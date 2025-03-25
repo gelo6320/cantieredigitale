@@ -1063,6 +1063,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="css/cookie-banner.css">
 </head>
 <body>
     <!-- Pattern di sfondo stile cantiere -->
@@ -1380,6 +1381,61 @@
             <p style="font-style: italic; color: rgba(255,255,255,0.7); margin-top: 30px;">In base alla tua struttura, una volta a regime, acquisiremo da €300.000 a diversi milioni di euro di nuovi cantieri all'anno, procedendo in modo progressivo nella crescita della tua azienda.</p>
         </div>
     </section>
+
+    <!-- Cookie Banner -->
+    <div class="cookie-banner" id="cookie-banner">
+        <div class="cookie-content">
+            <div class="cookie-header">
+                <h3>Informativa sui Cookie</h3>
+                <button class="cookie-close" id="cookie-close">&times;</button>
+            </div>
+            <p>
+                Utilizziamo i cookie per migliorare la tua esperienza sul nostro sito. 
+                I cookie essenziali sono necessari per il funzionamento del sito, mentre altri ci aiutano 
+                a migliorare i nostri servizi e l'esperienza utente.
+            </p>
+            <div class="cookie-options">
+                <div class="cookie-option">
+                    <div class="cookie-option-header">
+                        <h4>Cookie Essenziali</h4>
+                        <label class="cookie-switch">
+                            <input type="checkbox" id="essential-cookies" checked disabled>
+                            <span class="cookie-slider"></span>
+                        </label>
+                    </div>
+                    <p>Questi cookie sono necessari per il funzionamento del sito e non possono essere disattivati.</p>
+                </div>
+                <div class="cookie-option">
+                    <div class="cookie-option-header">
+                        <h4>Cookie Analitici</h4>
+                        <label class="cookie-switch">
+                            <input type="checkbox" id="analytics-cookies">
+                            <span class="cookie-slider"></span>
+                        </label>
+                    </div>
+                    <p>Ci aiutano a capire come gli utenti interagiscono con il sito, migliorando la loro esperienza.</p>
+                </div>
+                <div class="cookie-option">
+                    <div class="cookie-option-header">
+                        <h4>Cookie di Marketing</h4>
+                        <label class="cookie-switch">
+                            <input type="checkbox" id="marketing-cookies">
+                            <span class="cookie-slider"></span>
+                        </label>
+                    </div>
+                    <p>Utilizzati per mostrarti annunci pertinenti in base ai tuoi interessi.</p>
+                </div>
+            </div>
+            <div class="cookie-actions">
+                <button id="cookie-save" class="btn">Salva Preferenze</button>
+                <button id="cookie-accept-all" class="btn btn-primary">Accetta Tutti</button>
+            </div>
+            <div class="cookie-footer">
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/cookie-policy">Cookie Policy</a>
+            </div>
+        </div>
+    </div>
     
     <footer>
         <div class="container">
@@ -1441,6 +1497,10 @@
                 </div>
                 <p style="margin-top: 20px">&copy; Cantiere Digitale 2023-2025. Tutti i diritti riservati.</p>
             </div>
+        </div>
+
+        <div class="footer-links">
+            <a href="#" class="cookie-settings-link">Impostazioni Cookie</a>
         </div>
     </footer>
     
@@ -1515,5 +1575,6 @@
             }
         });
     </script>
+    <script src="js/cookie-banner.js"></script>
 </body>
 </html>
