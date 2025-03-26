@@ -4120,7 +4120,7 @@
         
         // Funzioni
         function checkCookieConsent() {
-            fetch('/api/cookie-consent')
+            fetch('/api/cookie-consent?_=' + new Date().getTime())
                 .then(response => response.json())
                 .then(data => {
                     if (!data.configured) {
