@@ -4126,6 +4126,16 @@
             // Then reload the page to trigger a fresh consent check
             window.location.reload();
         }
+
+        const cookieSettingsLinks = document.querySelectorAll('.cookie-settings-link');
+        cookieSettingsLinks.forEach(link => {
+            if (link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetCookiePreferences();
+                });
+            }
+        });
         
         // Funzioni
         function checkCookieConsent() {
