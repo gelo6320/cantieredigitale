@@ -24,15 +24,15 @@ app.use(express.static(path.join(__dirname, 'www')));
 // Configurazione sessione
 app.use(session({
   secret: process.env.SESSION_SECRET || 'neosmile-secret-key',
-  resave: true,  // Cambia da false a true
-  saveUninitialized: true,  // Cambia da false a true
+  resave: false,  // Cambia da false a true
+  saveUninitialized: false,  // Cambia da false a true
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URL || process.env.MONGODB_URI,
     collectionName: 'sessions',
     ttl: 24 * 60 * 60
   }),
   cookie: { 
-    secure: false,  // Imposta a false indipendentemente dall'ambiente
+    secure: true,  // Imposta a false indipendentemente dall'ambiente
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
