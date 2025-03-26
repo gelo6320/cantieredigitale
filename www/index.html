@@ -4117,6 +4117,15 @@
                 acceptAllCookies();
             });
         }
+
+        function resetCookiePreferences() {
+            console.log('Resetting cookie preferences...');
+            // Delete the userId cookie
+            document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            
+            // Then reload the page to trigger a fresh consent check
+            window.location.reload();
+        }
         
         // Funzioni
         function checkCookieConsent() {
@@ -4301,13 +4310,12 @@
             */
         }
         
-        // Aggiungi pulsante per riaprire le preferenze cookie
-        const cookieSettingsLinks = document.querySelectorAll('.cookie-settings-link');
-        cookieSettingsLinks.forEach(link => {
+        const resetCookieLinks = document.querySelectorAll('.cookie-settings-link');
+        resetCookieLinks.forEach(link => {
             if (link) {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    showCookieBanner();
+                    resetCookiePreferences();
                 });
             }
         });
