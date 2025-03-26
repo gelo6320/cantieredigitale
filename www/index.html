@@ -4120,23 +4120,29 @@
         
         // Funzioni
         function checkCookieConsent() {
+            console.log('Starting cookie consent check...');
+            console.log('CookieBanner element exists:', !!document.getElementById('cookie-banner'));
+            
             fetch('/api/cookie-consent?_=' + new Date().getTime())
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Consent data received:', data);
+                    console.log('Configured status:', data.configured);
+                    
                     if (!data.configured) {
-                        // Se non ci sono preferenze, mostra il banner
+                        console.log('Attempting to show banner...');
                         showCookieBanner();
+                        console.log('Banner show class added');
                     } else {
-                        // Altrimenti, imposta le preferenze recuperate
-                        if (analyticsCookies) analyticsCookies.checked = data.analytics;
-                        if (marketingCookies) marketingCookies.checked = data.marketing;
-                        
-                        // Applica le preferenze
-                        applyPreferences(data);
+                        console.log('Banner not shown - user already configured preferences');
                     }
                 })
                 .catch(error => {
-                    console.error('Errore nel recupero delle preferenze cookie:', error);
+                    console.error('Error checking cookie consent:', error);
+                    console.log('Showing banner due to error');
                     showCookieBanner();
                 });
         }
