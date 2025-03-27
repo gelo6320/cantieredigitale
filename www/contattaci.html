@@ -1859,15 +1859,24 @@
                 calendar.next();
             });
             
-            // Sposta il titolo tra le frecce
-            const titleElement = calendarEl.querySelector('.fc-toolbar-title');
-            if (titleElement && titleElement.parentNode) {
-                titleElement.parentNode.removeChild(titleElement);
-            }
+            const customTitleElement = document.createElement('h2');
+            customTitleElement.className = 'fc-toolbar-title custom-title';
+            customTitleElement.textContent = calendar.view.title; // Imposta il titolo iniziale
             
+            // Nasconde il titolo originale di FullCalendar con CSS
+            const style = document.createElement('style');
+            style.textContent = '.fc-toolbar-title:not(.custom-title) { display: none !important; }';
+            document.head.appendChild(style);
+            
+            // Aggiunge i pulsanti e il titolo personalizzato al container
             navigationContainer.appendChild(prevButton);
-            if (titleElement) navigationContainer.appendChild(titleElement);
+            navigationContainer.appendChild(customTitleElement);
             navigationContainer.appendChild(nextButton);
+            
+            // Aggiorna il titolo personalizzato quando cambia la vista
+            calendar.on('datesSet', function(info) {
+                customTitleElement.textContent = calendar.view.title;
+            });
             
             // Aggiungi pulsante "Prenota per oggi"
             const todayButtonContainer = document.createElement('div');
