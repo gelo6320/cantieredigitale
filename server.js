@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'www')));
 
 // Configurazione CORS
 app.use(cors({
-  origin: ['https://dashboard-production-089e.up.railway.app', 'http://localhost:3000'],
+  origin: '*', // Permettere richieste da qualsiasi origine
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
