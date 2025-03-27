@@ -1,0 +1,44 @@
+<!-- 1. Sostituisci le dipendenze React nell'head con queste versioni: -->
+<head>
+    <!-- ... altri tag head ... -->
+    
+    <!-- React Dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<!-- 2. Modifica lo script del calendario React come segue: -->
+<script type="text/babel">
+    // Componente React del calendario
+    const CalendarioPrenotazioni = () => {
+      console.log("Rendering Calendario React"); // Aggiungi questo per debug
+      // Resto del codice invariato...
+    };
+
+    // Modifica il rendering del componente così:
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM completamente caricato");
+      const container = document.getElementById('react-calendar-container');
+      console.log("Container trovato:", container);
+      
+      if (container) {
+        // In React 18, il metodo di rendering è cambiato:
+        const root = ReactDOM.createRoot(container);
+        root.render(<CalendarioPrenotazioni />);
+      } else {
+        console.error("Container non trovato: react-calendar-container");
+      }
+    });
+</script>
+
+<!-- 3. Per verificare che tutto funzioni, alla fine del body aggiungi temporaneamente: -->
+<script>
+    console.log("Script di verifica caricato");
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM contenente completamente caricato");
+        console.log("Container presente:", !!document.getElementById('react-calendar-container'));
+        console.log("React disponibile:", typeof React !== 'undefined');
+        console.log("ReactDOM disponibile:", typeof ReactDOM !== 'undefined');
+    });
+</script>

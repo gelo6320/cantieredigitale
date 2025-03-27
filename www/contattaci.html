@@ -6,7 +6,9 @@
     <title>Contattaci - Cantiere Digitale</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Usa lo stesso stile CSS del file index.html -->
+    <!-- FullCalendar CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet">
+    <!-- Stile esistente -->
     <style>
         :root {
             --primary-color: #FF6B00; /* Arancione pronunciato */
@@ -301,6 +303,75 @@
             padding: 20px 40px;
         }
         
+        .booking-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 50px;
+        }
+        
+        .booking-step {
+            background-color: var(--light-accent);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            text-align: left;
+        }
+        
+        .booking-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+        }
+        
+        .booking-step-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .booking-step h3 {
+            font-size: 1.6rem;
+            margin: 0;
+        }
+        
+        /* Step visibility classes */
+        .step-hidden {
+            display: none;
+        }
+        
+        .step-active {
+            display: block;
+        }
+        
+        .step-completed .step-number {
+            background-color: var(--success-color);
+        }
+        
+        .step-completed .step-number::after {
+            content: '✓';
+        }
+        
         .form-container {
             background-color: var(--light-accent);
             border-radius: 15px;
@@ -385,399 +456,143 @@
             text-decoration: underline;
         }
         
-        /* Animated Stats Section */
-        .stats {
-            background-color: var(--dark-bg);
-            color: white;
-            padding: var(--section-padding);
-            position: relative;
-            overflow: hidden;
+        /* Calendario */
+        .calendar-container {
+            margin: 20px 0;
         }
         
-        .stats::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 0h50v50H0z' fill='%23FF6B00' fill-opacity='0.03'/%3E%3C/svg%3E");
-            background-repeat: repeat;
-            opacity: 0.3;
-        }
-        
-        .stats h2 {
-            text-align: center;
-            font-size: 2.8rem;
-            color: white;
-            margin-bottom: 60px;
-            position: relative;
-            text-transform: uppercase;
-        }
-        
-        .stats h2::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background-color: var(--primary-color);
-        }
-        
-        .stats-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin: 60px 0 40px;
-        }
-        
-        .stat-item {
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 300px;
-            margin: 15px;
+        #calendar {
             background-color: var(--light-accent);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
         }
         
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background-color: var(--primary-color);
+        /* Personalizzazione calendario */
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: rgba(255, 255, 255, 0.1);
         }
         
-        .stat-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        .fc-theme-standard .fc-scrollgrid {
+            border-color: rgba(255, 255, 255, 0.1);
         }
         
-        .stat-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
+        .fc-col-header-cell-cushion {
+            color: var(--text-color);
+            font-weight: 600;
+            padding: 10px 4px;
         }
         
-        .stat-number {
-            font-size: 3.8rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: white;
-            line-height: 1;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        
-        .stat-number small {
-            font-size: 1.8rem;
-            margin-left: 5px;
-            color: var(--primary-color);
-        }
-        
-        .stat-desc {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
+        .fc-daygrid-day-number {
+            color: var(--text-color);
             font-weight: 500;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            padding: 8px;
         }
         
-        /* How it works section */
-        .how-it-works {
-            padding: var(--section-padding);
-            background-color: var(--secondary-color);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .section-heading {
-            text-align: center;
-            margin-bottom: 60px;
-            position: relative;
-        }
-        
-        .section-heading h2 {
-            font-size: 2.8rem;
-            color: var(--text-color);
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            font-weight: 800;
-        }
-        
-        .section-heading p {
-            max-width: 800px;
-            margin: 0 auto;
-            color: var(--text-color);
-            font-size: 1.2rem;
-        }
-        
-        .section-heading::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
+        .fc .fc-button-primary {
             background-color: var(--primary-color);
-        }
-        
-        .steps-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 40px;
-            max-width: 1200px;
-            margin: 60px auto 0;
-            position: relative;
-        }
-        
-        .steps-connector {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 200px);
-            height: 3px;
-            background-color: var(--light-accent);
-            z-index: 0;
-        }
-        
-        .step {
-            flex: 1;
-            min-width: 280px;
-            padding: 40px 30px;
-            border-radius: 15px;
-            background-color: var(--light-accent);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            transition: all 0.4s ease;
-            position: relative;
-            z-index: 1;
-            border: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .step:hover {
-            transform: translateY(-15px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             border-color: var(--primary-color);
         }
         
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-        }
-        
-        .step-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .step h3 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: var(--text-color);
-            position: relative;
-            padding-bottom: 15px;
-        }
-        
-        .step h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 3px;
-            background-color: var(--primary-color);
-        }
-        
-        .step p {
-            color: rgba(255,255,255,0.8);
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-        
-        /* Services section with construction theme */
-        .services {
-            padding: var(--section-padding);
-            background-color: var(--dark-bg);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .services::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 300px;
-            background-color: var(--primary-color);
-            opacity: 0.05;
-            border-radius: 0 0 0 100%;
-        }
-        
-        .services::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200px;
-            height: 200px;
+        .fc .fc-button-primary:hover {
             background-color: var(--accent-color);
-            opacity: 0.05;
-            border-radius: 0 100% 0 0;
+            border-color: var(--accent-color);
         }
         
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 60px;
+        .fc .fc-button-primary:disabled {
+            background-color: rgba(255, 107, 0, 0.5);
+            border-color: rgba(255, 107, 0, 0.5);
         }
         
-        .service-card {
-            background-color: var(--light-accent);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            max-width: 350px;
+        .fc .fc-button-primary:not(:disabled).fc-button-active, 
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
         }
         
-        .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-        
-        .service-image {
-            height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .service-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .service-card:hover .service-image img {
-            transform: scale(1.1);
-        }
-        
-        .service-content {
-            padding: 30px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .service-title {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
+        .fc .fc-toolbar-title {
             color: var(--text-color);
         }
         
-        .service-description {
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 30px;
-            line-height: 1.7;
-            flex-grow: 1;
-        }
-        
-        .service-link {
-            display: inline-block;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-decoration: none;
-            padding: 5px 0;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .service-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
+        .fc-event {
             background-color: var(--primary-color);
-            transition: width 0.3s ease;
+            border-color: var(--primary-color);
         }
         
-        .service-link:hover::after {
-            width: 100%;
+        /* Time slots */
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
         }
         
-        .service-link i {
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-        }
-        
-        .service-link:hover i {
-            transform: translateX(5px);
-        }
-        
-        /* CTA Section */
-        .cta {
-            padding: var(--section-padding);
-            background-color: var(--secondary-color);
-            position: relative;
-            overflow: hidden;
+        .time-slot {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+            font-weight: 500;
             text-align: center;
         }
         
-        .cta h2 {
-            font-size: 2.8rem;
-            color: var(--text-color);
-            margin-bottom: 25px;
-            line-height: 1.2;
-            text-transform: uppercase;
+        .time-slot:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+            border-color: var(--primary-color);
         }
         
-        .cta p {
+        .time-slot.selected {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .time-slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Riepilogo prenotazione */
+        .booking-summary {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .booking-summary h4 {
             font-size: 1.2rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .booking-detail {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .booking-detail-label {
+            width: 120px;
+            font-weight: 600;
+        }
+        
+        .booking-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(255, 107, 0, 0.1);
         }
         
         /* Footer */
@@ -948,38 +763,6 @@
             color: var(--primary-color);
         }
         
-        /* Back to top button */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 99;
-        }
-        
-        .back-to-top.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .back-to-top:hover {
-            background-color: var(--accent-color);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.5);
-        }
-        
         /* Responsive */
         @media (max-width: 991px) {
             .hero h1 {
@@ -990,16 +773,8 @@
                 font-size: 3.2rem;
             }
             
-            .stats-container {
-                gap: 20px;
-            }
-            
-            .stat-item {
-                max-width: calc(50% - 40px);
-            }
-            
-            .steps-connector {
-                display: none;
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
@@ -1016,17 +791,8 @@
                 font-size: 2.2rem;
             }
             
-            .stat-item {
-                max-width: 100%;
-            }
-            
-            .step, .benefit {
-                min-width: 100%;
-            }
-            
-            .service-card {
-                max-width: 400px;
-                margin: 0 auto;
+            .time-slots {
+                grid-template-columns: 1fr;
             }
             
             nav ul {
@@ -1062,214 +828,14 @@
             .section-heading h2 {
                 font-size: 1.8rem;
             }
-        }
-
-        /* CSS del cookie banner */
-        .cookie-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: #212121;
-            color: #fff;
-            z-index: 1000;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            transform: translateY(100%);
-            transition: transform 0.4s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .cookie-banner.show {
-            transform: translateY(0);
-        }
-        
-        .cookie-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .cookie-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .cookie-header h3 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #FF6B00;
-        }
-        
-        .cookie-close {
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            color: #999;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .cookie-close:hover {
-            color: #FF6B00;
-        }
-        
-        .cookie-options {
-            margin: 20px 0;
-        }
-        
-        .cookie-option {
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #1a1a1a;
-        }
-        
-        .cookie-option-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .cookie-option-header h4 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-        
-        .cookie-option p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-        
-        /* Switch styling */
-        .cookie-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        
-        .cookie-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .cookie-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #333;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        
-        .cookie-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .cookie-slider {
-            background-color: #FF6B00;
-        }
-        
-        input:disabled + .cookie-slider {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        input:checked + .cookie-slider:before {
-            transform: translateX(26px);
-        }
-        
-        .cookie-actions {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .cookie-actions button {
-            flex: 1;
-            padding: 12px 15px;
-            border-radius: 5px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn {
-            background-color: #333;
-            color: #fff;
-        }
-        
-        .btn:hover {
-            background-color: #444;
-        }
-        
-        .btn-primary {
-            background-color: #FF6B00;
-            color: #fff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #FF8C38;
-        }
-        
-        .cookie-footer {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            font-size: 0.9rem;
-            margin-top: 15px;
-        }
-        
-        .cookie-footer a {
-            color: #999;
-            text-decoration: none;
-        }
-        
-        .cookie-footer a:hover {
-            color: #FF6B00;
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            .cookie-content {
-                padding: 15px;
-            }
             
-            .cookie-actions {
-                flex-direction: column;
-            }
-            
-            .cookie-header h3 {
-                font-size: 1.3rem;
-            }
-            
-            .cookie-option {
-                padding: 10px;
+            .booking-step, .form-container {
+                padding: 20px;
             }
         }
 
         .mobile-menu-toggle {
-            display: none; /* Nasconde l'hamburger menu su desktop */
+            display: none;
             font-size: 1.5rem;
             color: var(--text-color);
             cursor: pointer;
@@ -1277,9 +843,700 @@
         
         @media (max-width: 768px) {
             .mobile-menu-toggle {
-                display: block; /* Mostra l'hamburger menu solo su mobile */
+                display: block;
             }
         }
+        
+        /* Loader */
+        .loader {
+            display: none;
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loader-spinner {
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Messaggio di conferma */
+        .confirmation-message {
+            display: none;
+            background-color: var(--success-color);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .calendar-container {
+            margin: 40px 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        /* Container principale */
+        .fc {
+            background-color: var(--light-accent);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            color: var(--text-color);
+        }
+        
+        /* Barra degli strumenti */
+        .fc-header-toolbar {
+            display: flex !important;
+            flex-direction: row !important; /* Cambiato da column a row */
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 10px 20px !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: var(--primary-color) !important;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+            text-align: center;
+            margin: 0 !important;
+            flex-grow: 1;
+        }
+        
+        /* Pulsanti di navigazione */
+        .fc-button-group {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 50px;
+            overflow: hidden;
+            display: flex !important;
+        }
+        
+        .fc-button {
+            background-color: var(--light-accent) !important;
+            border: none !important;
+            color: var(--text-color) !important;
+            font-weight: 600 !important;
+            padding: 12px 20px !important;
+            transition: all 0.3s ease !important;
+            text-transform: capitalize;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .fc-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+        
+        .fc-button:hover::before {
+            left: 0;
+        }
+        
+        .fc-button:hover {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .fc-button-active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .fc-prev-button, .fc-next-button {
+            font-size: 1.2rem !important;
+            padding: 8px 16px !important;
+        }
+        
+        .fc-today-button {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-radius: 50px !important;
+            padding: 10px 20px !important;
+            opacity: 1 !important;
+            text-transform: capitalize;
+            font-weight: 600 !important;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3) !important;
+            margin-right: 10px !important;
+        }
+        
+        .fc-today-button:disabled {
+            opacity: 0.7 !important;
+            background-color: rgba(255, 107, 0, 0.5) !important;
+        }
+        
+        /* Intestazioni colonne (giorni della settimana) */
+        .fc-col-header {
+            margin-bottom: 15px;
+        }
+        
+        .fc-col-header-cell {
+            background-color: rgba(255, 107, 0, 0.15);
+            padding: 16px 0;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+        
+        .fc-col-header-cell-cushion {
+            color: var(--text-color);
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none !important;
+            text-transform: uppercase;
+            padding: 10px 5px;
+        }
+        
+        /* Griglia del calendario */
+        .fc-scrollgrid {
+            border: none !important;
+        }
+        
+        .fc-scrollgrid-section-header th {
+            border: none !important;
+        }
+        
+        .fc-scrollgrid-section-body td {
+            border: 1px solid rgba(255,255,255,0.08) !important;
+        }
+        
+        /* Celle dei giorni */
+        .fc-daygrid-day {
+            transition: all 0.2s ease;
+            position: relative;
+            height: 90px;
+            max-height: 90px;
+        }
+        
+        .fc-daygrid-day:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+        }
+        
+        .fc-day-today {
+            background-color: rgba(255, 107, 0, 0.15) !important;
+            border-radius: 8px;
+        }
+        
+        /* Numeri dei giorni */
+        .fc-daygrid-day-top {
+            display: flex;
+            justify-content: center;
+            padding: 8px 0;
+        }
+        
+        .fc-daygrid-day-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 5px !important;
+            width: 36px;
+            height: 36px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            text-decoration: none !important;
+            border-radius: 50%;
+        }
+        
+        .fc-day-today .fc-daygrid-day-number {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+        
+        /* Styling dei giorni dei mesi precedenti e successivi */
+        .fc-day-other .fc-daygrid-day-top {
+            opacity: 1 !important;
+        }
+        
+        .fc-day-other .fc-daygrid-day-number {
+            color: rgba(255, 255, 255, 0.4) !important;
+            font-weight: 400;
+        }
+        
+        /* Giorni passati */
+        .fc-day-past {
+            opacity: 0.6;
+        }
+        
+        /* Gestione dello spazio vuoto nella griglia */
+        .fc-daygrid-day-events {
+            min-height: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Miglioramento responsivo */
+        @media (max-width: 768px) {
+            .fc {
+                padding: 15px 10px;
+            }
+            
+            .fc-toolbar-title {
+                font-size: 1.2rem !important;
+            }
+            
+            .fc-button {
+                padding: 8px 15px !important;
+                font-size: 0.9rem !important;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 0.9rem;
+                padding: 8px 2px;
+            }
+            
+            .fc-daygrid-day {
+                height: 70px;
+                max-height: 70px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.9rem;
+                width: 30px;
+                height: 30px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .fc {
+                padding: 10px 5px;
+            }
+            
+            .fc-toolbar-title {
+                font-size: 1.1rem !important;
+                order: 1;
+                width: 100%;
+                margin-bottom: 10px !important;
+            }
+            
+            .fc-header-toolbar {
+                flex-direction: column;
+            }
+            
+            .fc-toolbar-chunk {
+                display: none !important;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 0.8rem;
+                padding: 5px 0;
+            }
+            
+            .fc-daygrid-day {
+                height: 50px;
+                max-height: 50px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.8rem;
+                width: 26px;
+                height: 26px;
+            }
+        }
+        
+        /* Transizione fluida per cambio di mese */
+        .fc-view-harness {
+            transition: height 0.3s ease;
+        }
+        
+        /* Miglioramento animazione al passaggio del mouse */
+        .fc-day:hover .fc-daygrid-day-number {
+            background-color: rgba(255, 107, 0, 0.3);
+            color: var(--text-color) !important;
+            transform: scale(1.1);
+        }
+        
+        .fc-day-today:hover .fc-daygrid-day-number {
+            background-color: var(--primary-color);
+            opacity: 0.9;
+        }
+        
+        /* Animazione per navigazione tra i mesi */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fc .fc-daygrid-body {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Aggiungi questi stili nella sezione <style> del tuo HTML, circa alla linea 683 dopo gli stili esistenti del calendario */
+
+        /* Stile per giorni disabilitati (date passate) */
+        .fc-day-disabled {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .fc-day-disabled .fc-daygrid-day-number {
+            color: rgba(255, 255, 255, 0.3) !important;
+            text-decoration: line-through !important;
+        }
+        
+        /* Miglioramenti alla responsività del calendario */
+        .fc {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+        }
+        
+        .calendar-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+        }
+        
+        /* Migliorare l'adattamento delle celle in schermi piccoli */
+        @media (max-width: 768px) {
+            .fc-daygrid-day-number {
+                font-size: 0.8rem !important;
+                padding: 3px !important;
+                width: 24px !important;
+                height: 24px !important;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 0.7rem !important;
+                padding: 3px 1px !important;
+            }
+            
+            .fc .fc-toolbar-title {
+                font-size: 1rem !important;
+            }
+        }
+        
+        /* Assicurati che la griglia del calendario si adatti allo spazio disponibile */
+        .fc .fc-view-harness {
+            width: 100% !important;
+            overflow: hidden !important;
+        }
+        
+        .fc .fc-daygrid-body {
+            width: 100% !important;
+        }
+        
+        .fc .fc-scroller {
+            overflow: hidden !important;
+        }
+        
+        .fc .fc-scrollgrid {
+            width: 100% !important;
+        }
+        
+        .fc .fc-scrollgrid-section-body table,
+        .fc .fc-scrollgrid-section-header table {
+            width: 100% !important;
+        }
+
+        /* Aggiungi questi stili CSS nella sezione <style> del tuo HTML */
+
+        /* Risolve il problema della visualizzazione limitata del calendario */
+        .fc .fc-scrollgrid-liquid {
+            height: auto !important;
+        }
+        
+        .fc .fc-daygrid-body {
+            height: auto !important;
+        }
+        
+        .fc-view-harness {
+            height: auto !important;
+            min-height: 600px !important;
+        }
+        
+        .fc-daygrid-body table {
+            height: 100% !important;
+        }
+        
+        .fc .fc-scroller-liquid-absolute {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            left: auto !important;
+            overflow: visible !important;
+        }
+        
+        .fc-scrollgrid {
+            display: table !important;
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
+        
+        .fc-daygrid-body {
+            width: 100% !important;
+            display: table !important;
+        }
+        
+        /* Assicura che tutte le righe del calendario siano visibili */
+        .fc-scrollgrid-sync-table {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 400px !important;
+        }
+        
+        /* Forza il calendario a mostrare 6 righe (necessarie per visualizzare tutti i giorni del mese) */
+        .fc-dayGridMonth-view .fc-daygrid-body {
+            min-height: 500px !important;
+        }
+        
+        .fc .fc-daygrid-body-balanced .fc-daygrid-day-events {
+            position: relative !important;
+        }
+
+        /* Aggiungi questi stili CSS per migliorare l'aspetto del calendario (circa linea 1140) */
+        
+        /* Navigazione calendario personalizzata */
+        .calendar-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Allinea a destra */
+            margin: 0;
+            order: 2; /* Posiziona a destra */
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: var(--primary-color) !important;
+            margin: 0 15px !important;
+            text-transform: capitalize;
+        }
+        
+        .calendar-nav-button {
+            background-color: rgba(255, 107, 0, 0.1);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-nav-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        /* Pulsante "Prenota per oggi" */
+        .today-button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .btn-today {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-today i {
+            font-size: 1.2rem;
+        }
+        
+        .btn-today:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
+        }
+        
+        /* Migliora l'aspetto della griglia dei giorni */
+        .fc-scrollgrid {
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2) !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+        }
+        
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        .fc-col-header-cell {
+            background-color: rgba(255, 107, 0, 0.15) !important;
+            padding: 15px 0 !important;
+        }
+        
+        .fc-col-header-cell-cushion {
+            text-transform: uppercase;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            letter-spacing: 1px;
+            padding: 10px !important;
+        }
+        
+        .fc-daygrid-day {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            cursor: pointer;
+            height: 80px !important;
+        }
+        
+        .fc-daygrid-day:hover {
+            background-color: rgba(255, 107, 0, 0.1) !important;
+            transform: translateY(-3px);
+            z-index: 5;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .fc-day-today {
+            background-color: rgba(255, 107, 0, 0.15) !important;
+            position: relative;
+        }
+        
+        .fc-day-today::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .fc-daygrid-day-number {
+            font-size: 1.2rem !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease;
+            width: 36px !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50% !important;
+            margin: 5px auto !important;
+        }
+        
+        .fc-day-today .fc-daygrid-day-number {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 3px 10px rgba(255, 107, 0, 0.4);
+        }
+        
+        /* Miglioramenti responsivi */
+        @media (max-width: 768px) {
+            .fc-toolbar-title {
+                font-size: 1.4rem !important;
+            }
+            
+            .calendar-nav-button {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .btn-today {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 1rem !important;
+                width: 30px !important;
+                height: 30px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .fc-toolbar-title {
+                font-size: 1.2rem !important;
+            }
+            
+            .calendar-nav-button {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .btn-today {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.9rem !important;
+                width: 26px !important;
+                height: 26px !important;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 0.7rem !important;
+                padding: 5px !important;
+            }
+        }
+        
+        /* Nascondi header originale */
+        .fc-header-toolbar {
+            flex-direction: column !important;
+        }
+        
+        /* Correggi layout del calendario */
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 0 !important;
+        }
+        
+        /* Stile per date selezionabili vs non selezionabili */
+        .fc-day-past {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .fc-day-past:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            background-color: transparent !important;
+        }
+        
     </style>
 </head>
 <body>
@@ -1294,237 +1551,538 @@
                     <path fill="#FF6B00" d="M422.7 243.3l-96-96c-6.2-6.2-16.4-6.2-22.6 0l-96 96c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L288 209.9V448c0 8.8 7.2 16 16 16s16-7.2 16-16V209.9l57.4 57.4c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6z"/>
                     <path fill="#FFFFFF" d="M160 32h-32c-8.8 0-16 7.2-16 16v400c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V48c0-8.8-7.2-16-16-16zm-56 432H48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h56c8.8 0 16 7.2 16 16v272c0 8.8-7.2 16-16 16zm-16-288H48v256h40V176z"/>
                 </svg>
-                <div class="logo-text">Cantiere <span>Digitale</span></div>
+                <div class="logo-text">Cantiere<span>Digitale</span></div>
             </a>
+            <div class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
             <nav>
                 <ul>
-                    <li><a href="index.html#services">Servizi</a></li>
-                    <li><a href="index.html#process">Processo</a></li>
-                    <li><a href="index.html#projects">Progetti</a></li>
-                    <li><a href="index.html#testimonials">Testimonianze</a></li>
-                    <li><a href="#" class="active">Contattaci</a></li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="servizi.html">Servizi</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                    <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                    <li><a href="contattaci.html" class="active">Contattaci</a></li>
                 </ul>
-                <div class="mobile-menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </div>
             </nav>
         </div>
     </header>
     
-    <section class="contact-hero" style="padding: 80px 0; background-color: var(--secondary-color);">
+    <section class="hero">
         <div class="container">
-            <div class="section-heading" style="margin-bottom: 40px;">
-                <h1 style="font-size: 2.8rem; color: var(--text-color); text-transform: uppercase; font-weight: 800;">RICHIEDI UNA <span style="color: var(--primary-color);">CONSULENZA GRATUITA</span></h1>
-                <p style="max-width: 800px; margin: 20px auto; font-size: 1.2rem;">Compila il form per prenotare una chiamata conoscitiva di 15 minuti con il nostro team. Valuteremo insieme se il tuo business può beneficiare del nostro metodo esclusivo.</p>
-            </div>
-            
-            <div class="form-container" style="max-width: 700px; margin: 0 auto;">
-                <form id="contact-form">
-                    <div class="form-group">
-                        <label for="name">Nome e Cognome</label>
-                        <input type="text" id="name" name="name" class="form-control" required placeholder="Es. Mario Rossi">
+            <div class="hero-content">
+                <h1>Prenota una <span>Chiamata Conoscitiva</span></h1>
+                <p>Scopri come <strong>Cantiere Digitale</strong> può aiutarti a costruire la tua presenza online. Seleziona una data e un orario per una chiamata gratuita di 30 minuti con un nostro esperto.</p>
+                
+                <div class="guarantee-box">
+                    <div class="guarantee-badge">
+                        <i class="fas fa-check"></i>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" required placeholder="Es. mario.rossi@azienda.it">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Telefono</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" required placeholder="Es. 333 1234567">
-                    </div>
-                    <div class="form-group">
-                        <label for="company">Nome Azienda</label>
-                        <input type="text" id="company" name="company" class="form-control" required placeholder="Es. Rossi Costruzioni Srl">
-                    </div>
-                    <div class="form-group">
-                        <label for="business">Settore di Attività</label>
-                        <select id="business" name="business" class="form-control" required>
-                            <option value="">Seleziona il tuo settore</option>
-                            <option value="ristrutturazioni">Ristrutturazioni</option>
-                            <option value="serramenti">Serramenti</option>
-                            <option value="fotovoltaico">Fotovoltaico</option>
-                            <option value="altro">Altro (specifica nel messaggio)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Come possiamo aiutarti? (opzionale)</label>
-                        <textarea id="message" name="message" class="form-control" placeholder="Raccontaci brevemente le tue necessità..."></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" id="privacy" name="privacy" required>
-                        <label for="privacy">
-                            Ho letto e accetto la <a href="#" id="privacy-link">Privacy Policy</a>
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-lg" style="width: 100%;">
-                        <span>PRENOTA ORA LA TUA CONSULENZA GRATUITA</span>
-                    </button>
-                </form>
-            </div>
-            
-            <div class="guarantee-box" style="margin-top: 60px;">
-                <div class="guarantee-badge">
-                    <i class="fas fa-shield-alt"></i>
+                    <h3>La Nostra Promessa</h3>
+                    <p>Nessun impegno, nessuna pressione commerciale. Solo una conversazione sincera per capire le tue esigenze e fornirti consigli utili per il tuo progetto digitale.</p>
                 </div>
-                <h3>LA NOSTRA GARANZIA</h3>
-                <p>In questa chiamata NON ti venderemo nulla. L'obiettivo è valutare se la tua azienda può sfruttare il nostro metodo per crescere seriamente. <strong>Solo se ci sono i presupposti</strong> procederemo ad una consulenza più approfondita.</p>
             </div>
         </div>
     </section>
     
-    <section style="background-color: var(--dark-bg); padding: 80px 0;">
+    <section class="booking-section">
         <div class="container">
-            <div class="section-heading">
-                <h2>PERCHÉ SCEGLIERE CANTIERE DIGITALE?</h2>
-            </div>
-            
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 60px;">
-                <div style="flex: 1; min-width: 300px; max-width: 400px; background-color: var(--light-accent); padding: 30px; border-radius: 10px; border-left: 5px solid var(--primary-color);">
-                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px;">
-                        <i class="fas fa-chart-line"></i>
+            <div class="booking-container">
+                <!-- Step 1: Selezione data -->
+                <div id="step1" class="booking-step step-active">
+                    <div class="booking-step-title">
+                        <div class="step-number">1</div>
+                        <h3>Seleziona una data</h3>
                     </div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--text-color);">Pagamento a Risultato</h3>
-                    <p style="color: rgba(255,255,255,0.8);">Veniamo pagati con una piccola fee iniziale, poi SOLAMENTE in base ai cantieri che acquisirai. Se non ottieni risultati, ti rimborsiamo.</p>
+                    <p>Scegli una data dal calendario per la tua chiamata conoscitiva.</p>
+                    
+                    <div class="calendar-container">
+                        <div id="calendar"></div>
+                    </div>
+                    
+                    <div id="loader-calendar" class="loader">
+                        <div class="loader-spinner"></div>
+                        <p>Caricamento disponibilità...</p>
+                    </div>
                 </div>
                 
-                <div style="flex: 1; min-width: 300px; max-width: 400px; background-color: var(--light-accent); padding: 30px; border-radius: 10px; border-left: 5px solid var(--primary-color);">
-                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px;">
-                        <i class="fas fa-users"></i>
+                <!-- Step 2: Selezione orario -->
+                <div id="step2" class="booking-step step-hidden">
+                    <div class="booking-step-title">
+                        <div class="step-number">2</div>
+                        <h3>Seleziona un orario</h3>
                     </div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--text-color);">Metodo Testato e Collaudato</h3>
-                    <p style="color: rgba(255,255,255,0.8);">Oltre 100 aziende nel settore ristrutturazioni, serramenti e fotovoltaico hanno già beneficiato del nostro metodo esclusivo.</p>
+                    <p>Scegli l'orario che preferisci tra quelli disponibili.</p>
+                    
+                    <div class="booking-detail">
+                        <div class="booking-detail-label">Data selezionata:</div>
+                        <div id="selected-date">--</div>
+                    </div>
+                    
+                    <div class="time-slots" id="time-slots-container">
+                        <!-- Time slots generati dinamicamente -->
+                    </div>
+                    
+                    <div class="booking-actions">
+                        <button class="btn btn-outline" id="backToStep1">
+                            <span><i class="fas fa-arrow-left"></i> Cambia data</span>
+                        </button>
+                        <button class="btn" id="confirmTimeSlot" disabled>
+                            <span>Conferma orario <i class="fas fa-arrow-right"></i></span>
+                        </button>
+                    </div>
                 </div>
                 
-                <div style="flex: 1; min-width: 300px; max-width: 400px; background-color: var(--light-accent); padding: 30px; border-radius: 10px; border-left: 5px solid var(--primary-color);">
-                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px;">
-                        <i class="fas fa-trophy"></i>
+                <!-- Step 3: Compilazione form -->
+                <div id="step3" class="booking-step step-hidden">
+                    <div class="booking-step-title">
+                        <div class="step-number">3</div>
+                        <h3>Inserisci i tuoi dati</h3>
                     </div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--text-color);">Risultati Concreti</h3>
-                    <p style="color: rgba(255,255,255,0.8);">Non ti promettiamo mari e monti. Ti garantiamo solamente quello che sappiamo di poterti offrire: cantieri reali e di alto-profilo.</p>
+                    <p>Compila il modulo con i tuoi dati per confermare la prenotazione.</p>
+                    
+                    <div class="booking-summary">
+                        <h4>Riepilogo prenotazione</h4>
+                        <div class="booking-detail">
+                            <div class="booking-detail-label">Data:</div>
+                            <div id="summary-date">--</div>
+                        </div>
+                        <div class="booking-detail">
+                            <div class="booking-detail-label">Orario:</div>
+                            <div id="summary-time">--</div>
+                        </div>
+                    </div>
+                    
+                    <form id="contact-form" class="mt-4">
+                        <input type="hidden" id="booking-date" name="bookingDate">
+                        <input type="hidden" id="booking-time" name="bookingTime">
+                        <input type="hidden" id="booking-timestamp" name="bookingTimestamp">
+                        
+                        <div class="form-group">
+                            <label for="name">Nome e Cognome *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Telefono *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Messaggio (opzionale)</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" placeholder="Raccontaci brevemente del tuo progetto o di cosa vorresti parlare durante la chiamata..."></textarea>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="privacy-check" required>
+                            <label class="form-check-label" for="privacy-check">
+                                Ho letto e accetto la <a href="privacy-policy.html" target="_blank">Privacy Policy</a> *
+                            </label>
+                        </div>
+                        
+                        <div class="booking-actions">
+                            <button type="button" class="btn btn-outline" id="backToStep2">
+                                <span><i class="fas fa-arrow-left"></i> Cambia orario</span>
+                            </button>
+                            <button type="submit" class="btn">
+                                <span>Conferma prenotazione <i class="fas fa-check"></i></span>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="loader-form" class="loader">
+                        <div class="loader-spinner"></div>
+                        <p>Invio prenotazione in corso...</p>
+                    </div>
+                    
+                    <div id="confirmation-message" class="confirmation-message">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h4>Prenotazione Confermata!</h4>
+                        <p>Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo fornito con tutti i dettagli.</p>
+                        <p>Ti contatteremo all'orario stabilito.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     
     <footer>
-        <!-- Usa lo stesso footer del file index.html -->
         <div class="container">
             <div class="footer-logo">
                 <svg class="footer-logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                     <path fill="#FF6B00" d="M422.7 243.3l-96-96c-6.2-6.2-16.4-6.2-22.6 0l-96 96c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L288 209.9V448c0 8.8 7.2 16 16 16s16-7.2 16-16V209.9l57.4 57.4c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6z"/>
                     <path fill="#FFFFFF" d="M160 32h-32c-8.8 0-16 7.2-16 16v400c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V48c0-8.8-7.2-16-16-16zm-56 432H48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h56c8.8 0 16 7.2 16 16v272c0 8.8-7.2 16-16 16zm-16-288H48v256h40V176z"/>
                 </svg>
-                <div class="footer-logo-text">Cantiere <span>Digitale</span></div>
+                <div class="footer-logo-text">Cantiere<span>Digitale</span></div>
             </div>
             
             <div class="footer-content">
                 <div class="footer-section">
-                    <p>Trasformiamo la tua presenza online in risultati concreti e misurabili. Strategie personalizzate che generano crescita reale per la tua azienda.</p>
+                    <h3>Chi Siamo</h3>
+                    <p>Cantiere Digitale è la tua agenzia di fiducia per la costruzione e lo sviluppo di progetti web di successo. Ogni giorno lavoriamo per trasformare le idee in realtà digitali concrete.</p>
                     <div class="social-links">
-                        <a href="#" class="social-link">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="fab fa-youtube"></i>
-                        </a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>I Nostri Servizi</h3>
+                    <h3>Link Rapidi</h3>
                     <ul>
-                        <li><a href="#"><i class="fas fa-angle-right"></i> SEO e Visibilità Online</a></li>
-                        <li><a href="#"><i class="fas fa-angle-right"></i> Campagne Pubblicitarie</a></li>
-                        <li><a href="#"><i class="fas fa-angle-right"></i> Soluzioni Fotovoltaiche</a></li>
-                        <li><a href="#"><i class="fas fa-angle-right"></i> Sviluppo Siti Web</a></li>
-                        <li><a href="#"><i class="fas fa-angle-right"></i> Consulenza Energetica</a></li>
+                        <li><a href="index.html"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="servizi.html"><i class="fas fa-chevron-right"></i> Servizi</a></li>
+                        <li><a href="portfolio.html"><i class="fas fa-chevron-right"></i> Portfolio</a></li>
+                        <li><a href="chi-siamo.html"><i class="fas fa-chevron-right"></i> Chi Siamo</a></li>
+                        <li><a href="contattaci.html"><i class="fas fa-chevron-right"></i> Contattaci</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>Contattaci</h3>
+                    <h3>Contatti</h3>
                     <ul>
                         <li><a href="mailto:info@cantieredigitale.it"><i class="fas fa-envelope"></i> info@cantieredigitale.it</a></li>
-                        <li><a href="tel:+390212345678"><i class="fas fa-phone"></i> +39 02 1234 5678</a></li>
-                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Milano, Italia</a></li>
+                        <li><a href="tel:+390123456789"><i class="fas fa-phone-alt"></i> +39 0123 456789</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Via Esempio 123, Milano, Italia</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="copyright">
                 <div class="footer-bottom">
+                    <p>&copy; 2025 Cantiere Digitale. Tutti i diritti riservati.</p>
                     <div class="footer-links">
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Cookie Policy</a>
-                        <a href="#">Termini e Condizioni</a>
+                        <a href="privacy-policy.html">Privacy Policy</a>
+                        <a href="cookie-policy.html">Cookie Policy</a>
+                        <a href="termini-e-condizioni.html">Termini e Condizioni</a>
                     </div>
                 </div>
-                <p style="margin-top: 20px">&copy; Cantiere Digitale 2023-2025. Tutti i diritti riservati.</p>
             </div>
         </div>
     </footer>
     
-    <!-- Back to top button -->
-    <div class="back-to-top" id="back-to-top">
-        <i class="fas fa-chevron-up"></i>
-    </div>
+    <!-- Script FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/it.min.js"></script>
     
-    <!-- Cookie Banner -->
-    <div class="cookie-banner" id="cookie-banner">
-        <!-- Usa lo stesso cookie banner del file index.html -->
-    </div>
-    
+    <!-- Script personalizzato -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Header scroll effect
-            const header = document.getElementById('header');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
+            // Elementi DOM
+            const step1El = document.getElementById('step1');
+            const step2El = document.getElementById('step2');
+            const step3El = document.getElementById('step3');
+            const calendarEl = document.getElementById('calendar');
+            const timeSlotsContainer = document.getElementById('time-slots-container');
+            const selectedDateEl = document.getElementById('selected-date');
+            const summaryDateEl = document.getElementById('summary-date');
+            const summaryTimeEl = document.getElementById('summary-time');
+            const confirmTimeSlotBtn = document.getElementById('confirmTimeSlot');
+            const backToStep1Btn = document.getElementById('backToStep1');
+            const backToStep2Btn = document.getElementById('backToStep2');
+            const bookingDateInput = document.getElementById('booking-date');
+            const bookingTimeInput = document.getElementById('booking-time');
+            const bookingTimestampInput = document.getElementById('booking-timestamp');
+            const contactForm = document.getElementById('contact-form');
+            const loaderCalendar = document.getElementById('loader-calendar');
+            const loaderForm = document.getElementById('loader-form');
+            const confirmationMessage = document.getElementById('confirmation-message');
+            
+            // Stato applicazione
+            let selectedDate = null;
+            let selectedTimeSlot = null;
+            let availableTimeSlots = [];
+            
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'it',
+                headerToolbar: {
+                    left: '', // Rimuovi i pulsanti a sinistra
+                    center: 'title', // Lascia solo il titolo al centro
+                    right: '' // Rimuovi i pulsanti a destra incluso "dayGridMonth"
+                },
+                selectable: true,
+                select: function(info) {
+                    handleDateSelection(info.start);
+                },
+                dateClick: function(info) {
+                    handleDateSelection(info.date);
+                },
+                fixedWeekCount: true,
+                showNonCurrentDates: true,
+                height: 'auto',
+                contentHeight: 'auto',
+                eventDidMount: function(info) {
+                    // Personalizzazioni eventi
+                },
+                dayCellDidMount: function(info) {
+                    // Evidenziazione celle del calendario
                 }
             });
+
+            calendar.render();
+            setTimeout(() => {
+                calendar.updateSize();
+            }, 100);
             
-            // Back to Top button
-            const backToTopButton = document.getElementById('back-to-top');
+            window.addEventListener('resize', function() {
+                calendar.updateSize();
+            });
+
+            // Crea pulsanti personalizzati per la navigazione
+            const calendarHeader = calendarEl.querySelector('.fc-header-toolbar');
+            const titleContainer = calendarEl.querySelector('.fc-toolbar-chunk:nth-child(2)');
             
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 500) {
-                    backToTopButton.classList.add('show');
-                } else {
-                    backToTopButton.classList.remove('show');
-                }
+            // Crea contenitore per frecce e titolo
+            const navigationContainer = document.createElement('div');
+            navigationContainer.className = 'calendar-navigation';
+            titleContainer.appendChild(navigationContainer);
+            
+            // Aggiungi freccia sinistra
+            const prevButton = document.createElement('button');
+            prevButton.className = 'calendar-nav-button prev-month';
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.addEventListener('click', function() {
+                calendar.prev();
             });
             
-            if (backToTopButton) {
-                backToTopButton.addEventListener('click', function() {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
+            // Aggiungi freccia destra
+            const nextButton = document.createElement('button');
+            nextButton.className = 'calendar-nav-button next-month';
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.addEventListener('click', function() {
+                calendar.next();
+            });
+            
+            // Sposta il titolo tra le frecce
+            const titleElement = calendarEl.querySelector('.fc-toolbar-title');
+            if (titleElement && titleElement.parentNode) {
+                titleElement.parentNode.removeChild(titleElement);
+            }
+            
+            navigationContainer.appendChild(prevButton);
+            if (titleElement) navigationContainer.appendChild(titleElement);
+            navigationContainer.appendChild(nextButton);
+            
+            // Aggiungi pulsante "Prenota per oggi"
+            const todayButtonContainer = document.createElement('div');
+            todayButtonContainer.className = 'today-button-container';
+            calendarHeader.appendChild(todayButtonContainer);
+            
+            const todayButton = document.createElement('button');
+            todayButton.className = 'btn-today';
+            todayButton.innerHTML = '<i class="fas fa-calendar-day"></i> Prenota per oggi';
+            todayButton.addEventListener('click', function() {
+                calendar.today();
+                handleDateSelection(new Date());
+            });
+            
+            todayButtonContainer.appendChild(todayButton);
+            
+            // Funzione per gestire la selezione di una data
+            function handleDateSelection(date) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (date < today) {
+                    alert('Non puoi selezionare una data passata');
+                    return;
+                }
+                
+                // Salva la data selezionata
+                selectedDate = date;
+                
+                // Formatta la data per mostrarla all'utente
+                const formattedDate = formatDate(date);
+                selectedDateEl.textContent = formattedDate;
+                summaryDateEl.textContent = formattedDate;
+                
+                // Recupera gli slot orari disponibili
+                fetchAvailableTimeSlots(date);
+                
+                // Passa allo step 2
+                moveToStep(2);
+            }
+
+            
+            // Funzione per recuperare gli slot orari disponibili
+            function fetchAvailableTimeSlots(date) {
+                // Mostra il loader
+                timeSlotsContainer.innerHTML = '';
+                loaderCalendar.style.display = 'block';
+                
+                // Simula una chiamata API (in produzione chiamiamo il server)
+                setTimeout(() => {
+                    // Genera slot orari di esempio (9:00 - 17:00)
+                    availableTimeSlots = [];
+                    
+                    // Slot fissi disponibili per orari lavorativi
+                    const workHours = [9, 10, 11, 12, 14, 15, 16, 17];
+                    
+                    // Simula alcuni slot già prenotati (in produzione questi verrebbero dal server)
+                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                    const bookedSlots = isWeekend ? [9, 10, 16, 17] : [10, 15];
+                    
+                    // Genera gli slot e marca quelli prenotati come non disponibili
+                    workHours.forEach(hour => {
+                        const isBooked = bookedSlots.includes(hour);
+                        availableTimeSlots.push({
+                            hour: hour,
+                            formatted: `${hour}:00`,
+                            available: !isBooked
+                        });
                     });
+                    
+                    // Mostra gli slot
+                    renderTimeSlots();
+                    loaderCalendar.style.display = 'none';
+                }, 800);
+            }
+            
+            // Funzione per visualizzare gli slot orari disponibili
+            function renderTimeSlots() {
+                timeSlotsContainer.innerHTML = '';
+                
+                availableTimeSlots.forEach(slot => {
+                    const slotEl = document.createElement('div');
+                    slotEl.className = `time-slot ${slot.available ? '' : 'disabled'}`;
+                    slotEl.textContent = slot.formatted;
+                    
+                    if (slot.available) {
+                        slotEl.addEventListener('click', () => {
+                            // Deseleziona tutti gli slot
+                            document.querySelectorAll('.time-slot').forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            
+                            // Seleziona questo slot
+                            slotEl.classList.add('selected');
+                            selectedTimeSlot = slot;
+                            
+                            // Aggiorna il riepilogo
+                            summaryTimeEl.textContent = slot.formatted;
+                            
+                            // Abilita il pulsante di conferma
+                            confirmTimeSlotBtn.disabled = false;
+                        });
+                    }
+                    
+                    timeSlotsContainer.appendChild(slotEl);
                 });
             }
             
-            // Contact Form
-            const contactForm = document.getElementById('contact-form');
+            // Event listeners
+            confirmTimeSlotBtn.addEventListener('click', () => {
+                // Compila i campi nascosti del form
+                bookingDateInput.value = formatDate(selectedDate);
+                bookingTimeInput.value = selectedTimeSlot.formatted;
+                
+                // Crea un timestamp per la prenotazione
+                const bookingDate = new Date(selectedDate);
+                bookingDate.setHours(selectedTimeSlot.hour, 0, 0, 0);
+                bookingTimestampInput.value = bookingDate.toISOString();
+                
+                // Passa allo step 3
+                moveToStep(3);
+            });
             
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
+            backToStep1Btn.addEventListener('click', () => {
+                moveToStep(1);
+            });
+            
+            backToStep2Btn.addEventListener('click', () => {
+                moveToStep(2);
+            });
+            
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Mostra il loader
+                loaderForm.style.display = 'block';
+                
+                // Raccogli i dati del form
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    message: document.getElementById('message').value,
+                    bookingDate: bookingDateInput.value,
+                    bookingTime: bookingTimeInput.value,
+                    bookingTimestamp: bookingTimestampInput.value,
+                    source: 'booking-form'
+                };
+                
+                // Invia i dati al server
+                fetch('/api/submit-booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loaderForm.style.display = 'none';
                     
-                    // Qui inserisci la logica per l'invio del form
-                    alert('Grazie per la tua richiesta! Ti contatteremo presto per la tua consulenza gratuita.');
-                    
-                    // Reset form
-                    contactForm.reset();
+                    if (data.success) {
+                        // Nascondi il form
+                        contactForm.style.display = 'none';
+                        
+                        // Mostra il messaggio di conferma
+                        confirmationMessage.style.display = 'block';
+                        
+                        // Scroll verso il messaggio
+                        confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore:', error);
+                    loaderForm.style.display = 'none';
+                    alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
                 });
+            });
+            
+            // Funzioni di utilità
+            function moveToStep(step) {
+                // Nascondi tutti gli step
+                [step1El, step2El, step3El].forEach(el => {
+                    el.classList.remove('step-active');
+                    el.classList.add('step-hidden');
+                });
+                
+                // Mostra lo step richiesto
+                switch (step) {
+                    case 1:
+                        step1El.classList.remove('step-hidden');
+                        step1El.classList.add('step-active');
+                        break;
+                    case 2:
+                        step2El.classList.remove('step-hidden');
+                        step2El.classList.add('step-active');
+                        break;
+                    case 3:
+                        step3El.classList.remove('step-hidden');
+                        step3El.classList.add('step-active');
+                        break;
+                }
+                
+                // Scroll verso l'inizio della sezione
+                window.scrollTo({
+                    top: document.querySelector('.booking-section').offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+            
+            function formatDate(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('it-IT', options);
             }
         });
     </script>
