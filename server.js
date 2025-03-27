@@ -280,6 +280,107 @@ app.get('/api/booking/availability', async (req, res) => {
   }
 });
 
+// API pubblica per ottenere le prenotazioni
+app.get('/api/bookings', async (req, res) => {
+  try {
+    // Parametri per paginazione e filtri
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    
+    // Imposta filtri se presenti
+    let query = {};
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query = {
+        $or: [
+          { name: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex }
+        ]
+      };
+    }
+    
+    // Filtro per stato
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+    
+    // Filtro per data
+    if (req.query.after) {
+      query.bookingTimestamp = { $gte: new Date(req.query.after) };
+    }
+    
+    if (req.query.before) {
+      if (!query.bookingTimestamp) query.bookingTimestamp = {};
+      query.bookingTimestamp.$lte = new Date(req.query.before);
+    }
+    
+    // Conta totale documenti per paginazione
+    const total = await Booking.countDocuments(query);
+    
+    // Ottieni i dati con ordinamento, paginazione e filtri
+    const bookings = await Booking.find(query)
+      .sort({ bookingTimestamp: 1 }) // Ordina per data della prenotazione
+      .skip(skip)
+      .limit(limit);
+    
+    res.status(200).json({
+      success: true,
+      data: bookings,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Errore recupero prenotazioni:', error);
+    res.status(500).json({ success: false, message: 'Errore nel recupero delle prenotazioni' });
+  }
+});
+
+// API pubblica per aggiornare lo stato di una prenotazione
+app.put('/api/bookings/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    // Verifica che lo stato sia valido
+    const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Stato non valido' });
+    }
+    
+    // Trova e aggiorna la prenotazione
+    const booking = await Booking.findByIdAndUpdate(
+      id, 
+      { status }, 
+      { new: true }
+    );
+    
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Prenotazione non trovata' });
+    }
+    
+    // Se lo stato è cambiato a "confirmed", invia un'email di conferma
+    if (status === 'confirmed') {
+      await sendBookingStatusEmail(booking, 'confirmed');
+    }
+    
+    // Se lo stato è cambiato a "cancelled", invia un'email di cancellazione
+    if (status === 'cancelled') {
+      await sendBookingStatusEmail(booking, 'cancelled');
+    }
+    
+    res.status(200).json({ success: true, data: booking });
+  } catch (error) {
+    console.error('Errore aggiornamento prenotazione:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento della prenotazione' });
+  }
+});
+
 // ----- ROUTES PER GESTIONE COOKIE -----
 
 // Route per ottenere lo stato attuale del consenso ai cookie
