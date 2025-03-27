@@ -696,7 +696,7 @@ app.get('/api/admin/export', requireAuth, async (req, res) => {
     
     // Imposta gli header della risposta
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename=costruzione-digitale-leads-${Date.now()}.csv`);
+    res.setHeader('Content-Disposition', `attachment; filename=Costruzione-digitale-leads-${Date.now()}.csv`);
     
     // Invia il file
     res.send(csv);
@@ -1021,7 +1021,7 @@ const createInitialAdmin = async () => {
     const adminExists = await Admin.findOne({ username: 'admin' });
     
     if (!adminExists) {
-      const password = process.env.ADMIN_PASSWORD || 'costruzioneDig2025';
+      const password = process.env.ADMIN_PASSWORD || 'CostruzioneDig2025';
       const hashedPassword = await bcrypt.hash(password, 10);
       
       await Admin.create({

@@ -1,5 +1,5 @@
 # robots.txt per Costruzione Digitale
-# https://costruzionedigitale.com/
+# https://Costruzionedigitale.com/
 
 User-agent: *
 Allow: /
@@ -35,4 +35,4 @@ User-agent: Slurp
 Crawl-delay: 3
 
 # Indirizzo del file sitemap
-Sitemap: https://costruzionedigitale.com/sitemap.xml
+Sitemap: https://Costruzionedigitale.com/sitemap.xml
