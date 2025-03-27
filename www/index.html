@@ -4340,6 +4340,38 @@
             </nav>
         </div>
     </header>
+
+    <!-- Menu Mobile -->
+    <div class="mobile-menu-container" id="mobile-menu">
+        <button class="mobile-menu-close" id="mobile-menu-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul class="mobile-menu-items">
+            <li><a href="#why-it-works">Perché funziona</a></li>
+            <li><a href="#process">Come funziona</a></li>
+            <li><a href="#services">Servizi</a></li>
+            <li><a href="#contatto">Contattaci</a></li>
+        </ul>
+        <div class="mobile-menu-contact">
+            <h4>Contattaci</h4>
+            <div class="mobile-contact-item">
+                <i class="fas fa-envelope"></i>
+                <a href="mailto:info@CostruzioneDigitale.it">info@CostruzioneDigitale.it</a>
+            </div>
+            <div class="mobile-contact-item">
+                <i class="fas fa-phone"></i>
+                <a href="tel:+390212345678">+39 02 1234 5678</a>
+            </div>
+            <div class="mobile-social-links">
+                <a href="#" class="mobile-social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="mobile-social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="mobile-social-link"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        <a href="contattaci.html" class="btn mobile-menu-button">
+            <span>PRENOTA ORA</span>
+        </a>
+    </div>
     
     <section class="hero" id="home">
         <div class="container">
@@ -4901,6 +4933,32 @@
             });
             
             // Contact Form
+
+            // Mobile Menu Toggle
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+            
+            if (mobileMenuToggle && mobileMenu && mobileMenuClose) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Blocca lo scroll della pagina
+                });
+                
+                mobileMenuClose.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = ''; // Ripristina lo scroll della pagina
+                });
+                
+                // Chiudi il menu quando viene cliccato un link
+                document.querySelectorAll('#mobile-menu a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+
             const contactForm = document.getElementById('contact-form');
             
             if (contactForm) {
