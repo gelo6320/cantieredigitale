@@ -1,4 +1,4 @@
-# robots.txt per Cantiere Digitale
+# robots.txt per Costruzione Digitale
 # https://costruzionedigitale.com/
 
 User-agent: *

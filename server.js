@@ -696,7 +696,7 @@ app.get('/api/admin/export', requireAuth, async (req, res) => {
     
     // Imposta gli header della risposta
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename=cantiere-digitale-leads-${Date.now()}.csv`);
+    res.setHeader('Content-Disposition', `attachment; filename=costruzione-digitale-leads-${Date.now()}.csv`);
     
     // Invia il file
     res.send(csv);
@@ -765,20 +765,20 @@ async function sendBookingConfirmationEmail(booking) {
     
     // Opzioni per l'email
     const mailOptions = {
-      from: `"Cantiere Digitale" <${process.env.EMAIL_FROM || 'noreply@cantieredigitale.it'}>`,
+      from: `"Costruzione Digitale" <${process.env.EMAIL_FROM || 'noreply@CostruzioneDigitale.it'}>`,
       to: booking.email,
       subject: 'Conferma prenotazione chiamata conoscitiva',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://cantieredigitale.it/logo.png" alt="Cantiere Digitale" style="height: 60px;">
+            <img src="https://CostruzioneDigitale.it/logo.png" alt="Costruzione Digitale" style="height: 60px;">
           </div>
           
           <h2 style="color: #FF6B00; margin-bottom: 20px;">Prenotazione Confermata!</h2>
           
           <p>Gentile ${booking.name},</p>
           
-          <p>Grazie per aver prenotato una chiamata conoscitiva con Cantiere Digitale. Di seguito i dettagli della tua prenotazione:</p>
+          <p>Grazie per aver prenotato una chiamata conoscitiva con Costruzione Digitale. Di seguito i dettagli della tua prenotazione:</p>
           
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p><strong>Data:</strong> ${formattedDate}</p>
@@ -799,11 +799,11 @@ async function sendBookingConfirmationEmail(booking) {
           
           <p>A presto!</p>
           
-          <p>Il team di Cantiere Digitale</p>
+          <p>Il team di Costruzione Digitale</p>
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #777; text-align: center;">
-            <p>Cantiere Digitale Srl - Via Esempio 123, Milano</p>
-            <p>Tel: +39 0123 456789 - Email: info@cantieredigitale.it</p>
+            <p>Costruzione Digitale Srl - Via Esempio 123, Milano</p>
+            <p>Tel: +39 0123 456789 - Email: info@CostruzioneDigitale.it</p>
           </div>
         </div>
       `
@@ -833,8 +833,8 @@ async function sendAdminNotificationEmail(booking) {
     
     // Opzioni per l'email
     const mailOptions = {
-      from: `"Sistema Prenotazioni" <${process.env.EMAIL_FROM || 'noreply@cantieredigitale.it'}>`,
-      to: process.env.ADMIN_EMAIL || 'admin@cantieredigitale.it',
+      from: `"Sistema Prenotazioni" <${process.env.EMAIL_FROM || 'noreply@CostruzioneDigitale.it'}>`,
+      to: process.env.ADMIN_EMAIL || 'admin@CostruzioneDigitale.it',
       subject: 'Nuova prenotazione chiamata conoscitiva',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
@@ -853,7 +853,7 @@ async function sendAdminNotificationEmail(booking) {
           
           <p>Accedi al pannello di amministrazione per gestire questa prenotazione.</p>
           
-          <p><a href="${process.env.SITE_URL || 'https://cantieredigitale.it'}/admin" style="background-color: #FF6B00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Vai al pannello admin</a></p>
+          <p><a href="${process.env.SITE_URL || 'https://CostruzioneDigitale.it'}/admin" style="background-color: #FF6B00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Vai al pannello admin</a></p>
         </div>
       `
     };
@@ -887,7 +887,7 @@ async function sendBookingStatusEmail(booking, status) {
       content = `
         <h2 style="color: #27ae60; margin-bottom: 20px;">Prenotazione Confermata</h2>
         <p>Gentile ${booking.name},</p>
-        <p>Siamo lieti di confermare la tua prenotazione per una chiamata conoscitiva con Cantiere Digitale.</p>
+        <p>Siamo lieti di confermare la tua prenotazione per una chiamata conoscitiva con Costruzione Digitale.</p>
         <p>Ti contatteremo al numero ${booking.phone} come programmato.</p>
       `;
     } else if (status === 'cancelled') {
@@ -895,7 +895,7 @@ async function sendBookingStatusEmail(booking, status) {
       content = `
         <h2 style="color: #e74c3c; margin-bottom: 20px;">Prenotazione Cancellata</h2>
         <p>Gentile ${booking.name},</p>
-        <p>La tua prenotazione per una chiamata conoscitiva con Cantiere Digitale è stata cancellata.</p>
+        <p>La tua prenotazione per una chiamata conoscitiva con Costruzione Digitale è stata cancellata.</p>
         <p>Se desideri riprogrammare la chiamata, puoi farlo visitando il nostro sito web o contattandoci direttamente.</p>
       `;
     } else {
@@ -904,13 +904,13 @@ async function sendBookingStatusEmail(booking, status) {
     
     // Opzioni per l'email
     const mailOptions = {
-      from: `"Cantiere Digitale" <${process.env.EMAIL_FROM || 'noreply@cantieredigitale.it'}>`,
+      from: `"Costruzione Digitale" <${process.env.EMAIL_FROM || 'noreply@CostruzioneDigitale.it'}>`,
       to: booking.email,
       subject: subject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://cantieredigitale.it/logo.png" alt="Cantiere Digitale" style="height: 60px;">
+            <img src="https://CostruzioneDigitale.it/logo.png" alt="Costruzione Digitale" style="height: 60px;">
           </div>
           
           ${content}
@@ -923,11 +923,11 @@ async function sendBookingStatusEmail(booking, status) {
           <p>Per qualsiasi domanda, non esitare a contattarci rispondendo a questa email o chiamando il nostro numero +39 0123 456789.</p>
           
           <p>Cordiali saluti,</p>
-          <p>Il team di Cantiere Digitale</p>
+          <p>Il team di Costruzione Digitale</p>
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #777; text-align: center;">
-            <p>Cantiere Digitale Srl - Via Esempio 123, Milano</p>
-            <p>Tel: +39 0123 456789 - Email: info@cantieredigitale.it</p>
+            <p>Costruzione Digitale Srl - Via Esempio 123, Milano</p>
+            <p>Tel: +39 0123 456789 - Email: info@CostruzioneDigitale.it</p>
           </div>
         </div>
       `
@@ -1021,7 +1021,7 @@ const createInitialAdmin = async () => {
     const adminExists = await Admin.findOne({ username: 'admin' });
     
     if (!adminExists) {
-      const password = process.env.ADMIN_PASSWORD || 'CantiereDig2025';
+      const password = process.env.ADMIN_PASSWORD || 'costruzioneDig2025';
       const hashedPassword = await bcrypt.hash(password, 10);
       
       await Admin.create({
