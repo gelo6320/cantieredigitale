@@ -1,0 +1,38 @@
+# robots.txt per Cantiere Digitale
+# https://costruzionedigitale.com/
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /backend/
+Disallow: /wp-admin/
+Disallow: /includes/
+Disallow: /temp/
+Disallow: /*?*
+
+# Impedisce l'indicizzazione di file specifici
+Disallow: /*.pdf$
+Disallow: /*.doc$
+Disallow: /*.docx$
+Disallow: /*.xls$
+Disallow: /*.xlsx$
+Disallow: /*.zip$
+Disallow: /*.rar$
+
+# Consente a Google di scansionare i file CSS e JS
+User-agent: Googlebot
+Allow: /*.js$
+Allow: /*.css$
+
+# Limita la frequenza di scansione per evitare sovraccarichi del server
+User-agent: Googlebot
+Crawl-delay: 1
+
+User-agent: bingbot
+Crawl-delay: 2
+
+User-agent: Slurp
+Crawl-delay: 3
+
+# Indirizzo del file sitemap
+Sitemap: https://costruzionedigitale.com/sitemap.xml
