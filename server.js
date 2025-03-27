@@ -9,6 +9,7 @@ const MongoStore = require('connect-mongo');
 const Papa = require('papaparse');
 const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer'); // Nuovo modulo per invio email
+const cors = require('cors');
 
 // Carica variabili d'ambiente
 dotenv.config();
@@ -21,6 +22,14 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'www')));
+
+// Configurazione CORS
+app.use(cors({
+  origin: ['https://dashboard-production-089e.up.railway.app', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Configurazione sessione
 app.use(session({
