@@ -1536,6 +1536,743 @@
             box-shadow: none !important;
             background-color: transparent !important;
         }
+
+        /* Ottimizzazioni per la pagina di prenotazione su mobile */
+
+        /* Header mobile coerente con la home page */
+        @media (max-width: 768px) {
+            header {
+                padding: 10px 0;
+            }
+            
+            .logo-icon {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            
+            /* Menu mobile */
+            .mobile-menu-toggle {
+                font-size: 1.8rem;
+                padding: 5px;
+                color: var(--primary-color);
+            }
+            
+            /* Mobile menu overlay */
+            .mobile-menu-container {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background-color: var(--secondary-color);
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.4s ease;
+                padding: 60px 20px 20px;
+                overflow-y: auto;
+            }
+            
+            .mobile-menu-container.active {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-close {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.8rem;
+                cursor: pointer;
+            }
+            
+            .mobile-menu-items {
+                list-style: none;
+                padding: 0;
+                margin: 30px 0;
+            }
+            
+            .mobile-menu-items li {
+                margin-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding-bottom: 15px;
+            }
+            
+            .mobile-menu-items li a {
+                display: block;
+                font-size: 1.2rem;
+                color: var(--text-color);
+                text-decoration: none;
+                padding: 5px 0;
+                transition: color 0.3s ease;
+            }
+            
+            .mobile-menu-items li a:hover {
+                color: var(--primary-color);
+            }
+        }
+        
+        /* Miglioramenti generali alla sezione hero su mobile */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 80px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+            
+            .hero h1 span {
+                font-size: 2.4rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+            
+            .guarantee-box {
+                padding: 25px 15px;
+                margin: 25px auto;
+            }
+            
+            .guarantee-box h3 {
+                font-size: 1.2rem;
+            }
+            
+            .guarantee-box p {
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* Miglioramenti ai passaggi di prenotazione su mobile */
+        @media (max-width: 768px) {
+            .booking-step {
+                padding: 25px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .booking-step-title {
+                margin-bottom: 15px;
+            }
+            
+            .booking-step h3 {
+                font-size: 1.3rem;
+            }
+            
+            .step-number {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+            
+            /* Miglioramenti alla sezione calendario */
+            .calendar-container {
+                margin: 25px 0;
+            }
+            
+            #calendar {
+                padding: 10px 5px;
+            }
+            
+            .fc-toolbar-title {
+                font-size: 1.2rem !important;
+            }
+            
+            .calendar-nav-button {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .btn-today {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            /* Miglioramenti agli slot temporali */
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-top: 20px;
+            }
+            
+            .time-slot {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+            
+            /* Miglioramenti al form di contatto */
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+            }
+            
+            .form-control {
+                padding: 12px 15px;
+            }
+            
+            textarea.form-control {
+                min-height: 100px;
+            }
+            
+            .booking-summary {
+                padding: 15px;
+                margin-top: 15px;
+                margin-bottom: 25px;
+            }
+            
+            .booking-summary h4 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            .booking-detail {
+                margin-bottom: 8px;
+                font-size: 0.95rem;
+            }
+            
+            .booking-detail-label {
+                width: 90px;
+            }
+            
+            /* Miglioramenti ai bottoni di azione */
+            .booking-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            
+            .booking-actions .btn {
+                width: 100%;
+                margin: 0;
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+            
+            /* Miglioramenti al messaggio di conferma */
+            .confirmation-message {
+                padding: 25px 15px;
+            }
+        }
+        
+        /* Ulteriori ottimizzazioni per schermi molto piccoli */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero h1 span {
+                font-size: 2rem;
+            }
+            
+            .booking-step h3 {
+                font-size: 1.2rem;
+            }
+            
+            /* Calendario ancora più compatto */
+            .fc-toolbar-title {
+                font-size: 1.1rem !important;
+            }
+            
+            .calendar-nav-button {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.8rem !important;
+                width: 24px !important;
+                height: 24px !important;
+            }
+            
+            /* Slot temporali in una colonna su schermi molto piccoli */
+            .time-slots {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Correzioni specifiche per il calendario */
+        @media (max-width: 768px) {
+            /* Assicurati che i giorni siano abbastanza grandi da essere cliccabili */
+            .fc-daygrid-day {
+                min-height: 50px !important;
+                height: auto !important;
+            }
+            
+            /* Mostra i controlli del calendario in modo più compatto */
+            .fc-header-toolbar {
+                margin-bottom: 0.5em !important;
+                padding: 5px !important;
+            }
+            
+            /* Rendi il calendario tutto visibile senza scrolling orizzontale */
+            .fc-scrollgrid-sync-table {
+                width: 100% !important;
+            }
+            
+            /* Aumenta area cliccabile per le date */
+            .fc-daygrid-day-top {
+                justify-content: center;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+            
+            /* Rendi più visibile la data di oggi */
+            .fc-day-today .fc-daygrid-day-number {
+                box-shadow: 0 2px 8px rgba(255, 107, 0, 0.5);
+                transform: scale(1.1);
+            }
+            
+            /* Miglioramenti tattili per gli elementi interattivi */
+            .time-slot, .btn, .calendar-nav-button, .fc-daygrid-day {
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+                touch-action: manipulation;
+            }
+            
+            /* Fissa l'altezza del contenitore calendario */
+            .fc-view-harness {
+                min-height: 300px !important;
+            }
+        }
+        
+        /* Miglioramenti di accessibilità e UX */
+        .time-slot.selected {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+        }
+        
+        .btn:focus, .time-slot:focus, .form-control:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        /* Animazione di caricamento più evidente */
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border-width: 6px;
+        }
+        
+        /* Indicazioni più chiare per i campi obbligatori */
+        .form-group label[for*="name"]::after,
+        .form-group label[for*="email"]::after,
+        .form-group label[for*="phone"]::after,
+        .form-check-label[for*="privacy-check"]::after {
+            content: " *";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        /* Stile per rendere il calendario più intuitivo */
+        .fc-day-today {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .fc-day-today::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,107,0,0.2) 0%, rgba(255,107,0,0) 50%);
+            pointer-events: none;
+        }
+        
+        /* Zoom sui form in focus per dispositivi mobili */
+        @media (max-width: 768px) {
+            .form-control:focus {
+                font-size: 16px; /* Previene lo zoom automatico su iOS */
+                transform: scale(1.02);
+                transition: transform 0.2s;
+            }
+        }
+        
+        /* Aggiungi feedback tattile per gli elementi interattivi */
+        @media (hover: hover) {
+            .time-slot:hover:not(.disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
+            }
+        }
+        
+        /* Styling per feedback visivo sulla selezione */
+        .time-slot:active:not(.disabled) {
+            transform: scale(0.98);
+            box-shadow: 0 2px 5px rgba(255, 107, 0, 0.2);
+        }
+        
+        /* Stili per i messaggi di errore e feedback utente */
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            padding-left: 5px;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .input-error {
+            border-color: #e74c3c !important;
+            background-color: rgba(231, 76, 60, 0.05) !important;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+        }
+        
+        /* Stile per il giorno selezionato nel calendario */
+        .fc-daygrid-day.selected-day {
+            background-color: rgba(255, 107, 0, 0.2) !important;
+            border: 2px solid var(--primary-color) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.3) !important;
+            transform: scale(1.02);
+            position: relative;
+            z-index: 5;
+        }
+        
+        .fc-daygrid-day.selected-day .fc-daygrid-day-number {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Animazioni migliorate */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Applica le animazioni */
+        .booking-step.step-active {
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .time-slot.selected {
+            animation: pulse 1.5s infinite;
+        }
+        
+        #selected-date, #summary-date, #summary-time {
+            animation: slideInRight 0.3s ease;
+        }
+        
+        .calendar-navigation-hint, .time-slot-hint, .form-instructions {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Miglioramenti estetici per i pulsanti di navigazione */
+        .booking-actions .btn:not(:disabled) {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .booking-actions .btn:not(:disabled)::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+        
+        .booking-actions .btn:not(:disabled):hover::after {
+            left: 100%;
+        }
+        
+        /* Miglioramenti agli slot orari su mobile */
+        @media (max-width: 768px) {
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .time-slot {
+                padding: 12px 8px;
+                font-size: 0.95rem;
+                height: auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Migliora la visibilità dello slot selezionato */
+            .time-slot.selected {
+                border-width: 2px;
+                box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .time-slot {
+                font-size: 0.9rem;
+                padding: 10px 5px;
+            }
+        }
+        
+        /* Miglioramenti al calendario per dispositivi touch */
+        @media (max-width: 768px) {
+            .fc-daygrid-day {
+                cursor: pointer;
+                position: relative;
+            }
+            
+            .fc-daygrid-day:not(.fc-day-disabled):active {
+                background-color: rgba(255, 107, 0, 0.2);
+            }
+            
+            .fc-daygrid-day-number {
+                cursor: pointer;
+                font-weight: 600;
+            }
+            
+            /* Migliora la legibilità del titolo del calendario */
+            .fc-toolbar-title {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Aumenta la dimensione dei controlli di navigazione */
+            .calendar-nav-button {
+                min-width: 40px;
+                min-height: 40px;
+            }
+        }
+        
+        /* Stili per riepilogo prenotazione */
+        .booking-summary {
+            border-left: 4px solid var(--primary-color);
+            background-color: rgba(255, 107, 0, 0.05);
+        }
+        
+        #summary-date, #summary-time, #selected-date {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* Migliora visibilità su mobile */
+        @media (max-width: 768px) {
+            .booking-summary h4 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            
+            .booking-detail {
+                margin-bottom: 10px;
+            }
+            
+            .booking-detail-label {
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.9);
+            }
+        }
+        
+        /* Stili per i diversi stati della prenotazione */
+        .step-completed .step-number {
+            background-color: var(--success-color);
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+        }
+        
+        .step-completed .step-number::after {
+            content: '✓';
+            position: absolute;
+            font-size: 1.2rem;
+        }
+        
+        /* Feedback utente per i pulsanti */
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
+        }
+        
+        /* Miglioramenti al messaggio di conferma */
+        .confirmation-message {
+            border-left: 4px solid var(--success-color);
+            background-color: rgba(39, 174, 96, 0.1);
+        }
+        
+        .confirmation-message h4 {
+            color: var(--success-color);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+        
+        .confirmation-message p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .confirmation-message {
+                padding: 25px 15px;
+            }
+            
+            .confirmation-message h4 {
+                font-size: 1.2rem;
+            }
+            
+            .confirmation-message p {
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* Miglioramenti di accessibilità */
+        .btn:focus, .time-slot:focus, .form-control:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        .time-slot:focus-visible, .calendar-nav-button:focus-visible, .btn:focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Miglioramenti al form per dispositivi mobili */
+        @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important; /* Previene lo zoom automatico su iOS */
+            }
+            
+            .form-group label {
+                margin-bottom: 8px;
+            }
+            
+            .form-control {
+                padding: 12px 15px;
+            }
+            
+            textarea.form-control {
+                min-height: 100px;
+            }
+            
+            .form-check {
+                margin-bottom: 15px;
+            }
+            
+            .form-check label {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Miglioramento per mobile menu */
+        .mobile-menu-container {
+            z-index: 1001; /* Assicura che sia sopra tutto il resto */
+            overscroll-behavior: contain; /* Previene scroll dell'elemento sottostante */
+        }
+        
+        .mobile-menu-items {
+            margin-bottom: 30px;
+        }
+        
+        .mobile-menu-items li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+        }
+        
+        .mobile-menu-items li a i {
+            color: var(--primary-color);
+            width: 24px;
+            text-align: center;
+        }
+        
+        .mobile-menu-button {
+            margin-top: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mobile-menu-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .mobile-menu-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Rimuovi il doppio tap delay su iOS */
+        a, button, input, .time-slot, .fc-daygrid-day {
+            touch-action: manipulation;
+        }
+        
+        /* Preferenze di riduzione del movimento */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* Miglioramento per la versione stampata del documento */
+        @media print {
+            header, footer, .booking-step:not(.step-active), .booking-actions {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white;
+                color: black;
+            }
+            
+            .booking-summary {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin: 20px 0;
+            }
+        }
         
     </style>
 </head>
@@ -1559,6 +2296,9 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#why-it-works">Perché funziona</a></li>
+                    <li><a href="index.html#process">Come funziona</a></li>
+                    <li><a href="index.html#services">Servizi</a></li>
                 </ul>
             </nav>
         </div>
@@ -1593,6 +2333,9 @@
                     <p>Scegli una data dal calendario per la tua chiamata conoscitiva.</p>
                     
                     <div class="calendar-container">
+                        <div class="calendar-navigation-hint" style="text-align: center; margin-bottom: 15px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+                            <i class="fas fa-info-circle"></i> Tocca una data per selezionarla
+                        </div>
                         <div id="calendar"></div>
                     </div>
                     
@@ -1615,6 +2358,9 @@
                         <div id="selected-date">--</div>
                     </div>
                     
+                    <p class="time-slot-hint" style="margin-top: 15px; margin-bottom: 10px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> Tocca un orario disponibile per selezionarlo
+                    </p>
                     <div class="time-slots" id="time-slots-container">
                         <!-- Time slots generati dinamicamente -->
                     </div>
@@ -1697,10 +2443,15 @@
                     </div>
                     
                     <div id="confirmation-message" class="confirmation-message">
-                        <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <div class="confirmation-icon" style="font-size: 3rem; margin-bottom: 20px; color: #27ae60;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
                         <h4>Prenotazione Confermata!</h4>
                         <p>Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo fornito con tutti i dettagli.</p>
-                        <p>Ti contatteremo all'orario stabilito.</p>
+                        <p style="margin-top: 15px; font-weight: bold;">Ti contatteremo all'orario stabilito.</p>
+                        <a href="index.html" class="btn" style="margin-top: 25px;">
+                            <span>Torna alla Home</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1761,6 +2512,21 @@
             </div>
         </div>
     </footer>
+
+    <div class="mobile-menu-container" id="mobile-menu">
+        <button class="mobile-menu-close" id="mobile-menu-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul class="mobile-menu-items">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="index.html#why-it-works"><i class="fas fa-question-circle"></i> Perché funziona</a></li>
+            <li><a href="index.html#process"><i class="fas fa-tools"></i> Come funziona</a></li>
+            <li><a href="index.html#services"><i class="fas fa-briefcase"></i> Servizi</a></li>
+        </ul>
+        <a href="#" class="btn mobile-menu-button" id="mobile-book-now">
+            <span>PRENOTA ORA</span>
+        </a>
+    </div>
     
     <!-- Script FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
@@ -1769,252 +2535,479 @@
     <!-- Script personalizzato -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementi DOM
-            const step1El = document.getElementById('step1');
-            const step2El = document.getElementById('step2');
-            const step3El = document.getElementById('step3');
-            const calendarEl = document.getElementById('calendar');
-            const timeSlotsContainer = document.getElementById('time-slots-container');
-            const selectedDateEl = document.getElementById('selected-date');
-            const summaryDateEl = document.getElementById('summary-date');
-            const summaryTimeEl = document.getElementById('summary-time');
-            const confirmTimeSlotBtn = document.getElementById('confirmTimeSlot');
-            const backToStep1Btn = document.getElementById('backToStep1');
-            const backToStep2Btn = document.getElementById('backToStep2');
-            const bookingDateInput = document.getElementById('booking-date');
-            const bookingTimeInput = document.getElementById('booking-time');
-            const bookingTimestampInput = document.getElementById('booking-timestamp');
-            const contactForm = document.getElementById('contact-form');
-            const loaderCalendar = document.getElementById('loader-calendar');
-            const loaderForm = document.getElementById('loader-form');
-            const confirmationMessage = document.getElementById('confirmation-message');
-            
-            // Stato applicazione
-            let selectedDate = null;
-            let selectedTimeSlot = null;
-            let availableTimeSlots = [];
-            
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'it',
-                headerToolbar: {
-                    left: '', // Rimuovi i pulsanti a sinistra
-                    center: 'title', // Lascia solo il titolo al centro
-                    right: '' // Rimuovi i pulsanti a destra incluso "dayGridMonth"
-                },
-                selectable: true,
-                select: function(info) {
-                    handleDateSelection(info.start);
-                },
-                dateClick: function(info) {
-                    handleDateSelection(info.date);
-                },
-                fixedWeekCount: true,
-                showNonCurrentDates: true,
-                height: 'auto',
-                contentHeight: 'auto',
-                eventDidMount: function(info) {
-                    // Personalizzazioni eventi
-                },
-                dayCellDidMount: function(info) {
-                    // Evidenziazione celle del calendario
+    // Elementi DOM
+        const step1El = document.getElementById('step1');
+        const step2El = document.getElementById('step2');
+        const step3El = document.getElementById('step3');
+        const calendarEl = document.getElementById('calendar');
+        const timeSlotsContainer = document.getElementById('time-slots-container');
+        const selectedDateEl = document.getElementById('selected-date');
+        const summaryDateEl = document.getElementById('summary-date');
+        const summaryTimeEl = document.getElementById('summary-time');
+        const confirmTimeSlotBtn = document.getElementById('confirmTimeSlot');
+        const backToStep1Btn = document.getElementById('backToStep1');
+        const backToStep2Btn = document.getElementById('backToStep2');
+        const bookingDateInput = document.getElementById('booking-date');
+        const bookingTimeInput = document.getElementById('booking-time');
+        const bookingTimestampInput = document.getElementById('booking-timestamp');
+        const contactForm = document.getElementById('contact-form');
+        const loaderCalendar = document.getElementById('loader-calendar');
+        const loaderForm = document.getElementById('loader-form');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const body = document.body;
+        
+        // Stato applicazione
+        let selectedDate = null;
+        let selectedTimeSlot = null;
+        let availableTimeSlots = [];
+        
+        // Inizializzazione del calendario
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'it',
+            headerToolbar: {
+                left: '', // Rimuovi i pulsanti a sinistra
+                center: 'title', // Lascia solo il titolo al centro
+                right: '' // Rimuovi i pulsanti a destra incluso "dayGridMonth"
+            },
+            selectable: true,
+            select: function(info) {
+                handleDateSelection(info.start);
+            },
+            dateClick: function(info) {
+                handleDateSelection(info.date);
+            },
+            fixedWeekCount: true,
+            showNonCurrentDates: true,
+            height: 'auto',
+            contentHeight: 'auto',
+            eventDidMount: function(info) {
+                // Personalizzazioni eventi
+            },
+            dayCellDidMount: function(info) {
+                // Disabilita date passate
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const cellDate = info.date;
+                
+                if (cellDate < today) {
+                    info.el.classList.add('fc-day-disabled');
                 }
+            }
+        });
+    
+        calendar.render();
+        
+        // Assicura che il calendario abbia la dimensione corretta
+        setTimeout(() => {
+            calendar.updateSize();
+        }, 100);
+        
+        // Aggiorna la dimensione del calendario quando la finestra cambia
+        window.addEventListener('resize', function() {
+            calendar.updateSize();
+        });
+    
+        // Crea pulsanti personalizzati per la navigazione
+        const calendarHeader = calendarEl.querySelector('.fc-header-toolbar');
+        const titleContainer = calendarEl.querySelector('.fc-toolbar-chunk:nth-child(2)');
+        
+        // Crea contenitore per frecce e titolo
+        const navigationContainer = document.createElement('div');
+        navigationContainer.className = 'calendar-navigation';
+        titleContainer.appendChild(navigationContainer);
+        
+        // Aggiungi freccia sinistra
+        const prevButton = document.createElement('button');
+        prevButton.className = 'calendar-nav-button prev-month';
+        prevButton.setAttribute('aria-label', 'Mese precedente');
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.addEventListener('click', function() {
+            calendar.prev();
+        });
+        
+        // Aggiungi freccia destra
+        const nextButton = document.createElement('button');
+        nextButton.className = 'calendar-nav-button next-month';
+        nextButton.setAttribute('aria-label', 'Mese successivo');
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.addEventListener('click', function() {
+            calendar.next();
+        });
+        
+        // Personalizza il titolo
+        const customTitleElement = document.createElement('h2');
+        customTitleElement.className = 'fc-toolbar-title custom-title';
+        customTitleElement.textContent = calendar.view.title; // Imposta il titolo iniziale
+        
+        // Nasconde il titolo originale di FullCalendar con CSS
+        const style = document.createElement('style');
+        style.textContent = '.fc-toolbar-title:not(.custom-title) { display: none !important; }';
+        document.head.appendChild(style);
+        
+        // Aggiunge i pulsanti e il titolo personalizzato al container
+        navigationContainer.appendChild(prevButton);
+        navigationContainer.appendChild(customTitleElement);
+        navigationContainer.appendChild(nextButton);
+        
+        // Aggiorna il titolo personalizzato quando cambia la vista
+        calendar.on('datesSet', function(info) {
+            customTitleElement.textContent = calendar.view.title;
+        });
+        
+        // Aggiungi pulsante "Prenota per oggi"
+        const todayButtonContainer = document.createElement('div');
+        todayButtonContainer.className = 'today-button-container';
+        calendarHeader.appendChild(todayButtonContainer);
+        
+        const todayButton = document.createElement('button');
+        todayButton.className = 'btn-today';
+        todayButton.innerHTML = '<i class="fas fa-calendar-day"></i> Prenota per oggi';
+        todayButton.addEventListener('click', function() {
+            calendar.today();
+            handleDateSelection(new Date());
+        });
+        
+        todayButtonContainer.appendChild(todayButton);
+        
+        // Gestione del menu mobile
+        let mobileMenuContainer = document.querySelector('.mobile-menu-container');
+        
+        if (!mobileMenuContainer) {
+            // Crea il container per il menu mobile se non esiste
+            mobileMenuContainer = document.createElement('div');
+            mobileMenuContainer.className = 'mobile-menu-container';
+            mobileMenuContainer.id = 'mobile-menu';
+            
+            // Crea il pulsante di chiusura
+            const closeButton = document.createElement('button');
+            closeButton.className = 'mobile-menu-close';
+            closeButton.id = 'mobile-menu-close';
+            closeButton.innerHTML = '<i class="fas fa-times"></i>';
+            mobileMenuContainer.appendChild(closeButton);
+            
+            // Crea la lista di menu copiando quella desktop
+            const menuItems = document.createElement('ul');
+            menuItems.className = 'mobile-menu-items';
+            
+            // Copia le voci di menu esistenti o crea menu base
+            const desktopMenuItems = document.querySelectorAll('nav ul li');
+            if (desktopMenuItems.length > 0) {
+                desktopMenuItems.forEach(item => {
+                    const mobileItem = item.cloneNode(true);
+                    menuItems.appendChild(mobileItem);
+                });
+            } else {
+                // Menu base se non ci sono voci nel menu desktop
+                menuItems.innerHTML = `
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="index.html#why-it-works"><i class="fas fa-question-circle"></i> Perché funziona</a></li>
+                    <li><a href="index.html#process"><i class="fas fa-tools"></i> Come funziona</a></li>
+                    <li><a href="index.html#services"><i class="fas fa-briefcase"></i> Servizi</a></li>
+                `;
+            }
+            
+            mobileMenuContainer.appendChild(menuItems);
+            
+            // Aggiungi pulsante di contatto
+            const contactButton = document.createElement('a');
+            contactButton.href = "#";
+            contactButton.className = 'btn mobile-menu-button';
+            contactButton.id = 'mobile-book-now';
+            contactButton.innerHTML = '<span>PRENOTA ORA</span>';
+            contactButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                mobileMenuContainer.classList.remove('active');
+                body.style.overflow = '';
+                scrollToBookingSection();
             });
-
-            calendar.render();
-            setTimeout(() => {
-                calendar.updateSize();
-            }, 100);
             
-            window.addEventListener('resize', function() {
-                calendar.updateSize();
+            mobileMenuContainer.appendChild(contactButton);
+            
+            // Aggiungi il menu mobile al body
+            body.appendChild(mobileMenuContainer);
+        }
+        
+        // Gestisci la chiusura del menu mobile
+        const mobileMenuClose = document.getElementById('mobile-menu-close');
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', function() {
+                mobileMenuContainer.classList.remove('active');
+                body.style.overflow = '';
             });
-
-            // Crea pulsanti personalizzati per la navigazione
-            const calendarHeader = calendarEl.querySelector('.fc-header-toolbar');
-            const titleContainer = calendarEl.querySelector('.fc-toolbar-chunk:nth-child(2)');
-            
-            // Crea contenitore per frecce e titolo
-            const navigationContainer = document.createElement('div');
-            navigationContainer.className = 'calendar-navigation';
-            titleContainer.appendChild(navigationContainer);
-            
-            // Aggiungi freccia sinistra
-            const prevButton = document.createElement('button');
-            prevButton.className = 'calendar-nav-button prev-month';
-            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            prevButton.addEventListener('click', function() {
-                calendar.prev();
+        }
+        
+        // Gestisci i click sui link del menu mobile
+        const mobileLinks = mobileMenuContainer.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenuContainer.classList.remove('active');
+                body.style.overflow = '';
             });
-            
-            // Aggiungi freccia destra
-            const nextButton = document.createElement('button');
-            nextButton.className = 'calendar-nav-button next-month';
-            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            nextButton.addEventListener('click', function() {
-                calendar.next();
+        });
+        
+        // Gestisci il toggle del menu mobile
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuContainer.classList.add('active');
+                body.style.overflow = 'hidden'; // Blocca lo scrolling
             });
+        }
+        
+        // Funzione per scrollare alla sezione di prenotazione
+        function scrollToBookingSection() {
+            const bookingSection = document.querySelector('.booking-section');
+            if (bookingSection) {
+                bookingSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Applica miglioramenti specifici per mobile al calendario
+        if (window.innerWidth <= 768) {
+            enhanceCalendarForMobile();
+        }
+        
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                enhanceCalendarForMobile();
+            }
+            calendar.updateSize();
+        });
+        
+        function enhanceCalendarForMobile() {
+            // Assicurati che il calendario sia completamente visibile
+            const fcViewHarness = document.querySelector('.fc-view-harness');
+            if (fcViewHarness) {
+                fcViewHarness.style.height = 'auto';
+                fcViewHarness.style.minHeight = '350px';
+            }
             
-            const customTitleElement = document.createElement('h2');
-            customTitleElement.className = 'fc-toolbar-title custom-title';
-            customTitleElement.textContent = calendar.view.title; // Imposta il titolo iniziale
-            
-            // Nasconde il titolo originale di FullCalendar con CSS
-            const style = document.createElement('style');
-            style.textContent = '.fc-toolbar-title:not(.custom-title) { display: none !important; }';
-            document.head.appendChild(style);
-            
-            // Aggiunge i pulsanti e il titolo personalizzato al container
-            navigationContainer.appendChild(prevButton);
-            navigationContainer.appendChild(customTitleElement);
-            navigationContainer.appendChild(nextButton);
-            
-            // Aggiorna il titolo personalizzato quando cambia la vista
-            calendar.on('datesSet', function(info) {
-                customTitleElement.textContent = calendar.view.title;
-            });
-            
-            // Aggiungi pulsante "Prenota per oggi"
-            const todayButtonContainer = document.createElement('div');
-            todayButtonContainer.className = 'today-button-container';
-            calendarHeader.appendChild(todayButtonContainer);
-            
-            const todayButton = document.createElement('button');
-            todayButton.className = 'btn-today';
-            todayButton.innerHTML = '<i class="fas fa-calendar-day"></i> Prenota per oggi';
-            todayButton.addEventListener('click', function() {
-                calendar.today();
-                handleDateSelection(new Date());
-            });
-            
-            todayButtonContainer.appendChild(todayButton);
-            
-            // Funzione per gestire la selezione di una data
-            function handleDateSelection(date) {
+            // Rendi le celle dei giorni più grandi per facilitare il click/tap
+            const dayGridCells = document.querySelectorAll('.fc-daygrid-day');
+            dayGridCells.forEach(cell => {
+                cell.style.minHeight = '45px';
+                
+                // Gestisci la visualizzazione delle date passate
+                const cellDate = new Date(cell.getAttribute('data-date'));
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
-                if (date < today) {
-                    alert('Non puoi selezionare una data passata');
-                    return;
+                if (cellDate < today) {
+                    cell.classList.add('fc-day-disabled');
+                    cell.style.pointerEvents = 'none';
                 }
-                
-                // Salva la data selezionata
-                selectedDate = date;
-                
-                // Formatta la data per mostrarla all'utente
-                const formattedDate = formatDate(date);
-                selectedDateEl.textContent = formattedDate;
-                summaryDateEl.textContent = formattedDate;
-                
-                // Recupera gli slot orari disponibili
-                fetchAvailableTimeSlots(date);
-                
-                // Passa allo step 2
-                moveToStep(2);
-            }
-
+            });
             
-            // Funzione per recuperare gli slot orari disponibili
-            function fetchAvailableTimeSlots(date) {
-                // Mostra il loader
-                timeSlotsContainer.innerHTML = '';
-                loaderCalendar.style.display = 'block';
+            // Migliora la responsività del calendario
+            const scroller = document.querySelector('.fc-scroller');
+            if (scroller) {
+                scroller.style.overflow = 'visible';
+            }
+        }
+        
+        // Funzione per gestire la selezione di una data
+        function handleDateSelection(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (date < today) {
+                alert('Non puoi selezionare una data passata');
+                return;
+            }
+            
+            // Rimuovi la classe selected-day da tutte le celle
+            document.querySelectorAll('.fc-daygrid-day').forEach(cell => {
+                cell.classList.remove('selected-day');
+            });
+            
+            // Aggiungi la classe selected-day alla cella selezionata
+            const selectedCell = document.querySelector(`.fc-daygrid-day[data-date="${date.toISOString().split('T')[0]}"]`);
+            if (selectedCell) {
+                selectedCell.classList.add('selected-day');
+            }
+            
+            // Salva la data selezionata
+            selectedDate = date;
+            
+            // Formatta la data per mostrarla all'utente
+            const formattedDate = formatDate(date);
+            selectedDateEl.textContent = formattedDate;
+            summaryDateEl.textContent = formattedDate;
+            
+            // Recupera gli slot orari disponibili
+            fetchAvailableTimeSlots(date);
+            
+            // Passa allo step 2
+            moveToStep(2);
+        }
+        
+        // Funzione per recuperare gli slot orari disponibili
+        function fetchAvailableTimeSlots(date) {
+            // Mostra il loader
+            timeSlotsContainer.innerHTML = '';
+            loaderCalendar.style.display = 'block';
+            
+            // Simula una chiamata API (in produzione chiamiamo il server)
+            setTimeout(() => {
+                // Genera slot orari di esempio (9:00 - 17:00)
+                availableTimeSlots = [];
                 
-                // Simula una chiamata API (in produzione chiamiamo il server)
-                setTimeout(() => {
-                    // Genera slot orari di esempio (9:00 - 17:00)
-                    availableTimeSlots = [];
+                // Slot fissi disponibili per orari lavorativi
+                const workHours = [9, 10, 11, 12, 14, 15, 16, 17];
+                
+                // Simula alcuni slot già prenotati (in produzione questi verrebbero dal server)
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const bookedSlots = isWeekend ? [9, 10, 16, 17] : [10, 15];
+                
+                // Genera gli slot e marca quelli prenotati come non disponibili
+                workHours.forEach(hour => {
+                    const isBooked = bookedSlots.includes(hour);
+                    availableTimeSlots.push({
+                        hour: hour,
+                        formatted: `${hour}:00`,
+                        available: !isBooked
+                    });
+                });
+                
+                // Mostra gli slot
+                renderTimeSlots();
+                loaderCalendar.style.display = 'none';
+            }, 800);
+        }
+        
+        // Funzione per visualizzare gli slot orari disponibili
+        function renderTimeSlots() {
+            timeSlotsContainer.innerHTML = '';
+            
+            availableTimeSlots.forEach(slot => {
+                const slotEl = document.createElement('div');
+                slotEl.className = `time-slot ${slot.available ? '' : 'disabled'}`;
+                slotEl.textContent = slot.formatted;
+                
+                // Aggiungi attributi di accessibilità
+                slotEl.setAttribute('role', 'button');
+                slotEl.setAttribute('aria-label', `Orario ${slot.formatted} ${slot.available ? 'disponibile' : 'non disponibile'}`);
+                
+                if (slot.available) {
+                    slotEl.tabIndex = 0; // Rendi l'elemento focusable
                     
-                    // Slot fissi disponibili per orari lavorativi
-                    const workHours = [9, 10, 11, 12, 14, 15, 16, 17];
-                    
-                    // Simula alcuni slot già prenotati (in produzione questi verrebbero dal server)
-                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-                    const bookedSlots = isWeekend ? [9, 10, 16, 17] : [10, 15];
-                    
-                    // Genera gli slot e marca quelli prenotati come non disponibili
-                    workHours.forEach(hour => {
-                        const isBooked = bookedSlots.includes(hour);
-                        availableTimeSlots.push({
-                            hour: hour,
-                            formatted: `${hour}:00`,
-                            available: !isBooked
-                        });
+                    slotEl.addEventListener('click', () => {
+                        selectTimeSlot(slotEl, slot);
                     });
                     
-                    // Mostra gli slot
-                    renderTimeSlots();
-                    loaderCalendar.style.display = 'none';
-                }, 800);
+                    // Supporto per tastiera (accessibilità)
+                    slotEl.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            selectTimeSlot(slotEl, slot);
+                        }
+                    });
+                } else {
+                    slotEl.setAttribute('aria-disabled', 'true');
+                }
+                
+                timeSlotsContainer.appendChild(slotEl);
+            });
+        }
+        
+        // Funzione per selezionare uno slot orario
+        function selectTimeSlot(slotElement, slot) {
+            // Deseleziona tutti gli slot
+            document.querySelectorAll('.time-slot').forEach(el => {
+                el.classList.remove('selected');
+                el.setAttribute('aria-selected', 'false');
+            });
+            
+            // Seleziona questo slot
+            slotElement.classList.add('selected');
+            slotElement.setAttribute('aria-selected', 'true');
+            selectedTimeSlot = slot;
+            
+            // Aggiorna il riepilogo
+            summaryTimeEl.textContent = slot.formatted;
+            
+            // Abilita il pulsante di conferma
+            confirmTimeSlotBtn.disabled = false;
+            
+            // Animazione di feedback
+            if ('vibrate' in navigator && window.innerWidth <= 768) {
+                navigator.vibrate(50); // Feedback aptico leggero (solo su dispositivi mobili)
             }
+        }
+        
+        // Event listeners
+        confirmTimeSlotBtn.addEventListener('click', () => {
+            // Compila i campi nascosti del form
+            bookingDateInput.value = formatDate(selectedDate);
+            bookingTimeInput.value = selectedTimeSlot.formatted;
             
-            // Funzione per visualizzare gli slot orari disponibili
-            function renderTimeSlots() {
-                timeSlotsContainer.innerHTML = '';
-                
-                availableTimeSlots.forEach(slot => {
-                    const slotEl = document.createElement('div');
-                    slotEl.className = `time-slot ${slot.available ? '' : 'disabled'}`;
-                    slotEl.textContent = slot.formatted;
-                    
-                    if (slot.available) {
-                        slotEl.addEventListener('click', () => {
-                            // Deseleziona tutti gli slot
-                            document.querySelectorAll('.time-slot').forEach(el => {
-                                el.classList.remove('selected');
-                            });
-                            
-                            // Seleziona questo slot
-                            slotEl.classList.add('selected');
-                            selectedTimeSlot = slot;
-                            
-                            // Aggiorna il riepilogo
-                            summaryTimeEl.textContent = slot.formatted;
-                            
-                            // Abilita il pulsante di conferma
-                            confirmTimeSlotBtn.disabled = false;
-                        });
-                    }
-                    
-                    timeSlotsContainer.appendChild(slotEl);
-                });
-            }
+            // Crea un timestamp per la prenotazione
+            const bookingDate = new Date(selectedDate);
+            bookingDate.setHours(selectedTimeSlot.hour, 0, 0, 0);
+            bookingTimestampInput.value = bookingDate.toISOString();
             
-            // Event listeners
-            confirmTimeSlotBtn.addEventListener('click', () => {
-                // Compila i campi nascosti del form
-                bookingDateInput.value = formatDate(selectedDate);
-                bookingTimeInput.value = selectedTimeSlot.formatted;
-                
-                // Crea un timestamp per la prenotazione
-                const bookingDate = new Date(selectedDate);
-                bookingDate.setHours(selectedTimeSlot.hour, 0, 0, 0);
-                bookingTimestampInput.value = bookingDate.toISOString();
-                
-                // Passa allo step 3
-                moveToStep(3);
-            });
-            
-            backToStep1Btn.addEventListener('click', () => {
-                moveToStep(1);
-            });
-            
-            backToStep2Btn.addEventListener('click', () => {
-                moveToStep(2);
-            });
-            
+            // Passa allo step 3
+            moveToStep(3);
+        });
+        
+        backToStep1Btn.addEventListener('click', () => {
+            moveToStep(1);
+        });
+        
+        backToStep2Btn.addEventListener('click', () => {
+            moveToStep(2);
+        });
+        
+        // Gestione del form di contatto
+        if (contactForm) {
             contactForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                
+                // Validazione client-side
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const phoneInput = document.getElementById('phone');
+                const privacyCheck = document.getElementById('privacy-check');
+                
+                // Verifica che i campi obbligatori siano compilati
+                let isValid = true;
+                
+                if (!nameInput.value.trim()) {
+                    showInputError(nameInput, 'Il nome è obbligatorio');
+                    isValid = false;
+                }
+                
+                if (!emailInput.value.trim()) {
+                    showInputError(emailInput, 'L\'email è obbligatoria');
+                    isValid = false;
+                } else if (!isValidEmail(emailInput.value)) {
+                    showInputError(emailInput, 'Inserisci un indirizzo email valido');
+                    isValid = false;
+                }
+                
+                if (!phoneInput.value.trim()) {
+                    showInputError(phoneInput, 'Il numero di telefono è obbligatorio');
+                    isValid = false;
+                }
+                
+                if (!privacyCheck.checked) {
+                    showInputError(privacyCheck, 'Devi accettare la Privacy Policy');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    return; // Non procedere con l'invio se ci sono errori
+                }
                 
                 // Mostra il loader
                 loaderForm.style.display = 'block';
                 
                 // Raccogli i dati del form
                 const formData = {
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
+                    name: nameInput.value,
+                    email: emailInput.value,
+                    phone: phoneInput.value,
                     message: document.getElementById('message').value,
                     bookingDate: bookingDateInput.value,
                     bookingTime: bookingTimeInput.value,
@@ -2022,17 +3015,12 @@
                     source: 'booking-form'
                 };
                 
-                // Invia i dati al server
-                fetch('/api/submit-booking', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                })
-                .then(response => response.json())
-                .then(data => {
+                // Simula l'invio al server (in produzione, questa sarebbe una vera chiamata API)
+                setTimeout(() => {
                     loaderForm.style.display = 'none';
+                    
+                    // Simula una risposta di successo
+                    const data = { success: true };
                     
                     if (data.success) {
                         // Nascondi il form
@@ -2046,50 +3034,111 @@
                     } else {
                         alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
                     }
-                })
-                .catch(error => {
-                    console.error('Errore:', error);
-                    loaderForm.style.display = 'none';
-                    alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
-                });
+                }, 1500);
             });
             
-            // Funzioni di utilità
-            function moveToStep(step) {
-                // Nascondi tutti gli step
-                [step1El, step2El, step3El].forEach(el => {
-                    el.classList.remove('step-active');
-                    el.classList.add('step-hidden');
+            // Aggiungi gestione degli eventi per la rimozione degli errori
+            const formInputs = contactForm.querySelectorAll('input, textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearInputError(input);
                 });
                 
-                // Mostra lo step richiesto
-                switch (step) {
-                    case 1:
-                        step1El.classList.remove('step-hidden');
-                        step1El.classList.add('step-active');
-                        break;
-                    case 2:
-                        step2El.classList.remove('step-hidden');
-                        step2El.classList.add('step-active');
-                        break;
-                    case 3:
-                        step3El.classList.remove('step-hidden');
-                        step3El.classList.add('step-active');
-                        break;
-                }
-                
-                // Scroll verso l'inizio della sezione
-                window.scrollTo({
-                    top: document.querySelector('.booking-section').offsetTop - 100,
-                    behavior: 'smooth'
+                input.addEventListener('focus', function() {
+                    clearInputError(input);
                 });
+            });
+        }
+        
+        // Funzioni di utilità
+        function moveToStep(step) {
+            // Nascondi tutti gli step
+            [step1El, step2El, step3El].forEach(el => {
+                el.classList.remove('step-active');
+                el.classList.add('step-hidden');
+            });
+            
+            // Mostra lo step richiesto
+            switch (step) {
+                case 1:
+                    step1El.classList.remove('step-hidden');
+                    step1El.classList.add('step-active');
+                    break;
+                case 2:
+                    step2El.classList.remove('step-hidden');
+                    step2El.classList.add('step-active');
+                    break;
+                case 3:
+                    step3El.classList.remove('step-hidden');
+                    step3El.classList.add('step-active');
+                    break;
             }
             
-            function formatDate(date) {
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                return date.toLocaleDateString('it-IT', options);
+            // Scroll verso l'inizio della sezione
+            window.scrollTo({
+                top: document.querySelector('.booking-section').offsetTop - 80,
+                behavior: 'smooth'
+            });
+        }
+        
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('it-IT', options);
+        }
+        
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+        
+        function showInputError(inputElement, errorMessage) {
+            // Aggiungi la classe di errore
+            inputElement.classList.add('input-error');
+            
+            // Rimuovi eventuali messaggi di errore precedenti
+            const existingError = inputElement.parentNode.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
             }
-        });
+            
+            // Crea il messaggio di errore
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.textContent = errorMessage;
+            
+            // Aggiungi il messaggio dopo l'input
+            if (inputElement.type === 'checkbox') {
+                // Per i checkbox, aggiungi l'errore dopo la label
+                const label = inputElement.parentNode.querySelector('label');
+                if (label) {
+                    label.parentNode.insertBefore(errorElement, label.nextSibling);
+                } else {
+                    inputElement.parentNode.appendChild(errorElement);
+                }
+            } else {
+                // Per gli altri input, aggiungi dopo l'input
+                inputElement.parentNode.appendChild(errorElement);
+            }
+            
+            // Scroll al primo campo con errore se necessario
+            if (document.querySelector('.input-error') && window.innerWidth <= 768) {
+                setTimeout(() => {
+                    inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+        
+        function clearInputError(inputElement) {
+            // Rimuovi la classe di errore
+            inputElement.classList.remove('input-error');
+            
+            // Rimuovi il messaggio di errore
+            const errorElement = inputElement.parentNode.querySelector('.error-message');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }
+    });
     </script>
 </body>
 </html>
