@@ -1996,7 +1996,7 @@
             position: absolute;
             top: 0;
             right: 0;
-            width: 8px;
+            width: 18px;
             height: 100%;
             background-color: var(--primary-color);
             border-radius: 0 20px 20px 0;
@@ -2261,6 +2261,11 @@
         }
         
         @media (max-width: 768px) {
+
+            .highlight-block::before {
+                display: none;
+            }
+
             .section-title-unique {
                 font-size: 2.4rem;
             }
@@ -2279,6 +2284,7 @@
             
             .highlight-heading.large {
                 font-size: 2rem;
+                padding-top: 20px;
             }
             
             .unique-block p, 
@@ -2901,7 +2907,7 @@
         .badge-inner {
             width: 100%;
             height: 100%;
-            background-color: #8F3F00;
+            background-color: var(--primary-color);
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -3735,6 +3741,7 @@
             
             .unique-block p {
                 font-size: 1rem;
+                padding: 10px;
             }
             
             .unique-image-text {
