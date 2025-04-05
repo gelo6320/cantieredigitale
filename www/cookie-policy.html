@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <script src="/js/cookie-consent-manager.js" defer></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cookie Policy di Costruzione Digitale - Scopri come utilizziamo i cookie sul nostro sito web.">
+    <title>Cookie Policy | Costruzione Digitale</title>
+    
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Costruzione Digitale">
+    
+    <!-- Open Graph per condivisione sui social media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://costruzionedigitale.com/cookie-policy">
+    <meta property="og:title" content="Cookie Policy | Costruzione Digitale">
+    <meta property="og:description" content="Scopri come Costruzione Digitale utilizza i cookie per migliorare la tua esperienza di navigazione.">
+    <meta property="og:image" content="https://costruzionedigitale.com/og-image.jpg">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://costruzionedigitale.com/cookie-policy">
+    <meta name="twitter:title" content="Cookie Policy | Costruzione Digitale">
+    <meta name="twitter:description" content="Scopri come Costruzione Digitale utilizza i cookie per migliorare la tua esperienza di navigazione.">
+    <meta name="twitter:image" content="https://costruzionedigitale.com/twitter-image.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link rel="canonical" href="https://costruzionedigitale.com/cookie-policy">
+
+    <style>
+        :root {
+            --primary-color: #FF6B00; /* Arancione pronunciato */
+            --secondary-color: #212121; /* Nero profondo */
+            --text-color: #FFFFFF; /* Testo bianco */
+            --accent-color: #FF8C38; /* Arancione più chiaro */
+            --dark-bg: #151515; /* Sfondo nero più scuro */
+            --light-accent: #333333; /* Grigio scuro */
+            --success-color: #27ae60; /* Verde per elementi positivi */
+            --warning-color: #e67e22; /* Arancione per avvertimenti */
+            --danger-color: #e74c3c; /* Rosso per errori */
+            --section-padding: 80px 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+            position: relative;
+            background-color: var(--secondary-color);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Pattern di sfondo stile Costruzione */
+        .construction-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,107,0,0.05) 25%, transparent 25%, transparent 50%, 
+                rgba(255,107,0,0.05) 50%, rgba(255,107,0,0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        header {
+            background-color: var(--dark-bg);
+            padding: 15px 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled {
+            padding: 10px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .logo-icon {
+            padding: 0;
+            margin-right: 20px;
+            width: 116px;
+            height: 80px;
+        }
+        
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-color);
+        }
+        
+        .logo-text span {
+            color: var(--primary-color);
+            font-weight: 900;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+            position: relative;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            padding: 10px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Pagina policy */
+        .policy-page {
+            padding: 80px 0;
+            text-align: left;
+        }
+        
+        .policy-header {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+        
+        .policy-header h1 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .policy-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .policy-header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .policy-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--light-accent);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .policy-section {
+            margin-bottom: 40px;
+        }
+        
+        .policy-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .policy-section h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 107, 0, 0.3);
+        }
+        
+        .policy-section h3 {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            margin: 25px 0 15px;
+        }
+        
+        .policy-section p {
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .policy-section ul, .policy-section ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .policy-section li {
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .policy-section a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .policy-section a:hover {
+            text-decoration: underline;
+        }
+        
+        .policy-date {
+            margin-top: 40px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: right;
+        }
+        
+        .cookie-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .cookie-table th, .cookie-table td {
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cookie-table th {
+            background-color: rgba(255, 107, 0, 0.1);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .cookie-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .cookie-table td {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-bg);
+            color: white;
+            padding: 80px 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B00' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .footer-logo-icon {
+            width: 100px;
+            height: 70px;
+            margin-right: 15px;
+        }
+        
+        .footer-logo-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .footer-logo-text span {
+            color: var(--primary-color);
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 50px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 30px;
+            padding-right: 30px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 25px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+        
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 15px;
+        }
+        
+        .footer-section ul li a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-section ul li a:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .footer-section ul li a i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 991px) {
+            .policy-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .policy-content {
+                padding: 30px;
+            }
+            
+            .policy-section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .policy-section h3 {
+                font-size: 1.3rem;
+            }
+            
+            .cookie-table th, .cookie-table td {
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .policy-header h1 {
+                font-size: 2rem;
+            }
+            
+            .policy-header p {
+                font-size: 1rem;
+            }
+            
+            .policy-content {
+                padding: 20px;
+            }
+            
+            .policy-section h2 {
+                font-size: 1.4rem;
+            }
+            
+            .policy-section h3 {
+                font-size: 1.2rem;
+            }
+            
+            .footer-section {
+                flex: 100%;
+                margin-bottom: 20px;
+                padding-right: 0;
+            }
+            
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            
+            .logo-icon {
+                width: 87px;
+                height: 60px;
+                margin-right: 10px;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.8rem;
+                padding: 5px;
+                color: var(--primary-color);
+            }
+            
+            .cookie-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .policy-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .policy-content {
+                padding: 15px;
+            }
+            
+            .policy-section h2 {
+                font-size: 1.3rem;
+            }
+            
+            .policy-section h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Pattern di sfondo stile Costruzione -->
+    <div class="construction-pattern"></div>
+    
+    <header id="header">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <img src="logooo.webp" class="logo-icon" alt="Logo Costruzione Digitale">
+                <div class="logo-text">Costruzione <span>Digitale</span></div>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="/#why-it-works">Perché funziona</a></li>
+                    <li><a href="/#process">Come funziona</a></li>
+                    <li><a href="/#services">Servizi</a></li>
+                    <li><a href="/contattaci">Contattaci</a></li>
+                </ul>
+                <div class="mobile-menu-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                        <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
+                    </svg>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="policy-page">
+        <div class="container">
+            <div class="policy-header">
+                <h1>Cookie Policy</h1>
+                <p>Informazioni sui cookie utilizzati su questo sito e su come gestirli.</p>
+            </div>
+            
+            <div class="policy-content">
+                <div class="policy-section">
+                    <h2>1. Cosa sono i cookie?</h2>
+                    <p>I cookie sono piccoli file di testo che i siti visitati inviano al terminale dell'utente (computer, tablet, smartphone, notebook), dove vengono memorizzati, per poi essere ritrasmessi agli stessi siti alla visita successiva. Sono usati per eseguire autenticazioni informatiche, monitoraggio di sessioni e memorizzazione di informazioni sui siti (senza l'uso dei cookie "tecnici" alcune operazioni risulterebbero molto complesse o impossibili da eseguire). Attraverso i cookie è possibile registrare informazioni relative alle preferenze degli utenti, come le pagine navigate o il download di file dal nostro sito o altre azioni similari effettuate navigando il nostro sito.</p>
+                </div>
+                
+                <div class="policy-section">
+                    <h2>2. Tipologie di cookie utilizzati</h2>
+                    
+                    <h3>2.1 Cookie tecnici</h3>
+                    <p>Sono i cookie necessari per il corretto funzionamento del sito. Senza questi cookie, il sito web non potrebbe funzionare correttamente. Questi cookie, in base alla normativa vigente, possono essere utilizzati anche in assenza del consenso dell'interessato.</p>
+                    <p>I cookie tecnici utilizzati da questo sito sono:</p>
+                    <table class="cookie-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Fornitore</th>
+                                <th>Scopo</th>
+                                <th>Scadenza</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>userId</td>
+                                <td>costruzionedigitale.com</td>
+                                <td>Consente di identificare in modo univoco l'utente durante la sua navigazione sul sito.</td>
+                                <td>1 anno</td>
+                            </tr>
+                            <tr>
+                                <td>cookieConsent</td>
+                                <td>costruzionedigitale.com</td>
+                                <td>Memorizza le preferenze dell'utente relative ai cookie.</td>
+                                <td>1 anno</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>2.2 Cookie analitici</h3>
+                    <p>Sono utilizzati per raccogliere informazioni sull'utilizzo del sito. Il Titolare usa tali informazioni per analisi statistiche, per migliorare il sito e semplificarne l'utilizzo, oltre che per monitorarne il corretto funzionamento. Questo tipo di cookie raccoglie informazioni in forma anonima sull'attività degli utenti nel sito e sul modo in cui sono arrivati al sito e alle pagine visitate.</p>
+                    <p>I cookie analitici utilizzati da questo sito sono:</p>
+                    <table class="cookie-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Fornitore</th>
+                                <th>Scopo</th>
+                                <th>Scadenza</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>_ga</td>
+                                <td>Google</td>
+                                <td>Registra un ID univoco utilizzato per generare dati statistici su come il visitatore utilizza il sito internet.</td>
+                                <td>2 anni</td>
+                            </tr>
+                            <tr>
+                                <td>_ga_*</td>
+                                <td>Google</td>
+                                <td>Utilizzato da Google Analytics per raccogliere dati sul numero di volte che un utente ha visitato il sito internet, oltre che le date per la prima e la più recente visita.</td>
+                                <td>2 anni</td>
+                            </tr>
+                            <tr>
+                                <td>_gid</td>
+                                <td>Google</td>
+                                <td>Registra un ID univoco utilizzato per generare dati statistici su come il visitatore utilizza il sito internet.</td>
+                                <td>24 ore</td>
+                            </tr>
+                            <tr>
+                                <td>_gat</td>
+                                <td>Google</td>
+                                <td>Utilizzato da Google Analytics per limitare la frequenza delle richieste.</td>
+                                <td>1 minuto</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>2.3 Cookie di marketing e profilazione</h3>
+                    <p>Sono utilizzati per tracciare la navigazione dell'utente in rete e creare profili sui suoi gusti, abitudini, scelte, ecc. Con questi cookie possono essere trasmessi al terminale dell'utente messaggi pubblicitari in linea con le preferenze già manifestate dallo stesso utente nella navigazione online.</p>
+                    <p>I cookie di marketing utilizzati da questo sito sono:</p>
+                    <table class="cookie-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Fornitore</th>
+                                <th>Scopo</th>
+                                <th>Scadenza</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>_fbp</td>
+                                <td>Facebook</td>
+                                <td>Utilizzato da Facebook per fornire una serie di prodotti pubblicitari come offerte in tempo reale da inserzionisti terzi.</td>
+                                <td>3 mesi</td>
+                            </tr>
+                            <tr>
+                                <td>fr</td>
+                                <td>Facebook</td>
+                                <td>Utilizzato da Facebook per fornire annunci pubblicitari e misurare l'efficacia delle campagne.</td>
+                                <td>3 mesi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="policy-section">
+                    <h2>3. Gestione dei cookie</h2>
+                    <p>Puoi decidere se accettare o meno i cookie utilizzando il banner dei cookie che appare quando visiti il nostro sito per la prima volta o utilizzando le impostazioni del tuo browser.</p>
+                    <p>La maggior parte dei browser consente di:</p>
+                    <ul>
+                        <li>Visualizzare i cookie presenti e cancellarli singolarmente</li>
+                        <li>Bloccare i cookie di terze parti</li>
+                        <li>Bloccare i cookie di particolari siti</li>
+                        <li>Bloccare l'installazione di tutti i cookie</li>
+                        <li>Cancellare tutti i cookie alla chiusura del browser</li>
+                    </ul>
+                    <p>Se decidi di bloccare o cancellare i cookie, potresti non essere in grado di utilizzare tutte le funzionalità del nostro sito.</p>
+                    <p>Di seguito trovi i link alle istruzioni di gestione dei cookie per i browser più comuni:</p>
+                    <ul>
+                        <li><a href="https://support.google.com/chrome/answer/95647?hl=it" target="_blank">Google Chrome</a></li>
+                        <li><a href="https://support.mozilla.org/it/kb/Gestione%20dei%20cookie" target="_blank">Mozilla Firefox</a></li>
+                        <li><a href="https://support.apple.com/it-it/guide/safari/sfri11471/mac" target="_blank">Safari</a></li>
+                        <li><a href="https://support.microsoft.com/it-it/windows/eliminare-e-gestire-i-cookie-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank">Microsoft Edge</a></li>
+                        <li><a href="https://help.opera.com/en/latest/web-preferences/#cookies" target="_blank">Opera</a></li>
+                    </ul>
+                </div>
+                
+                <div class="policy-section">
+                    <h2>4. Cookie di terze parti</h2>
+                    <p>Il nostro sito web utilizza anche servizi di terze parti che potrebbero impostare cookie quando visiti le pagine del nostro sito. Non abbiamo accesso diretto a questi cookie, né possiamo controllarli. Puoi trovare maggiori informazioni su questi cookie e su come gestirli visitando le policy privacy delle rispettive terze parti.</p>
+                    <h3>4.1 Google Analytics</h3>
+                    <p>Questo sito utilizza Google Analytics, un servizio di analisi web fornito da Google, Inc. ("Google"). Google Analytics utilizza dei "cookie" per raccogliere e analizzare informazioni relative alle modalità di interazione degli utenti con il sito web. Le informazioni generate dal cookie sull'utilizzo del sito web vengono trasmesse e depositate presso i server di Google negli Stati Uniti. Google utilizzerà queste informazioni allo scopo di tracciare e esaminare il vostro utilizzo del sito web, compilare report sulle attività del sito web e fornire altri servizi relativi alle attività del sito web e all'utilizzo di Internet.</p>
+                    <p>Per maggiori informazioni sulla privacy policy di Google Analytics, visita: <a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a></p>
+                    <p>Puoi disattivare Google Analytics installando sul tuo browser il componente aggiuntivo di opt-out fornito da Google: <a href="https://tools.google.com/dlpage/gaoptout" target="_blank">https://tools.google.com/dlpage/gaoptout</a></p>
+                    
+                    <h3>4.2 Facebook Pixel</h3>
+                    <p>Il nostro sito utilizza il pixel di Facebook, uno strumento di analisi che ci consente di misurare l'efficacia delle nostre campagne pubblicitarie monitorando le azioni degli utenti sul nostro sito. Questi dati ci aiutano a mostrarti annunci più pertinenti su Facebook.</p>
+                    <p>Per maggiori informazioni sui cookie di Facebook e su come gestirli, visita: <a href="https://www.facebook.com/policies/cookies/" target="_blank">https://www.facebook.com/policies/cookies/</a></p>
+                </div>
+                
+                <div class="policy-section">
+                    <h2>5. Modifiche alla Cookie Policy</h2>
+                    <p>Il Titolare si riserva il diritto di apportare modifiche alla presente Cookie Policy in qualunque momento, dandone pubblicità agli utenti su questa pagina. Si prega dunque di consultare spesso questa pagina, prendendo come riferimento la data di ultima modifica indicata in fondo.</p>
+                    <p>Nel caso di mancata accettazione delle modifiche apportate alla presente Cookie Policy, l'utente può richiedere al Titolare di rimuovere i propri dati personali.</p>
+                </div>
+                
+                <div class="policy-date">
+                    <p>Ultimo aggiornamento: 3 Aprile 2025</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">
+                <img src="logooo.webp" class="footer-logo-icon" alt="Logo Costruzione Digitale">
+                <div class="footer-logo-text">Costruzione <span>Digitale</span></div>
+            </div>
+            
+            <div class="footer-content">
+                <div class="footer-section">
+                    <p>Trasformiamo la tua presenza online in risultati concreti e misurabili. Strategie personalizzate che generano crescita reale per la tua azienda.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M100.3 448H7.4V148.9h92.9zM53.8 108.1C24.1 108.1 0 83.5 0 53.8a53.8 53.8 0 0 1 107.6 0c0 29.7-24.1 54.3-53.8 54.3zM447.9 448h-92.7V302.4c0-34.7-.7-79.2-48.3-79.2-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>I Nostri Servizi</h3>
+                    <ul>
+                        <li><a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/>
+                            </svg> SEO e Visibilità Online</a>
+                        </li>
+                        <li><a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/>
+                            </svg> Campagne Pubblicitarie</a>
+                        </li>
+                        <li><a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/>
+                            </svg> Sviluppo Siti Web</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contattaci</h3>
+                    <ul>
+                        <li><a href="mailto:info@CostruzioneDigitale.it">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/>
+                            </svg> info@costruzionedigitale.com</a>
+                        </li>
+                        <li><a href="tel:+390212345678">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>
+                            </svg> +39 02 1234 5678</a>
+                        </li>
+                        <li><a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/>
+                            </svg> Roma, Italia</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <div class="footer-bottom">
+                    <div class="footer-links">
+                        <a href="/privacy-policy">Privacy Policy</a>
+                        <a href="/cookie-policy">Cookie Policy</a>
+                        <a href="#">Termini e Condizioni</a>
+                    </div>
+                </div>
+                <p style="margin-top: 20px">&copy; Costruzione Digitale 2023-2025. Tutti i diritti riservati.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to top button -->
+    <div class="back-to-top" id="back-to-top">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+            <path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"/>
+        </svg>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Header scroll effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Back to Top button
+            const backToTopButton = document.getElementById('back-to-top');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 500) {
+                    backToTopButton.classList.add('show');
+                } else {
+                    backToTopButton.classList.remove('show');
+                }
+            });
+            
+            if (backToTopButton) {
+                backToTopButton.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

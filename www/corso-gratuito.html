@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <script src="/js/cookie-consent-manager.js" defer></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Corso gratuito: Strategie collaudate per proprietari di imprese edili che vogliono aumentare il fatturato e acquisire clienti di alta qualità senza dipendere dai bonus edilizi">
+    <title>Corso Gratuito per Imprese Edili - Costruzione Digitale</title>
+    
+    <!-- Favicon -->
+
+    <!-- Favicon standard -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    
+    <!-- Icone per dispositivi Apple -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Icone per altri dispositivi -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    <!-- Manifest per PWA -->
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link rel="canonical" href="https://costruzionedigitale.com/corso-gratuito">
+    <link rel="preload" href="logooo.webp" as="image" />
+    
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --secondary-color: #212121;
+            --text-color: #FFFFFF;
+            --accent-color: #FF8C38;
+            --dark-bg: #151515;
+            --light-accent: #333333;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --section-padding: 80px 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Pattern di sfondo stile Costruzione */
+        .construction-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,107,0,0.05) 25%, transparent 25%, transparent 50%, 
+                rgba(255,107,0,0.05) 50%, rgba(255,107,0,0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            background-color: var(--dark-bg);
+            padding: 15px 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .logo-icon {
+            width: 116px;
+            height: 80px;
+            margin-right: 20px;
+        }
+        
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-color);
+        }
+        
+        .logo-text span {
+            color: var(--primary-color);
+            font-weight: 900;
+        }
+        
+        /* Splash effect on page load */
+        .splash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: splashFade 1.5s ease-out forwards;
+        }
+        
+        @keyframes splashFade {
+            0% {
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .splash-logo {
+            animation: pulsate 1s infinite alternate;
+            width: 150px;
+            height: 100px;
+        }
+        
+        @keyframes pulsate {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+        
+        /* Hero Section Improved */
+        .hero {
+            padding: 80px 0 60px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--dark-bg) 100%);
+            text-align: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-color: var(--primary-color);
+            clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, var(--secondary-color), transparent);
+            z-index: 0;
+        }
+        
+        .exclusive-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+            animation: bounce 2s infinite;
+            z-index: 5;
+            transform: rotate(5deg);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) rotate(5deg);
+            }
+            40% {
+                transform: translateY(-15px) rotate(5deg);
+            }
+            60% {
+                transform: translateY(-7px) rotate(5deg);
+            }
+        }
+        
+        .sub-headline {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            animation-delay: 0.5s;
+        }
+        
+        .main-headline {
+            color: var(--text-color);
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            position: relative;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            animation-delay: 0.7s;
+        }
+        
+        .main-headline span {
+            color: var(--primary-color);
+            display: block;
+            font-size: 3.6rem;
+            position: relative;
+        }
+        
+        .main-headline span::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 450px;
+            height: 8px;
+            background-color: rgba(255, 107, 0, 0.3);
+            border-radius: 4px;
+            z-index: -1;
+        }
+        
+        .sub-text {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: rgba(255, 255, 255, 0.9);
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            animation-delay: 0.9s;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 50px 0 30px;
+        }
+        
+        .stat-item {
+            background-color: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        .stat-item:nth-child(1) {
+            animation-delay: 1.1s;
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .stat-item:nth-child(2) {
+            animation-delay: 1.3s;
+            border-left: 3px solid var(--warning-color);
+        }
+        
+        .stat-item:nth-child(3) {
+            animation-delay: 1.5s;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-desc {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Main CTA button */
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 18px 35px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(255, 107, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 0, 0.4);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn span {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Instructor Section */
+        .instructor-section {
+            padding: 80px 0;
+            position: relative;
+            background-color: var(--dark-bg);
+        }
+        
+        .instructor-container {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .instructor-image {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .instructor-image img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .instructor-quote {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-style: italic;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            max-width: 250px;
+        }
+        
+        .instructor-info {
+            flex: 1.5;
+        }
+        
+        .instructor-intro {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .instructor-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        
+        .instructor-bio {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .credential-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .credential-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .credential-list li::before {
+            content: '✓';
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 10px;
+            background-color: rgba(255, 107, 0, 0.1);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Content Preview Section */
+        .content-preview {
+            padding: 80px 0;
+            position: relative;
+            background-color: var(--secondary-color);
+        }
+        
+        .content-preview-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .preview-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .preview-header h2 {
+            font-size: 2.4rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .preview-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .preview-header p {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .preview-card {
+            background-color: var(--light-accent);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .preview-icon {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .preview-card h3 {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+        
+        .preview-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* Key points section improved */
+        .key-points {
+            padding: var(--section-padding);
+            background-color: var(--dark-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .key-points::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background-color: var(--primary-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            z-index: 0;
+        }
+        
+        .key-points::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            background-color: var(--accent-color);
+            opacity: 0.05;
+            border-radius: 0 100% 0 0;
+            z-index: 0;
+        }
+        
+        .key-points h2 {
+            font-size: 2.4rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--text-color);
+            position: relative;
+        }
+        
+        .key-points h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .points-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .point-card {
+            background-color: var(--light-accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        
+        .point-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .point-number {
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .point-content {
+            flex: 1;
+        }
+        
+        .point-content h3 {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+        
+        .point-content p {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        /* Bonus section improved */
+        .bonus-section {
+            padding: var(--section-padding);
+            background-color: var(--secondary-color);
+            position: relative;
+        }
+        
+        .bonus-badge {
+            position: absolute;
+            top: 30px;
+            right: 10%;
+            width: 130px;
+            height: 130px;
+            animation: float 3s ease-in-out infinite;
+            z-index: 10;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        .bonus-badge-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 50%;
+            z-index: -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-align: center;
+            text-transform: uppercase;
+            line-height: 1.3;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        .bonus-badge-content::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px dashed white;
+            border-radius: 50%;
+            animation: spin 15s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .bonus-section h2 {
+            font-size: 2.4rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--text-color);
+            position: relative;
+        }
+        
+        .bonus-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .bonus-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .bonus-item {
+            flex: 1;
+            min-width: 300px;
+            background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, rgba(0,0,0,0) 100%);
+            padding: 40px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,107,0,0.3);
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .bonus-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .bonus-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .bonus-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .bonus-item p {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        /* Testimonials section */
+        .testimonials {
+            padding: var(--section-padding);
+            background-color: var(--dark-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonials h2 {
+            font-size: 2.4rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--text-color);
+            position: relative;
+        }
+        
+        .testimonials h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .testimonial-slider {
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .testimonial-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .testimonial-card {
+            min-width: 100%;
+            padding: 40px;
+            background-color: var(--light-accent);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 10px;
+            position: relative;
+        }
+        
+        .testimonial-quote {
+            font-size: 6rem;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255,107,0,0.1);
+            font-family: Georgia, serif;
+            line-height: 0;
+        }
+        
+        .testimonial-content {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .author-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .author-info {
+            flex: 1;
+        }
+        
+        .author-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        
+        .author-title {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+        }
+        
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+        
+        /* Final CTA section */
+        .final-cta {
+            padding: 80px 0;
+            text-align: center;
+            background-color: var(--secondary-color);
+            position: relative;
+        }
+        
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, rgba(0,0,0,0) 70%);
+            z-index: 0;
+        }
+        
+        .final-cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            padding: 0 20px;
+        }
+        
+        .final-cta h2 {
+            font-size: 2.6rem;
+            color: var(--text-color);
+            margin-bottom: 25px;
+        }
+        
+        .final-cta p {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .countdown-box {
+            background-color: var(--light-accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,107,0,0.3);
+        }
+        
+        .countdown-box h3 {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .countdown-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            background-color: rgba(255,107,0,0.1);
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .countdown-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+        }
+        
+        .cta-button-large {
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 107, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
+            }
+        }
+        
+        /* Form Popup Improved */
+        .form-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .form-popup-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .form-popup-container {
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .form-popup-content {
+            background-color: var(--light-accent);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        .close-popup {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+        
+        .close-popup:hover {
+            color: var(--primary-color);
+        }
+        
+        .form-progress-container {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .form-progress-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .form-progress-bar {
+            height: 10px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .form-progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 85%;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            border-radius: 5px;
+        }
+        
+        .form-popup-content h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: var(--text-color);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: rgba(0,0,0,0.2);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+        }
+        
+        .form-check {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        
+        .form-check input {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+        
+        .form-check label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .form-check a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .special-offer {
+            background-color: rgba(255, 107, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px dashed var(--primary-color);
+        }
+        
+        .special-offer h3 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .special-offer p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-bg);
+            padding: 40px 0 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .footer-logo {
+            margin-bottom: 30px;
+        }
+        
+        .footer-logo img {
+            width: 100px;
+            height: 70px;
+        }
+        
+        .legal-links {
+            margin: 20px 0;
+        }
+        
+        .legal-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        
+        .legal-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .disclaimer {
+            max-width: 800px;
+            margin: 30px auto 0;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 991px) {
+            .instructor-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 30px;
+            }
+            
+            .instructor-image {
+                margin: 0 auto;
+            }
+            
+            .instructor-quote {
+                right: 0;
+            }
+            
+            .credential-list li {
+                justify-content: center;
+            }
+            
+            .credential-list li::before {
+                margin-right: 5px;
+            }
+            
+            .countdown-timer {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-headline {
+                font-size: 1.8rem;
+            }
+            
+            .main-headline span {
+                font-size: 2.4rem;
+            }
+            
+            .sub-headline {
+                font-size: 1rem;
+            }
+            
+            .sub-text {
+                font-size: 1.1rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .stat-item {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+            
+            .point-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .form-popup-content {
+                padding: 30px 20px;
+            }
+            
+            .bonus-badge {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .bonus-badge-content {
+                font-size: 0.9rem;
+            }
+            
+            .testimonial-card {
+                padding: 30px 20px;
+            }
+            
+            .testimonial-content {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+
+            .main-headline span::after {
+                width: 40%;
+                margin-bottom: -10px;
+            }
+
+            .main-headline {
+                font-size: 1.5rem;
+            }
+            
+            .main-headline span {
+                font-size: 2rem;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem;
+            }
+            
+            .logo-icon {
+                width: 90px;
+                height: 60px;
+                margin-right: 10px;
+            }
+            
+            .countdown-number {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Miglioramenti generali per mobile */
+        @media (max-width: 768px) {
+            :root {
+                --section-padding: 60px 0;
+            }
+            
+            section {
+                padding: var(--section-padding);
+            }
+        
+            .container {
+                padding: 0 15px;
+            }
+        
+            /* Titoli più compatti */
+            section h2 {
+                font-size: 1.8rem !important;
+                margin-bottom: 30px !important;
+            }
+        }
+        
+        /* ===== Sezione Instructor (IL TUO ESPERTO DI FIDUCIA) ===== */
+        @media (max-width: 768px) {
+            .instructor-section {
+                padding: 50px 0;
+            }
+            
+            .instructor-container {
+                gap: 20px;
+            }
+            
+            .instructor-intro {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+            
+            .instructor-name {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .instructor-bio {
+                font-size: 1rem;
+                line-height: 1.5;
+                margin-bottom: 20px;
+                text-align: left;
+            }
+            
+            .credential-list {
+                text-align: left;
+            }
+            
+            .credential-list li {
+                justify-content: flex-start;
+                margin-bottom: 12px;
+                font-size: 0.95rem;
+            }
+            
+            .instructor-image {
+                max-width: 280px;
+            }
+            
+            .instructor-quote {
+                max-width: 200px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                right: -10px;
+                bottom: -15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .instructor-image {
+                max-width: 240px;
+            }
+            
+            .instructor-quote {
+                max-width: 180px;
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+        }
+        
+        /* ===== Sezione Content Preview (ECCO COSA IMPARERAI) ===== */
+        @media (max-width: 768px) {
+            .content-preview {
+                padding: 50px 0;
+            }
+            
+            .preview-header h2 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .preview-header p {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+            
+            .preview-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                max-width: 400px;
+                margin: 0 auto 40px;
+            }
+            
+            .preview-card {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+            }
+            
+            .preview-icon {
+                font-size: 1.8rem;
+                margin-bottom: 0;
+                margin-right: 15px;
+                flex-shrink: 0;
+            }
+            
+            .preview-card h3 {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .preview-card p {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .preview-grid {
+                max-width: 100%;
+            }
+            
+            .preview-card {
+                padding: 15px;
+            }
+            
+            .preview-icon {
+                font-size: 1.6rem;
+                margin-right: 12px;
+            }
+        }
+        
+        /* ===== Sezione Key Points (3 CONCETTI CHIAVE) ===== */
+        @media (max-width: 768px) {
+            .key-points {
+                padding: 50px 0;
+            }
+            
+            .points-container {
+                max-width: 450px;
+                margin: 0 auto;
+            }
+            
+            .point-card {
+                padding: 20px;
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
+            }
+            
+            .point-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
+            
+            .point-content h3 {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+            
+            .point-content p {
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .point-card {
+                padding: 15px;
+            }
+            
+            .point-number {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+                margin-right: 10px;
+            }
+            
+            .point-content h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* ===== Sezione Bonus (2 SUPER BONUS) ===== */
+        @media (max-width: 768px) {
+            .bonus-section {
+                padding: 50px 0 60px;
+            }
+            
+            .bonus-container {
+                flex-direction: column;
+                gap: 20px;
+                max-width: 450px;
+            }
+            
+            .bonus-item {
+                min-width: unset;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+            }
+            
+            .bonus-icon {
+                font-size: 2rem;
+                margin-bottom: 0;
+                margin-right: 15px;
+                flex-shrink: 0;
+            }
+            
+            .bonus-content {
+                flex: 1;
+            }
+            
+            .bonus-item h3 {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .bonus-item p {
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            
+            .bonus-badge {
+                top: 20px;
+                right: 5%;
+                width: 100px;
+                height: 100px;
+            }
+            
+            .bonus-badge-content {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .bonus-item {
+                display: block;
+                text-align: center;
+            }
+            
+            .bonus-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+                font-size: 2.2rem;
+            }
+            
+            .bonus-badge {
+                width: 80px;
+                height: 80px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .bonus-badge-content {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* ===== Sezione Final CTA (NON PERDERE QUESTA OPPORTUNITÀ) ===== */
+        @media (max-width: 768px) {
+            .final-cta {
+                padding: 50px 0;
+            }
+            
+            .final-cta h2 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .final-cta p {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+            
+            .countdown-box {
+                padding: 20px 15px;
+                margin-bottom: 25px;
+            }
+            
+            .countdown-box h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            
+            .countdown-timer {
+                flex-wrap: wrap;
+                justify-content: space-around;
+                gap: 10px;
+            }
+            
+            .countdown-number {
+                width: 65px;
+                height: 65px;
+                font-size: 1.8rem;
+            }
+            
+            .countdown-label {
+                font-size: 0.8rem;
+            }
+            
+            .cta-button-large {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .countdown-timer {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 0 20px;
+            }
+            
+            .countdown-number {
+                width: 55px;
+                height: 55px;
+                font-size: 1.6rem;
+            }
+            
+            .cta-button-large {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Varianti di layout per creare maggiore varietà */
+        @media (max-width: 768px) {
+            /* Variante per card in preview section - alternanza lato icone */
+            .preview-card:nth-child(odd) {
+                border-left: none;
+                border-right: 4px solid var(--primary-color);
+            }
+            
+            /* Variante per bonus items - stile differente */
+            .bonus-item:first-child {
+                background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(255,107,0,0.1) 100%);
+            }
+            
+            /* Variante point cards con bordi arrotondati diversi */
+            .point-card:nth-child(1) {
+                border-radius: 15px 15px 5px 15px;
+            }
+            
+            .point-card:nth-child(2) {
+                border-radius: 15px 5px 15px 15px;
+            }
+            
+            .point-card:nth-child(3) {
+                border-radius: 5px 15px 15px 15px;
+            }
+            
+            /* Effetto hover particolare per mobile */
+            .preview-card:active, .point-card:active, .bonus-item:active {
+                transform: scale(0.98);
+                transition: transform 0.2s ease;
+            }
+        }
+        
+        /* Animazioni mobile */
+        @media (max-width: 768px) {
+            @keyframes fadeInUpMobile {
+                from {
+                    opacity: 0;
+                    transform: translateY(15px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .point-card, .preview-card, .bonus-item, .countdown-box {
+                animation: fadeInUpMobile 0.5s ease forwards;
+                opacity: 0;
+            }
+            
+            .point-card:nth-child(1), .preview-card:nth-child(1), .bonus-item:nth-child(1) {
+                animation-delay: 0.1s;
+            }
+            
+            .point-card:nth-child(2), .preview-card:nth-child(2), .bonus-item:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+            
+            .point-card:nth-child(3), .preview-card:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+            
+            .preview-card:nth-child(4) {
+                animation-delay: 0.4s;
+            }
+            
+            .preview-card:nth-child(5) {
+                animation-delay: 0.5s;
+            }
+            
+            .preview-card:nth-child(6) {
+                animation-delay: 0.6s;
+            }
+        }
+
+        .cta-container {
+            text-align: center;
+            margin: 40px auto 10px;
+            width: 100%;
+        }
+
+        .cta-button-large {
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash effect on page load -->
+    <div class="splash-overlay">
+        <img src="logooo.webp" class="splash-logo" alt="Logo Costruzione Digitale">
+    </div>
+
+    <!-- Pattern di sfondo stile Costruzione -->
+    <div class="construction-pattern"></div>
+    
+    <header>
+        <div class="container header-container">
+            <a href="/" class="logo">
+                <img src="logooo.webp" class="logo-icon" alt="Logo Costruzione Digitale">
+                <div class="logo-text">Costruzione <span>Digitale</span></div>
+            </a>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="exclusive-badge">ACCESSO ESCLUSIVO!</div>
+        <div class="container">
+            <h3 class="sub-headline">Costruzione Digitale, agenzia di marketing specializzata nel settore edilizio in Italia regala GRATIS:</h2>
+            
+            <h1 class="main-headline">IL CORSO COMPLETO SU COME ACQUISIRE CLIENTI DI FASCIA ALTA <span>ANCHE SENZA BONUS EDILIZI</span></h1>
+            
+            <p class="sub-text">Per proprietari di imprese edili stanchi di lavorare a ritmi frenetici con margini risicati e alla continua ricerca di nuovi clienti disposti a pagare il giusto prezzo</p>
+            
+            <!-- <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">87%</div>
+                    <div class="stat-desc">dei nostri clienti hanno aumentato il fatturato entro 90 giorni</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3.2X</div>
+                    <div class="stat-desc">ROI medio sugli investimenti pubblicitari</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-desc">Accesso gratuito a strategie esclusive</div>
+                </div>
+            </div> -->
+            
+            <a href="#" class="btn main-cta-button"><span>VOGLIO ACCEDERE GRATIS AL CORSO!</span></a>
+        </div>
+    </section>
+    
+    <section class="instructor-section">
+        <div class="container">
+            <div class="instructor-container">
+                <div class="instructor-image">
+                    <img src="vascneo.webp" alt="Istruttore del corso">
+                    <div class="instructor-quote">"Ho aiutato oltre 200 imprese edili a crescere significativamente"</div>
+                </div>
+                <div class="instructor-info">
+                    <div class="instructor-intro">IL TUO ESPERTO DI FIDUCIA</div>
+                    <h2 class="instructor-name">Vasco Gerini</h2>
+                    <p class="instructor-bio">Con esperienza pregressa nel settore del marketing digitale, Vasco ti aiuterà a liberarti dalla dipendenza dei bonus edilizi e ad acquisire clienti di fascia alta disposti a pagare il giusto prezzo.</p>
+                    
+                    <ul class="credential-list">
+                        <li>Fondatore di Costruzione Digitale, agenzia specializzata nel settore edilizio</li>
+                        <li>Responsabile della consulenza ed il contatto con il cliente</li>
+                    </ul>
+                    
+                    <a href="#" class="btn"><span>IMPARA DAL MIGLIORE - ACCEDI ORA!</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="content-preview">
+        <div class="container content-preview-container">
+            <div class="preview-header">
+                <h2>Ecco Cosa Imparerai</h2>
+                <p>Il nostro corso gratuito è ricco di contenuti pratici e immediatamente applicabili alla tua impresa edile</p>
+            </div>
+            
+            <div class="preview-grid">
+                <div class="preview-card">
+                    <div class="preview-icon">🎯</div>
+                    <div class="preview-content">
+                        <h3>Identificazione dei clienti ideali</h3>
+                        <p>Come trovare e attrarre clienti di fascia alta che apprezzano la qualità e sono disposti a pagarla.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-icon">💰</div>
+                    <div class="preview-content">
+                        <h3>Strategie di pricing avanzate</h3>
+                        <p>Tecniche per determinare il prezzo giusto che massimizzi i tuoi profitti senza perdere clienti.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-icon">🔄</div>
+                    <div class="preview-content">
+                        <h3>Sistema di acquisizione clienti</h3>
+                        <p>Come creare un flusso costante di nuovi clienti che non dipenda da bonus o incentivi statali.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-icon">📊</div>
+                    <div class="preview-content">
+                        <h3>Analisi di mercato</h3>
+                        <p>Come analizzare il tuo mercato locale e identificare opportunità che i tuoi concorrenti non vedono.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-icon">📱</div>
+                    <div class="preview-content">
+                        <h3>Marketing digitale specifico</h3>
+                        <p>Strategie di marketing online studiate appositamente per le imprese del settore edilizio.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-icon">🤝</div>
+                    <div class="preview-content">
+                        <h3>Tecniche di vendita non invasive</h3>
+                        <p>Come concludere più contratti senza tecniche di vendita aggressive o manipolative.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-container">
+                <a href="#" class="btn"><span>VOGLIO IMPARARE QUESTE STRATEGIE!</span></a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="key-points" id="key-points">
+        <div class="container">
+            <h2>3 Concetti Chiave Che Ti Porterai a Casa</h2>
+            
+            <div class="points-container">
+                <div class="point-card">
+                    <div class="point-number">1</div>
+                    <div class="point-content">
+                        <h3>Strategie Fondamentali per Clienti di <span style="color: #FF6B00;">Fascia Alta</span></h3>
+                        <p>Le 7 strategie fondamentali per intercettare clienti di fascia alta che valorizzano la qualità del tuo lavoro e sono disposti a pagare il giusto prezzo (con esempi concreti che puoi implementare da subito)</p>
+                    </div>
+                </div>
+                
+                <div class="point-card">
+                    <div class="point-number">2</div>
+                    <div class="point-content">
+                        <h3>Il Metodo <span style="color: #FF6B00;">"Costruzione Digitale"</span></h3>
+                        <p>Il metodo <span style="color: #FF6B00;" style="font-weight: 800;">"Costruzione Digitale"</span> per strutturare un processo di acquisizione clienti che porta naturalmente alla firma del contratto, senza tecniche di vendita aggressive e mantenendo la tua autorevolezza professionale</p>
+                    </div>
+                </div>
+                
+                <div class="point-card">
+                    <div class="point-number">3</div>
+                    <div class="point-content">
+                        <h3>Liberati dalla Dipendenza dai Bonus</h3>
+                        <p>Come liberarti definitivamente dalla dipendenza dai bonus edilizi e attirare solo chi è veramente pronto a investire nei tuoi servizi di qualità (ti mostro 6 casi studio di imprese edili che hanno aumentato il fatturato anche dopo la fine dei bonus)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-container">
+                <a href="#" class="btn"><span>VOGLIO ACCEDERE GRATIS AL CORSO!</span></a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- <section class="bonus-section">
+        <div class="bonus-badge">
+            <div class="bonus-badge-content">BONUS GRATUITI</div>
+        </div>
+        
+        <div class="container">
+            <h2>2 Super Bonus Gratuiti Che Riceverai</h2>
+            
+            <div class="bonus-container">
+                <div class="bonus-item">
+                    <div class="bonus-icon">🎁</div>
+                    <div class="bonus-content">
+                        <h3>BONUS 1: La "Checklist del Preventivo Perfetto"</h3>
+                        <p>Un documento PDF con la struttura step-by-step utilizzata dai nostri clienti più performanti per presentare preventivi che vengono accettati sistematicamente dai clienti di fascia alta.</p>
+                    </div>
+                </div>
+                
+                <div class="bonus-item">
+                    <div class="bonus-icon">🎁</div>
+                    <div class="bonus-content">
+                        <h3>BONUS 2: Accesso esclusivo alla guida "Gli Script Vincenti"</h3>
+                        <p>Con le esatte frasi da utilizzare per gestire le 5 obiezioni più comuni che bloccano la firma del contratto da parte dei clienti più esigenti.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-container">
+                <a href="#" class="btn bonus-button"><span>VOGLIO ANCHE I BONUS GRATUITI!</span></a>
+            </div>
+        </div>
+    </section> -->
+    
+    <!-- <section class="testimonials">
+        <div class="container">
+            <h2>Cosa Dicono I Nostri Clienti</h2>
+            
+            <div class="testimonial-slider">
+                <div class="testimonial-track">
+                    <div class="testimonial-card">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-content">Ho applicato le strategie di questo corso e nel giro di 2 mesi ho acquisito 3 nuovi clienti di fascia alta. Il più importante: nessuno mi ha chiesto sconti o bonus. Finalmente posso lavorare con margini decenti e con clienti che apprezzano la qualità.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://via.placeholder.com/60" alt="Avatar di Roberto G.">
+                            </div>
+                            <div class="author-info">
+                                <div class="author-name">Roberto G.</div>
+                                <div class="author-title">Impresa Edile, Milano</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-card">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-content">Ero scettico all'inizio, pensavo fosse il solito corso pieno di teoria inutile. Invece ho trovato strategie concrete e facili da applicare. In 3 mesi ho aumentato il fatturato del 40% e, la cosa migliore, non dipendo più dal Superbonus per sopravvivere.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://via.placeholder.com/60" alt="Avatar di Lucia M.">
+                            </div>
+                            <div class="author-info">
+                                <div class="author-name">Lucia M.</div>
+                                <div class="author-title">Impresa Serramenti, Roma</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-card">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-content">Il metodo "Cantiere Digitale Sicuro" è stato una svolta per la mia azienda. Ora abbiamo un sistema che genera costantemente nuovi contatti qualificati. La cosa più sorprendente? I clienti ci scelgono perché vedono il nostro valore, non perché offriamo il prezzo più basso.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://via.placeholder.com/60" alt="Avatar di Marco B.">
+                            </div>
+                            <div class="author-info">
+                                <div class="author-name">Marco B.</div>
+                                <div class="author-title">Impresa Ristrutturazioni, Torino</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-nav">
+                    <div class="nav-dot active" data-index="0"></div>
+                    <div class="nav-dot" data-index="1"></div>
+                    <div class="nav-dot" data-index="2"></div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+    
+    <section class="final-cta">
+        <div class="final-cta-container">
+            <h2>NON PERDERE QUESTA OPPORTUNITÀ</h2>
+            <p>Per un periodo limitato puoi accedervi completamente GRATIS!</p>
+            
+            <div class="countdown-box">
+                <h3>L'OFFERTA SCADE TRA:</h3>
+                <div class="countdown-timer">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-days">01</div>
+                        <div class="countdown-label">Giorni</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-hours">12</div>
+                        <div class="countdown-label">Ore</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-minutes">34</div>
+                        <div class="countdown-label">Minuti</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-seconds">56</div>
+                        <div class="countdown-label">Secondi</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-container">
+                <a href="#" class="btn cta-button-large"><span>SI, VOGLIO ACCEDERE GRATIS ORA!</span></a>
+                <p class="no-card-note" style="margin-top: 20px;">Nessuna carta di credito richiesta. Accesso istantaneo dopo la registrazione.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Form popup overlay con progress bar -->
+    <div id="form-popup-overlay" class="form-popup-overlay">
+        <div class="form-popup-container">
+            <div class="form-popup-content">
+                <button class="close-popup" id="close-popup">&times;</button>
+                
+                <div class="form-progress-container">
+                    <div class="form-progress-text">Hai quasi fatto!</div>
+                    <div class="form-progress-bar">
+                        <div class="form-progress-fill"></div>
+                    </div>
+                </div>
+                
+                <h2>Inserisci i tuoi dati per accedere SUBITO al corso gratuito</h2>
+                
+                <form id="corso-form" method="post">
+                    <div class="form-group">
+                        <label for="name">Nome e Cognome*</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Es. Mario Rossi" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email*</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="La tua email di lavoro" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Numero di cellulare*</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Il tuo numero di cellulare" required>
+                    </div>
+                    
+                    <div class="special-offer">
+                        <h3>EXTRA BONUS SPECIALE!</h3>
+                        <p>Ricevi anche la nostra guida esclusiva "Come aumentare del 30% il valore medio dei tuoi preventivi" completando la registrazione ora!</p>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="privacy" name="privacy" required>
+                        <label for="privacy">Acconsento al trattamento dei dati personali secondo la <a href="/privacy-policy" target="_blank">Normativa Privacy</a></label>
+                    </div>
+                    
+                    <button type="submit" class="btn"><span>RICHIEDI SUBITO ACCESSO AL CORSO GRATUITO</span></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-logo">
+                <img src="logooo.webp" alt="Logo Costruzione Digitale">
+            </div>
+            
+            <div class="legal-links">
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/cookie-policy">Cookie Policy</a>
+                <a href="/termini-e-condizioni">Termini e Condizioni</a>
+            </div>
+            
+            <p>Costruzione Digitale © 2023-2025 – Tutti i diritti riservati</p>
+            
+            <div class="disclaimer">
+                <p>DISCLAIMER</p>
+                <p>Sottoscrivendo materiale dell'Editore, riconosci e accetti espressamente che non stiamo offrendo in alcun caso promesse, suggerimenti, proiezioni, rappresentazioni o garanzie di alcun genere in merito a prospettive di lucro future o guadagni in relazione al tuo acquisto di servizi Costruzione Digitale, e che non abbiamo autorizzato alcuna proiezione, promessa o rappresentazione da parte di soggetti terzi, interni o esterni all'azienda.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Gestione popup form
+        document.addEventListener('DOMContentLoaded', function() {
+            const formPopup = document.getElementById('form-popup-overlay');
+            const closePopupBtn = document.getElementById('close-popup');
+            const allAccessButtons = document.querySelectorAll('.btn');
+            
+            // Funzione per aprire il popup
+            function openFormPopup() {
+                formPopup.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Impedisce lo scroll della pagina
+            }
+            
+            // Funzione per chiudere il popup
+            function closeFormPopup() {
+                formPopup.classList.remove('active');
+                document.body.style.overflow = ''; // Ripristina lo scroll della pagina
+            }
+            
+            // Event listener per tutti i pulsanti di accesso
+            allAccessButtons.forEach(button => {
+                if (!button.closest('form')) { // Escludi il pulsante nel form
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        openFormPopup();
+                    });
+                }
+            });
+            
+            // Event listener per chiudere il popup
+            if (closePopupBtn) {
+                closePopupBtn.addEventListener('click', closeFormPopup);
+            }
+            
+            // Chiudi il popup se l'utente clicca fuori dal contenuto del form
+            formPopup.addEventListener('click', function(e) {
+                if (e.target === formPopup) {
+                    closeFormPopup();
+                }
+            });
+            
+            // Gestisci invio del form
+            const corsoForm = document.getElementById('corso-form');
+            if (corsoForm) {
+                corsoForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Qui andrà il codice per inviare i dati del form al server
+                    // Per ora simuliamo il successo e reindirizziamo alla pagina di ringraziamento
+                    
+                    setTimeout(function() {
+                        window.location.href = '/grazie';
+                    }, 1000);
+                });
+            }
+            
+            // Exit intent popup
+            let mouseHasLeftBefore = false;
+            
+            document.addEventListener('mouseleave', function(e) {
+                if (e.clientY < 0 && !mouseHasLeftBefore) {
+                    mouseHasLeftBefore = true;
+                    openFormPopup();
+                }
+            });
+            
+            // Animazione slider testimonianze
+            const track = document.querySelector('.testimonial-track');
+            const dots = document.querySelectorAll('.nav-dot');
+            let currentIndex = 0;
+            
+            if (track && dots.length) {
+                dots.forEach(dot => {
+                    dot.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        currentIndex = index;
+                        updateSlider();
+                    });
+                });
+                
+                function updateSlider() {
+                    const slideWidth = track.querySelector('.testimonial-card').offsetWidth;
+                    track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+                    
+                    dots.forEach((dot, i) => {
+                        if (i === currentIndex) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    });
+                }
+                
+                // Auto rotation
+                setInterval(() => {
+                    currentIndex = (currentIndex + 1) % dots.length;
+                    updateSlider();
+                }, 5000);
+            }
+            
+            // Countdown timer
+            document.addEventListener('DOMContentLoaded', function() {
+                const countdownDays = document.getElementById('countdown-days');
+                const countdownHours = document.getElementById('countdown-hours');
+                const countdownMinutes = document.getElementById('countdown-minutes');
+                const countdownSeconds = document.getElementById('countdown-seconds');
+                
+                if (countdownDays && countdownHours && countdownMinutes && countdownSeconds) {
+                    // Funzione per aggiornare il timer, sincronizzata con la home
+                    function updateTimer() {
+                        // Ottiene l'ora di fine giornata server
+                        const now = new Date();
+                        const midnight = new Date(now);
+                        midnight.setHours(23, 59, 59, 0);
+                        
+                        const diff = midnight - now;
+                        if (diff <= 0) {
+                            // Resetta al giorno successivo
+                            const tomorrow = new Date(now);
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            tomorrow.setHours(23, 59, 59, 0);
+                            updateTimerDisplay(tomorrow - now);
+                        } else {
+                            updateTimerDisplay(diff);
+                        }
+                    }
+                    
+                    // Aggiorna display timer
+                    function updateTimerDisplay(diff) {
+                        // Per il countdown del corso, mostriamo anche i giorni (a differenza della home)
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                        
+                        countdownDays.textContent = days.toString().padStart(2, '0');
+                        countdownHours.textContent = hours.toString().padStart(2, '0');
+                        countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+                        countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+                    }
+                    
+                    // Aggiorna timer ogni secondo
+                    updateTimer();
+                    setInterval(updateTimer, 1000);
+                }
+            });
+        });
+    </script>
+
+    <!-- JavaScript aggiuntivo per migliorare l'esperienza mobile -->
+    <script>
+        // Rilevazione dispositivi mobili per applicare animazioni specifiche
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Intersection Observer per animare gli elementi quando entrano nel viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.1
+                });
+                
+                // Osserva tutti gli elementi che desideri animare
+                document.querySelectorAll('.point-card, .preview-card, .bonus-item, .countdown-box').forEach(el => {
+                    observer.observe(el);
+                });
+            }
+        });
+        
+        // Ottimizzazione del caricamento delle immagini su mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('loading' in HTMLImageElement.prototype) {
+                // Browser supporta lazy-loading nativo
+                document.querySelectorAll('img').forEach(img => {
+                    img.setAttribute('loading', 'lazy');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

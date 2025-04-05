@@ -1,0 +1,1 @@
+openssl req -new -newkey rsa:2048 -nodes -keyout Costruzionedigitale.key -out Costruzionedigitale.csr

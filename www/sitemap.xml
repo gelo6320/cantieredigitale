@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://Costruzionedigitale.com/</loc>
+    <lastmod>2025-04-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Pagina Contattaci -->
+  <url>
+    <loc>https://Costruzionedigitale.com/contattaci</loc>
+    <lastmod>2025-04-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Corso-gratuito -->
+  <url>
+    <loc>https://Costruzionedigitale.com/corso-gratuito</loc>
+    <lastmod>2025-04-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Cookie policy -->
+  <url>
+    <loc>https://Costruzionedigitale.com/cookie-policy</loc>
+    <lastmod>2025-04-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Privacy policy -->
+  <url>
+    <loc>https://Costruzionedigitale.com/privacy-policy</loc>
+    <lastmod>2025-04-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>

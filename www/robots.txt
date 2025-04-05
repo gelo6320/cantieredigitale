@@ -1,0 +1,54 @@
+# robots.txt per Costruzione Digitale
+# https://Costruzionedigitale.com/
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /backend/
+Disallow: /wp-admin/
+Disallow: /includes/
+Disallow: /temp/
+Disallow: /*?*
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+# Permette l'accesso esplicito alle favicon
+User-agent: *
+Allow: /favicon.ico
+Allow: /favicon-16x16.png
+Allow: /favicon-32x32.png
+Allow: /apple-touch-icon.png
+Allow: /android-chrome-192x192.png
+Allow: /android-chrome-512x512.png
+Allow: /site.webmanifest
+Allow: /mstile-144x144.png
+Allow: /browserconfig.xml
+
+# Impedisce l'indicizzazione di file specifici
+Disallow: /*.pdf$
+Disallow: /*.doc$
+Disallow: /*.docx$
+Disallow: /*.xls$
+Disallow: /*.xlsx$
+Disallow: /*.zip$
+Disallow: /*.rar$
+
+# Consente a Google di scansionare i file CSS e JS
+User-agent: Googlebot
+Allow: /*.js$
+Allow: /*.css$
+
+# Limita la frequenza di scansione per evitare sovraccarichi del server
+User-agent: Googlebot
+Crawl-delay: 1
+
+User-agent: bingbot
+Crawl-delay: 2
+
+User-agent: Slurp
+Crawl-delay: 3
+
+# Indirizzo del file sitemap
+Sitemap: https://Costruzionedigitale.com/sitemap.xml
