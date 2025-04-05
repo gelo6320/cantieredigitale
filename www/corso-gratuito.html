@@ -2094,10 +2094,10 @@
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="Il tuo numero di cellulare" required>
                     </div>
                     
-                    <div class="special-offer">
+                    <!-- <div class="special-offer">
                         <h3>EXTRA BONUS SPECIALE!</h3>
                         <p>Ricevi anche la nostra guida esclusiva "Come aumentare del 30% il valore medio dei tuoi preventivi" completando la registrazione ora!</p>
-                    </div>
+                    </div> -->
                     
                     <div class="form-check">
                         <input type="checkbox" id="privacy" name="privacy" required>
@@ -2137,6 +2137,7 @@
             const formPopup = document.getElementById('form-popup-overlay');
             const closePopupBtn = document.getElementById('close-popup');
             const allAccessButtons = document.querySelectorAll('.btn');
+            const corsoForm = document.getElementById('corso-form');
             
             // Funzione per aprire il popup
             function openFormPopup() {
@@ -2173,17 +2174,80 @@
             });
             
             // Gestisci invio del form
-            const corsoForm = document.getElementById('corso-form');
             if (corsoForm) {
                 corsoForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    // Qui andrà il codice per inviare i dati del form al server
-                    // Per ora simuliamo il successo e reindirizziamo alla pagina di ringraziamento
+                    // Recupera i dati dal form
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        source: 'corso-gratuito-form'
+                    };
                     
-                    setTimeout(function() {
-                        window.location.href = '/grazie';
-                    }, 1000);
+                    // Mostra indicatore di caricamento
+                    const submitButton = corsoForm.querySelector('button[type="submit"]');
+                    const originalButtonText = submitButton.innerHTML;
+                    submitButton.innerHTML = '<span>ELABORAZIONE IN CORSO...</span>';
+                    submitButton.disabled = true;
+                    
+                    // Invia i dati al server
+                    fetch('/api/submit-form', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Memorizza email in localStorage per tracciamento conversione
+                            localStorage.setItem('corso_email', formData.email);
+                            
+                            // Tracciamento evento (se esistono)
+                            if (window.gtag) {
+                                window.gtag('event', 'corso_registrazione', {
+                                    'event_category': 'conversione',
+                                    'event_label': formData.email
+                                });
+                            }
+                            
+                            if (window.fbq) {
+                                window.fbq('track', 'Lead', {
+                                    content_name: 'Corso Gratuito Edilizia',
+                                    content_category: 'corso_registrazione'
+                                });
+                            }
+                            
+                            // Mostra messaggio di successo nel form
+                            corsoForm.innerHTML = `
+                                <div class="success-message">
+                                    <div style="font-size: 3rem; color: #27ae60; margin-bottom: 20px;">✓</div>
+                                    <h3 style="color: #fff; margin-bottom: 15px;">Registrazione Completata!</h3>
+                                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 20px;">Grazie ${formData.name}! Abbiamo inviato le istruzioni di accesso alla tua email ${formData.email}.</p>
+                                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 30px;">Controlla anche nella cartella spam se non vedi la nostra email.</p>
+                                </div>
+                            `;
+                            
+                            // Reindirizza alla pagina di ringraziamento dopo 3 secondi
+                            setTimeout(function() {
+                                window.location.href = '/grazie-corso';
+                            }, 3000);
+                        } else {
+                            // Gestione errore
+                            submitButton.innerHTML = originalButtonText;
+                            submitButton.disabled = false;
+                            alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore:', error);
+                        submitButton.innerHTML = originalButtonText;
+                        submitButton.disabled = false;
+                        alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
+                    });
                 });
             }
             
@@ -2197,86 +2261,107 @@
                 }
             });
             
-            // Animazione slider testimonianze
-            const track = document.querySelector('.testimonial-track');
-            const dots = document.querySelectorAll('.nav-dot');
-            let currentIndex = 0;
+            // ----- COUNTDOWN TIMER SINCRONIZZATO CON LA HOME -----
+            const countdownDays = document.getElementById('countdown-days');
+            const countdownHours = document.getElementById('countdown-hours');
+            const countdownMinutes = document.getElementById('countdown-minutes');
+            const countdownSeconds = document.getElementById('countdown-seconds');
             
-            if (track && dots.length) {
-                dots.forEach(dot => {
-                    dot.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        currentIndex = index;
-                        updateSlider();
-                    });
-                });
-                
-                function updateSlider() {
-                    const slideWidth = track.querySelector('.testimonial-card').offsetWidth;
-                    track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+            if (countdownDays && countdownHours && countdownMinutes && countdownSeconds) {
+                // Utilizza la stessa logica di timer della homepage
+                // Funzione per aggiornare il timer
+                function updateTimer() {
+                    // Ottiene l'ora di fine giornata server
+                    const now = new Date();
+                    const midnight = new Date(now);
+                    midnight.setHours(23, 59, 59, 0);
                     
-                    dots.forEach((dot, i) => {
-                        if (i === currentIndex) {
-                            dot.classList.add('active');
-                        } else {
-                            dot.classList.remove('active');
-                        }
-                    });
+                    const diff = midnight - now;
+                    if (diff <= 0) {
+                        // Resetta al giorno successivo
+                        const tomorrow = new Date(now);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        tomorrow.setHours(23, 59, 59, 0);
+                        updateTimerDisplay(tomorrow - now);
+                    } else {
+                        updateTimerDisplay(diff);
+                    }
                 }
                 
-                // Auto rotation
-                setInterval(() => {
-                    currentIndex = (currentIndex + 1) % dots.length;
-                    updateSlider();
-                }, 5000);
+                // Aggiorna display timer - versione estesa per la pagina corso
+                function updateTimerDisplay(diff) {
+                    // Include i giorni nel countdown per la pagina corso
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    countdownDays.textContent = days.toString().padStart(2, '0');
+                    countdownHours.textContent = hours.toString().padStart(2, '0');
+                    countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+                    countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+                }
+                
+                // Aggiorna timer ogni secondo
+                updateTimer();
+                setInterval(updateTimer, 1000);
             }
             
-            // Countdown timer
-            document.addEventListener('DOMContentLoaded', function() {
-                const countdownDays = document.getElementById('countdown-days');
-                const countdownHours = document.getElementById('countdown-hours');
-                const countdownMinutes = document.getElementById('countdown-minutes');
-                const countdownSeconds = document.getElementById('countdown-seconds');
+            // Controllo validazione dei campi
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            
+            if (nameInput && emailInput && phoneInput) {
+                // Funzione di validazione nome
+                nameInput.addEventListener('blur', function() {
+                    validateField(nameInput, value => value.trim().length >= 3, 
+                        'Per favore inserisci un nome valido');
+                });
                 
-                if (countdownDays && countdownHours && countdownMinutes && countdownSeconds) {
-                    // Funzione per aggiornare il timer, sincronizzata con la home
-                    function updateTimer() {
-                        // Ottiene l'ora di fine giornata server
-                        const now = new Date();
-                        const midnight = new Date(now);
-                        midnight.setHours(23, 59, 59, 0);
-                        
-                        const diff = midnight - now;
-                        if (diff <= 0) {
-                            // Resetta al giorno successivo
-                            const tomorrow = new Date(now);
-                            tomorrow.setDate(tomorrow.getDate() + 1);
-                            tomorrow.setHours(23, 59, 59, 0);
-                            updateTimerDisplay(tomorrow - now);
-                        } else {
-                            updateTimerDisplay(diff);
-                        }
+                // Funzione di validazione email
+                emailInput.addEventListener('blur', function() {
+                    validateField(emailInput, value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), 
+                        'Per favore inserisci un indirizzo email valido');
+                });
+                
+                // Funzione di validazione telefono
+                phoneInput.addEventListener('blur', function() {
+                    validateField(phoneInput, value => /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(value), 
+                        'Per favore inserisci un numero di telefono valido');
+                });
+                
+                // Funzione generica per la validazione dei campi
+                function validateField(field, validationFn, errorMessage) {
+                    const value = field.value;
+                    const isValid = validationFn(value);
+                    
+                    // Rimuovi eventuali messaggi di errore precedenti
+                    const existingError = field.parentNode.querySelector('.error-message');
+                    if (existingError) {
+                        existingError.remove();
                     }
                     
-                    // Aggiorna display timer
-                    function updateTimerDisplay(diff) {
-                        // Per il countdown del corso, mostriamo anche i giorni (a differenza della home)
-                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    // Se il campo non è valido e contiene un valore
+                    if (!isValid && value.trim() !== '') {
+                        field.classList.add('error');
                         
-                        countdownDays.textContent = days.toString().padStart(2, '0');
-                        countdownHours.textContent = hours.toString().padStart(2, '0');
-                        countdownMinutes.textContent = minutes.toString().padStart(2, '0');
-                        countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+                        // Crea e aggiungi il messaggio di errore
+                        const errorElement = document.createElement('div');
+                        errorElement.className = 'error-message';
+                        errorElement.style.color = '#e74c3c';
+                        errorElement.style.fontSize = '0.85rem';
+                        errorElement.style.marginTop = '5px';
+                        errorElement.textContent = errorMessage;
+                        
+                        field.parentNode.appendChild(errorElement);
+                        return false;
+                    } else {
+                        field.classList.remove('error');
+                        return true;
                     }
-                    
-                    // Aggiorna timer ogni secondo
-                    updateTimer();
-                    setInterval(updateTimer, 1000);
                 }
-            });
+            }
         });
     </script>
 
