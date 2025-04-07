@@ -13,6 +13,8 @@ const cors = require('cors');
 const fs = require('fs');
 const compression = require('compression');
 const hubspot = require('@hubspot/api-client');
+const axios = require('axios');
+const crypto = require('crypto');
 
 // Carica variabili d'ambiente
 dotenv.config();
@@ -235,11 +237,40 @@ const transporter = nodemailer.createTransport({
 // Route per la gestione dell'invio del form
 app.post('/api/submit-form', async (req, res) => {
   try {
+    // Genera un ID evento univoco per la deduplicazione
+    const eventId = 'event_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+    
+    // Salva i dati nel database
     const formData = new FormData(req.body);
     await formData.save();
     
+    // Invia evento alla Facebook Conversion API
+    try {
+      const userData = {
+        email: req.body.email,
+        phone: req.body.phone,
+        name: req.body.name
+      };
+      
+      const eventData = {
+        sourceUrl: req.headers.referer || 'https://costruzionedigitale.com',
+        customData: {
+          form_type: req.body.source || 'contact_form',
+          content_name: 'Richiesta di contatto'
+        }
+      };
+      
+      // Invia l'evento come Lead
+      await sendFacebookConversionEvent('Lead', userData, eventData, eventId);
+    } catch (conversionError) {
+      console.error('Errore nell\'invio dell\'evento alla CAPI:', conversionError);
+      // Non blocchiamo il flusso se l'invio fallisce
+    }
+    
     console.log('Dati salvati in MongoDB:', req.body);
-    res.status(200).json({ success: true });
+    
+    // Restituisci l'eventId per la deduplicazione lato client
+    res.status(200).json({ success: true, eventId });
   } catch (error) {
     console.error('Errore nel salvataggio dei dati:', error);
     res.status(500).json({ success: false, error: 'Errore nel salvataggio dei dati' });
@@ -248,6 +279,9 @@ app.post('/api/submit-form', async (req, res) => {
 
 app.post('/api/submit-booking', async (req, res) => {
   try {
+    // Genera un ID evento univoco per la deduplicazione
+    const eventId = 'event_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+    
     // Crea un nuovo documento di prenotazione
     const booking = new Booking(req.body);
     
@@ -265,8 +299,36 @@ app.post('/api/submit-booking', async (req, res) => {
       // Non blocchiamo il flusso se l'integrazione HubSpot fallisce
     }
     
+    // Invia evento alla Facebook Conversion API
+    try {
+      const userData = {
+        email: req.body.email,
+        phone: req.body.phone,
+        name: req.body.name
+      };
+      
+      const eventData = {
+        sourceUrl: req.headers.referer || 'https://costruzionedigitale.com',
+        customData: {
+          form_type: 'booking_call',
+          content_name: 'Prenotazione chiamata',
+          booking_date: req.body.bookingDate,
+          booking_time: req.body.bookingTime
+        }
+      };
+      
+      // Invia l'evento come Lead e Schedule
+      await sendFacebookConversionEvent('Lead', userData, eventData, eventId + '_lead');
+      await sendFacebookConversionEvent('Schedule', userData, eventData, eventId + '_schedule');
+    } catch (conversionError) {
+      console.error('Errore nell\'invio dell\'evento alla CAPI:', conversionError);
+      // Non blocchiamo il flusso se l'invio fallisce
+    }
+    
     console.log('Prenotazione salvata:', req.body);
-    res.status(200).json({ success: true });
+    
+    // Restituisci l'eventId per la deduplicazione lato client
+    res.status(200).json({ success: true, eventId });
   } catch (error) {
     console.error('Errore nella prenotazione:', error);
     res.status(500).json({ success: false, error: 'Errore durante la prenotazione' });
@@ -625,6 +687,57 @@ function formatStatus(status) {
       return 'Completata';
     default:
       return status || 'Sconosciuto';
+  }
+}
+
+// Funzione per inviare eventi alla Facebook Conversion API
+async function sendFacebookConversionEvent(eventName, userData, eventData, eventId) {
+  try {
+    // Verifica che l'access token sia configurato
+    if (!process.env.ACCESS_TOKEN) {
+      console.error('Facebook Access Token non configurato');
+      return false;
+    }
+
+    // Preparazione dei dati dell'utente con hashing per la privacy
+    const hashedUserData = {
+      em: userData.email ? crypto.createHash('sha256').update(userData.email.toLowerCase().trim()).digest('hex') : undefined,
+      ph: userData.phone ? crypto.createHash('sha256').update(userData.phone.replace(/\D/g, '')).digest('hex') : undefined,
+      fn: userData.name ? crypto.createHash('sha256').update(userData.name.split(' ')[0].toLowerCase().trim()).digest('hex') : undefined,
+      ln: userData.name && userData.name.includes(' ') ? crypto.createHash('sha256').update(userData.name.split(' ').slice(1).join(' ').toLowerCase().trim()).digest('hex') : undefined,
+    };
+
+    // Filtro per rimuovere valori undefined
+    Object.keys(hashedUserData).forEach(key => 
+      hashedUserData[key] === undefined && delete hashedUserData[key]
+    );
+
+    // Costruzione del payload
+    const payload = {
+      data: [{
+        event_name: eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId,
+        event_source_url: eventData.sourceUrl || 'https://costruzionedigitale.com',
+        user_data: hashedUserData,
+        custom_data: eventData.customData || {}
+      }],
+      access_token: process.env.ACCESS_TOKEN,
+      partner_agent: 'costruzionedigitale-nodejs',
+      test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
+    };
+
+    // Invio dell'evento alla CAPI
+    const response = await axios.post(
+      `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+      payload
+    );
+
+    console.log('Facebook Conversion API - Evento inviato con successo:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Errore nell\'invio dell\'evento alla Facebook Conversion API:', error.response?.data || error.message);
+    return false;
   }
 }
 
@@ -1035,6 +1148,7 @@ class CookieConsentManager {
     /**
      * Abilita Meta Pixel (Facebook)
      */
+    // Modifica della funzione enableMetaPixel() nel CookieConsentManager
     enableMetaPixel() {
         console.log('Attivazione Meta Pixel...');
         
@@ -1081,7 +1195,12 @@ class CookieConsentManager {
             
             // Inizializza e traccia
             window.fbq('init', this.config.metaPixelId);
-            window.fbq('track', 'PageView');
+            
+            // Genera un eventID univoco per la pagina
+            window.fbEventId = 'event_' + new Date().getTime() + '_' + Math.random().toString(36).substring(2, 15);
+            
+            // Traccia la visualizzazione della pagina con eventID
+            window.fbq('track', 'PageView', {}, {eventID: window.fbEventId});
             
             // Aggiungi noscript
             const noscript = document.createElement('noscript');
@@ -1093,7 +1212,7 @@ class CookieConsentManager {
             noscript.appendChild(img);
             document.body.appendChild(noscript);
             
-            console.log('Meta Pixel inizializzato con successo');
+            console.log('Meta Pixel inizializzato con successo, eventID:', window.fbEventId);
         } catch (error) {
             console.error('Errore durante inizializzazione Meta Pixel:', error);
             window._metaPixelEnabled = false;

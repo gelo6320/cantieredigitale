@@ -3220,56 +3220,63 @@
                 
                 // Raccogli i dati del form
                 const formData = {
-                    name: nameInput.value,
-                    email: emailInput.value,
-                    phone: phoneInput.value,
-                    message: document.getElementById('message').value,
-                    bookingDate: bookingDateInput.value,
-                    bookingTime: bookingTimeInput.value,
-                    bookingTimestamp: bookingTimestampInput.value,
-                    source: 'booking-form'
+                  name: nameInput.value,
+                  email: emailInput.value,
+                  phone: phoneInput.value,
+                  message: document.getElementById('message').value,
+                  bookingDate: bookingDateInput.value,
+                  bookingTime: bookingTimeInput.value,
+                  bookingTimestamp: bookingTimestampInput.value,
+                  source: 'booking-form'
                 };
                 
                 // Invia la prenotazione al server
                 fetch('/api/submit-booking', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(formData)
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Aggiorna il riepilogo nel messaggio di conferma
-                    document.getElementById('confirmation-date').textContent = bookingDateInput.value;
-                    document.getElementById('confirmation-time').textContent = bookingTimeInput.value;
-                    loaderForm.style.display = 'none';
+                  // Aggiorna il riepilogo nel messaggio di conferma
+                  document.getElementById('confirmation-date').textContent = bookingDateInput.value;
+                  document.getElementById('confirmation-time').textContent = bookingTimeInput.value;
+                  loaderForm.style.display = 'none';
+                  
+                  if (data.success) {
+                    // Nascondi il form
+                    contactForm.style.display = 'none';
                     
-                    if (data.success) {
-                        // Nascondi il form
-                        contactForm.style.display = 'none';
-                        
-                        // Mostra il messaggio di conferma
-                        confirmationMessage.style.display = 'block';
-                        
-                        // Aggiungi informazioni sull'email al messaggio di conferma
-                        const confirmationText = confirmationMessage.querySelector('p');
-                        if (confirmationText) {
-                            confirmationText.innerHTML = `Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo <strong>${emailInput.value}</strong> con tutti i dettagli.`;
-                        }
-                        
-                        // Scroll verso il messaggio
-                        confirmationMessage.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
+                    // Se l'invio è riuscito e Meta Pixel è attivo, traccia l'evento con lo stesso eventId
+                    if (window.fbq && typeof window.fbq === 'function' && window._metaPixelEnabled) {
+                      window.fbq('track', 'Lead', {}, {eventID: data.eventId + '_lead'});
+                      window.fbq('track', 'Schedule', {}, {eventID: data.eventId + '_schedule'});
+                      console.log('Eventi Lead e Schedule tracciati con eventID:', data.eventId);
                     }
+                    
+                    // Mostra il messaggio di conferma
+                    confirmationMessage.style.display = 'block';
+                    
+                    // Aggiungi informazioni sull'email al messaggio di conferma
+                    const confirmationText = confirmationMessage.querySelector('p');
+                    if (confirmationText) {
+                      confirmationText.innerHTML = `Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo <strong>${emailInput.value}</strong> con tutti i dettagli.`;
+                    }
+                    
+                    // Scroll verso il messaggio
+                    confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
+                  }
                 })
                 .catch(error => {
-                    console.error('Errore durante la prenotazione:', error);
-                    loaderForm.style.display = 'none';
-                    alert('Si è verificato un errore di rete. Riprova più tardi.');
+                  console.error('Errore durante la prenotazione:', error);
+                  loaderForm.style.display = 'none';
+                  alert('Si è verificato un errore di rete. Riprova più tardi.');
                 });
-            });
+              });
             
             // Aggiungi gestione degli eventi per la rimozione degli errori
             const formInputs = contactForm.querySelectorAll('input, textarea');

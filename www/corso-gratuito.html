@@ -2176,78 +2176,80 @@
             // Gestisci invio del form
             if (corsoForm) {
                 corsoForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Recupera i dati dal form
-                    const formData = {
-                        name: document.getElementById('name').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        source: 'corso-gratuito-form'
-                    };
-                    
-                    // Mostra indicatore di caricamento
-                    const submitButton = corsoForm.querySelector('button[type="submit"]');
-                    const originalButtonText = submitButton.innerHTML;
-                    submitButton.innerHTML = '<span>ELABORAZIONE IN CORSO...</span>';
-                    submitButton.disabled = true;
-                    
-                    // Invia i dati al server
-                    fetch('/api/submit-form', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Memorizza email in localStorage per tracciamento conversione
-                            localStorage.setItem('corso_email', formData.email);
-                            
-                            // Tracciamento evento (se esistono)
-                            if (window.gtag) {
-                                window.gtag('event', 'corso_registrazione', {
-                                    'event_category': 'conversione',
-                                    'event_label': formData.email
-                                });
-                            }
-                            
-                            if (window.fbq) {
-                                window.fbq('track', 'Lead', {
-                                    content_name: 'Corso Gratuito Edilizia',
-                                    content_category: 'corso_registrazione'
-                                });
-                            }
-                            
-                            // Mostra messaggio di successo nel form
-                            corsoForm.innerHTML = `
-                                <div class="success-message">
-                                    <div style="font-size: 3rem; color: #27ae60; margin-bottom: 20px;">✓</div>
-                                    <h3 style="color: #fff; margin-bottom: 15px;">Registrazione Completata!</h3>
-                                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 20px;">Grazie ${formData.name}! Abbiamo inviato le istruzioni di accesso alla tua email ${formData.email}.</p>
-                                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 30px;">Controlla anche nella cartella spam se non vedi la nostra email.</p>
-                                </div>
-                            `;
-                            
-                            // Reindirizza alla pagina di ringraziamento dopo 3 secondi
-                            setTimeout(function() {
-                                window.location.href = '/grazie-corso';
-                            }, 3000);
-                        } else {
-                            // Gestione errore
-                            submitButton.innerHTML = originalButtonText;
-                            submitButton.disabled = false;
-                            alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Errore:', error);
-                        submitButton.innerHTML = originalButtonText;
-                        submitButton.disabled = false;
-                        alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
-                    });
+                  e.preventDefault();
+                  
+                  // Recupera i dati dal form
+                  const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    source: 'corso-gratuito-form'
+                  };
+                  
+                  // Mostra indicatore di caricamento
+                  const submitButton = corsoForm.querySelector('button[type="submit"]');
+                  const originalButtonText = submitButton.innerHTML;
+                  submitButton.innerHTML = '<span>ELABORAZIONE IN CORSO...</span>';
+                  submitButton.disabled = true;
+                  
+                  // Invia i dati al server
+                  fetch('/api/submit-form', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Memorizza email in localStorage per tracciamento conversione
+                      localStorage.setItem('corso_email', formData.email);
+                      
+                      // Tracciamento evento con eventID (se esistono)
+                      if (window.gtag) {
+                        window.gtag('event', 'corso_registrazione', {
+                          'event_category': 'conversione',
+                          'event_label': formData.email
+                        });
+                      }
+                      
+                      // Traccia l'evento Facebook con l'eventID restituito dal server
+                      if (window.fbq && typeof window.fbq === 'function' && window._metaPixelEnabled) {
+                        window.fbq('track', 'Lead', {
+                          content_name: 'Corso Gratuito Edilizia',
+                          content_category: 'corso_registrazione'
+                        }, {eventID: data.eventId});
+                        console.log('Evento Lead tracciato con eventID:', data.eventId);
+                      }
+                      
+                      // Mostra messaggio di successo nel form
+                      corsoForm.innerHTML = `
+                        <div class="success-message">
+                          <div style="font-size: 3rem; color: #27ae60; margin-bottom: 20px;">✓</div>
+                          <h3 style="color: #fff; margin-bottom: 15px;">Registrazione Completata!</h3>
+                          <p style="color: rgba(255,255,255,0.9); margin-bottom: 20px;">Grazie ${formData.name}! Abbiamo inviato le istruzioni di accesso alla tua email ${formData.email}.</p>
+                          <p style="color: rgba(255,255,255,0.7); margin-bottom: 30px;">Controlla anche nella cartella spam se non vedi la nostra email.</p>
+                        </div>
+                      `;
+                      
+                      // Reindirizza alla pagina di ringraziamento dopo 3 secondi
+                      setTimeout(function() {
+                        window.location.href = '/grazie-corso';
+                      }, 3000);
+                    } else {
+                      // Gestione errore
+                      submitButton.innerHTML = originalButtonText;
+                      submitButton.disabled = false;
+                      alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Errore:', error);
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.disabled = false;
+                    alert('Si è verificato un errore durante l\'invio del modulo. Riprova più tardi.');
+                  });
                 });
             }
             
