@@ -284,16 +284,55 @@ app.post('/api/submit-booking', async (req, res) => {
     
     // Assicurati che il timestamp della prenotazione sia valido
     const bookingData = { ...req.body };
-    
-    // Parse del timestamp se è una stringa
+
+    // Parse del timestamp se è una stringa, mantenendo l'ora locale
     if (typeof bookingData.bookingTimestamp === 'string') {
-      bookingData.bookingTimestamp = new Date(bookingData.bookingTimestamp);
+        // Crea un timestamp dal valore ISO string mantenendo l'ora corretta
+        const bookingTimestamp = new Date(bookingData.bookingTimestamp);
+        
+        // Estrai l'ora dalla stringa dell'orario fornita
+        // perché il timestamp ISO potrebbe aver modificato il fuso orario
+        if (bookingData.bookingTime) {
+            const hourString = bookingData.bookingTime.split(':')[0];
+            const hour = parseInt(hourString, 10);
+            
+            // Assicurati che sia l'ora corretta nel database
+            const date = new Date(bookingTimestamp);
+            date.setHours(hour, 0, 0, 0);
+            bookingData.bookingTimestamp = date;
+            
+            console.log('Submit - Orario dalla stringa:', hour + ':00');
+            console.log('Submit - Data prenotazione:', bookingData.bookingDate);
+            console.log('Submit - Timestamp aggiornato:', date.toISOString());
+        } else {
+            bookingData.bookingTimestamp = bookingTimestamp;
+        }
     }
     
     // Controlla se già esiste una prenotazione per lo stesso orario
+    const bookingHour = new Date(bookingData.bookingTimestamp).getHours();
+    const bookingDay = new Date(bookingData.bookingTimestamp).setHours(0, 0, 0, 0);
+    
+    console.log('Controllo prenotazioni esistenti per ora:', bookingHour, 'e giorno:', new Date(bookingDay).toISOString());
+    
     const existingBooking = await Booking.findOne({
-      bookingTimestamp: bookingData.bookingTimestamp,
-      status: { $ne: 'cancelled' }
+        $and: [
+            // Stessa data (ignorando l'ora)
+            {
+                bookingTimestamp: {
+                    $gte: new Date(bookingDay),
+                    $lt: new Date(bookingDay + 24 * 60 * 60 * 1000)
+                }
+            },
+            // Stessa ora
+            {
+                $expr: {
+                    $eq: [{ $hour: "$bookingTimestamp" }, bookingHour]
+                }
+            },
+            // Non cancellata
+            { status: { $ne: 'cancelled' } }
+        ]
     });
     
     if (existingBooking) {
@@ -490,7 +529,11 @@ app.get('/api/booking/availability', async (req, res) => {
     const bookedSlots = bookings.map(booking => {
       // Estrai solo l'ora dal timestamp della prenotazione
       if (booking.bookingTimestamp) {
-        return new Date(booking.bookingTimestamp).getHours();
+        // Crea un oggetto date locale senza conversione UTC
+        const bookingDate = new Date(booking.bookingTimestamp);
+        // Ajusta l'orario per il fuso UTC+2 (Roma)
+        const localHour = bookingDate.getHours();
+        return localHour;
       }
       
       // Fallback: estrai l'ora dalla stringa dell'orario se il timestamp non è valido

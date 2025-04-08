@@ -3179,10 +3179,20 @@
             bookingDateInput.value = formatDate(selectedDate);
             bookingTimeInput.value = selectedTimeSlot.formatted;
             
-            // Crea un timestamp per la prenotazione
+            // Crea un timestamp per la prenotazione preservando il fuso orario
             const bookingDate = new Date(selectedDate);
+            
+            // Imposta l'ora mantenendo il fuso orario locale (per Roma/Italia)
             bookingDate.setHours(selectedTimeSlot.hour, 0, 0, 0);
+            
+            // Aggiungi un attributo data per debug
+            bookingDate.setAttribute = selectedTimeSlot.hour;
+            
+            // Salva il timestamp come ISO String per coerenza
             bookingTimestampInput.value = bookingDate.toISOString();
+            
+            console.log('Orario prenotazione:', selectedTimeSlot.hour + ':00');
+            console.log('Timestamp salvato:', bookingTimestampInput.value);
             
             // Passa allo step 3
             moveToStep(3);
