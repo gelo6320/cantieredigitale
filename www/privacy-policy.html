@@ -592,7 +592,7 @@
     <header id="header">
         <div class="container nav-container">
             <a href="/" class="logo">
-                <img src="logooo.webp" class="logo-icon" alt="Logo Costruzione Digitale">
+                <img src="logosito1.webp" class="logo-icon" alt="Logo Costruzione Digitale">
                 <div class="logo-text">Costruzione <span>Digitale</span></div>
             </a>
             <nav>
@@ -716,7 +716,7 @@
     <footer>
         <div class="container">
             <div class="footer-logo">
-                <img src="logooo.webp" class="footer-logo-icon" alt="Logo Costruzione Digitale">
+                <img src="logosito1.webp" class="footer-logo-icon" alt="Logo Costruzione Digitale">
                 <div class="footer-logo-text">Costruzione <span>Digitale</span></div>
             </div>
             
@@ -826,26 +826,17 @@
                     header.classList.remove('scrolled');
                 }
             });
-            
-            // Back to Top button
-            const backToTopButton = document.getElementById('back-to-top');
+
+            // Pulsante fluttuante per prenotare una chiamata
+            const ctaFloatButton = document.getElementById('call-to-action-float');
             
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 500) {
-                    backToTopButton.classList.add('show');
+                    ctaFloatButton.classList.add('show');
                 } else {
-                    backToTopButton.classList.remove('show');
+                    ctaFloatButton.classList.remove('show');
                 }
             });
-            
-            if (backToTopButton) {
-                backToTopButton.addEventListener('click', function() {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                });
-            }
             
             // Smooth scrolling for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
