@@ -282,14 +282,48 @@ app.post('/api/submit-booking', async (req, res) => {
     // Genera un ID evento univoco per la deduplicazione
     const eventId = 'event_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
     
+    // Assicurati che il timestamp della prenotazione sia valido
+    const bookingData = { ...req.body };
+    
+    // Parse del timestamp se è una stringa
+    if (typeof bookingData.bookingTimestamp === 'string') {
+      bookingData.bookingTimestamp = new Date(bookingData.bookingTimestamp);
+    }
+    
+    // Controlla se già esiste una prenotazione per lo stesso orario
+    const existingBooking = await Booking.findOne({
+      bookingTimestamp: bookingData.bookingTimestamp,
+      status: { $ne: 'cancelled' }
+    });
+    
+    if (existingBooking) {
+      return res.status(409).json({ 
+        success: false, 
+        error: 'Questo orario è già stato prenotato. Per favore, seleziona un altro orario.' 
+      });
+    }
+    
     // Crea un nuovo documento di prenotazione
-    const booking = new Booking(req.body);
+    const booking = new Booking(bookingData);
     
     // Salva la prenotazione
     await booking.save();
     
+    console.log('Nuova prenotazione salvata:', {
+      name: booking.name,
+      email: booking.email,
+      date: booking.bookingDate,
+      time: booking.bookingTime,
+      timestamp: booking.bookingTimestamp
+    });
+    
     // Invia email di conferma all'utente
-    await sendBookingConfirmationEmail(booking);
+    try {
+      await sendBookingConfirmationEmail(booking);
+    } catch (emailError) {
+      console.error('Errore invio email:', emailError);
+      // Continuiamo comunque perché la prenotazione è stata salvata
+    }
     
     // Integra con HubSpot
     try {
@@ -325,13 +359,19 @@ app.post('/api/submit-booking', async (req, res) => {
       // Non blocchiamo il flusso se l'invio fallisce
     }
     
-    console.log('Prenotazione salvata:', req.body);
-    
     // Restituisci l'eventId per la deduplicazione lato client
-    res.status(200).json({ success: true, eventId });
+    res.status(200).json({ 
+      success: true, 
+      eventId, 
+      message: 'Prenotazione completata con successo'
+    });
   } catch (error) {
     console.error('Errore nella prenotazione:', error);
-    res.status(500).json({ success: false, error: 'Errore durante la prenotazione' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Errore durante la prenotazione',
+      details: error.message
+    });
   }
 });
 
@@ -416,13 +456,22 @@ app.get('/api/booking/availability', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Data non specificata' });
     }
     
-    // Converte la data in formato ISO
-    const selectedDate = new Date(date);
+    // Converte la data in formato ISO in un oggetto Date
+    // Assicurandosi che la data sia interpretata come mezzanotte UTC
+    const selectedDate = new Date(date + 'T00:00:00.000Z');
+    
+    // Log per debugging
+    console.log('Data richiesta:', date);
+    console.log('Data convertita:', selectedDate);
+    
+    // Imposta la data a mezzanotte locale
     selectedDate.setHours(0, 0, 0, 0);
     
     // Trova le prenotazioni per la data selezionata
     const nextDay = new Date(selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
+    
+    console.log('Cercando prenotazioni tra', selectedDate, 'e', nextDay);
     
     const bookings = await Booking.find({
       bookingTimestamp: {
@@ -432,14 +481,28 @@ app.get('/api/booking/availability', async (req, res) => {
       status: { $ne: 'cancelled' }
     });
     
+    console.log('Prenotazioni trovate:', bookings.length);
+    
     // Slot orari disponibili (9:00 - 17:00)
     const workHours = [9, 10, 11, 12, 14, 15, 16, 17];
     
     // Trova gli slot già prenotati
     const bookedSlots = bookings.map(booking => {
-      const hours = new Date(booking.bookingTimestamp).getHours();
-      return hours;
-    });
+      // Estrai solo l'ora dal timestamp della prenotazione
+      if (booking.bookingTimestamp) {
+        return new Date(booking.bookingTimestamp).getHours();
+      }
+      
+      // Fallback: estrai l'ora dalla stringa dell'orario se il timestamp non è valido
+      if (booking.bookingTime) {
+        const hourStr = booking.bookingTime.split(':')[0];
+        return parseInt(hourStr, 10);
+      }
+      
+      return null;
+    }).filter(hour => hour !== null);
+    
+    console.log('Orari prenotati:', bookedSlots);
     
     // Genera l'array di disponibilità
     const availability = workHours.map(hour => ({
@@ -451,11 +514,16 @@ app.get('/api/booking/availability', async (req, res) => {
     res.status(200).json({ 
       success: true, 
       date: selectedDate.toISOString().split('T')[0],
-      availability 
+      availability,
+      message: 'Disponibilità recuperata con successo'
     });
   } catch (error) {
     console.error('Errore nel recupero disponibilità:', error);
-    res.status(500).json({ success: false, error: 'Errore nel recupero disponibilità' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Errore nel recupero disponibilità',
+      details: error.message 
+    });
   }
 });
 
