@@ -766,7 +766,7 @@ async function sendBookingConfirmationEmail(booking) {
         </style>
         <div style="font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #FFFFFF !important; background-color: #212121; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://costruzionedigitale.com/logooo.png" alt="Costruzione Digitale" style="height: 80px;">
+            <img src="https://costruzionedigitale.com/logosito1.webp" alt="Costruzione Digitale" style="height: 80px;">
           </div>
           
           <h2 style="color: #FF6B00 !important; margin-bottom: 25px; font-weight: 700; text-transform: uppercase; text-align: center;">Prenotazione Confermata!</h2>
@@ -890,7 +890,7 @@ async function sendBookingStatusEmail(booking, status) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://costruzionedigitale.com/logooo.png" alt="Costruzione Digitale" style="height: 60px;">
+            <img src="https://costruzionedigitale.com/logosito1.webp" alt="Costruzione Digitale" style="height: 60px;">
           </div>
           
           ${content}
