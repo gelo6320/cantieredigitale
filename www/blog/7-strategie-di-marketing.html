@@ -1811,14 +1811,15 @@
             
             .article-content {
                 font-size: 1rem;
-                background-color: var(--code-bg);
-                border-radius: 0;
+                background-color: var(--secondary-color);
+                width: calc(100% + 60px); /* Compensa esattamente i margini negativi */
                 margin-left: -30px;
                 margin-right: -30px;
                 border-bottom: var(--primary-color);
                 border-bottom-style: solid;
                 border-top: var(--primary-color);
                 border-top-style: solid;
+                border-radius: 0px;
             }
             
             .comment-header {
