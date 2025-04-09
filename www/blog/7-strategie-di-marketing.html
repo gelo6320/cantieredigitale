@@ -1920,6 +1920,107 @@
             }
         }
 
+        /* Pulsante fluttuante per prenotare una chiamata */
+        .call-to-action-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 50px;
+            padding: 12px 20px;
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.4);
+            text-decoration: none;
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(20px);
+        }
+        
+        .call-to-action-float.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .call-to-action-float:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(255, 107, 0, 0.6);
+        }
+        
+        .cta-float-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .cta-float-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .cta-float-text {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        
+        /* Pulsante animato con effetto pulse */
+        .call-to-action-float::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            z-index: -1;
+            animation: pulse-float 2s infinite;
+        }
+        
+        @keyframes pulse-float {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            70% {
+                transform: scale(1.1);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1.1);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsività per dispositivi mobili */
+        @media (max-width: 768px) {
+            .call-to-action-float {
+                max-width: 300px;
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+            }
+            
+            .cta-float-icon {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .cta-float-text {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2580,12 +2681,15 @@
         </div>
     </section>
 
-    <!-- Back to Top Button -->
-    <div class="back-to-top" id="back-to-top" title="Torna in cima">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-            <path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"/>
-        </svg>
-    </div>
+    <!-- Pulsante per prenotare una chiamata -->
+    <a href="/contattaci" class="call-to-action-float" id="call-to-action-float" title="Prenota una chiamata gratuita">
+        <div class="cta-float-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>
+            </svg>
+        </div>
+        <div class="cta-float-text">PRENOTA UNA CHIAMATA GRATUITA</div>
+    </a>
 
     <!-- Footer -->
     <footer>
@@ -2679,6 +2783,19 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Pulsante fluttuante per prenotare una chiamata
+        const ctaFloatButton = document.getElementById('call-to-action-float');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 500) {
+                    ctaFloatButton.classList.add('show');
+                } else {
+                    ctaFloatButton.classList.remove('show');
+                }
+            });
+    </script>
 
     <!-- Schema.org per Article -->
     <script type="application/ld+json">
