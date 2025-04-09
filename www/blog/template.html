@@ -297,8 +297,9 @@
             line-height: 1.2;
             margin-bottom: 25px;
             font-weight: 800;
-            background: var(--primary-color);
-            -webkit-background-clip: text;
+            background: #ffffff;
+            background-clip: text;          /* Standard property */
+            -webkit-background-clip: text;  /* Webkit prefix for older browsers */
             -webkit-text-fill-color: transparent;
             display: inline-block;
         }
