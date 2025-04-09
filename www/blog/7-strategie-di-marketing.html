@@ -88,6 +88,13 @@
             position: relative;
             z-index: 1;
         }
+
+        @media (max-width: 768px) {
+
+            .container {
+                padding: 0px;
+            }
+        }
         
         /* Pattern di sfondo stile Costruzione */
         .construction-pattern {
@@ -1740,7 +1747,9 @@
             }
             
             .article-content {
-                font-size: 1rem;
+                font-size: 0.85rem;
+                background-color: #333333;
+                width: 100%;
             }
             
             .comment-header {
