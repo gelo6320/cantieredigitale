@@ -393,6 +393,9 @@
             font-size: 1.1rem;
             line-height: 1.8;
             margin-bottom: 60px;
+            background-color: rgba(38, 38, 38, 0.6);
+            padding: 30px;
+            border-radius: 30px;
         }
         
         .article-content p {
@@ -1277,8 +1280,29 @@
         
         .sticky-sidebar {
             position: sticky;
-            top: 100px;
+            top: 130px;
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
+            padding-bottom: 30px;
+            scrollbar-width: thin;
+            z-index: 10; /* Aggiungi un valore di z-index appropriato */
         }
+
+        /* Stile della scrollbar per Chrome, Edge e Safari */
+        .sticky-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sticky-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .sticky-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
         
         /* CTA Section */
         .cta {

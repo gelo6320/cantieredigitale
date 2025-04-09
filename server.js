@@ -42,9 +42,9 @@ app.use(compression({
 // Middleware
 app.use(bodyParser.json());
 app.use(cookieParser());
-// Configurazione avanzata per servire file statici senza estensione .html
 app.use(express.static(path.join(__dirname, 'www'), {
-  extensions: ['html']  // Questo fa sì che Express cerchi automaticamente i file .html quando l'estensione non è specificata
+  extensions: ['html'],
+  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
 }));
 
 // Configurazione CORS
@@ -1041,9 +1041,9 @@ app.get('*.html', (req, res) => {
   res.redirect(301, urlWithoutExt);
 });
 
-// Configurazione per servire i file statici
 app.use(express.static(path.join(__dirname, 'www'), {
-  extensions: ['html']  // Questo fa sì che Express cerchi automaticamente i file .html quando l'estensione non è specificata
+  extensions: ['html'],
+  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
 }));
 
 app.get('/js/cookie-consent-manager.js', (req, res) => {
@@ -1507,9 +1507,12 @@ app.get('*', (req, res) => {
   // Ottieni il percorso richiesto
   let filePath = req.path;
   
-  // Rimuovi la / iniziale se presente
+  // Rimuovi la / iniziale e finale se presenti
   if (filePath.startsWith('/')) {
     filePath = filePath.substring(1);
+  }
+  if (filePath.endsWith('/')) {
+    filePath = filePath.slice(0, -1);
   }
   
   // Se il percorso è vuoto, servi index.html
@@ -1517,18 +1520,28 @@ app.get('*', (req, res) => {
     filePath = 'index.html';
   }
   
-  // Percorso completo al file
-  const fullPath = path.join(__dirname, 'www', filePath);
+  // Percorso completo al file HTML (dando priorità)
   const htmlPath = path.join(__dirname, 'www', filePath + '.html');
   
-  // Controlla se esiste il file richiesto
-  if (fs.existsSync(fullPath)) {
+  // Percorso completo al file senza estensione
+  const fullPath = path.join(__dirname, 'www', filePath);
+  
+  // IMPORTANTE: Prima controlla se esiste la versione .html
+  if (fs.existsSync(htmlPath)) {
+    return res.sendFile(htmlPath);
+  }
+  
+  // Poi controlla se esiste il file richiesto
+  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
     return res.sendFile(fullPath);
   }
   
-  // Controlla se esiste la versione .html
-  if (fs.existsSync(htmlPath)) {
-    return res.sendFile(htmlPath);
+  // Se è una directory, cerca index.html al suo interno
+  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
+    const indexPath = path.join(fullPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
   }
   
   // Altrimenti serve la homepage come fallback
