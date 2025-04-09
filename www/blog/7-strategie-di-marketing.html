@@ -92,7 +92,11 @@
         @media (max-width: 768px) {
 
             .container {
-                padding: 0px;
+                padding: 10px;
+            }
+
+            .blog-article-layout {
+                padding: 0px 0px 40px 0px !important;
             }
         }
         
@@ -1712,7 +1716,8 @@
             }
             
             .related-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             
             .logo-icon {
@@ -1739,6 +1744,10 @@
                 width: 40px;
                 height: 40px;
             }
+
+            .related-content {
+                padding: 15px;
+            }
         }
         
         @media (max-width: 576px) {
@@ -1747,9 +1756,10 @@
             }
             
             .article-content {
-                font-size: 0.85rem;
+                font-size: 1rem;
                 background-color: #333333;
                 width: 100%;
+                padding: 25px;
             }
             
             .comment-header {
@@ -2272,7 +2282,7 @@
                                     </a>
                                 </div>
                             </article>
-                            <article class="related-card">
+                            <!-- <article class="related-card">
                                 <div class="related-image">
                                     <img src="logosito.webp" alt="Case study impresa edile" loading="lazy">
                                 </div>
@@ -2297,7 +2307,7 @@
                                         </svg>
                                     </a>
                                 </div>
-                            </article>
+                            </article> -->
                         </div>
                     </section>
                 </article>
