@@ -1502,23 +1502,6 @@ if (document.readyState === 'loading') {
 `);
 });
 
-// Redirect requests with trailing slashes to non-trailing slash URLs
-app.use((req, res, next) => {
-  // Check if URL ends with a slash and is not the root path
-  if (req.path.length > 1 && req.path.endsWith('/')) {
-    // Remove the trailing slash
-    const newPath = req.path.slice(0, -1);
-    
-    // Preserve query parameters if any
-    const query = req.url.includes('?') ? req.url.slice(req.path.length) : '';
-    
-    // Redirect to the URL without trailing slash
-    return res.redirect(301, newPath + query);
-  }
-  
-  next();
-});
-
 // Route di fallback per SPA
 app.get('*', (req, res) => {
   // Ottieni il percorso richiesto
