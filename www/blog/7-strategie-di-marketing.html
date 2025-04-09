@@ -2039,7 +2039,7 @@
                     <li><a href="/blog" title="leggi il blog della nostra agenzia">Leggi il Blog</a></li>
                     <li><a href="/contattaci" title="Contattaci per una consulenza">Contattaci</a></li>
                 </ul>
-                <div class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Apri menu mobile">
+                <div class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
                         <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
                     </svg>
@@ -2865,13 +2865,6 @@
                 } else {
                     backToTopBtn.classList.remove('show');
                 }
-            });
-            
-            backToTopBtn.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
             });
             
             // Table of Contents Smooth Scroll
