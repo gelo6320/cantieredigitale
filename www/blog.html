@@ -1301,11 +1301,6 @@
                 font-size: 1rem !important;
             }
             
-            .mobile-sidebar-container .sidebar-section {
-                margin-bottom: 20px;
-                padding: 20px;
-            }
-            
             .blog-categories {
                 display: flex;
                 flex-wrap: wrap;
@@ -1379,6 +1374,40 @@
                 gap: 5px;
             }
         }
+
+        @media (max-width: 991px) {
+            
+            .mobile-sidebar-container {
+                max-height: 70vh; /* Limita l'altezza e aggiungi scrolling */
+                overflow-y: auto;
+            }
+            
+            .mobile-sidebar-container .sidebar-section {
+                margin-bottom: 20px;
+                padding: 20px;
+            }
+        }
+
+        .blog-card, .featured-post {
+            position: relative;
+        }
+
+        .blog-card::after, .featured-post::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            pointer-events: none; /* Permette ai click di passare attraverso */
+        }
+
+        .blog-card a, .blog-card button, .featured-post a, .featured-post button {
+            position: relative;
+            z-index: 2;
+        }
+
     </style>
 </head>
 <body>
@@ -1864,16 +1893,22 @@
             const mobileMenu = document.getElementById('mobile-menu');
             const mobileMenuClose = document.getElementById('mobile-menu-close');
             // Mobile Sidebar Toggle
-            const mobileSidebarButton = document.getElementById('mobile-sidebar-button');
-            const mobileSidebarContainer = document.getElementById('mobile-sidebar-container');
             const blogSidebar = document.querySelector('.blog-sidebar');
+            const mobileSidebarContainer = document.getElementById('mobile-sidebar-container');
             
-            if (mobileSidebarButton && mobileSidebarContainer && blogSidebar) {
-                // Clona la sidebar per mobile
-                const sidebarContent = blogSidebar.cloneNode(true);
-                mobileSidebarContainer.appendChild(sidebarContent);
-                
-                mobileSidebarButton.addEventListener('click', function() {
+            if (blogSidebar && mobileSidebarContainer) {
+                // Clona il contenuto interno invece dell'intero elemento
+                const sidebarSections = blogSidebar.querySelectorAll('.sidebar-section');
+                sidebarSections.forEach(section => {
+                    const clonedSection = section.cloneNode(true);
+                    mobileSidebarContainer.appendChild(clonedSection);
+                });
+            }
+            
+            const mobileSidebarButton = document.getElementById('mobile-sidebar-button');
+            if (mobileSidebarButton && mobileSidebarContainer) {
+                mobileSidebarButton.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Previene che il click chiuda immediatamente
                     mobileSidebarContainer.classList.toggle('active');
                 });
                 
@@ -1886,6 +1921,25 @@
                     }
                 });
             }
+            
+            // Rendi le card del blog interamente cliccabili
+            const blogCards = document.querySelectorAll('.blog-card, .featured-post');
+            blogCards.forEach(card => {
+                const link = card.querySelector('h2 a');
+                if (link) {
+                    const url = link.getAttribute('href');
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', function(e) {
+                        // Se l'utente ha cliccato su un link o un bottone all'interno della card
+                        // non interrompiamo quell'azione
+                        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || 
+                            e.target.closest('a') || e.target.closest('button')) {
+                            return;
+                        }
+                        window.location.href = url;
+                    });
+                }
+            });
             
             mobileMenuToggle.addEventListener('click', function() {
                 mobileMenu.classList.add('active');
