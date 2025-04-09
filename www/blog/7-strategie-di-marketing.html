@@ -89,14 +89,18 @@
             z-index: 1;
         }
 
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
         @media (max-width: 768px) {
 
-            .container {
-                padding: 10px;
-            }
-
             .blog-article-layout {
-                padding: 0px 0px 40px 0px !important;
+                padding: 0px 0px 40px 0px;
             }
         }
         
@@ -404,7 +408,7 @@
             font-size: 1.1rem;
             line-height: 1.8;
             margin-bottom: 60px;
-            background-color: rgba(38, 38, 38, 0.6);
+            background-color: var(--code-bg);
             padding: 30px;
             border-radius: 30px;
         }
@@ -778,7 +782,7 @@
         }
         
         .share-button.twitter {
-            background-color: #1da1f2;
+            background-color: #000000;
         }
         
         .share-button.linkedin {
@@ -1038,6 +1042,13 @@
             font-size: 0.6rem;
             flex-grow: 1;
         }
+
+        @media (max-width: 768px) {
+            .related-excerpt {
+                display: none;
+            }
+        }    
+
         
         .read-more {
             display: inline-flex;
@@ -1757,9 +1768,14 @@
             
             .article-content {
                 font-size: 1rem;
-                background-color: #333333;
-                width: 100%;
-                padding: 25px;
+                background-color: var(--code-bg);
+                border-radius: 0;
+                margin-left: -10px;
+                margin-right: -10px;
+                border-bottom: var(--primary-color);
+                border-bottom-style: solid;
+                border-top: var(--primary-color);
+                border-top-style: solid;
             }
             
             .comment-header {
@@ -1819,13 +1835,12 @@
             </a>
             <nav>
                 <ul>
-                    <li><a href="/#why-it-works" title="Scopri perché il nostro metodo funziona">Perché funziona</a></li>
-                    <li><a href="/#process" title="Come funziona il nostro metodo">Come funziona</a></li>
-                    <li><a href="/#services" title="I nostri servizi di marketing">Servizi</a></li>
-                    <li><a href="/blog" title="Il nostro blog">Blog</a></li>
+                    <li><a href="#process" title="Come funziona il nostro metodo">Come funziona</a></li>
+                    <li><a href="#services" title="I nostri servizi di marketing">Servizi</a></li>
+                    <li><a href="/blog" title="leggi il blog della nostra agenzia">Leggi il Blog</a></li>
                     <li><a href="/contattaci" title="Contattaci per una consulenza">Contattaci</a></li>
                 </ul>
-                <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <div class="mobile-menu-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
                         <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
                     </svg>
