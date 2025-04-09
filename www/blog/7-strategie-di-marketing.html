@@ -1507,8 +1507,12 @@
         .mobile-menu-toggle {
             display: none;
             font-size: 1.5rem;
-            color: var(--text-color);
             cursor: pointer;
+        }
+
+        .mobile-menu-toggle svg {
+            width: 1.5rem;
+            height: 1.5rem;
         }
         
         .mobile-menu-container {
@@ -1657,7 +1661,12 @@
             }
             
             .mobile-menu-toggle {
-                display: block;
+                display: flex;
+                align-content: center;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 5px;
+                color: var(--primary-color);
             }
             
             .mobile-menu-container {
