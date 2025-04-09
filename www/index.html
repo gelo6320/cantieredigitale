@@ -5630,48 +5630,7 @@
     }
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const craneElement = document.querySelector('.parallax-crane');
-            
-            if (craneElement) {
-                // Effetto di parallasse leggero al movimento del mouse
-                document.addEventListener('mousemove', function(e) {
-                    if (window.innerWidth > 768) { // Solo su desktop
-                        const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
-                        const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
-                        
-                        craneElement.style.transform = `translate(${moveX}px, ${moveY}px)`;
-                    }
-                });
-                
-                // Piccolo movimento durante lo scroll
-                window.addEventListener('scroll', function() {
-                    const scrollY = window.scrollY || window.pageYOffset;
-                    const moveY = scrollY * 0.05;
-                    
-                    // Combinare con qualsiasi trasformazione esistente
-                    const currentTransform = craneElement.style.transform;
-                    const hasTransform = currentTransform && currentTransform !== 'none';
-                    
-                    if (hasTransform && currentTransform.includes('translate(')) {
-                        // Mantenere la parte X della trasformazione esistente
-                        const match = currentTransform.match(/translate\(([^,]+),/);
-                        if (match && match[1]) {
-                            const moveX = match[1];
-                            craneElement.style.transform = `translate(${moveX}, ${moveY}px)`;
-                        } else {
-                            craneElement.style.transform = `translate(0, ${moveY}px)`;
-                        }
-                    } else {
-                        craneElement.style.transform = `translate(0, ${moveY}px)`;
-                    }
-                });
-            }
-        });
-    </script>
-
-    <script>
+    <!-- <script>
         // Gestione timer banner promozionale
         document.addEventListener('DOMContentLoaded', function() {
             const promoBanner = document.getElementById('promo-banner');
@@ -5729,7 +5688,7 @@
                 });
             }
         });
-    </script>
+    </script> -->
 
 </body>
 </html>
