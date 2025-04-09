@@ -2079,8 +2079,10 @@
             const activeCategory = urlParams.get('categoria');
             
             categoryPills.forEach(pill => {
-                const href = new URL(pill.href);
-                const pillCategory = new URLSearchParams(href.search).get('categoria');
+                // Get search params directly from the href string
+                const hrefString = pill.getAttribute('href') || pill.href || '';
+                const queryString = hrefString.includes('?') ? hrefString.split('?')[1] : '';
+                const pillCategory = new URLSearchParams(queryString).get('categoria');
                 
                 if ((activeCategory === null && pill.classList.contains('active')) || 
                     (activeCategory === pillCategory)) {
