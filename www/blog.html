@@ -813,22 +813,44 @@
             display: inline-block;
             background-color: var(--primary-color);
             color: white;
-            padding: 12px 25px;
+            padding: 18px 35px;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
-            border: none;
+            border: 2px solid var(--primary-color);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
             text-align: center;
+            margin: 10px auto;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.4s ease;
+            z-index: 1;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:hover {
             background-color: var(--accent-color);
-            transform: translateY(-3px);
+            border-color: var(--accent-color);
+            box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
+            transform: translateY(-2px);
         }
         
         /* CTA Section */
@@ -1075,14 +1097,33 @@
         }
         
         .mobile-menu-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
             border: none;
-            color: var(--text-color);
-            font-size: 1.8rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-close {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.8rem;
+                cursor: pointer;
+            }
         }
         
         .mobile-menu-items {
@@ -1098,22 +1139,30 @@
         }
         
         .mobile-menu-items li a {
-            display: block;
-            font-size: 1.2rem;
             color: var(--text-color);
             text-decoration: none;
-            padding: 5px 0;
             transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            font-size: 1.1rem;
         }
-        
+
         .mobile-menu-items li a:hover {
             color: var(--primary-color);
         }
+
+        .mobile-menu-items {
+            margin-bottom: 30px;
+        }
         
         .mobile-menu-button {
-            width: 100%;
-            max-width: none;
             margin-top: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         /* Responsive */
@@ -1238,6 +1287,12 @@
         }
         
         @media (max-width: 991px) {
+
+            .btn {
+                padding: 15px 25px;
+                font-size: 1rem;
+            }
+            
             .mobile-sidebar-toggle {
                 display: block;
             }
@@ -1414,6 +1469,12 @@
             margin-right: 10px;
         }
 
+        .mobile-menu-items li a i {
+            color: var(--primary-color);
+            width: 24px;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
@@ -1459,7 +1520,7 @@
             <li><a href="/blog" title="leggi il blog della nostra agenzia">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
                     <path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/>
-                </svg> leggi il blog</a>
+                </svg> Leggi il blog</a>
             </li>
             <li><a href="/#process" title="Scopri come funziona il nostro metodo">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">

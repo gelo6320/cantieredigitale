@@ -1649,18 +1649,6 @@
             }
         }
         
-        /* Miglioramenti al design dei bottoni */
-        .btn {
-            border-radius: 10px;
-            overflow: hidden;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 10px 25px rgba(255, 107, 0, 0.3);
-        }
-        
         .btn::after {
             content: '';
             position: absolute;
@@ -3682,13 +3670,6 @@
                 top: -20px;
             }
             
-            .btn {
-                padding: 12px 20px;
-                font-size: 0.9rem;
-                width: 100%;
-                max-width: 300px;
-            }
-            
             .btn-lg {
                 padding: 15px 30px;
                 font-size: 1rem;
@@ -4180,32 +4161,7 @@
                 font-size: 1.8rem;
                 cursor: pointer;
             }
-            
-            .mobile-menu-items {
-                list-style: none;
-                padding: 0;
-                margin: 30px 0;
-            }
-            
-            .mobile-menu-items li {
-                margin-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-                padding-bottom: 15px;
-            }
-            
-            .mobile-menu-items li a {
-                display: block;
-                font-size: 1.2rem;
-                color: var(--text-color);
-                text-decoration: none;
-                padding: 5px 0;
-                transition: color 0.3s ease;
-            }
-            
-            .mobile-menu-items li a:hover {
-                color: var(--primary-color);
-            }
-            
+
             .mobile-menu-contact {
                 margin-top: 40px;
                 padding-top: 20px;
@@ -4262,28 +4218,12 @@
             }
             
             .mobile-menu-button {
-                width: 100%;
-                max-width: none;
                 margin-top: 30px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
-        }
-
-        .mobile-menu-items {
-            margin-bottom: 30px;
-        }
-
-        .mobile-menu-items li a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 0;
-            font-size: 1.1rem;
-        }
-        
-        .mobile-menu-items li a i {
-            color: var(--primary-color);
-            width: 24px;
-            text-align: center;
         }
 
         /* Fix per i forms su mobile */
@@ -4513,14 +4453,6 @@
             width: 1em;
             height: 1em;
         }
-        
-        .mobile-menu-items li a svg {
-            color: var(--primary-color);
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-        
         /* Animazione per le frecce nei pulsanti */
         .freedom-button svg {
             margin-left: 10px;
@@ -4908,6 +4840,50 @@
             }
         }
 
+        .mobile-menu-items li a svg {
+            color: var(--primary-color);
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .mobile-menu-items li a i {
+            color: var(--primary-color);
+            width: 24px;
+            text-align: center;
+        }
+
+        .mobile-menu-items {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+        
+        .mobile-menu-items li {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        
+        .mobile-menu-items li a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+        }
+
+        .mobile-menu-items li a:hover {
+            color: var(--primary-color);
+        }
+
+        .mobile-menu-items {
+            margin-bottom: 30px;
+        }
+
     </style>
 </head>
 <body>
@@ -4916,7 +4892,7 @@
     <div class="construction-pattern"></div>
 
     <!-- Banner promozionale con timer -->
-    <div id="promo-banner" class="promo-banner">
+    <!-- <div id="promo-banner" class="promo-banner">
         <div class="container">
             <a href="/corso-gratuito" class="promo-content-link" title="Clicca qui per ricevere la nostra guida gratuita">
                 <div class="promo-content">
@@ -4941,9 +4917,9 @@
                     </div>
                 </div>
             </a>
-            <!-- <button class="close-promo" id="close-promo" aria-label="Chiudi banner">×</button> -->
+            <button class="close-promo" id="close-promo" aria-label="Chiudi banner">×</button>
         </div>
-    </div>
+    </div> -->
     
     <header id="header">
         <div class="container nav-container">
@@ -4983,7 +4959,7 @@
             <li><a href="/blog" title="leggi il blog della nostra agenzia">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
                     <path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/>
-                </svg> leggi il blog</a>
+                </svg> Leggi il blog</a>
             </li>
             <li><a href="/#process" title="Scopri come funziona il nostro metodo">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
