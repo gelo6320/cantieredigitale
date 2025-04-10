@@ -1186,9 +1186,6 @@
         }
         
         .cookie-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 15px;
         }
         
@@ -1226,7 +1223,12 @@
             background-color: transparent;
             color: var(--primary-color);
             border: 2px solid var(--primary-color);
-            max-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .btn-outline {
+                max-width: 300px;
+            }
         }
         
         .btn-outline:hover {
@@ -1246,6 +1248,13 @@
             border: 2px solid var(--primary-color);
             box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
         }
+
+        @media (max-width: 768px) {
+            .btn-primary {
+                max-width: 300px;
+            }
+        }
+
         .btn-primary:hover {
             background-color: var(--accent-color);
             box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
@@ -1303,10 +1312,13 @@
             }
             
             .cookie-footer {
-                flex-direction: column;
-                align-items: center;
+                flex-direction: row;
                 gap: 10px;
                 font-size: 0.85rem;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                justify-content: center;
             }
         }
         
