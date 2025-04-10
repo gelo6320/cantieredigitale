@@ -907,27 +907,30 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       return false;
     }
 
-    console.log(`EventID: ${eventId}`);
-    console.log(`Dati utente ricevuti:`, userData);
+    // Ottieni il consenso dell'utente dal database, non dalla richiesta
+    let hasConsent = false;
+    let userFbclid = null;
     
-    // Verifica sessione e consenso
-    if (req && req.session) {
-      console.log(`fbclid in sessione: ${req.session.fbclid || 'NESSUNO'}`);
-    } else {
-      console.log('Sessione non disponibile');
-    }
-    
-    if (req && req.cookieConsent) {
-      console.log(`Consenso marketing: ${req.cookieConsent.marketing ? 'SÌ' : 'NO'}`);
-    } else {
-      console.log('Informazioni consenso non disponibili');
+    if (req && req.cookies && req.cookies.userId) {
+      // Cerca direttamente nel database, non in req.cookieConsent
+      const userConsent = await CookieConsent.findOne({ userId: req.cookies.userId });
+      
+      if (userConsent) {
+        console.log(`Consenso marketing da database: ${userConsent.marketing ? 'SÌ' : 'NO'}`);
+        hasConsent = userConsent.marketing;
+      }
+      
+      // Ottieni fbclid dalla sessione se disponibile
+      if (req.session && req.session.fbclid) {
+        userFbclid = req.session.fbclid;
+        console.log(`fbclid in sessione: ${userFbclid}`);
+      }
     }
 
     // Per gli eventi che non sono PageView, verifica il consenso ai cookie di marketing
-    // a meno che non stiamo inviando solo l'fbclid (che è permesso anche senza consenso)
-    if (eventName !== 'PageView' && req && req.cookieConsent && !req.cookieConsent.marketing) {
+    if (eventName !== 'PageView' && !hasConsent) {
       // Se non c'è consenso di marketing ma abbiamo un fbclid, possiamo usare solo quello
-      if (req.session && req.session.fbclid) {
+      if (userFbclid) {
         console.log('Consenso marketing NON fornito ma fbclid disponibile: invio solo fbclid');
         
         const payload = {
@@ -937,7 +940,7 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
             event_id: eventId,
             event_source_url: eventData.sourceUrl || 'https://costruzionedigitale.com',
             user_data: {
-              fbclid: req.session.fbclid
+              fbclid: userFbclid
             },
             custom_data: eventData.customData || {}
           }],
@@ -946,20 +949,15 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
           test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
         };
 
-        console.log('Payload preparato (solo fbclid):');
-        console.log(JSON.stringify(payload.data[0], null, 2));
-
         const response = await axios.post(
           `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
           payload
         );
 
         console.log(`✅ CAPI ${eventName} inviato solo con fbclid (no dati utente)`);
-        console.log('Risposta da Facebook:', JSON.stringify(response.data, null, 2));
         return true;
       }
       
-      // Se non c'è consenso marketing e non abbiamo fbclid, non inviamo l'evento
       console.log(`❌ Evento ${eventName} NON inviato: consenso marketing non fornito e fbclid non disponibile`);
       return false;
     }
@@ -1223,29 +1221,93 @@ app.use(express.static(path.join(__dirname, 'www'), {
   index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
 }));
 
+// In server.js: Aggiungi una nuova route per servire script di tracciamento basati sul consenso
+app.get('/js/tracking.js', async (req, res) => {
+  const userId = req.cookies.userId;
+  let consent = { essential: true, analytics: false, marketing: false };
+  
+  if (userId) {
+    const userConsent = await CookieConsent.findOne({ userId });
+    if (userConsent) {
+      consent = {
+        essential: userConsent.essential,
+        analytics: userConsent.analytics, 
+        marketing: userConsent.marketing
+      };
+    }
+  }
+  
+  let trackingCode = '';
+  
+  // Base script sempre incluso
+  trackingCode += `
+    console.log("Consenso utente:", ${JSON.stringify(consent)});
+    window.userConsent = ${JSON.stringify(consent)};
+  `;
+  
+  // Google Analytics - solo se il consenso analytics è true
+  if (consent.analytics) {
+    trackingCode += `
+      // Google Analytics
+      (function() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-MBFTYV86P7');
+        
+        // Carica lo script GA
+        var gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-MBFTYV86P7';
+        document.head.appendChild(gaScript);
+        
+        console.log('Google Analytics attivato basato sul consenso utente');
+      })();
+    `;
+  }
+  
+  // Meta Pixel - solo se il consenso marketing è true
+  if (consent.marketing) {
+    trackingCode += `
+      // Meta Pixel
+      (function() {
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        
+        // Inizializza pixel e invia PageView
+        window.fbEventId = 'event_' + new Date().getTime() + '_' + Math.random().toString(36).substring(2, 15);
+        fbq('init', '1543790469631614');
+        fbq('track', 'PageView', {}, {eventID: window.fbEventId});
+        
+        console.log('Meta Pixel attivato basato sul consenso utente, eventID:', window.fbEventId);
+      })();
+    `;
+  }
+  
+  res.type('application/javascript');
+  res.send(trackingCode);
+});
+
 app.get('/js/cookie-consent-manager.js', (req, res) => {
   res.type('application/javascript');
   res.send(`// CookieConsentManager.js - Generated by server
 // Versione 1.0.0
 
-/**
- * CookieConsentManager
- * Sistema unificato per la gestione del consenso ai cookie su tutte le pagine
- */
 class CookieConsentManager {
     constructor(options = {}) {
-        // Configurazione predefinita
+        // Configurazione base
         this.config = {
             cookieName: 'user_cookie_consent',
-            cookieDuration: 365, // giorni
-            analyticsId: 'G-MBFTYV86P7', // Default empty string instead of undefined
-            metaPixelId: '1543790469631614',
+            cookieDuration: 365,
             ...options
         };
         
         // Stato del consenso
         this.consent = {
-            essential: true, // Sempre necessari
+            essential: true,
             analytics: false,
             marketing: false,
             configured: false
@@ -1255,23 +1317,19 @@ class CookieConsentManager {
         this.init();
     }
 
-    /**
-     * Inizializza il gestore dei cookie
-     */
-    init() {
+    async init() {
         // Carica le preferenze esistenti
         this.loadPreferences();
         
-        // Applica le preferenze
-        this.applyPreferences();
-        
-        // Collega gli eventi al banner esistente nella pagina
+        // Collega gli eventi al banner
         this.bindExistingBanner();
+        
+        // Carica lo script di tracciamento dopo un piccolo ritardo
+        setTimeout(() => {
+            this.loadTrackingScript();
+        }, 100);
     }
 
-    /**
-     * Carica le preferenze dai cookie
-     */
     loadPreferences() {
         const cookieValue = this.getCookie(this.config.cookieName);
         
@@ -1286,10 +1344,7 @@ class CookieConsentManager {
         }
     }
 
-    /**
-     * Salva le preferenze nei cookie
-     */
-    savePreferences() {
+    async savePreferences() {
         // Imposta il flag configured su true
         this.consent.configured = true;
         
@@ -1300,186 +1355,46 @@ class CookieConsentManager {
             this.config.cookieDuration
         );
         
-        console.log('Preferenze cookie salvate:', this.consent);
+        // Salva le preferenze sul server e ricarica gli script di tracciamento
+        try {
+            const response = await fetch('/api/cookie-consent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.consent),
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                console.log('Preferenze cookie salvate sul server');
+                
+                // Ricarica lo script di tracciamento per applicare le nuove preferenze
+                this.loadTrackingScript(true);
+            }
+        } catch (error) {
+            console.error('Errore nel salvataggio delle preferenze sul server:', error);
+        }
         
         // Nascondi il banner
         this.hideBanner();
-        
-        // Applica le preferenze con un piccolo ritardo
-        // per dare tempo al browser di elaborare le altre operazioni
-        setTimeout(() => {
-            this.applyPreferences();
-        }, 50);
     }
     
-    /**
-     * Collega gli eventi al banner esistente nella pagina
-     */
-    bindExistingBanner() {
-        // Verifica se il banner esiste già
-        const banner = document.getElementById('cookie-banner');
-        
-        if (banner) {
-            // Se l'utente ha già configurato le preferenze, nascondi il banner
-            if (this.consent.configured) {
-                banner.classList.remove('show');
-                return;
-            }
-            
-            // Altrimenti, mostra il banner
-            setTimeout(() => {
-                banner.classList.add('show');
-            }, 1000);
-            
-            // Collega gli eventi ai pulsanti
-            const closeBtn = document.getElementById('cookie-close');
-            const acceptBtn = document.getElementById('cookie-accept-all');
-            const rejectBtn = document.getElementById('cookie-reject-all');
-            
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => this.hideBanner());
-            }
-            
-            if (acceptBtn) {
-                acceptBtn.addEventListener('click', () => this.acceptAllCookies());
-            }
-            
-            if (rejectBtn) {
-                rejectBtn.addEventListener('click', () => this.rejectAllCookies());
-            }
-        } else {
-            console.warn('Banner dei cookie non trovato nel DOM');
-        }
-    }
-
-    /**
-     * Applica le preferenze attivando/disattivando i relativi servizi
-     */
-    applyPreferences() {
-        console.log('Applicazione preferenze cookie...');
-        
-        // Prima disabilitiamo sempre tutti i servizi
-        this.disableGoogleAnalytics();
-        this.disableMetaPixel();
-        
-        // Poi attiviamo solo quelli consentiti
-        if (this.consent.analytics) {
-            this.enableGoogleAnalytics();
-        }
-        
-        if (this.consent.marketing) {
-            // Aggiungi un leggero ritardo prima di attivare Meta Pixel
-            // per evitare conflitti con altri script
-            setTimeout(() => {
-                this.enableMetaPixel();
-            }, 100);
-        }
-    }
-
-    /**
-     * Abilita Google Analytics
-     */
-    enableGoogleAnalytics() {
-        if (!window.gtag || typeof window.gtag !== 'function' || window.gtag.toString().includes('disabilitato')) {
-            console.log('Attivazione Google Analytics...');
-            
-            // Check if analyticsId is defined
-            if (!this.config || !this.config.analyticsId) {
-                console.error('Google Analytics ID non configurato');
-                return;
-            }
-            
-            // Rimuovi lo script precedente se esiste
-            const existingScript = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
+    loadTrackingScript(reload = false) {
+        // Rimuovi script precedente se necessario
+        if (reload) {
+            const existingScript = document.getElementById('tracking-script');
             if (existingScript) {
                 existingScript.remove();
             }
-            
-            // Crea e aggiungi lo script di Google Analytics
-            const gaScript = document.createElement('script');
-            gaScript.src = \`https://www.googletagmanager.com/gtag/js?id=\${this.config.analyticsId}\`;
-            gaScript.async = true;
-            document.head.appendChild(gaScript);
-            
-            // Inizializza Google Analytics
-            window.dataLayer = window.dataLayer || [];
-            window.gtag = function() {
-                window.dataLayer.push(arguments);
-            };
-            window.gtag('js', new Date());
-            window.gtag('config', this.config.analyticsId);
         }
+        
+        // Carica lo script di tracciamento dal server
+        const script = document.createElement('script');
+        script.id = 'tracking-script';
+        script.src = '/js/tracking.js?t=' + Date.now(); // Versione per evitare cache
+        document.head.appendChild(script);
     }
-
-    /**
-     * Disabilita Google Analytics
-     */
-    disableGoogleAnalytics() {
-        console.log('Disattivazione Google Analytics...');
-        
-        // Rimuovi lo script
-        const gaScript = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
-        if (gaScript) {
-            gaScript.remove();
-        }
-        
-        // Sovrascrive la funzione gtag
-        window._gtag_backup = window.gtag;
-        window.gtag = function() {
-            console.log('Google Analytics è disabilitato per preferenze cookie: gtag disabilitato');
-        };
-        
-        // Cancella il dataLayer
-        window.dataLayer = [];
-    }
-
-    /**
-     * Abilita Meta Pixel (Facebook)
-     */
-    // Modifica della funzione enableMetaPixel() nel CookieConsentManager
-    enableMetaPixel() {
-        console.log('Attivazione Meta Pixel...');
-        
-        // Se il Pixel è già attivo, non fare nulla
-        if (window._metaPixelEnabled && window.fbq && typeof window.fbq === 'function') {
-            console.log('Meta Pixel già attivo');
-            return;
-        }
-        
-        // Imposta il flag prima di inizializzare
-        window._metaPixelEnabled = true;
-        
-        // Verifica l'ID
-        if (!this.config.metaPixelId) {
-            console.error('Meta Pixel ID non configurato');
-            return;
-        }
-        
-        try {
-            // Rimuovi script e pixel esistenti per evitare duplicati
-            document.querySelectorAll('script[src*="connect.facebook.net"]').forEach(el => el.remove());
-            document.querySelectorAll('noscript img[src*="facebook.com/tr"]').forEach(el => {
-                if (el.parentNode) el.parentNode.remove();
-            });
-            
-            // Inizializza Meta Pixel
-            window.fbq = window.fbq || function() {
-                window.fbq.callMethod ? 
-                window.fbq.callMethod.apply(window.fbq, arguments) : 
-                window.fbq.queue.push(arguments);
-            };
-            
-            if (!window._fbq) window._fbq = window.fbq;
-            window.fbq.push = window.fbq;
-            window.fbq.loaded = true;
-            window.fbq.version = '2.0';
-            window.fbq.queue = [];
-            
-            // Crea script per caricamento
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-            document.head.appendChild(script);
             
             // Inizializza e traccia
             window.fbq('init', this.config.metaPixelId);
