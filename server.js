@@ -1302,6 +1302,8 @@ class CookieConsentManager {
         this.config = {
             cookieName: 'user_cookie_consent',
             cookieDuration: 365,
+            analyticsId: 'G-MBFTYV86P7',
+            metaPixelId: '1543790469631614',
             ...options
         };
         
@@ -1395,79 +1397,42 @@ class CookieConsentManager {
         script.src = '/js/tracking.js?t=' + Date.now(); // Versione per evitare cache
         document.head.appendChild(script);
     }
-            
-            // Inizializza e traccia
-            window.fbq('init', this.config.metaPixelId);
-            
-            // Genera un eventID univoco per la pagina
-            window.fbEventId = 'event_' + new Date().getTime() + '_' + Math.random().toString(36).substring(2, 15);
-            
-            // Traccia la visualizzazione della pagina con eventID
-            window.fbq('track', 'PageView', {}, {eventID: window.fbEventId});
-            
-            // Aggiungi noscript
-            const noscript = document.createElement('noscript');
-            const img = document.createElement('img');
-            img.height = 1;
-            img.width = 1;
-            img.style.display = 'none';
-            img.src = 'https://www.facebook.com/tr?id=' + this.config.metaPixelId + '&ev=PageView&noscript=1';
-            noscript.appendChild(img);
-            document.body.appendChild(noscript);
-            
-            console.log('Meta Pixel inizializzato con successo, eventID:', window.fbEventId);
-        } catch (error) {
-            console.error('Errore durante inizializzazione Meta Pixel:', error);
-            window._metaPixelEnabled = false;
-        }
-    }
-
-    /**
-     * Disabilita Meta Pixel (Facebook)
-     */
-    disableMetaPixel() {
-        console.log('Disattivazione Meta Pixel...');
+    
+    bindExistingBanner() {
+        // Verifica se il banner esiste già
+        const banner = document.getElementById('cookie-banner');
         
-        // Imposta flag globale
-        window._metaPixelEnabled = false;
-        
-        // Evita di mostrare messaggi multipli
-        let isLogEnabled = true;
-        
-        // Rimuovi script e pixel
-        try {
-            // Rimuovi script
-            const fbScripts = document.querySelectorAll('script[src*="connect.facebook.net/en_US/fbevents.js"]');
-            fbScripts.forEach(script => script.remove());
-            
-            // Rimuovi pixel
-            const pixelImgs = document.querySelectorAll('img[src*="facebook.com/tr"]');
-            pixelImgs.forEach(img => {
-                if (img.parentNode.nodeName.toLowerCase() === 'noscript') {
-                    img.parentNode.remove();
-                } else {
-                    img.remove();
-                }
-            });
-            
-            // Rimuovi noscript elements
-            const noscriptTags = document.querySelectorAll('noscript');
-            noscriptTags.forEach(tag => {
-                if (tag.innerHTML.includes('facebook.com/tr')) {
-                    tag.remove();
-                }
-            });
-        } catch (e) {
-            console.error('Errore durante la rimozione di Meta Pixel:', e);
-        }
-        
-        // Sovrascrive la funzione fbq con versione disabilitata
-        window.fbq = function() {
-            if (isLogEnabled) {
-                console.log('Meta Pixel è disabilitato per preferenze cookie');
-                isLogEnabled = false; // Evita messaggi multipli
+        if (banner) {
+            // Se l'utente ha già configurato le preferenze, nascondi il banner
+            if (this.consent.configured) {
+                banner.classList.remove('show');
+                return;
             }
-        };
+            
+            // Altrimenti, mostra il banner
+            setTimeout(() => {
+                banner.classList.add('show');
+            }, 1000);
+            
+            // Collega gli eventi ai pulsanti
+            const closeBtn = document.getElementById('cookie-close');
+            const acceptBtn = document.getElementById('cookie-accept-all');
+            const rejectBtn = document.getElementById('cookie-reject-all');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => this.hideBanner());
+            }
+            
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', () => this.acceptAllCookies());
+            }
+            
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', () => this.rejectAllCookies());
+            }
+        } else {
+            console.warn('Banner dei cookie non trovato nel DOM');
+        }
     }
 
     /**
@@ -1576,10 +1541,7 @@ function initCookieManager() {
     console.log('Inizializzazione Cookie Manager...');
     
     // Crea l'istanza del gestore
-    window.cookieManager = new CookieConsentManager({
-        analyticsId: 'G-MBFTYV86P7',    // ID di Google Analytics
-        metaPixelId: '1543790469631614' // ID del Meta Pixel
-    });
+    window.cookieManager = new CookieConsentManager();
     
     // Inizializza i link per reimpostare le preferenze
     initCookieSettingsLinks();
