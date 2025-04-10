@@ -232,6 +232,80 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Middleware per catturare fbclid e inviare PageView alla CAPI (solo per la prima visita)
+app.use(async (req, res, next) => {
+  // Estrai fbclid dalla query
+  const fbclid = req.query.fbclid;
+  
+  console.log('========== FBCLID MIDDLEWARE ==========');
+  console.log(`URL richiesto: ${req.originalUrl}`);
+  console.log(`fbclid trovato nella query: ${fbclid || 'NESSUNO'}`);
+  console.log(`fbclid già tracciato in sessione: ${req.session && req.session.fbclidTracked ? 'SÌ' : 'NO'}`);
+  
+  // Procedi solo se c'è un fbclid nella URL e non è stato già tracciato questo fbclid
+  if (fbclid && (!req.session || !req.session.fbclidTracked)) {
+    // Salva fbclid in sessione se presente
+    if (req.session) {
+      req.session.fbclid = fbclid;
+      req.session.fbclidTracked = true; // Segna come già tracciato per evitare duplicati
+      console.log(`fbclid "${fbclid}" salvato in sessione e marcato come tracciato`);
+    } else {
+      console.log('ATTENZIONE: Sessione non disponibile, impossibile salvare fbclid');
+    }
+    
+    try {
+      // Genera un ID evento univoco per la deduplicazione
+      const eventId = 'pageview_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+      console.log(`Generato eventId: ${eventId}`);
+      
+      // Costruzione del payload con solo fbclid (senza dati personali)
+      const payload = {
+        data: [{
+          event_name: 'PageView',
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: eventId,
+          event_source_url: req.headers.referer || `https://${req.get('host')}${req.originalUrl}`,
+          user_data: {
+            fbclid: fbclid
+          },
+          custom_data: {}
+        }],
+        access_token: process.env.ACCESS_TOKEN,
+        partner_agent: 'costruzionedigitale-nodejs',
+        test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
+      };
+      
+      console.log('Payload PageView preparato:');
+      console.log(JSON.stringify(payload.data[0], null, 2));
+      
+      // Invia l'evento PageView alla CAPI
+      console.log('Invio evento PageView a Facebook...');
+      const response = await axios.post(
+        `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+        payload
+      );
+      
+      console.log('CAPI PageView iniziale inviato con successo');
+      console.log('Risposta da Facebook:', JSON.stringify(response.data, null, 2));
+    } catch (error) {
+      console.error('❌ ERRORE invio PageView a CAPI:');
+      if (error.response) {
+        console.error('Status:', error.response.status);
+        console.error('Dati errore:', JSON.stringify(error.response.data, null, 2));
+      } else {
+        console.error('Errore completo:', error.message);
+      }
+    }
+  } else if (fbclid) {
+    console.log(`Nessun evento inviato: fbclid "${fbclid}" già tracciato in precedenza`);
+  } else {
+    console.log('Nessun evento inviato: fbclid non presente nell\'URL');
+  }
+  
+  console.log('====================================');
+  next();
+});
+
 // ----- ROUTES PER IL FRONTEND -----
 
 // Route per la gestione dell'invio del form
@@ -260,11 +334,12 @@ app.post('/api/submit-form', async (req, res) => {
         }
       };
       
+      console.log('Invio evento Lead alla CAPI dal form di contatto...');
+      console.log('Dati form:', req.body);
       // Invia l'evento come Lead
-      await sendFacebookConversionEvent('Lead', userData, eventData, eventId);
+      await sendFacebookConversionEvent('Lead', userData, eventData, eventId, req);
     } catch (conversionError) {
-      console.error('Errore nell\'invio dell\'evento alla CAPI:', conversionError);
-      // Non blocchiamo il flusso se l'invio fallisce
+      console.error('Errore completo nell\'invio dell\'evento alla CAPI:', conversionError);
     }
     
     console.log('Dati salvati in MongoDB:', req.body);
@@ -390,12 +465,22 @@ app.post('/api/submit-booking', async (req, res) => {
         }
       };
       
+      console.log('Invio eventi alla CAPI dalla prenotazione...');
+      console.log('Dati prenotazione:', {
+        name: req.body.name,
+        email: req.body.email,
+        date: req.body.bookingDate,
+        time: req.body.bookingTime
+      });
+      
       // Invia l'evento come Lead e Schedule
-      await sendFacebookConversionEvent('Lead', userData, eventData, eventId + '_lead');
-      await sendFacebookConversionEvent('Schedule', userData, eventData, eventId + '_schedule');
+      console.log('Invio evento Lead...');
+      await sendFacebookConversionEvent('Lead', userData, eventData, eventId + '_lead', req);
+      
+      console.log('Invio evento Schedule...');
+      await sendFacebookConversionEvent('Schedule', userData, eventData, eventId + '_schedule', req);
     } catch (conversionError) {
-      console.error('Errore nell\'invio dell\'evento alla CAPI:', conversionError);
-      // Non blocchiamo il flusso se l'invio fallisce
+      console.error('Errore completo nell\'invio degli eventi alla CAPI:', conversionError);
     }
     
     // Restituisci l'eventId per la deduplicazione lato client
@@ -802,14 +887,74 @@ function formatStatus(status) {
 }
 
 // Funzione per inviare eventi alla Facebook Conversion API
-async function sendFacebookConversionEvent(eventName, userData, eventData, eventId) {
+async function sendFacebookConversionEvent(eventName, userData, eventData, eventId, req) {
+  console.log(`\n========== INVIO EVENTO ${eventName} ==========`);
+  
   try {
     // Verifica che l'access token sia configurato
     if (!process.env.ACCESS_TOKEN) {
-      console.error('Facebook Access Token non configurato');
+      console.error('❌ Facebook Access Token non configurato');
       return false;
     }
 
+    console.log(`EventID: ${eventId}`);
+    console.log(`Dati utente ricevuti:`, userData);
+    
+    // Verifica sessione e consenso
+    if (req && req.session) {
+      console.log(`fbclid in sessione: ${req.session.fbclid || 'NESSUNO'}`);
+    } else {
+      console.log('Sessione non disponibile');
+    }
+    
+    if (req && req.cookieConsent) {
+      console.log(`Consenso marketing: ${req.cookieConsent.marketing ? 'SÌ' : 'NO'}`);
+    } else {
+      console.log('Informazioni consenso non disponibili');
+    }
+
+    // Per gli eventi che non sono PageView, verifica il consenso ai cookie di marketing
+    // a meno che non stiamo inviando solo l'fbclid (che è permesso anche senza consenso)
+    if (eventName !== 'PageView' && req && req.cookieConsent && !req.cookieConsent.marketing) {
+      // Se non c'è consenso di marketing ma abbiamo un fbclid, possiamo usare solo quello
+      if (req.session && req.session.fbclid) {
+        console.log('Consenso marketing NON fornito ma fbclid disponibile: invio solo fbclid');
+        
+        const payload = {
+          data: [{
+            event_name: eventName,
+            event_time: Math.floor(Date.now() / 1000),
+            event_id: eventId,
+            event_source_url: eventData.sourceUrl || 'https://costruzionedigitale.com',
+            user_data: {
+              fbclid: req.session.fbclid
+            },
+            custom_data: eventData.customData || {}
+          }],
+          access_token: process.env.ACCESS_TOKEN,
+          partner_agent: 'costruzionedigitale-nodejs',
+          test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
+        };
+
+        console.log('Payload preparato (solo fbclid):');
+        console.log(JSON.stringify(payload.data[0], null, 2));
+
+        const response = await axios.post(
+          `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+          payload
+        );
+
+        console.log(`✅ CAPI ${eventName} inviato solo con fbclid (no dati utente)`);
+        console.log('Risposta da Facebook:', JSON.stringify(response.data, null, 2));
+        return true;
+      }
+      
+      // Se non c'è consenso marketing e non abbiamo fbclid, non inviamo l'evento
+      console.log(`❌ Evento ${eventName} NON inviato: consenso marketing non fornito e fbclid non disponibile`);
+      return false;
+    }
+
+    console.log('Preparazione dati con hashing per la privacy...');
     // Preparazione dei dati dell'utente con hashing per la privacy
     const hashedUserData = {
       em: userData.email ? crypto.createHash('sha256').update(userData.email.toLowerCase().trim()).digest('hex') : undefined,
@@ -818,10 +963,19 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       ln: userData.name && userData.name.includes(' ') ? crypto.createHash('sha256').update(userData.name.split(' ').slice(1).join(' ').toLowerCase().trim()).digest('hex') : undefined,
     };
 
+    // Aggiungi fbclid se disponibile in sessione
+    if (req && req.session && req.session.fbclid) {
+      hashedUserData.fbclid = req.session.fbclid;
+      console.log(`fbclid "${req.session.fbclid}" aggiunto ai dati utente`);
+    }
+
     // Filtro per rimuovere valori undefined
     Object.keys(hashedUserData).forEach(key => 
       hashedUserData[key] === undefined && delete hashedUserData[key]
     );
+
+    console.log('Dati utente dopo hashing:');
+    console.log(JSON.stringify(hashedUserData, null, 2));
 
     // Costruzione del payload
     const payload = {
@@ -838,16 +992,29 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
     };
 
+    console.log('Payload completo preparato:');
+    console.log(JSON.stringify(payload.data[0], null, 2));
+    
     // Invio dell'evento alla CAPI
+    console.log('Invio evento a Facebook...');
     const response = await axios.post(
       `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
       payload
     );
 
-    console.log('Facebook Conversion API - Evento inviato con successo:', response.data);
+    console.log(`✅ CAPI ${eventName} inviato con successo!`);
+    console.log('Risposta da Facebook:', JSON.stringify(response.data, null, 2));
+    console.log('=========================================\n');
     return true;
   } catch (error) {
-    console.error('Errore nell\'invio dell\'evento alla Facebook Conversion API:', error.response?.data || error.message);
+    console.error(`❌ ERRORE nell'invio dell'evento ${eventName} alla CAPI:`);
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Dati errore:', JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error('Errore completo:', error.message);
+    }
+    console.error('=========================================\n');
     return false;
   }
 }
