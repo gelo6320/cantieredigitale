@@ -136,6 +136,10 @@ const Booking = mongoose.model('Booking', BookingSchema); // Nuovo modello
 
 // Middleware per verificare il consenso ai cookie
 const checkCookieConsent = async (req, res, next) => {
+  console.log('=============== CHECK COOKIE CONSENT ===============');
+  console.log('Path:', req.path);
+  console.log('Cookie userId:', req.cookies.userId);
+  console.log('Cookie user_cookie_consent:', req.cookies.user_cookie_consent);
   // I cookie essenziali sono sempre consentiti
   if (req.path === '/api/cookie-consent' || req.path.startsWith('/admin')) {
     return next();
@@ -803,6 +807,12 @@ app.post('/api/cookie-consent', async (req, res) => {
   try {
     const { essential, analytics, marketing } = req.body;
     const userId = req.cookies.userId || generateUserId();
+    
+    console.log('=============== SALVATAGGIO COOKIE CONSENT ===============');
+    console.log('Cookie userId ricevuto:', req.cookies.userId);
+    console.log('userId utilizzato:', userId);
+    console.log('Cookie consent ricevuto:', req.cookies.user_cookie_consent);
+    console.log('Body della richiesta:', req.body);
     
     // Se l'utente non ha ancora un ID, imposta il cookie (solo per questa sessione)
     if (!req.cookies.userId) {
