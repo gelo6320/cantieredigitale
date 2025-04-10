@@ -1617,14 +1617,16 @@
         }
         
         .mobile-menu-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
             border: none;
-            color: var(--text-color);
-            font-size: 1.8rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .mobile-menu-button {
@@ -1882,19 +1884,6 @@
 
         .mobile-menu-items {
             margin-bottom: 30px;
-        }
-
-        .mobile-menu-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .mobile-menu-close:hover {
@@ -2205,7 +2194,7 @@
         .btn-primary:active {
             transform: translateY(0);
         }
-        
+
     </style>
 </head>
 <body>
