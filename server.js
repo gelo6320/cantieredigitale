@@ -312,6 +312,33 @@ app.use(async (req, res, next) => {
 
 // ----- ROUTES PER IL FRONTEND -----
 
+// Sul server (da aggiungere a server.js)
+app.post('/api/cookie-consent/reset', async (req, res) => {
+  try {
+    const userId = req.cookies.userId;
+    
+    if (userId) {
+      // Rimuovi il record dal database
+      await CookieConsent.findOneAndDelete({ userId });
+    }
+    
+    // Cancella i cookie
+    res.clearCookie('userId');
+    res.clearCookie('user_cookie_consent');
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Preferenze cookie resettate con successo'
+    });
+  } catch (error) {
+    console.error('Errore nel reset delle preferenze cookie:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel reset delle preferenze cookie'
+    });
+  }
+});
+
 // Route per la gestione dell'invio del form
 app.post('/api/submit-form', async (req, res) => {
   try {
