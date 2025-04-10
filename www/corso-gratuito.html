@@ -1770,6 +1770,137 @@
             display: block;
         }
 
+                /* Stili personalizzati per il cookie banner */
+                .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--secondary-color);
+            color: #fff;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .cookie-banner.show {
+            transform: translateY(0);
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .cookie-header {
+            margin-bottom: 15px;
+        }
+
+        .cookie-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .cookie-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .cookie-actions button {
+            flex: 1;
+            padding: 14px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            height: 48px; /* Altezza fissa per entrambi */
+            box-sizing: border-box; /* Assicura che padding e bordo siano inclusi nella dimensione */
+        }
+
+        .cookie-footer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .cookie-footer a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .cookie-footer a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            
+            .cookie-banner {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            
+            .cookie-content {
+                padding: 15px;
+            }
+            
+            .cookie-header h3 {
+                font-size: 1.3rem;
+            }
+            
+            .cookie-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            
+            .cookie-actions button {
+                width: 100%;
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+            
+            .cookie-footer {
+                flex-direction: row;
+                gap: 10px;
+                font-size: 0.85rem;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+
+            .cookie-header h3 {
+                font-size: 1.2rem;
+            }
+            
+            .cookie-content p {
+                font-size: 0.9rem;
+            }
+            
+            .cookie-actions button {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+        }
+
         /* Pulsante "Rifiuta tutti" */
         .btn-outline {
             background-color: transparent;
