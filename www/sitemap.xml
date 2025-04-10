@@ -7,15 +7,23 @@
   <!-- Homepage -->
   <url>
     <loc>https://costruzionedigitale.com/</loc>
-    <lastmod>2025-04-03</lastmod>
+    <lastmod>2025-04-10</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Blog homepage -->
+  <url>
+    <loc>https://costruzionedigitale.com/blog/</loc>
+    <lastmod>2025-04-10</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
   <!-- Pagina Contattaci -->
   <url>
     <loc>https://costruzionedigitale.com/contattaci</loc>
-    <lastmod>2025-04-03</lastmod>
+    <lastmod>2025-04-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -25,6 +33,14 @@
     <loc>https://costruzionedigitale.com/corso-gratuito</loc>
     <lastmod>2025-04-03</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blogpost: sette strategie di marketing -->
+  <url>
+    <loc>https://costruzionedigitale.com/blog/7-strategie-di-marketing</loc>
+    <lastmod>2025-04-10</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
