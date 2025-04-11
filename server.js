@@ -133,6 +133,24 @@ const FormData = mongoose.model('FormData', FormDataSchema);
 const Admin = mongoose.model('Admin', AdminSchema);
 const CookieConsent = mongoose.model('CookieConsent', CookieConsentSchema);
 const Booking = mongoose.model('Booking', BookingSchema); // Nuovo modello
+const FacebookLead = mongoose.model('FacebookLead', FacebookLeadSchema);
+
+// Schema per i lead di Facebook
+const FacebookLeadSchema = new mongoose.Schema({
+  leadId: String,
+  formId: String,
+  adId: String,
+  pageId: String,
+  adgroupId: String,
+  createdTime: Number,
+  name: String,
+  email: String,
+  phone: String,
+  customFields: Object,
+  rawData: Object,
+  processed: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
 
 // Middleware per verificare il consenso ai cookie
 const checkCookieConsent = async (req, res, next) => {
@@ -339,7 +357,7 @@ app.post('/api/cookie-consent/reset', async (req, res) => {
   }
 });
 
-// Aggiungi questa route GET prima della tua route POST esistente
+// Route form webhook per Facebook
 app.get('/webhook/facebook-leads', (req, res) => {
   try {
     // Verifica dell'autenticazione del webhook
@@ -397,8 +415,32 @@ app.post('/webhook/facebook-leads', async (req, res) => {
             const leadId = leadData.leadgen_id;
             const formId = leadData.form_id;
             
-            // Recupera i dettagli completi del lead tramite API Graph
-            await retrieveLeadDetails(leadId, formId);
+            try {
+              // Recupera i dettagli completi del lead tramite API Graph
+              await retrieveLeadDetails(leadId, formId);
+            } catch (error) {
+              console.log('Impossibile recuperare dettagli completi, salvataggio dati di base del lead');
+              
+              // Salva almeno i dati di base nel modello FacebookLead
+              try {
+                const newLead = await FacebookLead.create({
+                  leadId: leadData.leadgen_id,
+                  formId: leadData.form_id,
+                  adId: leadData.ad_id,
+                  pageId: leadData.page_id,
+                  adgroupId: leadData.adgroup_id,
+                  createdTime: leadData.created_time,
+                  name: 'Lead da Facebook',
+                  email: 'lead@facebook.com',  // Email placeholder
+                  phone: '',
+                  rawData: leadData
+                });
+                
+                console.log('Lead Facebook di base salvato nel database con ID:', newLead._id);
+              } catch (dbError) {
+                console.error('Errore nel salvataggio dei dati di base del lead:', dbError);
+              }
+            }
           }
         }
       }
@@ -431,24 +473,22 @@ async function retrieveLeadDetails(leadId, formId) {
       }
     }
     
-    // Crea un nuovo lead nel tuo database
-    const newLead = await FormData.create({
+    // Crea un nuovo lead nel modello FacebookLead
+    const newLead = await FacebookLead.create({
+      leadId: leadId,
+      formId: formId,
+      adId: leadDetails.ad_id,
+      pageId: leadDetails.page_id,
+      adgroupId: leadDetails.adgroup_id,
+      createdTime: leadDetails.created_time,
       name: fieldsData.full_name || fieldsData.name || 'N/A',
       email: fieldsData.email || 'N/A',
-      phone: fieldsData.phone_number || 'N/A',
-      message: fieldsData.message || '',
-      source: `facebook_form_${formId}`,
-      status: 'new',
-      fbLeadId: leadId,
-      crmEvents: [{
-        eventName: 'LeadCreated',
-        eventTime: new Date(),
-        sentToFacebook: false,
-        metadata: { source: 'facebook_webhook' }
-      }]
+      phone: fieldsData.phone_number || fieldsData.phone || 'N/A',
+      customFields: fieldsData,
+      rawData: leadDetails
     });
     
-    console.log('Lead salvato nel database:', newLead._id);
+    console.log('Lead Facebook salvato nel database:', newLead._id);
     
     // Opzionale: invia una conferma via email
     // sendLeadNotificationEmail(newLead);
