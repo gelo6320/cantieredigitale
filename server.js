@@ -128,14 +128,6 @@ const BookingSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Modelli
-const FormData = mongoose.model('FormData', FormDataSchema);
-const Admin = mongoose.model('Admin', AdminSchema);
-const CookieConsent = mongoose.model('CookieConsent', CookieConsentSchema);
-const Booking = mongoose.model('Booking', BookingSchema); // Nuovo modello
-const FacebookLead = mongoose.model('FacebookLead', FacebookLeadSchema);
-
-// Schema per i lead di Facebook
 const FacebookLeadSchema = new mongoose.Schema({
   leadId: String,
   formId: String,
@@ -151,6 +143,13 @@ const FacebookLeadSchema = new mongoose.Schema({
   processed: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
+
+// Modelli
+const FormData = mongoose.model('FormData', FormDataSchema);
+const Admin = mongoose.model('Admin', AdminSchema);
+const CookieConsent = mongoose.model('CookieConsent', CookieConsentSchema);
+const Booking = mongoose.model('Booking', BookingSchema); // Nuovo modello
+const FacebookLead = mongoose.model('FacebookLead', FacebookLeadSchema);
 
 // Middleware per verificare il consenso ai cookie
 const checkCookieConsent = async (req, res, next) => {
