@@ -4971,30 +4971,473 @@
         </a>
     </div>
     
-    <section class="hero" id="home">
-        <div class="container">
+    <style>
+        /* Modern Hero Section Styles */
+        .modern-hero {
+          position: relative;
+          padding: 40px 0 20px; /* Ridotto per compattare la sezione */
+          background: linear-gradient(135deg, #212121 0%, #151515 100%);
+          overflow: hidden;
+          min-height: 90vh; /* Ridimensionato per mostrare solo ciò che vogliamo */
+        }
+        
+        /* Background elements */
+        .hero-bg-pattern {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            radial-gradient(circle at 10% 20%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 90% 80%, rgba(255, 107, 0, 0.05) 0%, transparent 50%);
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .hero-bg-dots {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+          background-size: 30px 30px;
+          opacity: 0.3;
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        /* Hero container */
+        .hero-container {
+          position: relative;
+          z-index: 2;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
+        
+        /* Wrapped content with image */
+        .hero-wrap {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          margin-bottom: 5px;
+          min-height: 70vh; /* Assicura che il contenuto principale sia visibile */
+        }
+        
+        /* Content area that wraps around the image */
+        .hero-content {
+          width: 60%;
+          position: relative;
+          z-index: 3;
+          padding-top: 50px;
+        }
+        
+        .hero-title {
+          font-size: 3.8rem;
+          font-weight: 900;
+          line-height: 1.1;
+          margin-bottom: 20px;
+          color: #fff;
+          text-transform: uppercase;
+          text-align: left;
+        }
+        
+        .hero-title .primary {
+          color: #fff;
+          display: block;
+        }
+        
+        .hero-title .highlight {
+          display: block;
+          color: #FF6B00;
+          font-size: 4.2rem;
+        }
+        
+        .hero-text {
+          font-size: 1.2rem;
+          line-height: 1.5;
+          margin-bottom: 25px;
+          color: rgba(255, 255, 255, 0.9);
+          max-width: 90%;
+          text-align: left;
+        }
+        
+        .hero-text strong {
+          color: #FF6B00;
+          font-weight: 700;
+        }
+        
+        /* CTA section */
+        .hero-cta {
+          margin-bottom: 30px;
+          text-align: left;
+        }
+        
+        .hero-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px 40px;
+          background: linear-gradient(90deg, #FF6B00, #FF8C38);
+          color: white;
+          font-size: 1.2rem;
+          font-weight: 700;
+          text-decoration: none;
+          border-radius: 50px;
+          border: none;
+          box-shadow: 0 10px 30px rgba(255, 107, 0, 0.5);
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          animation: pulse-glow 2s infinite;
+        }
+        
+        .hero-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.2);
+          transition: all 0.4s ease;
+          z-index: 1;
+        }
+        
+        .hero-button:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 30px rgba(255, 107, 0, 0.5);
+        }
+        
+        .hero-button:hover::before {
+          left: 100%;
+        }
+        
+        .hero-button span {
+          position: relative;
+          z-index: 2;
+        }
+        
+        .hero-button-note {
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.7);
+          margin-top: 10px;
+          font-style: italic;
+          text-align: left;
+        }
+        
+        /* Image area */
+        .hero-image {
+          width: 40%;
+          position: relative;
+          z-index: 2;
+          align-self: flex-end;
+        }
+        
+        .hero-image img {
+          width: auto;
+          height: 570px; /* Altezza fissa più piccola */
+          filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+          display: block;
+          margin-left: -130px;
+        }
+        
+        /* Glowing effect around image */
+        .hero-image::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, rgba(255, 107, 0, 0.15) 0%, transparent 70%);
+          z-index: -1;
+          filter: blur(25px);
+        }
+        
+        /* Separator */
+        .hero-separator {
+          height: 3px;
+          background: linear-gradient(90deg, 
+            rgba(255, 107, 0, 0) 0%, 
+            rgba(255, 107, 0, 0.8) 50%, 
+            rgba(255, 107, 0, 0) 100%);
+          margin: 0 auto 40px;
+          position: relative;
+          width: 90%;
+        }
+        
+        .hero-separator::before {
+          content: '';
+          position: absolute;
+          top: -10px;
+          left: 0;
+          right: 0;
+          height: 20px;
+          background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.3) 0%, rgba(255, 107, 0, 0) 70%);
+          filter: blur(10px);
+          opacity: 0.7;
+        }
+        
+        /* Guarantee box */
+        .guarantee-container {
+          margin: 30px auto 0;
+          width: 100%;
+          max-width: 800px;
+        }
+        
+        .guarantee-box {
+          background: linear-gradient(135deg, rgba(33, 33, 33, 0.8) 0%, rgba(21, 21, 21, 0.9) 100%);
+          border: 2px dashed rgba(255, 107, 0, 0.5);
+          border-radius: 15px;
+          padding: 25px 35px;
+          position: relative;
+          text-align: center;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .guarantee-badge {
+          position: absolute;
+          top: -25px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 50px;
+          background-color: #212121;
+          border: 2px solid #FF6B00;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #FF6B00;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          z-index: 1;
+        }
+        
+        .guarantee-badge svg {
+          width: 25px;
+          height: 25px;
+          color: #FF6B00;
+        }
+        
+        .guarantee-glow {
+          position: absolute;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255, 107, 0, 0.3) 0%, rgba(255, 107, 0, 0) 70%);
+          top: -38px;
+          left: 50%;
+          transform: translateX(-50%);
+          filter: blur(10px);
+          z-index: 0;
+        }
+        
+        .guarantee-title {
+          color: #FF6B00;
+          margin-bottom: 15px;
+          font-size: 1.4rem;
+          text-transform: uppercase;
+          font-weight: 800;
+          letter-spacing: 1px;
+        }
+        
+        .guarantee-text {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1.1rem;
+          margin-bottom: 0;
+          line-height: 1.6;
+        }
+        
+        .guarantee-text strong {
+          color: #FF6B00;
+          font-weight: 700;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 1100px) {
+          .hero-content {
+            width: 55%;
+            margin-right: -80px;
+          }
+          
+          .hero-title {
+            font-size: 3.4rem;
+          }
+          
+          .hero-title .highlight {
+            font-size: 3.8rem;
+          }
+          
+          .hero-image img {
+            height: 480px;
+          }
+        }
+        
+        @media (max-width: 991px) {
+          .hero-wrap {
+            flex-direction: column;
+            min-height: auto;
+          }
+          
+          .hero-content {
+            width: 100%;
+            margin-right: 0;
+            padding-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+          }
+          
+          .hero-title, .hero-text {
+            text-align: center;
+          }
+          
+          .hero-text {
+            max-width: 100%;
+          }
+          
+          .hero-image {
+            width: 70%;
+            max-width: 350px;
+            align-self: center;
+          }
+          
+          .hero-image img {
+            height: auto;
+            max-height: 450px;
+            margin: 0 auto;
+          }
+          
+          .hero-cta {
+            text-align: center;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .modern-hero {
+            padding: 30px 0 40px;
+            min-height: auto;
+          }
+          
+          .hero-title {
+            font-size: 2.8rem;
+          }
+          
+          .hero-title .highlight {
+            font-size: 3.2rem;
+          }
+          
+          .hero-text {
+            font-size: 1.1rem;
+          }
+          
+          .hero-button {
+            width: 100%;
+            max-width: 300px;
+            font-size: 0.9rem;
+            padding: 14px 25px;
+          }
+          
+          .guarantee-box {
+            padding: 25px 15px;
+          }
+          
+          .hero-separator {
+            width: 80%;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .hero-title {
+            font-size: 2.4rem;
+          }
+          
+          .hero-title .highlight {
+            font-size: 2.8rem;
+          }
+          
+          .hero-image {
+            width: 90%;
+          }
+          
+          .hero-image img {
+            max-height: 380px;
+          }
+          
+          .guarantee-title {
+            font-size: 1.2rem;
+          }
+          
+          .guarantee-text {
+            font-size: 0.95rem;
+          }
+        }
+      </style>
+      
+      <section class="modern-hero" id="home">
+        <!-- Background patterns -->
+        <div class="hero-bg-pattern"></div>
+        <div class="hero-bg-dots"></div>
+        
+        <div class="hero-container">
+          <!-- Wrapped content with image -->
+          <div class="hero-wrap">
+            <!-- Content area that wraps around the image -->
             <div class="hero-content">
-                <h1 style="font-weight: 1000;">CLIENTI DI VALORE <span>PER IMPRESE CHE VALGONO</span></h1>
-                <p>Garantiamo cantieri di <strong>ALTO-PROFILO</strong> per la tua impresa edile nei prossimi 12 mesi con il nostro metodo esclusivo!</p>
-                
-                <div class="cta-container" style="margin: 40px auto; text-align: center;">
-                    <a href="/contattaci" class="freedom-button" title="Prenota una consulenza gratuita">
-                        <span>PRENOTA UNA CONSULENZA GRATUITA</span>
-                    </a>
-                    <p style="font-size: 1rem; color: rgba(255,255,255,0.8); margin-top: 10px;">Senza impegno, valutiamo insieme se il nostro metodo è adatto alla tua azienda</p>
-                </div>
-                
-                <div class="guarantee-box" style="min-height:190px">
-                    <div class="guarantee-badge">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon-shield" width="1em" height="1em" fill="currentColor">
-                          <path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0z"/>
-                        </svg>                    </div>
-                    <h2>LA NOSTRA GARANZIA</h2>
-                    <p><strong>La nostra garanzia è la tua tranquillità:</strong> se non raggiungiamo i risultati concordati come da contratto, <strong> continuiamo a lavorare GRATUITAMENTE fino a raggiungerli.</strong> Nessun compromesso, solo risultati.</p>
-                </div>
+              <h1 class="hero-title">
+                <span class="primary">CLIENTI DI VALORE</span>
+                <span class="highlight">PER IMPRESE CHE VALGONO</span>
+              </h1>
+              
+              <p class="hero-text">
+                Garantiamo cantieri di <strong>ALTO-PROFILO</strong> per la tua impresa<br>
+                edile nei prossimi 12 mesi con il nostro metodo esclusivo!
+              </p>
+              
+              <div class="hero-cta">
+                <a href="/contattaci" class="hero-button" title="Prenota una consulenza gratuita">
+                  <span>PRENOTA UNA CONSULENZA GRATUITA</span>
+                </a>
+                <p class="hero-button-note">
+                  Senza impegno, valutiamo insieme se il nostro metodo è adatto alla tua azienda
+                </p>
+              </div>
             </div>
+            
+            <!-- Image area on the right -->
+            <div class="hero-image">
+              <img src="homevasco.png" alt="Esperto di marketing digitale per imprese edili" />
+            </div>
+          </div>
+          
+          <!-- Glowing separator -->
+          <div class="hero-separator"></div>
+          
+          <!-- Guarantee box below -->
+          <div class="guarantee-container">
+            <div class="guarantee-box">
+              <div class="guarantee-glow"></div>
+              <div class="guarantee-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+                  <path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0z"/>
+                </svg>
+              </div>
+              
+              <h2 class="guarantee-title">LA NOSTRA GARANZIA</h2>
+              
+              <p class="guarantee-text">
+                <strong>La nostra garanzia è la tua tranquillità:</strong> se non raggiungiamo i risultati 
+                concordati come da contratto, <strong>continuiamo a lavorare GRATUITAMENTE fino a raggiungerli.</strong> 
+                Nessun compromesso, solo risultati.
+              </p>
+            </div>
+          </div>
         </div>
-    </section>
+      </section>
 
     <section class="why-works-unique" id="why-it-works">
         <div class="container">
