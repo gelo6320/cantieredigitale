@@ -5074,6 +5074,12 @@
           margin-bottom: 30px;
           text-align: left;
         }
+
+        @media (max-width: 768px) {
+          .hero-cta {
+            width: calc(100% + 100px);
+          }
+        }
         
         .hero-button {
           display: inline-flex;
@@ -5485,6 +5491,13 @@
             margin-bottom: a25px;
           }
         }
+
+        @media only screen and (max-width: 768px) {
+          .hero-text .line-break-mobile::after {
+            content: "\A";
+            white-space: pre;
+          }
+        }
       </style>
       
       <section class="modern-hero" id="home">
@@ -5503,7 +5516,7 @@
               </h1>
               
               <p class="hero-text">
-                Garantiamo cantieri di <strong>ALTO-PROFILO</strong> per la tua impresa<br>
+                Garantiamo cantieri di <span class="line-break-mobile">cantieri di</span> <strong>ALTO-PROFILO</strong> per la tua impresa<br>
                 edile nei prossimi 12 mesi con il nostro metodo esclusivo!
               </p>
               
