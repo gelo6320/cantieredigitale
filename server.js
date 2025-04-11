@@ -339,6 +339,36 @@ app.post('/api/cookie-consent/reset', async (req, res) => {
   }
 });
 
+// Aggiungi questa route GET prima della tua route POST esistente
+app.get('/webhook/facebook-leads', (req, res) => {
+  try {
+    // Verifica dell'autenticazione del webhook
+    const VERIFY_TOKEN = process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN;
+    
+    console.log('Richiesta di verifica webhook ricevuta');
+    console.log('Query params:', req.query);
+    
+    // Verifica del modo - per la configurazione iniziale
+    if (req.query['hub.mode'] === 'subscribe' && 
+        req.query['hub.verify_token'] === VERIFY_TOKEN) {
+      console.log('Webhook verificato con successo!');
+      return res.status(200).send(req.query['hub.challenge']);
+    }
+    
+    // Se è una semplice visita all'URL senza parametri di verifica
+    if (!req.query['hub.mode']) {
+      return res.status(200).send('Webhook endpoint attivo. Usa questo URL nella configurazione di Facebook.');
+    }
+    
+    // Se la verifica fallisce
+    console.log('Verifica webhook fallita: token non valido');
+    res.status(403).send('Forbidden: token non valido');
+  } catch (error) {
+    console.error('Errore nella verifica del webhook:', error);
+    res.status(500).send('Errore interno');
+  }
+});
+
 // Webhook per ricevere lead da Facebook
 app.post('/webhook/facebook-leads', async (req, res) => {
   try {
