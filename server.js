@@ -339,6 +339,97 @@ app.post('/api/cookie-consent/reset', async (req, res) => {
   }
 });
 
+// Webhook per ricevere lead da Facebook
+app.post('/webhook/facebook-leads', async (req, res) => {
+  try {
+    // Verifica dell'autenticazione del webhook
+    const VERIFY_TOKEN = process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN;
+    
+    // Verifica del modo - per la configurazione iniziale
+    if (req.query['hub.mode'] === 'subscribe' && 
+        req.query['hub.verify_token'] === VERIFY_TOKEN) {
+      console.log('Webhook verificato con successo!');
+      return res.status(200).send(req.query['hub.challenge']);
+    }
+    
+    // Elabora la notifica di lead
+    const data = req.body;
+    
+    // Verifica che sia una notifica di lead
+    if (data.object === 'page' && data.entry && data.entry.length > 0) {
+      for (const entry of data.entry) {
+        for (const change of entry.changes) {
+          if (change.field === 'leadgen' && change.value) {
+            const leadData = change.value;
+            console.log('Nuovo lead ricevuto:', leadData);
+            
+            // L'ID del lead è in leadData.leadgen_id
+            const leadId = leadData.leadgen_id;
+            const formId = leadData.form_id;
+            
+            // Recupera i dettagli completi del lead tramite API Graph
+            await retrieveLeadDetails(leadId, formId);
+          }
+        }
+      }
+    }
+    
+    // Rispondi con successo a Facebook
+    res.status(200).send('EVENT_RECEIVED');
+  } catch (error) {
+    console.error('Errore webhook lead:', error);
+    res.status(500).send('ERRORE_INTERNO');
+  }
+});
+
+// Funzione per recuperare i dettagli completi del lead
+async function retrieveLeadDetails(leadId, formId) {
+  try {
+    // Assicurati di avere un token d'accesso con i permessi necessari
+    const response = await axios.get(
+      `https://graph.facebook.com/v17.0/${leadId}?access_token=${process.env.FACEBOOK_ACCESS_TOKEN}`
+    );
+    
+    const leadDetails = response.data;
+    console.log('Dettagli lead:', leadDetails);
+    
+    // Estrai i campi del form (dipende dalla struttura del tuo form)
+    const fieldsData = {};
+    if (leadDetails.field_data && leadDetails.field_data.length > 0) {
+      for (const field of leadDetails.field_data) {
+        fieldsData[field.name] = field.values[0];
+      }
+    }
+    
+    // Crea un nuovo lead nel tuo database
+    const newLead = await FormData.create({
+      name: fieldsData.full_name || fieldsData.name || 'N/A',
+      email: fieldsData.email || 'N/A',
+      phone: fieldsData.phone_number || 'N/A',
+      message: fieldsData.message || '',
+      source: `facebook_form_${formId}`,
+      status: 'new',
+      fbLeadId: leadId,
+      crmEvents: [{
+        eventName: 'LeadCreated',
+        eventTime: new Date(),
+        sentToFacebook: false,
+        metadata: { source: 'facebook_webhook' }
+      }]
+    });
+    
+    console.log('Lead salvato nel database:', newLead._id);
+    
+    // Opzionale: invia una conferma via email
+    // sendLeadNotificationEmail(newLead);
+    
+    return newLead;
+  } catch (error) {
+    console.error('Errore recupero dettagli lead:', error);
+    throw error;
+  }
+}
+
 // Route per la gestione dell'invio del form
 app.post('/api/submit-form', async (req, res) => {
   try {
