@@ -5503,6 +5503,232 @@
             white-space: pre;
           }
         }
+
+        /* Nuova sezione Metodo "Chiavi in Mano" */
+        .method-section {
+            padding: 60px 0;
+            background-color: var(--secondary-color); /* Sfondo scuro come il resto del sito */
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .method-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,107,0,0.05) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0;
+        }
+        
+        .method-title {
+            font-size: 2.2rem; /* Testo più piccolo */
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+            color: var(--text-color); /* Bianco per sfondo scuro */
+        }
+        
+        .method-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: #FF6B00;
+        }
+        
+        .method-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .method-row.reverse {
+            flex-direction: row-reverse;
+        }
+        
+        .method-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 30px;
+        }
+        
+        .method-icon {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0px 10px 15px rgba(255, 107, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+        
+        .method-row:hover .method-icon {
+            transform: translateY(-10px);
+        }
+        
+        .method-content {
+            flex: 2;
+            padding: 0 30px;
+        }
+        
+        .method-content h3 {
+            font-size: 1.6rem; /* Testo più piccolo */
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .method-content h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: #FF6B00;
+        }
+        
+        .method-content p {
+            font-size: 1rem; /* Testo più piccolo */
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8); /* Testo semitrasparente per sfondo scuro */
+            margin: 0;
+        }
+        
+        /* Responsive styles - mantenendo lo stesso layout */
+        @media (max-width: 991px) {
+            .method-title {
+                font-size: 2rem;
+            }
+            
+            .method-content h3 {
+                font-size: 1.4rem;
+            }
+            
+            .method-content p {
+                font-size: 0.95rem;
+            }
+            
+            .method-icon {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .method-section {
+                padding: 40px 0;
+            }
+            
+            .method-title {
+                font-size: 1.8rem;
+                margin-bottom: 30px;
+            }
+            
+            /* Cambia la direzione delle righe su mobile */
+            .method-row, .method-row.reverse {
+                flex-direction: column;
+                margin-bottom: 40px;
+                text-align: center;
+            }
+            
+            .method-content {
+                order: 2;
+                padding: 0 20px;
+                margin-top: 15px;
+            }
+            
+            .method-image {
+                order: 1;
+                padding: 0;
+                margin-bottom: 15px;
+            }
+            
+            /* Centralizza la riga sotto il titolo per mobile */
+            .method-content h3::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .method-content h3 {
+                font-size: 1.3rem;
+                display: block; /* Per centrare la linea */
+            }
+            
+            .method-content p {
+                font-size: 0.9rem;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 575px) {
+            .method-title {
+                font-size: 1.8rem;
+                margin-bottom: 40px;
+            }
+            
+            .method-row {
+                margin-bottom: 40px;
+            }
+            
+            .method-content {
+                padding: 0 15px;
+            }
+            
+            .method-image {
+                padding: 0 15px;
+            }
+            
+            .method-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .method-content h3 {
+                font-size: 1.4rem;
+            }
+            
+            .method-content p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .method-row {
+                background-color: rgba(51, 51, 51, 0.3); /* Leggero sfondo per separare le sezioni */
+                border-radius: 12px;
+                padding: 20px 15px;
+                margin-bottom: 25px;
+            }
+            
+            .method-title {
+                font-size: 1.6rem;
+            }
+            
+            .method-content h3 {
+                font-size: 1.2rem;
+            }
+            
+            .method-content p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+            
+            .method-icon {
+                width: 70px;
+                height: 70px;
+            }
+        }
       </style>
       
       <section class="modern-hero" id="home">
@@ -5569,106 +5795,43 @@
         </div>
       </section>
 
-    <section class="why-works-unique" id="why-it-works">
+      <section class="method-section" id="method">
         <div class="container">
-            <h2 class="section-title-unique alt">Perché il nostro metodo funziona davvero?</h2>
-            <p class="section-subtitle">Non è magia, è solo un approccio che ha senso</p>
+            <h2 class="method-title">Cos'è il metodo "Chiavi in Mano"</h2>
             
-            <div class="unique-quote">
-                <p>"La verità è che troppe agenzie ti vendono fumo. Ti promettono di tutto, spariscono con i tuoi soldi e poi... silenzio. Noi facciamo l'esatto contrario."</p>
-            </div>
-            
-            <div class="unique-block right-aligned highlight-block">
-                <div class="unique-content">
-                    <h2 class="highlight-heading large">Il nostro approccio è diverso.</h2>
-                    <p>Il sistema di Costruzione Digitale funziona perché è semplice e diretto. Costruiamo con il tuo brand la campagna di acquisizione cantieri più efficace del settore. Non stiamo parlando di like su Facebook o visualizzazioni su YouTube - parliamo di clienti veri che firmano contratti veri e ti pagano con soldi veri.</p>
+            <div class="method-row">
+                <div class="method-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="method-icon">
+                        <path d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128H144zm79-167l80 80c9.4 9.4 24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-39 39V184c0-13.3-10.7-24-24-24s-24 10.7-24 24V318.1l-39-39c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9z" fill="#FF6B00"/>
+                    </svg>
                 </div>
-            </div>
-            
-            <div class="unique-block left-aligned">
-                <div class="unique-content">
-                    <h3 class="highlight-heading">ALTRO CHE NUMERI INVENTATI.</h3>
-                    <p>Ti è mai capitato di sentirti dire "la campagna ha avuto 10.000 visualizzazioni" ma poi non hai visto neanche un cliente nuovo? Ecco, a noi questa roba fa venire l'orticaria. Per questo abbiamo creato un sistema di tracciamento che monitora solo le cose che contano davvero: quanto hai investito, quanto è il ritorno, quanti preventivi vengono richiesti, quanti vengono accettati. Fine delle chiacchiere, solo numeri che puoi portare in banca.</p>
+                <div class="method-content">
+                    <h3>Ottimizzazione</h3>
+                    <p>Il nostro sistema ottimizza ogni aspetto della tua presenza online. Non ci limitiamo a creare campagne pubblicitarie, ma costruiamo un ecosistema digitale completo che attira clienti di qualità per la tua impresa edile. Il risultato? Più preventivi accettati e margini migliori su ogni cantiere.</p>
                 </div>
             </div>
             
-            <div class="unique-image-text">
-                <div class="text-side">
-                    <h3 class="highlight-heading">SIAMO PARTNER, NON FORNITORI.</h3>
-                    <p>Quando lavori con noi, attiviamo un vero piano di consulenza tra i nostri team. Non ti mandiamo un report mensile e sparire. Ti aiutiamo attivamente ad ottimizzare le vendite, a migliorare la conversione, ad affinare il tuo approccio commerciale. Cresciamo insieme, impariamo insieme, guadagniamo insieme. E questa non è una frase fatta: se tu non guadagni, non guadagniamo neanche noi.</p>
+            <div class="method-row reverse">
+                <div class="method-content">
+                    <h3>Tracciamento</h3>
+                    <p>Niente più numeri inventati o metriche inutili. Con il nostro sistema di tracciamento, monitoriamo solo ciò che conta davvero: quanto investi, quanto ottieni in ritorno, quanti preventivi vengono richiesti e quanti vengono trasformati in cantieri. Solo dati concreti che puoi verificare e che si traducono in crescita reale.</p>
                 </div>
-                <div class="image-side">
-                    <div class="placeholder-image">
-                        <div class="placeholder-image">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="10em" height="10em" fill="#FF6B00">
-                                <path d="M323.4 85.2l-96.8 78.4c-16.1 13-19.2 36.4-7 53.1c12.9 17.8 38 21.3 55.3 7.8l99.3-77.2c7-5.4 17-4.2 22.5 2.8s4.2 17-2.8 22.5l-20.9 16.2L512 316.8 512 128l-.7 0-3.9-2.5L434.8 79c-15.3-9.8-33.2-15-51.4-15c-21.8 0-43 7.5-60 21.2zm22.8 124.4l-51.7 40.2C263 274.4 217.3 268 193.7 235.6c-22.2-30.5-16.6-73.1 12.7-96.8l83.2-67.3c-11.6-4.9-24.1-7.4-36.8-7.4C234 64 215.7 69.6 200 80l-72 48 0 224 28.2 0 91.4 83.4c19.6 17.9 49.9 16.5 67.8-3.1c5.5-6.1 9.2-13.2 11.1-20.6l17 15.6c19.5 17.9 49.9 16.6 67.8-2.9c4.5-4.9 7.8-10.6 9.9-16.5c19.4 13 45.8 10.3 62.1-7.5c17.9-19.5 16.6-49.9-2.9-67.8l-134.2-123zM16 128c-8.8 0-16 7.2-16 16L0 352c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-224-80 0zM48 320a16 16 0 1 1 0 32 16 16 0 1 1 0-32zM544 128l0 224c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-208c0-8.8-7.2-16-16-16l-80 0zm32 208a16 16 0 1 1 32 0 16 16 0 1 1 -32 0z"/>
-                            </svg>
-                        </div>
-                    </div>
+                <div class="method-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="method-icon">
+                        <path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" fill="#FF6B00"/>
+                    </svg>
                 </div>
             </div>
             
-            <section class="bonus-freedom">
-                <!-- Sfondo dinamico con elementi decorativi -->
-                <div class="freedom-bg">
-                    <div class="deco-circle c1"></div>
-                    <div class="deco-circle c2"></div>
-                    <div class="deco-square s1"></div>
-                    <div class="deco-square s2"></div>
-                    <div class="deco-line l1"></div>
-                    <div class="deco-line l2"></div>
+            <div class="method-row">
+                <div class="method-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="method-icon">
+                        <path d="M326.7 403.7c-22.1 8-45.9 12.3-70.7 12.3s-48.7-4.4-70.7-12.3c-.3 .1-.5 .2-.8 .3C91.6 430.9 32 389.2 32 336c0-35.8 23.5-71.9 64-98.9V152.3C49.5 180.5 0 245.9 0 336c0 87.3 79 176 256 176s256-88.7 256-176c0-90.1-49.5-155.5-96-183.7v84.8c40.5 27 64 63.1 64 98.9c0 53.2-59.6 94.9-152.6 67.7c-.3-.1-.5-.2-.8-.3zM192 272v48c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272h48c8.8 0 16-7.2 16-16V224c0-8.8-7.2-16-16-16H256V160c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v48H144c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h48zm176-224v128l32-32 32 32V48c0-26.5-21.5-48-48-48H144C117.5 0 96 21.5 96 48v128l32-32 32 32V48c0-8.8 7.2-16 16-16H352c8.8 0 16 7.2 16 16z" fill="#FF6B00"/>
+                    </svg>
                 </div>
-                
-                <!-- Badge rotante -->
-                <div class="rotating-badge">
-                    <div class="badge-inner">
-                        <span>BONUS</span>
-                        <span>SPECIALE</span>
-                    </div>
-                </div>
-                
-                <!-- Titolo principale con posizionamento angolato -->
-                <div class="freedom-header">
-                    <h2 class="freedom-title">
-                        <span class="freedom-small">E SE TI DICESSI CHE PUOI</span>
-                        LIBERARTI DALLA DIPENDENZA 
-                        <span class="freedom-highlight">DAI BONUS EDILIZI?</span>
-                    </h2>
-                </div>
-                
-                <!-- Domanda provocatoria con design sporgente -->
-                <div class="question-box">
-                    <p>Hai mai pensato a cosa succederebbe alla tua azienda se <span class="strike">DOMANI</span> sparissero tutti i bonus?</p>
-                </div>
-                
-                <!-- Confronto scenari con layout asimmetrico -->
-                <div class="scenario-comparison">
-                    <div class="scenario bad-future">
-                        <div class="scenario-icon">😱</div>
-                        <div class="scenario-content">
-                            <h3>La maggior parte delle aziende:</h3>
-                            <div class="scenario-result">CRISI</div>
-                            <p>Panico! Crollo del fatturato del 60-70%, taglio del personale, cantieri fermi, fornitori non pagati... e magari anche peggio!</p>
-                        </div>
-                    </div>
-                    
-                    <div class="scenario-divider">
-                        <span>MA</span>
-                    </div>
-                    
-                    <div class="scenario good-future">
-                        <div class="scenario-icon">😎</div>
-                        <div class="scenario-content">
-                            <h3>I nostri clienti:</h3>
-                            <div class="scenario-result">CRESCITA</div>
-                            <p>Un normale giorno di lavoro. Cantieri pieni, clienti che pagano (volentieri) il prezzo pieno, margini migliori e zero ansia da "cambio normativa".</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Paragrafo centrale con design speciale -->
-                <div class="reality-check">
-                    <p>Senti, parliamoci chiaro: <span class="highlight-text">i bonus sono fantastici finché durano</span>. Ma costruire un'azienda che dipende dagli incentivi governativi è come fare surf su un'onda che prima o poi si schianta sulla spiaggia. E quando succede, fa male. Molto male.</p>
+                <div class="method-content">
+                    <h3>Valore</h3>
+                    <p>Siamo partner, non fornitori. Quando lavori con noi, otterrai un team dedicato che collabora con la tua impresa per migliorare le vendite, ottimizzare le conversioni e affinare l'approccio commerciale. Il nostro successo è direttamente collegato al tuo - se non generiamo risultati per te, non guadagniamo neanche noi.</p>
                 </div>
             </div>
         </div>

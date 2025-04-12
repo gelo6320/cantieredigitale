@@ -1,0 +1,104 @@
+<section class="why-works-unique" id="why-it-works">
+        <div class="container">
+            <h2 class="section-title-unique alt">Perché il nostro metodo funziona davvero?</h2>
+            <p class="section-subtitle">Non è magia, è solo un approccio che ha senso</p>
+            
+            <div class="unique-quote">
+                <p>"La verità è che troppe agenzie ti vendono fumo. Ti promettono di tutto, spariscono con i tuoi soldi e poi... silenzio. Noi facciamo l'esatto contrario."</p>
+            </div>
+            
+            <div class="unique-block right-aligned highlight-block">
+                <div class="unique-content">
+                    <h2 class="highlight-heading large">Il nostro approccio è diverso.</h2>
+                    <p>Il sistema di Costruzione Digitale funziona perché è semplice e diretto. Costruiamo con il tuo brand la campagna di acquisizione cantieri più efficace del settore. Non stiamo parlando di like su Facebook o visualizzazioni su YouTube - parliamo di clienti veri che firmano contratti veri e ti pagano con soldi veri.</p>
+                </div>
+            </div>
+            
+            <div class="unique-block left-aligned">
+                <div class="unique-content">
+                    <h3 class="highlight-heading">ALTRO CHE NUMERI INVENTATI.</h3>
+                    <p>Ti è mai capitato di sentirti dire "la campagna ha avuto 10.000 visualizzazioni" ma poi non hai visto neanche un cliente nuovo? Ecco, a noi questa roba fa venire l'orticaria. Per questo abbiamo creato un sistema di tracciamento che monitora solo le cose che contano davvero: quanto hai investito, quanto è il ritorno, quanti preventivi vengono richiesti, quanti vengono accettati. Fine delle chiacchiere, solo numeri che puoi portare in banca.</p>
+                </div>
+            </div>
+            
+            <div class="unique-image-text">
+                <div class="text-side">
+                    <h3 class="highlight-heading">SIAMO PARTNER, NON FORNITORI.</h3>
+                    <p>Quando lavori con noi, attiviamo un vero piano di consulenza tra i nostri team. Non ti mandiamo un report mensile e sparire. Ti aiutiamo attivamente ad ottimizzare le vendite, a migliorare la conversione, ad affinare il tuo approccio commerciale. Cresciamo insieme, impariamo insieme, guadagniamo insieme. E questa non è una frase fatta: se tu non guadagni, non guadagniamo neanche noi.</p>
+                </div>
+                <div class="image-side">
+                    <div class="placeholder-image">
+                        <div class="placeholder-image">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="10em" height="10em" fill="#FF6B00">
+                                <path d="M323.4 85.2l-96.8 78.4c-16.1 13-19.2 36.4-7 53.1c12.9 17.8 38 21.3 55.3 7.8l99.3-77.2c7-5.4 17-4.2 22.5 2.8s4.2 17-2.8 22.5l-20.9 16.2L512 316.8 512 128l-.7 0-3.9-2.5L434.8 79c-15.3-9.8-33.2-15-51.4-15c-21.8 0-43 7.5-60 21.2zm22.8 124.4l-51.7 40.2C263 274.4 217.3 268 193.7 235.6c-22.2-30.5-16.6-73.1 12.7-96.8l83.2-67.3c-11.6-4.9-24.1-7.4-36.8-7.4C234 64 215.7 69.6 200 80l-72 48 0 224 28.2 0 91.4 83.4c19.6 17.9 49.9 16.5 67.8-3.1c5.5-6.1 9.2-13.2 11.1-20.6l17 15.6c19.5 17.9 49.9 16.6 67.8-2.9c4.5-4.9 7.8-10.6 9.9-16.5c19.4 13 45.8 10.3 62.1-7.5c17.9-19.5 16.6-49.9-2.9-67.8l-134.2-123zM16 128c-8.8 0-16 7.2-16 16L0 352c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-224-80 0zM48 320a16 16 0 1 1 0 32 16 16 0 1 1 0-32zM544 128l0 224c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-208c0-8.8-7.2-16-16-16l-80 0zm32 208a16 16 0 1 1 32 0 16 16 0 1 1 -32 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <section class="bonus-freedom">
+                <!-- Sfondo dinamico con elementi decorativi -->
+                <div class="freedom-bg">
+                    <div class="deco-circle c1"></div>
+                    <div class="deco-circle c2"></div>
+                    <div class="deco-square s1"></div>
+                    <div class="deco-square s2"></div>
+                    <div class="deco-line l1"></div>
+                    <div class="deco-line l2"></div>
+                </div>
+                
+                <!-- Badge rotante -->
+                <div class="rotating-badge">
+                    <div class="badge-inner">
+                        <span>BONUS</span>
+                        <span>SPECIALE</span>
+                    </div>
+                </div>
+                
+                <!-- Titolo principale con posizionamento angolato -->
+                <div class="freedom-header">
+                    <h2 class="freedom-title">
+                        <span class="freedom-small">E SE TI DICESSI CHE PUOI</span>
+                        LIBERARTI DALLA DIPENDENZA 
+                        <span class="freedom-highlight">DAI BONUS EDILIZI?</span>
+                    </h2>
+                </div>
+                
+                <!-- Domanda provocatoria con design sporgente -->
+                <div class="question-box">
+                    <p>Hai mai pensato a cosa succederebbe alla tua azienda se <span class="strike">DOMANI</span> sparissero tutti i bonus?</p>
+                </div>
+                
+                <!-- Confronto scenari con layout asimmetrico -->
+                <div class="scenario-comparison">
+                    <div class="scenario bad-future">
+                        <div class="scenario-icon">😱</div>
+                        <div class="scenario-content">
+                            <h3>La maggior parte delle aziende:</h3>
+                            <div class="scenario-result">CRISI</div>
+                            <p>Panico! Crollo del fatturato del 60-70%, taglio del personale, cantieri fermi, fornitori non pagati... e magari anche peggio!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-divider">
+                        <span>MA</span>
+                    </div>
+                    
+                    <div class="scenario good-future">
+                        <div class="scenario-icon">😎</div>
+                        <div class="scenario-content">
+                            <h3>I nostri clienti:</h3>
+                            <div class="scenario-result">CRESCITA</div>
+                            <p>Un normale giorno di lavoro. Cantieri pieni, clienti che pagano (volentieri) il prezzo pieno, margini migliori e zero ansia da "cambio normativa".</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paragrafo centrale con design speciale -->
+                <div class="reality-check">
+                    <p>Senti, parliamoci chiaro: <span class="highlight-text">i bonus sono fantastici finché durano</span>. Ma costruire un'azienda che dipende dagli incentivi governativi è come fare surf su un'onda che prima o poi si schianta sulla spiaggia. E quando succede, fa male. Molto male.</p>
+                </div>
+            </div>
+        </div>
+    </section>
