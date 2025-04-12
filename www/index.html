@@ -1219,7 +1219,513 @@
         </div>
     </section>
 
-    <section class="services" id="services">
+    <!-- Sezione Chi è Oleg Bolonniy -->
+    <style>
+        /* Stili per la sezione Oleg - versione compatta */
+        .about-oleg-section {
+          padding: 50px 0; /* Ridotto da 80px */
+          background-color: #1a1a1a;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        /* Pattern di sfondo */
+        .about-bg-pattern {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            radial-gradient(circle at 90% 10%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 10% 90%, rgba(255, 107, 0, 0.05) 0%, transparent 40%);
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .about-oleg-container {
+          max-width: 1000px; /* Ridotto da 1200px */
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+          padding: 0 20px;
+        }
+        
+        /* Grid layout principale */
+        .about-oleg-grid {
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr; /* Ridimensionato per dare più spazio al contenuto */
+          gap: 30px; /* Ridotto da 40px */
+          align-items: center;
+        }
+        
+        /* Stile immagine */
+        .about-oleg-image {
+          position: relative;
+        }
+        
+        .oleg-photo-frame {
+          position: relative;
+          width: 92%; /* Ridotto da 95% */
+          padding-top: 105%; /* Ridotto da 110% */
+          background-color: #242424;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); /* Ridotto da 20px 40px */
+        }
+        
+        .oleg-photo {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .oleg-accent-square {
+          position: absolute;
+          width: 55%; /* Ridotto da 60% */
+          height: 55%; /* Ridotto da 60% */
+          bottom: -20px; /* Ridotto da -30px */
+          right: -15px; /* Ridotto da -20px */
+          background: linear-gradient(135deg, #FF6B00 0%, #FF8C38 100%);
+          border-radius: 6px; /* Ridotto da 8px */
+          z-index: -1;
+          opacity: 0.8;
+        }
+        
+        /* Contenuto testuale */
+        .about-oleg-content {
+          max-width: 500px; /* Ridotto da 540px */
+        }
+        
+        .about-oleg-mini-heading {
+          display: inline-block;
+          padding: 6px 12px; /* Ridotto da 8px 16px */
+          background-color: rgba(255, 107, 0, 0.1);
+          color: #FF6B00;
+          font-size: 0.8rem; /* Ridotto da 0.9rem */
+          font-weight: 600;
+          text-transform: uppercase;
+          border-radius: 4px;
+          margin-bottom: 15px; /* Ridotto da 20px */
+          letter-spacing: 1.5px;
+        }
+        
+        .about-oleg-title {
+          font-size: 2.2rem; /* Ridotto da 2.8rem */
+          font-weight: 800;
+          margin-bottom: 20px; /* Ridotto da 25px */
+          color: #fff;
+          line-height: 1.2;
+        }
+        
+        .about-oleg-title .highlight {
+          color: #FF6B00;
+        }
+        
+        .about-oleg-description {
+          font-size: 0.95rem; /* Ridotto da 1.1rem */
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 20px; /* Ridotto da 30px */
+        }
+        
+        /* Card di specialità */
+        .specialty-cards {
+          display: flex;
+          gap: 12px; /* Ridotto da 15px */
+          margin-bottom: 20px; /* Ridotto da 30px */
+          flex-wrap: wrap;
+        }
+        
+        .specialty-card {
+          flex: 1;
+          min-width: 130px; /* Ridotto da 150px */
+          background-color: #242424;
+          padding: 15px; /* Ridotto da 20px */
+          border-radius: 6px; /* Ridotto da 8px */
+          border-left: 3px solid #FF6B00;
+          transition: all 0.3s ease;
+        }
+        
+        .specialty-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Ridotto da 10px 20px */
+        }
+        
+        .specialty-card h4 {
+          font-size: 0.9rem; /* Ridotto da 1rem */
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 8px; /* Ridotto da 10px */
+        }
+        
+        .specialty-card p {
+          font-size: 0.8rem; /* Ridotto da 0.9rem */
+          color: rgba(255, 255, 255, 0.7);
+          line-height: 1.5;
+        }
+        
+        /* Quote */
+        .oleg-quote {
+          position: relative;
+          margin-top: 20px; /* Ridotto da 30px */
+          padding: 20px 25px; /* Ridotto da 25px 30px */
+          background-color: #242424;
+          border-radius: 6px; /* Ridotto da 8px */
+        }
+        
+        .oleg-quote::before {
+          content: "";
+          position: absolute;
+          top: -15px; /* Ridotto da -20px */
+          left: 15px; /* Ridotto da 20px */
+          font-size: 5rem; /* Ridotto da 6rem */
+          color: #FF6B00;
+          opacity: 0.3;
+          font-family: Georgia, serif;
+          line-height: 1;
+        }
+        
+        .oleg-quote p {
+          font-size: 0.95rem; /* Ridotto da 1.1rem */
+          font-style: italic;
+          color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Stats */
+        .oleg-stats {
+          display: flex;
+          gap: 15px; /* Ridotto da 20px */
+          margin-top: 25px; /* Ridotto da 40px */
+        }
+        
+        .stat-item {
+          flex: 1;
+          text-align: center;
+        }
+        
+        .stat-number {
+          font-size: 2.2rem; /* Ridotto da 2.5rem */
+          font-weight: 800;
+          color: #FF6B00;
+          margin-bottom: 3px; /* Ridotto da 5px */
+          line-height: 1;
+          display: block;
+        }
+        
+        .stat-label {
+          font-size: 0.8rem; /* Ridotto da 0.9rem */
+          color: rgba(255, 255, 255, 0.7);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        
+        /* Responsive - ancora più ottimizzato */
+        @media (max-width: 991px) {
+          .about-oleg-grid {
+            gap: 25px; /* Ridotto ulteriormente */
+          }
+          
+          .about-oleg-title {
+            font-size: 1.9rem; /* Ridotto ulteriormente */
+          }
+          
+          .about-oleg-description {
+            font-size: 0.9rem; /* Ridotto ulteriormente */
+          }
+          
+          .specialty-cards {
+            flex-direction: column;
+          }
+          
+          .oleg-stats {
+            flex-wrap: wrap;
+          }
+          
+          .stat-item {
+            min-width: calc(50% - 15px); /* Ridotto ulteriormente */
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .about-oleg-section {
+            padding: 40px 0; /* Ridotto ulteriormente da 60px */
+          }
+          
+          .about-oleg-grid {
+            grid-template-columns: 1fr;
+            gap: 30px; /* Ridotto ulteriormente */
+          }
+          
+          .about-oleg-content {
+            order: 2;
+            text-align: center;
+            max-width: 100%;
+          }
+          
+          .about-oleg-image {
+            order: 1;
+            max-width: 320px; /* Ridotto ulteriormente da 400px */
+          }
+          
+          .oleg-photo-frame {
+            padding-top: 100%;
+            width: 90%; /* Più piccolo su mobile */
+            margin: 0 auto;
+          }
+          
+          .oleg-accent-square {
+            right: -5px; /* Ridotto da -10px */
+            bottom: -5px; /* Ridotto da -10px */
+            width: 50%; /* Più piccolo su mobile */
+            height: 50%; /* Più piccolo su mobile */
+          }
+          
+          .about-oleg-mini-heading {
+            font-size: 0.75rem; /* Più piccolo su mobile */
+            padding: 5px 10px; /* Più piccolo su mobile */
+            margin-bottom: 12px; /* Più piccolo su mobile */
+          }
+          
+          .about-oleg-title {
+            font-size: 1.8rem; /* Più piccolo su mobile */
+            margin-bottom: 15px; /* Più piccolo su mobile */
+          }
+          
+          .about-oleg-description {
+            font-size: 0.85rem; /* Più piccolo su mobile */
+            margin-bottom: 15px; /* Più piccolo su mobile */
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          
+          .specialty-cards {
+            justify-content: center;
+            gap: 10px; /* Più piccolo su mobile */
+          }
+          
+          .specialty-card {
+            text-align: left;
+            min-width: 250px; /* Larghezza fissa su mobile */
+            max-width: 90%; /* Limita larghezza */
+            margin: 0 auto;
+          }
+          
+          .oleg-quote {
+            max-width: 90%;
+            margin: 15px auto 0; /* Centrato con margine ridotto */
+            padding: 15px 20px; /* Più piccolo su mobile */
+            text-align: left;
+          }
+          
+          .oleg-quote p {
+            font-size: 0.85rem; /* Più piccolo su mobile */
+          }
+          
+          .oleg-stats {
+            max-width: 90%;
+            margin: 20px auto 0; /* Centrato con margine ridotto */
+            gap: 10px; /* Più piccolo su mobile */
+          }
+          
+          .stat-number {
+            font-size: 1.9rem; /* Più piccolo su mobile */
+          }
+          
+          .stat-label {
+            font-size: 0.75rem; /* Più piccolo su mobile */
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .about-oleg-section {
+            padding: 30px 0; /* Ultra compatto */
+          }
+          
+          .about-oleg-title {
+            font-size: 1.5rem; /* Ultra compatto */
+          }
+          
+          .about-oleg-description {
+            font-size: 0.8rem; /* Ultra compatto */
+            line-height: 1.5;
+          }
+          
+          .about-oleg-image {
+            max-width: 250px; /* Ultra compatto */
+          }
+          
+          .specialty-card {
+            min-width: 200px; /* Ultra compatto */
+            padding: 12px; /* Ultra compatto */
+          }
+          
+          .specialty-card h4 {
+            font-size: 0.8rem; /* Ultra compatto */
+          }
+          
+          .specialty-card p {
+            font-size: 0.75rem; /* Ultra compatto */
+          }
+          
+          .oleg-quote {
+            padding: 12px 15px; /* Ultra compatto */
+          }
+          
+          .oleg-quote p {
+            font-size: 0.8rem; /* Ultra compatto */
+          }
+          
+          .oleg-stats {
+            flex-direction: row; /* Manteniamo la fila ma rendiamo più compatto */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px; /* Ultra compatto */
+          }
+          
+          .stat-item {
+            padding: 8px 0; /* Ultra compatto */
+            min-width: 0; /* Rimuove larghezza minima */
+            width: 30%; /* 3 elementi per riga */
+          }
+          
+          .stat-number {
+            font-size: 1.6rem; /* Ultra compatto */
+          }
+          
+          .stat-label {
+            font-size: 0.7rem; /* Ultra compatto */
+          }
+        }
+        
+        /* Animazioni ed elementi decorativi - rimpiccioliti */
+        .floating-icon {
+          position: absolute;
+          width: 60px; /* Ridotto da 80px */
+          height: 60px; /* Ridotto da 80px */
+          border-radius: 50%;
+          background-color: rgba(255, 107, 0, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #FF6B00;
+          font-size: 1.5rem; /* Ridotto da 2rem */
+          animation: float 5s ease-in-out infinite;
+          z-index: 0;
+        }
+        
+        .float-1 {
+          top: 10%;
+          left: 5%;
+          animation-delay: 0s;
+        }
+        
+        .float-2 {
+          bottom: 15%;
+          right: 8%;
+          animation-delay: 2.5s;
+        }
+        
+        @media (max-width: 768px) {
+          .floating-icon {
+            width: 40px; /* Ancora più piccolo su mobile */
+            height: 40px; /* Ancora più piccolo su mobile */
+            font-size: 1.2rem; /* Ancora più piccolo su mobile */
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .floating-icon {
+            display: none; /* Rimuovi su schermi molto piccoli */
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) rotate(0);
+          }
+          50% {
+            transform: translateY(-10px) rotate(5deg); /* Ridotto da -15px */
+          }
+        }
+      </style>
+      
+      <section class="about-oleg-section" id="about-oleg">
+        <!-- Pattern di sfondo -->
+        <div class="about-bg-pattern"></div>
+        
+        <!-- Elementi fluttuanti decorativi -->
+        <div class="floating-icon float-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+            <path d="M184 48H328c4.4 0 8 3.6 8 8V96H176V56c0-4.4 3.6-8 8-8zm-56 8V96H64C28.7 96 0 124.7 0 160v96H192 320 512V160c0-35.3-28.7-64-64-64H384V56c0-30.9-25.1-56-56-56H184c-30.9 0-56 25.1-56 56zM512 288H320v32c0 17.7-14.3 32-32 32H224c-17.7 0-32-14.3-32-32V288H0V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V288z"/>
+          </svg>
+        </div>
+        <div class="floating-icon float-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
+            <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
+          </svg>
+        </div>
+        
+        <div class="about-oleg-container">
+          <div class="about-oleg-grid">
+            <!-- Immagine -->
+            <div class="about-oleg-image">
+              <div class="oleg-photo-frame">
+                <img src="olegabout.png" alt="Oleg Bolonniy, fondatore di Costruzione Digitale" class="oleg-photo" />
+              </div>
+              <div class="oleg-accent-square"></div>
+            </div>
+            
+            <!-- Contenuto -->
+            <div class="about-oleg-content">
+              <span class="about-oleg-mini-heading">Il fondatore</span>
+              <h2 class="about-oleg-title">Chi è <span class="highlight">Oleg Bolonniy</span></h2>
+              <p class="about-oleg-description">
+                Esperto di marketing digitale con oltre 10 anni di esperienza, Oleg ha trasformato la visibilità online di oltre 50 imprese edili in tutta Italia. La sua visione? Creare un marketing concreto che generi risultati misurabili.
+              </p>
+              
+              <!-- Specialità -->
+              <div class="specialty-cards">
+                <div class="specialty-card">
+                  <h4>Strategia</h4>
+                  <p>Sviluppo di strategie data-driven che massimizzano il ROI per imprese edili</p>
+                </div>
+                <div class="specialty-card">
+                  <h4>Conversione</h4>
+                  <p>Focus sui tassi di conversione e sulla qualità dei lead generati</p>
+                </div>
+              </div>
+              
+              <!-- Quote -->
+              <div class="oleg-quote">
+                <p>"Il marketing per le imprese edili non è solo visibilità, ma conversione di clienti di alto profilo in cantieri concreti."</p>
+              </div>
+              
+              <!-- Stats -->
+              <div class="oleg-stats">
+                <div class="stat-item">
+                  <span class="stat-number">10+</span>
+                  <span class="stat-label">Anni di esperienza</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">50+</span>
+                  <span class="stat-label">Imprese servite</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">85%</span>
+                  <span class="stat-label">Tasso di conversione</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <!-- <section class="services" id="services">
         <div class="container">
             <div class="section-heading">
                 <h2 id="servizi-heading" class="section-title">I NOSTRI SERVIZI</h2>
@@ -1229,7 +1735,7 @@
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-image">
-                        <!-- SVG per servizio di ristrutturazione digitale -->
+                        SVG per servizio di ristrutturazione digitale
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
                             <rect width="400" height="200" fill="#212121"/>
                             <rect x="100" y="40" width="200" height="120" rx="5" fill="#FF6B00"/>
@@ -1264,7 +1770,7 @@
                 
                 <div class="service-card">
                     <div class="service-image">
-                        <!-- SVG per servizio di Costruzione siti web -->
+                        SVG per servizio di Costruzione siti web
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
                             <rect width="400" height="200" fill="#212121"/>
                             <rect x="60" y="40" width="280" height="160" rx="5" fill="#333333"/>
@@ -1297,7 +1803,7 @@
                 
                 <div class="service-card">
                     <div class="service-image">
-                        <!-- SVG per servizio di marketing strategico -->
+                        SVG per servizio di marketing strategico
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
                             <rect width="400" height="200" fill="#212121"/>
                             <rect x="50" y="50" width="300" height="120" rx="5" fill="#333333" stroke="#444444" stroke-width="2"/>
@@ -1343,7 +1849,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Cookie Banner -->
     <div class="cookie-banner" id="cookie-banner">
