@@ -320,7 +320,9 @@ app.use(async (req, res, next) => {
       // Aggiungi fbclid al campo corretto
       if (fbclid) {
         // L'fbclid deve essere passato come parametro esterno per il matching
-        payload.data[0].fbclid = fbclid;
+        const timestamp = Date.now();
+        payload.data[0].user_data.fbc = `fb.1.${timestamp}.${fbclid}`;
+        console.log(`fbclid convertito in fbc e aggiunto ai dati utente: ${payload.data[0].user_data.fbc}`);
       }
       
       console.log('Payload PageView preparato:');
@@ -1222,12 +1224,10 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
             event_id: eventId,
             event_source_url: eventData.sourceUrl || 'https://costruzionedigitale.com',
             user_data: {
-              client_user_agent: req.headers['user-agent'] || ''
-              // Non includere fbclid in user_data
+              client_user_agent: req.headers['user-agent'] || '',
+              fbc: `fb.1.${Date.now()}.${userFbclid}`
             },
-            custom_data: eventData.customData || {},
-            // Aggiungi fbclid come parametro esterno
-            fbclid: userFbclid
+            custom_data: eventData.customData || {}
           }],
           access_token: process.env.ACCESS_TOKEN,
           partner_agent: 'costruzionedigitale-nodejs',
