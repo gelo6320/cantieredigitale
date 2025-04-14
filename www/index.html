@@ -2770,34 +2770,6 @@
               statsObserver.observe(number);
           });
           
-          // ======= 5. EFFETTO TYPING PER TITOLI PRINCIPALI =======
-          
-          // Animazione per titoli principali (opzionale)
-          function typeWriter(element, text, speed = 50, startDelay = 500) {
-              element.textContent = '';
-              
-              setTimeout(() => {
-                  let i = 0;
-                  const timer = setInterval(() => {
-                      if (i < text.length) {
-                          element.textContent += text.charAt(i);
-                          i++;
-                      } else {
-                          clearInterval(timer);
-                      }
-                  }, speed);
-              }, startDelay);
-          }
-          
-          // Applicare l'effetto typing ai titoli principali (solo desktop)
-          if (window.innerWidth > 768) {
-              const mainTitle = document.querySelector('.hero-title .highlight');
-              if (mainTitle) {
-                  const originalText = mainTitle.textContent;
-                  typeWriter(mainTitle, originalText, 80);
-              }
-          }
-          
           // ======= 6. EFFETTO GLITCH PER IL CALL TO ACTION GALLEGGIANTE =======
           
           // Aggiungi un effetto glitch occasionale al CTA fluttuante
