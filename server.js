@@ -1427,18 +1427,26 @@ app.use(express.static(path.join(__dirname, 'www'), {
 // In server.js: Aggiungi una nuova route per servire script di tracciamento basati sul consenso
 app.get('/js/tracking.js', async (req, res) => {
   const userId = req.cookies.userId;
+  console.log('Generazione tracking.js - userId dal cookie:', userId);
+  
   let consent = { essential: true, analytics: false, marketing: false };
   
   if (userId) {
     const userConsent = await CookieConsent.findOne({ userId });
+    console.log('Risultato query DB:', userConsent);
+    
     if (userConsent) {
       consent = {
         essential: userConsent.essential,
         analytics: userConsent.analytics, 
         marketing: userConsent.marketing
       };
+    } else {
+      console.log('ATTENZIONE: userId presente ma nessun consenso trovato nel DB');
     }
   }
+  
+  console.log('Consent usato per generare tracking.js:', consent);
   
   let trackingCode = '';
   
