@@ -306,7 +306,8 @@ app.use(async (req, res, next) => {
           event_id: eventId,
           event_source_url: req.headers.referer || `https://${req.get('host')}${req.originalUrl}`,
           user_data: {
-            fbclid: fbclid
+            client_user_agent: req.headers['user-agent'] || '',
+            // Non includere fbclid direttamente in user_data
           },
           custom_data: {}
         }],
@@ -314,6 +315,12 @@ app.use(async (req, res, next) => {
         partner_agent: 'costruzionedigitale-nodejs',
         test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
       };
+      
+      // Aggiungi fbclid al campo corretto
+      if (fbclid) {
+        // L'fbclid deve essere passato come parametro esterno per il matching
+        payload.data[0].fbclid = fbclid;
+      }
       
       console.log('Payload PageView preparato:');
       console.log(JSON.stringify(payload.data[0], null, 2));
@@ -1212,20 +1219,23 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
             event_id: eventId,
             event_source_url: eventData.sourceUrl || 'https://costruzionedigitale.com',
             user_data: {
-              fbclid: userFbclid
+              client_user_agent: req.headers['user-agent'] || ''
+              // Non includere fbclid in user_data
             },
-            custom_data: eventData.customData || {}
+            custom_data: eventData.customData || {},
+            // Aggiungi fbclid come parametro esterno
+            fbclid: userFbclid
           }],
           access_token: process.env.ACCESS_TOKEN,
           partner_agent: 'costruzionedigitale-nodejs',
           test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
         };
-
+      
         const response = await axios.post(
           `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
           payload
         );
-
+      
         console.log(`✅ CAPI ${eventName} inviato solo con fbclid (no dati utente)`);
         return true;
       }
@@ -1241,13 +1251,8 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       ph: userData.phone ? crypto.createHash('sha256').update(userData.phone.replace(/\D/g, '')).digest('hex') : undefined,
       fn: userData.name ? crypto.createHash('sha256').update(userData.name.split(' ')[0].toLowerCase().trim()).digest('hex') : undefined,
       ln: userData.name && userData.name.includes(' ') ? crypto.createHash('sha256').update(userData.name.split(' ').slice(1).join(' ').toLowerCase().trim()).digest('hex') : undefined,
+      client_user_agent: req.headers['user-agent'] || ''
     };
-
-    // Aggiungi fbclid se disponibile in sessione
-    if (req && req.session && req.session.fbclid) {
-      hashedUserData.fbclid = req.session.fbclid;
-      console.log(`fbclid "${req.session.fbclid}" aggiunto ai dati utente`);
-    }
 
     // Filtro per rimuovere valori undefined
     Object.keys(hashedUserData).forEach(key => 
@@ -1271,6 +1276,13 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       partner_agent: 'costruzionedigitale-nodejs',
       test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
     };
+    
+    // Aggiungi fbclid se disponibile, MA NON in user_data
+    if (req && req.session && req.session.fbclid) {
+      // Aggiungi fbclid come parametro esterno all'evento, non dentro user_data
+      payload.data[0].fbclid = req.session.fbclid;
+      console.log(`fbclid "${req.session.fbclid}" aggiunto all'evento`);
+    }
 
     console.log('Payload completo preparato:');
     console.log(JSON.stringify(payload.data[0], null, 2));
