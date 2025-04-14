@@ -1276,12 +1276,16 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       partner_agent: 'costruzionedigitale-nodejs',
       test_event_code: process.env.NODE_ENV === 'production' ? undefined : process.env.FACEBOOK_TEST_EVENT_CODE
     };
-    
-    // Aggiungi fbclid se disponibile, MA NON in user_data
+  
+    // Aggiungi fbc se l'fbclid è disponibile in sessione
     if (req && req.session && req.session.fbclid) {
-      // Aggiungi fbclid come parametro esterno all'evento, non dentro user_data
-      payload.data[0].fbclid = req.session.fbclid;
-      console.log(`fbclid "${req.session.fbclid}" aggiunto all'evento`);
+      // Formato fbc: fb.1.TIMESTAMP.fbclid
+      const timestamp = Math.floor(Date.now() / 1000);
+      hashedUserData.fbc = `fb.1.${timestamp}.${req.session.fbclid}`;
+      console.log(`fbclid convertito in fbc e aggiunto ai dati utente: ${hashedUserData.fbc}`);
+      
+      // Aggiungi anche l'URL di origine con fbclid
+      payload.data[0].event_source_url = `https://costruzionedigitale.com/?fbclid=${req.session.fbclid}`;
     }
 
     console.log('Payload completo preparato:');
