@@ -87,6 +87,7 @@ const FormDataSchema = new mongoose.Schema({
   phone: String,
   message: String,
   source: String,
+  fbclid: String, // Nuovo campo per salvare fbclid
   timestamp: {
     type: Date,
     default: Date.now
@@ -125,6 +126,7 @@ const BookingSchema = new mongoose.Schema({
     default: 'pending' 
   },
   source: String,
+  fbclid: String, // Nuovo campo per salvare fbclid
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -505,8 +507,15 @@ app.post('/api/submit-form', async (req, res) => {
     // Genera un ID evento univoco per la deduplicazione
     const eventId = 'event_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
     
+    // Aggiungi fbclid al formData se presente nella sessione
+    const formDataWithFbclid = { ...req.body };
+    if (req.session && req.session.fbclid) {
+      formDataWithFbclid.fbclid = req.session.fbclid;
+      console.log(`Salvato fbclid "${req.session.fbclid}" con i dati del form`);
+    }
+    
     // Salva i dati nel database
-    const formData = new FormData(req.body);
+    const formData = new FormData(formDataWithFbclid);
     await formData.save();
     
     // Invia evento alla Facebook Conversion API
@@ -533,7 +542,7 @@ app.post('/api/submit-form', async (req, res) => {
       console.error('Errore completo nell\'invio dell\'evento alla CAPI:', conversionError);
     }
     
-    console.log('Dati salvati in MongoDB:', req.body);
+    console.log('Dati salvati in MongoDB:', formDataWithFbclid);
     
     // Restituisci l'eventId per la deduplicazione lato client
     res.status(200).json({ success: true, eventId });
@@ -550,6 +559,12 @@ app.post('/api/submit-booking', async (req, res) => {
     
     // Assicurati che il timestamp della prenotazione sia valido
     const bookingData = { ...req.body };
+    
+    // Aggiungi fbclid alla prenotazione se presente nella sessione
+    if (req.session && req.session.fbclid) {
+      bookingData.fbclid = req.session.fbclid;
+      console.log(`Salvato fbclid "${req.session.fbclid}" con i dati della prenotazione`);
+    }
 
     // Parse del timestamp se è una stringa, mantenendo l'ora locale
     if (typeof bookingData.bookingTimestamp === 'string') {
@@ -619,7 +634,8 @@ app.post('/api/submit-booking', async (req, res) => {
       email: booking.email,
       date: booking.bookingDate,
       time: booking.bookingTime,
-      timestamp: booking.bookingTimestamp
+      timestamp: booking.bookingTimestamp,
+      fbclid: booking.fbclid // Log del fbclid salvato
     });
     
     // Invia email di conferma all'utente
