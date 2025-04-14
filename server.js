@@ -87,7 +87,8 @@ const FormDataSchema = new mongoose.Schema({
   phone: String,
   message: String,
   source: String,
-  fbclid: String, // Nuovo campo per salvare fbclid
+  fbclid: String,
+  fbclidTimestamp: Number, // Aggiungere questa linea
   timestamp: {
     type: Date,
     default: Date.now
@@ -126,7 +127,8 @@ const BookingSchema = new mongoose.Schema({
     default: 'pending' 
   },
   source: String,
-  fbclid: String, // Nuovo campo per salvare fbclid
+  fbclid: String,
+  fbclidTimestamp: Number, // Aggiungere questa linea
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -287,10 +289,9 @@ app.use(async (req, res, next) => {
     // Salva fbclid in sessione se presente
     if (req.session) {
       req.session.fbclid = fbclid;
-      req.session.fbclidTracked = true; // Segna come già tracciato per evitare duplicati
+      req.session.fbclidTimestamp = Date.now(); // Aggiungere questa linea
+      req.session.fbclidTracked = true;
       console.log(`fbclid "${fbclid}" salvato in sessione e marcato come tracciato`);
-    } else {
-      console.log('ATTENZIONE: Sessione non disponibile, impossibile salvare fbclid');
     }
     
     try {
@@ -537,6 +538,7 @@ app.post('/api/submit-form', async (req, res) => {
     const formDataWithFbclid = { ...req.body };
     if (req.session && req.session.fbclid) {
       formDataWithFbclid.fbclid = req.session.fbclid;
+      formDataWithFbclid.fbclidTimestamp = req.session.fbclidTimestamp || Date.now(); // Aggiungere questa linea
       console.log(`Salvato fbclid "${req.session.fbclid}" con i dati del form`);
     }
     
@@ -589,6 +591,7 @@ app.post('/api/submit-booking', async (req, res) => {
     // Aggiungi fbclid alla prenotazione se presente nella sessione
     if (req.session && req.session.fbclid) {
       bookingData.fbclid = req.session.fbclid;
+      bookingData.fbclidTimestamp = req.session.fbclidTimestamp || Date.now(); // Aggiungere questa linea
       console.log(`Salvato fbclid "${req.session.fbclid}" con i dati della prenotazione`);
     }
 
@@ -1280,12 +1283,9 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
     // Aggiungi fbc se l'fbclid è disponibile in sessione
     if (req && req.session && req.session.fbclid) {
       // Formato fbc: fb.1.TIMESTAMP.fbclid
-      const timestamp = Math.floor(Date.now() / 1000);
+      const timestamp = req.session.fbclidTimestamp || Date.now();
       hashedUserData.fbc = `fb.1.${timestamp}.${req.session.fbclid}`;
       console.log(`fbclid convertito in fbc e aggiunto ai dati utente: ${hashedUserData.fbc}`);
-      
-      // Aggiungi anche l'URL di origine con fbclid
-      payload.data[0].event_source_url = `https://costruzionedigitale.com/?fbclid=${req.session.fbclid}`;
     }
 
     console.log('Payload completo preparato:');
