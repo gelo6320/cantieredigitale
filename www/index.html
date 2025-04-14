@@ -2770,6 +2770,34 @@
               statsObserver.observe(number);
           });
           
+          // ======= 5. EFFETTO TYPING PER TITOLI PRINCIPALI =======
+          
+          // Animazione per titoli principali (opzionale)
+          function typeWriter(element, text, speed = 50, startDelay = 500) {
+              element.textContent = '';
+              
+              setTimeout(() => {
+                  let i = 0;
+                  const timer = setInterval(() => {
+                      if (i < text.length) {
+                          element.textContent += text.charAt(i);
+                          i++;
+                      } else {
+                          clearInterval(timer);
+                      }
+                  }, speed);
+              }, startDelay);
+          }
+          
+          // Applicare l'effetto typing ai titoli principali (solo desktop)
+          if (window.innerWidth > 768) {
+              const mainTitle = document.querySelector('.hero-title .highlight');
+              if (mainTitle) {
+                  const originalText = mainTitle.textContent;
+                  typeWriter(mainTitle, originalText, 80);
+              }
+          }
+          
           // ======= 6. EFFETTO GLITCH PER IL CALL TO ACTION GALLEGGIANTE =======
           
           // Aggiungi un effetto glitch occasionale al CTA fluttuante
@@ -2812,6 +2840,30 @@
               // Ripeti l'effetto ogni 8 secondi
               setInterval(addShineEffect, 8000);
           }
+          
+          // ======= 8. PULSANTE TORNA IN CIMA =======
+          
+          // Mostra il pulsante "back to top" dopo un certo scroll
+          const scrollTop = 300;
+          const backToTopButton = document.createElement('div');
+          backToTopButton.className = 'back-to-top';
+          backToTopButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor"><path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"/></svg>';
+          document.body.appendChild(backToTopButton);
+          
+          backToTopButton.addEventListener('click', () => {
+              window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+              });
+          });
+          
+          window.addEventListener('scroll', () => {
+              if (window.pageYOffset > scrollTop) {
+                  backToTopButton.classList.add('show');
+              } else {
+                  backToTopButton.classList.remove('show');
+              }
+          });
           
           // ======= 9. TOOLTIPS PERSONALIZZATI =======
           
