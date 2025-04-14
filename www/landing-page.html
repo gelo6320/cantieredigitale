@@ -991,6 +991,14 @@
                 width: 100%;
             }
         }
+
+        @media only screen and (max-width: 768px) {
+          .method-title .line-break-mobile::after {
+            content: "\A";
+            white-space: pre;
+          }
+        }
+        
     </style>
 
     <!-- Preload immagini critiche -->
@@ -1030,7 +1038,7 @@
     <!-- Sezione Metodo Chiavi in Mano -->
     <section class="method-section" id="method">
         <div class="container">
-            <h2 class="method-title fade-in">Cos'è il metodo <span class="gradient-text">"CHIAVI IN MANO"</span></h2>
+            <h2 class="method-title fade-in">Cos'è il <span class="line-break-mobile">metodo</span> <span class="gradient-text">"CHIAVI IN MANO"</span></h2>
               
             <div class="method-row fade-in-left">
                 <div class="method-image">
