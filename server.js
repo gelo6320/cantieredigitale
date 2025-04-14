@@ -1017,14 +1017,26 @@ app.post('/api/cookie-consent', async (req, res) => {
     console.log('Cookie consent ricevuto:', req.cookies.user_cookie_consent);
     console.log('Body della richiesta:', req.body);
     
-    // Se l'utente non ha ancora un ID, imposta il cookie (solo per questa sessione)
+    // Se l'utente non ha ancora un ID, imposta il cookie
     if (!req.cookies.userId) {
       res.cookie('userId', userId, { 
-        // Cookie valido solo per questa sessione (nessun maxAge)
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno (cambiato da session-only)
         httpOnly: true,
         sameSite: 'strict'
       });
     }
+    
+    // Imposta anche il cookie di consenso nel browser per garantire la sincronizzazione
+    res.cookie('user_cookie_consent', JSON.stringify({
+      essential: essential !== undefined ? essential : true,
+      analytics: analytics !== undefined ? analytics : false,
+      marketing: marketing !== undefined ? marketing : false,
+      configured: true
+    }), { 
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno
+      path: '/',
+      sameSite: 'strict'
+    });
     
     // Cerca il consenso esistente o crea nuovo
     let consent = await CookieConsent.findOne({ userId });
@@ -1034,7 +1046,7 @@ app.post('/api/cookie-consent', async (req, res) => {
       consent.essential = essential !== undefined ? essential : true; // Essential è sempre true
       consent.analytics = analytics !== undefined ? analytics : false;
       consent.marketing = marketing !== undefined ? marketing : false;
-      consent.configured = true;  // Segna come configurato in questa sessione
+      consent.configured = true;  // Segna come configurato
       consent.updatedAt = new Date();
       await consent.save();
     } else {
@@ -1044,7 +1056,7 @@ app.post('/api/cookie-consent', async (req, res) => {
         essential: essential !== undefined ? essential : true,
         analytics: analytics !== undefined ? analytics : false,
         marketing: marketing !== undefined ? marketing : false,
-        configured: true  // Segna come configurato in questa sessione
+        configured: true  // Segna come configurato
       });
     }
     
@@ -1427,32 +1439,68 @@ app.use(express.static(path.join(__dirname, 'www'), {
 // In server.js: Aggiungi una nuova route per servire script di tracciamento basati sul consenso
 app.get('/js/tracking.js', async (req, res) => {
   const userId = req.cookies.userId;
-  console.log('Generazione tracking.js - userId dal cookie:', userId);
   
+  // Valori predefiniti
   let consent = { essential: true, analytics: false, marketing: false };
+  let consentSource = "default";
   
-  if (userId) {
-    const userConsent = await CookieConsent.findOne({ userId });
-    console.log('Risultato query DB:', userConsent);
-    
-    if (userConsent) {
-      consent = {
-        essential: userConsent.essential,
-        analytics: userConsent.analytics, 
-        marketing: userConsent.marketing
-      };
-    } else {
-      console.log('ATTENZIONE: userId presente ma nessun consenso trovato nel DB');
+  // PASSO 1: Controlla prima i cookie del browser
+  if (req.cookies.user_cookie_consent) {
+    try {
+      const cookieConsent = JSON.parse(req.cookies.user_cookie_consent);
+      if (cookieConsent && cookieConsent.configured) {
+        consent = {
+          essential: cookieConsent.essential !== undefined ? cookieConsent.essential : true,
+          analytics: cookieConsent.analytics !== undefined ? cookieConsent.analytics : false,
+          marketing: cookieConsent.marketing !== undefined ? cookieConsent.marketing : false
+        };
+        consentSource = "browser_cookie";
+      }
+    } catch (error) {
+      console.error('Errore nel parsing del cookie di consenso:', error);
     }
   }
   
-  console.log('Consent usato per generare tracking.js:', consent);
+  // PASSO 2: Se l'utente ha un ID, controlla anche il database
+  if (userId && consentSource === "default") {
+    try {
+      const userConsent = await CookieConsent.findOne({ userId });
+      if (userConsent && userConsent.configured) {
+        consent = {
+          essential: userConsent.essential,
+          analytics: userConsent.analytics, 
+          marketing: userConsent.marketing
+        };
+        consentSource = "database";
+        
+        // Se abbiamo trovato le preferenze nel database ma non nei cookie,
+        // imposta il cookie per sincronizzare
+        if (!req.cookies.user_cookie_consent) {
+          res.cookie('user_cookie_consent', JSON.stringify({
+            essential: consent.essential,
+            analytics: consent.analytics,
+            marketing: consent.marketing,
+            configured: true
+          }), { 
+            maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno
+            path: '/',
+            sameSite: 'strict'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Errore nel recupero del consenso dal database:', error);
+    }
+  }
+  
+  console.log(`Generando tracking.js con preferenze (fonte: ${consentSource}):`, consent);
   
   let trackingCode = '';
   
   // Base script sempre incluso
   trackingCode += `
     console.log("Consenso utente:", ${JSON.stringify(consent)});
+    console.log("Fonte consenso:", "${consentSource}");
     window.userConsent = ${JSON.stringify(consent)};
   `;
   
@@ -1544,16 +1592,57 @@ class CookieConsentManager {
     }
 
     loadPreferences() {
-        const cookieValue = this.getCookie(this.config.cookieName);
+        // Inizia con i valori predefiniti
+        let preferencesFound = false;
         
+        // PASSO 1: Cerca prima nei cookie del browser
+        const cookieValue = this.getCookie(this.config.cookieName);
         if (cookieValue) {
             try {
                 const savedConsent = JSON.parse(cookieValue);
                 this.consent = { ...this.consent, ...savedConsent };
-                console.log('Preferenze cookie caricate:', this.consent);
+                console.log('Preferenze cookie caricate dal cookie locale:', this.consent);
+                preferencesFound = true;
             } catch (e) {
                 console.error('Errore nel parsing delle preferenze cookie:', e);
             }
+        }
+        
+        // PASSO 2: Se non trovate nei cookie, controlla il server in modo sincrono
+        if (!preferencesFound) {
+            // Utilizziamo XMLHttpRequest per una richiesta sincrona
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/cookie-consent', false); // false = sincrono
+            xhr.withCredentials = true;
+            
+            try {
+                xhr.send();
+                if (xhr.status === 200) {
+                    const serverConsent = JSON.parse(xhr.responseText);
+                    
+                    // Applica solo se ci sono dati e se configured è true
+                    if (serverConsent && serverConsent.configured) {
+                        this.consent = { ...this.consent, ...serverConsent };
+                        console.log('Preferenze cookie caricate dal server:', this.consent);
+                        
+                        // Salva anche nei cookie locali per sincronizzare
+                        this.setCookie(
+                            this.config.cookieName,
+                            JSON.stringify(this.consent),
+                            this.config.cookieDuration
+                        );
+                        preferencesFound = true;
+                    }
+                }
+            } catch (e) {
+                console.error('Errore nel recupero delle preferenze dal server:', e);
+            }
+        }
+        
+        // Se non sono state trovate preferenze da nessuna parte,
+        // utilizza i valori predefiniti già impostati in this.consent
+        if (!preferencesFound) {
+            console.log('Nessuna preferenza trovata, utilizzo i valori predefiniti:', this.consent);
         }
     }
 
@@ -1561,14 +1650,15 @@ class CookieConsentManager {
         // Imposta il flag configured su true
         this.consent.configured = true;
         
-        // Salva il cookie
+        // PASSO 1: Salva nei cookie locali
         this.setCookie(
             this.config.cookieName,
             JSON.stringify(this.consent),
             this.config.cookieDuration
         );
+        console.log('Preferenze salvate nei cookie locali:', this.consent);
         
-        // Salva le preferenze sul server e ricarica gli script di tracciamento
+        // PASSO 2: Salva le preferenze sul server
         try {
             const response = await fetch('/api/cookie-consent', {
                 method: 'POST',
@@ -1580,14 +1670,16 @@ class CookieConsentManager {
             });
             
             if (response.ok) {
-                console.log('Preferenze cookie salvate sul server');
-                
-                // Ricarica lo script di tracciamento per applicare le nuove preferenze
-                this.loadTrackingScript(true);
+                console.log('Preferenze cookie salvate anche sul server');
+            } else {
+                console.error('Errore nella risposta del server:', await response.text());
             }
         } catch (error) {
             console.error('Errore nel salvataggio delle preferenze sul server:', error);
         }
+        
+        // PASSO 3: Ricarica lo script di tracciamento per applicare le nuove preferenze
+        this.loadTrackingScript(true);
         
         // Nascondi il banner
         this.hideBanner();
