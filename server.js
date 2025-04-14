@@ -258,15 +258,32 @@ const transporter = nodemailer.createTransport({
 // Middleware per catturare fbclid e inviare PageView alla CAPI (solo per la prima visita)
 app.use(async (req, res, next) => {
   // Estrai fbclid dalla query
-  const fbclid = req.query.fbclid;
+  let fbclid = req.query.fbclid;
+  
+  // Se non c'è nella query diretta, controlla l'header referer
+  if (!fbclid && req.headers.referer) {
+    try {
+      const refererUrl = new URL(req.headers.referer);
+      fbclid = refererUrl.searchParams.get('fbclid');
+    } catch (e) {
+      console.error('Errore nel parsing del referer URL:', e);
+    }
+  }
   
   console.log('========== FBCLID MIDDLEWARE ==========');
   console.log(`URL richiesto: ${req.originalUrl}`);
   console.log(`fbclid trovato nella query: ${fbclid || 'NESSUNO'}`);
   console.log(`fbclid già tracciato in sessione: ${req.session && req.session.fbclidTracked ? 'SÌ' : 'NO'}`);
   
+  // Verifica se l'fbclid è già presente nella sessione
+  const sessionFbclid = req.session && req.session.fbclid;
+  if (!fbclid && sessionFbclid) {
+    console.log(`fbclid non trovato nella query ma presente in sessione: ${sessionFbclid}`);
+    fbclid = sessionFbclid;
+  }
+  
   // Procedi solo se c'è un fbclid nella URL e non è stato già tracciato questo fbclid
-  if (fbclid && (!req.session || !req.session.fbclidTracked)) {
+  if (fbclid && (!req.session || !req.session.fbclidTracked || req.session.fbclid !== fbclid)) {
     // Salva fbclid in sessione se presente
     if (req.session) {
       req.session.fbclid = fbclid;
@@ -319,8 +336,10 @@ app.use(async (req, res, next) => {
         console.error('Errore completo:', error.message);
       }
     }
-  } else if (fbclid) {
+  } else if (fbclid && req.session && req.session.fbclidTracked && req.session.fbclid === fbclid) {
     console.log(`Nessun evento inviato: fbclid "${fbclid}" già tracciato in precedenza`);
+  } else if (req.session && req.session.fbclid) {
+    console.log(`fbclid non trovato nell'URL ma presente in sessione: ${req.session.fbclid}`);
   } else {
     console.log('Nessun evento inviato: fbclid non presente nell\'URL');
   }
