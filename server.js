@@ -1122,24 +1122,62 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
       return false;
     }
 
-    // Ottieni il consenso dell'utente dal database, non dalla richiesta
+    // Inizializza con le impostazioni predefinite
     let hasConsent = false;
     let userFbclid = null;
+    let consentSource = "nessuna fonte";
     
-    if (req && req.cookies && req.cookies.userId) {
-      // Cerca direttamente nel database, non in req.cookieConsent
-      const userConsent = await CookieConsent.findOne({ userId: req.cookies.userId });
-      
-      if (userConsent) {
-        console.log(`Consenso marketing da database: ${userConsent.marketing ? 'SÌ' : 'NO'}`);
-        hasConsent = userConsent.marketing;
+    // PASSO 1: Controlla prima i cookie del browser
+    if (req && req.cookies && req.cookies.user_cookie_consent) {
+      try {
+        const cookieConsent = JSON.parse(req.cookies.user_cookie_consent);
+        if (cookieConsent && cookieConsent.configured) {
+          hasConsent = cookieConsent.marketing === true;
+          consentSource = "cookie browser";
+          console.log(`Consenso marketing da cookie browser: ${hasConsent ? 'SÌ' : 'NO'}`);
+        }
+      } catch (e) {
+        console.error('Errore nel parsing del cookie di consenso:', e);
       }
-      
-      // Ottieni fbclid dalla sessione se disponibile
-      if (req.session && req.session.fbclid) {
-        userFbclid = req.session.fbclid;
-        console.log(`fbclid in sessione: ${userFbclid}`);
+    }
+    
+    // PASSO 2: Se non abbiamo un consenso dai cookie, controlla il database
+    if (!hasConsent && req && req.cookies && req.cookies.userId) {
+      try {
+        // Cerca direttamente nel database
+        const userConsent = await CookieConsent.findOne({ userId: req.cookies.userId });
+        
+        if (userConsent && userConsent.configured) {
+          hasConsent = userConsent.marketing === true;
+          consentSource = "database";
+          console.log(`Consenso marketing da database: ${hasConsent ? 'SÌ' : 'NO'}`);
+          
+          // Sincronizza il cookie se necessario
+          if (!req.cookies.user_cookie_consent) {
+            console.log('Sincronizzazione cookie consenso dal database al browser');
+            res.cookie('user_cookie_consent', JSON.stringify({
+              essential: userConsent.essential,
+              analytics: userConsent.analytics,
+              marketing: userConsent.marketing,
+              configured: userConsent.configured
+            }), { 
+              maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno
+              path: '/',
+              sameSite: 'strict'
+            });
+          }
+        }
+      } catch (dbError) {
+        console.error('Errore nel recupero consenso dal database:', dbError);
       }
+    }
+    
+    console.log(`Fonte consenso: ${consentSource}`);
+    
+    // Ottieni fbclid dalla sessione se disponibile
+    if (req && req.session && req.session.fbclid) {
+      userFbclid = req.session.fbclid;
+      console.log(`fbclid in sessione: ${userFbclid}`);
     }
 
     // Per gli eventi che non sono PageView, verifica il consenso ai cookie di marketing
