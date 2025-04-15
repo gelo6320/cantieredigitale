@@ -651,7 +651,7 @@
       box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
       position: fixed;
       left: 0;
-      top: 0;
+      top: 56px;
       bottom: 0;
       width: 250px;
       z-index: 99;
@@ -2103,13 +2103,13 @@
             <ul class="nav flex-column">
               <li class="nav-item">
                 <a class="nav-link" :class="{ 'active': activeTab === 'dashboard' }" href="#" 
-                   @click.prevent="activeTab = 'dashboard'">
+                    @click.prevent="selectTab('dashboard')">
                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor"><path d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm320 96c0-26.9-16.5-49.9-40-59.3L280 88c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 204.7c-23.5 9.5-40 32.5-40 59.3c0 35.3 28.7 64 64 64s64-28.7 64-64zM144 176a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm-16 80a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm288 32a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM400 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg> Dashboard
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" :class="{ 'active': activeTab === 'forms' }" href="#" 
-                   @click.prevent="activeTab = 'forms'">
+                  @click.prevent="selectTab('forms')">
                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor"><path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/></svg> Form di contatto
                 </a>
               </li>
@@ -3617,6 +3617,14 @@
             }
           }, 500);
         };
+
+        const selectTab = (tab) => {
+          activeTab.value = tab;
+          if (windowSize.value.innerWidth < 768) {
+            sidebarVisible.value = false;
+            document.body.style.overflow = '';
+          }
+        };
         
         // Gestione del resize della finestra
         const handleResize = () => {
@@ -3729,6 +3737,7 @@
           facebookLeads,
           facebookLeadsPagination, 
           facebookLeadsFilter,
+          selectTab,
           loadFacebookLeads,
           filterFacebookLeadsByStatus,
           viewLeadDetails,
@@ -3807,18 +3816,6 @@
           this.style.backgroundColor = '';
         });
       });
-      
-      // Fix per il closing della sidebar in mobile
-      const sidebarOverlay = document.querySelector('.sidebar-overlay');
-      if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
-          // Questa funzione è più un backup, la logica principale è in Vue
-          const app = document.getElementById('app').__vue_app__;
-          if (app && app._instance && app._instance.exposed) {
-            app._instance.exposed.toggleSidebar();
-          }
-        });
-      }
       
       // Rimuovi possibili scroll orizzontali su mobile
       function checkAndFixOverflow() {
