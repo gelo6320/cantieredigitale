@@ -1940,7 +1940,8 @@ app.get('/api/logout', (req, res) => {
 
 // ----- PROTEZIONE DEL CRM -----
 
-// Protezione delle pagine del CRM (IMPORTANTE: aggiungi questa route PRIMA della route di fallback)
+const path = require('path');
+
 app.get('/crm', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'vip', 'crm.html'));
 });
