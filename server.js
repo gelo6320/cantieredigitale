@@ -49,10 +49,26 @@ app.use(express.static(path.join(__dirname, 'www'), {
 
 // Configurazione CORS
 app.use(cors({
-  origin: '*', // Permettere richieste da qualsiasi origine
+  origin: function(origin, callback) {
+    // Consenti richieste senza origine (come app mobile o curl)
+    if (!origin) return callback(null, true);
+    
+    // Lista dei domini consentiti
+    const allowedOrigins = [
+      'https://costruzionedigitale.com',
+      'https://www.costruzionedigitale.com',
+      'http://localhost:3000'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 // Configurazione sessione
