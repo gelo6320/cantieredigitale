@@ -81,6 +81,22 @@ app.use(session({
   }
 }));
 
+// Aggiungi questo middleware dopo la configurazione della sessione
+app.use((req, res, next) => {
+  if (req.path.includes('/api/') || req.path.includes('/crm') || req.path === '/login') {
+    console.log('=== SESSION CHECK ===');
+    console.log('Path:', req.path);
+    console.log('Session exists:', !!req.session);
+    console.log('Cookie sessionID:', req.cookies['connect.sid'] || 'non presente');
+    if (req.session) {
+      console.log('Session ID:', req.session.id);
+      console.log('isAuthenticated:', !!req.session.isAuthenticated);
+      console.log('Cookie scadenza:', req.session.cookie._expires);
+    }
+  }
+  next();
+});
+
 // Connessione a MongoDB
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
@@ -1871,17 +1887,28 @@ if (document.readyState === 'loading') {
 
 // Middleware per verificare l'autenticazione
 const isAuthenticated = (req, res, next) => {
+  console.log('=== AUTH CHECK ===');
+  console.log('Path richiesto:', req.path);
+  console.log('Metodo:', req.method);
+  console.log('User-Agent:', req.headers['user-agent']);
+  console.log('IP:', req.ip);
+  console.log('Session exists:', !!req.session);
+  console.log('Session ID:', req.session ? req.session.id : 'nessuna sessione');
+  console.log('isAuthenticated:', req.session ? !!req.session.isAuthenticated : false);
+  console.log('User in session:', req.session && req.session.user ? JSON.stringify(req.session.user) : 'nessun utente');
+  
   if (req.session && req.session.isAuthenticated) {
+    console.log('✅ Autenticazione verificata - accesso consentito');
     return next();
   }
   
-  // Controlla se è una richiesta API
-  if (req.path.startsWith('/api/')) {
-    return res.status(401).json({ success: false, message: 'Autenticazione richiesta' });
+  console.log('❌ Autenticazione fallita - reindirizzamento a login');
+  // Salva l'URL originale per reindirizzare dopo il login
+  if (req.session) {
+    req.session.returnTo = req.originalUrl;
+    console.log('URL salvato per reindirizzamento:', req.originalUrl);
   }
   
-  // Salva l'URL originale per reindirizzare dopo il login
-  req.session.returnTo = req.originalUrl;
   res.redirect('/login');
 };
 
@@ -1901,20 +1928,28 @@ app.get('/login', (req, res) => {
 
 // API per il login
 app.post('/api/login', async (req, res) => {
+  console.log('=== TENTATIVO LOGIN ===');
+  console.log('Username fornito:', req.body.username);
+  console.log('Password fornita:', req.body.password ? '***' : 'mancante');
+  
   try {
     const { username, password } = req.body;
     
     // Cerca l'utente nel database
     const user = await Admin.findOne({ username });
+    console.log('Utente trovato nel DB:', !!user);
     
     if (!user) {
+      console.log('❌ Login fallito: utente non trovato');
       return res.status(401).json({ success: false, message: 'Credenziali non valide' });
     }
     
     // Verifica la password
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log('Password valida:', isValidPassword);
     
     if (!isValidPassword) {
+      console.log('❌ Login fallito: password non valida');
       return res.status(401).json({ success: false, message: 'Credenziali non valide' });
     }
     
@@ -1925,24 +1960,39 @@ app.post('/api/login', async (req, res) => {
       username: user.username
     };
     
+    console.log('✅ Login riuscito - impostazione sessione');
+    console.log('Session ID:', req.session.id);
+    console.log('returnTo URL:', req.session.returnTo || 'non impostato');
+    
     // Salva la sessione e rispondi
-    req.session.save(() => {
-      // Registra l'accesso
-      console.log(`Utente ${username} ha effettuato l'accesso con successo`);
+    req.session.save((err) => {
+      if (err) {
+        console.error('❌ Errore nel salvataggio della sessione:', err);
+        return res.status(500).json({ success: false, message: 'Errore durante il login' });
+      }
+      
+      console.log('✅ Sessione salvata con successo');
       res.status(200).json({ success: true, message: 'Login effettuato con successo' });
     });
   } catch (error) {
-    console.error('Errore durante il login:', error);
+    console.error('❌ Errore durante il login:', error);
     res.status(500).json({ success: false, message: 'Errore durante il login' });
   }
 });
 
 // Logout
 app.get('/api/logout', (req, res) => {
+  console.log('=== LOGOUT ===');
+  console.log('Session before logout:', !!req.session);
+  console.log('User before logout:', req.session ? req.session.user : null);
+  
   req.session.destroy((err) => {
     if (err) {
-      console.error('Errore durante il logout:', err);
+      console.error('❌ Errore durante il logout:', err);
+      return res.status(500).json({ success: false, message: 'Errore durante il logout' });
     }
+    
+    console.log('✅ Sessione distrutta con successo');
     res.redirect('/'); // Reindirizza alla homepage
   });
 });
@@ -1951,6 +2001,9 @@ app.get('/api/logout', (req, res) => {
 
 // Protezione delle pagine del CRM
 app.get('/crm', isAuthenticated, (req, res) => {
+  console.log('=== ACCESSO CRM ===');
+  console.log('Utente autenticato:', req.session.user.username);
+  console.log('Session ID:', req.session.id);
   res.sendFile(path.join(__dirname, 'www', 'crm.html'));
 });
 
@@ -2025,6 +2078,15 @@ const createInitialAdmin = async () => {
     console.error('Errore nella creazione dell\'admin:', error);
   }
 };
+
+// Aggiungi questo prima di app.listen()
+console.log('=== CONFIGURAZIONE SESSIONE ===');
+console.log('Session secret:', process.env.SESSION_SECRET ? '[IMPOSTATO]' : 'neosmile-secret-key (default)');
+console.log('Cookie secure:', process.env.NODE_ENV === 'production');
+console.log('Cookie sameSite:', 'strict');
+console.log('Cookie httpOnly:', true);
+console.log('Session store:', 'MongoDB');
+console.log('Session TTL:', '24 ore');
 
 // Avvia il server
 app.listen(PORT, () => {
