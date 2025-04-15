@@ -2030,7 +2030,7 @@
     /* Very small screens */
     @media (max-width: 575.98px) {
       .sidebar {
-        width: 70%;
+        width: 60%;
       }
       
       .table {
@@ -3622,8 +3622,11 @@
 
         const selectTab = (tab) => {
           activeTab.value = tab;
+          // Chiudi la sidebar su mobile indipendentemente dalle dimensioni dello schermo
+          sidebarVisible.value = false;
+          
+          // Solo su mobile, ripristina il normale overflow del body
           if (windowSize.value.innerWidth < 768) {
-            sidebarVisible.value = false;
             document.body.style.overflow = '';
           }
         };
