@@ -3118,11 +3118,11 @@
         try {
           await axios.get('/api/logout');
           // Reindirizza alla pagina di login
-          window.location.href = '/login';
+          window.location.href = '/';
         } catch (error) {
           console.error('Errore durante il logout:', error);
           // In caso di errore, forza comunque il redirect
-          window.location.href = '/login';
+          window.location.href = '/';
         }
       };
       
