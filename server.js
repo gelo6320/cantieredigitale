@@ -1876,6 +1876,84 @@ if (document.readyState === 'loading') {
 `);
 });
 
+// ----- MIDDLEWARE DI AUTENTICAZIONE -----
+
+// Middleware per verificare l'autenticazione
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.isAuthenticated) {
+    return next();
+  }
+  // Salva l'URL originale per reindirizzare dopo il login
+  req.session.returnTo = req.originalUrl;
+  res.redirect('/login');
+};
+
+// ----- ROUTE PER L'AUTENTICAZIONE -----
+
+// Pagina di login
+app.get('/login', (req, res) => {
+  // Se già autenticato, reindirizza al CRM
+  if (req.session && req.session.isAuthenticated) {
+    return res.redirect('/crm');
+  }
+  res.sendFile(path.join(__dirname, 'www', 'login.html'));
+});
+
+// API per il login
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Cerca l'utente nel database
+    const user = await Admin.findOne({ username });
+    
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Credenziali non valide' });
+    }
+    
+    // Verifica la password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ success: false, message: 'Credenziali non valide' });
+    }
+    
+    // Imposta la sessione come autenticata
+    req.session.isAuthenticated = true;
+    req.session.user = {
+      id: user._id,
+      username: user.username
+    };
+    
+    // Salva la sessione e rispondi
+    req.session.save(() => {
+      // Registra l'accesso
+      console.log(`Utente ${username} ha effettuato l'accesso con successo`);
+      res.status(200).json({ success: true, message: 'Login effettuato con successo' });
+    });
+  } catch (error) {
+    console.error('Errore durante il login:', error);
+    res.status(500).json({ success: false, message: 'Errore durante il login' });
+  }
+});
+
+// Logout
+app.get('/api/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Errore durante il logout:', err);
+    }
+    res.redirect('/login');
+  });
+});
+
+// ----- PROTEZIONE DEL CRM -----
+
+// Protezione delle pagine del CRM (IMPORTANTE: aggiungi questa route PRIMA della route di fallback)
+app.get('/crm', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
+});
+
 // Route di fallback per SPA
 app.get('*', (req, res) => {
   // Ottieni il percorso richiesto
