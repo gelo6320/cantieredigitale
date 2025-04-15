@@ -667,6 +667,8 @@
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 90;
       display: none;
+      pointer-events: auto;
+      cursor: pointer;
     }
     
     .position-sticky {
@@ -2081,7 +2083,9 @@
     <div class="construction-pattern"></div>
     
     <!-- Overlay per sidebar mobile -->
-    <div class="sidebar-overlay" :class="{ 'd-block': sidebarVisible && windowSize.innerWidth < 768 }" @click="toggleSidebar"></div>
+    <div class="sidebar-overlay" 
+     :style="{ display: sidebarVisible && windowSize.innerWidth < 768 ? 'block' : 'none' }" 
+     @click="toggleSidebar"></div>
     
     <!-- Header -->
     <header class="navbar navbar-dark sticky-top" style="flex-wrap: nowrap;">
