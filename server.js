@@ -1943,7 +1943,7 @@ app.get('/api/logout', (req, res) => {
     if (err) {
       console.error('Errore durante il logout:', err);
     }
-    res.redirect('/login');
+    res.redirect('/'); // Reindirizza alla homepage
   });
 });
 
