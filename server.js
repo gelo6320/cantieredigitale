@@ -40,7 +40,18 @@ app.use(compression({
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+// Middleware per verificare l'autenticazione
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.isAuthenticated) {
+    return next();
+  }
+  // Salva l'URL originale per reindirizzare dopo il login
+  req.session.returnTo = req.originalUrl;
+  res.redirect('/login');
+};
+
 app.use('/crm', isAuthenticated);
+app.use('/crm.html', isAuthenticated);
 
 app.use(express.static(path.join(__dirname, 'www'), {
   extensions: ['html'],
@@ -1873,18 +1884,6 @@ if (document.readyState === 'loading') {
 }
 `);
 });
-
-// ----- MIDDLEWARE DI AUTENTICAZIONE -----
-
-// Middleware per verificare l'autenticazione
-const isAuthenticated = (req, res, next) => {
-  if (req.session && req.session.isAuthenticated) {
-    return next();
-  }
-  // Salva l'URL originale per reindirizzare dopo il login
-  req.session.returnTo = req.originalUrl;
-  res.redirect('/login');
-};
 
 // ----- ROUTE PER L'AUTENTICAZIONE -----
 
