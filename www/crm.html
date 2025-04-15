@@ -1805,7 +1805,7 @@
       const loadForms = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`http://151.80.130.16:5001/api/leads/forms?page=${formsPagination.value.page}&limit=${formsPagination.value.limit}${formsFilter.value ? `&status=${formsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(`https://151.80.130.16:5001/api/leads/forms?page=${formsPagination.value.page}&limit=${formsPagination.value.limit}${formsFilter.value ? `&status=${formsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
           
           forms.value = response.data.data || [];
           formsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
@@ -1828,7 +1828,7 @@
       const loadBookings = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`http://151.80.130.16:5001/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(`https://151.80.130.16:5001/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
           
           bookings.value = response.data.data || [];
           bookingsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
@@ -1851,7 +1851,7 @@
       const loadEvents = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`http://151.80.130.16:5001/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(`https://151.80.130.16:5001/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
           
           events.value = response.data.data || [];
           eventsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 50, pages: 0 };
@@ -1873,7 +1873,7 @@
       
       const loadRecentEvents = async () => {
         try {
-          const response = await axios.get('http://151.80.130.16:5001/api/events?limit=5');
+          const response = await axios.get('https://151.80.130.16:5001/api/events?limit=5');
           recentEvents.value = response.data.data || [];
         } catch (error) {
           console.error('Errore caricamento eventi recenti:', error);
@@ -2091,7 +2091,7 @@
         const loadFacebookLeads = async () => {
           try {
             isLoading.value = true;
-            const response = await axios.get(`http://151.80.130.16:5001/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+            const response = await axios.get(`https://151.80.130.16:5001/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
             
             facebookLeads.value = response.data.data || [];
             facebookLeadsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
