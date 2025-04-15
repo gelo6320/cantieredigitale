@@ -811,7 +811,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="event in recentEvents" :key="event._id" 
+                          <tr v-for="event in recentEvents || []" :key="event._id"
                               :class="{'table-success': event.success, 'table-danger': !event.success}">
                             <td>{{ formatDate(event.createdAt) }}</td>
                             <td>{{ event.leadType === 'form' ? 'Form contatto' : 'Prenotazione' }}</td>
@@ -875,7 +875,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="form in forms" :key="form._id">
+                <tr v-for="form in forms || []" :key="form._id">
                   <td>{{ formatDate(form.createdAt) }}</td>
                   <td>{{ form.name }}</td>
                   <td class="d-none d-md-table-cell">{{ form.email }}</td>
@@ -971,7 +971,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="booking in bookings" :key="booking._id">
+                <tr v-for="booking in bookings || []" :key="booking._id">
                   <td>{{ formatDate(booking.bookingTimestamp) }}</td>
                   <td>{{ booking.name }}</td>
                   <td class="d-none d-md-table-cell">{{ booking.email }}</td>
@@ -1059,7 +1059,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="event in events" :key="event._id" 
+                <tr v-for="event in events || []" :key="event._id"
                     :class="{'table-success': event.success, 'table-danger': !event.success}">
                   <td>{{ formatDateTime(event.createdAt) }}</td>
                   <td class="d-none d-md-table-cell">{{ event.leadType === 'form' ? 'Form contatto' : 'Prenotazione' }}</td>
@@ -1152,7 +1152,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="lead in facebookLeads" :key="lead._id">
+                <tr v-for="lead in facebookLeads || []" :key="lead._id">
                   <td>{{ formatDate(lead.createdAt) }}</td>
                   <td>{{ lead.name }}</td>
                   <td class="d-none d-md-table-cell">{{ lead.email }}</td>
@@ -1810,21 +1810,15 @@
           forms.value = response.data.data || [];
           formsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
           
-          // Mock data for demo
-          if (!forms.value.length) {
-            forms.value = getMockForms();
-            formsPagination.value = { total: forms.value.length, page: 1, limit: 10, pages: 1 };
-          }
-          
           // Aggiorna statistiche
           updateStats();
         } catch (error) {
           showToast('Errore', `Impossibile caricare i form: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
           console.error('Errore caricamento form:', error);
           
-          // Mock data in case of error
-          forms.value = getMockForms();
-          formsPagination.value = { total: forms.value.length, page: 1, limit: 10, pages: 1 };
+          // Initialize with empty arrays instead of mock data
+          forms.value = [];
+          formsPagination.value = { total: 0, page: 1, limit: 10, pages: 0 };
           updateStats();
         } finally {
           isLoading.value = false;
@@ -1836,14 +1830,19 @@
           isLoading.value = true;
           const response = await axios.get(`/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
           
-          bookings.value = response.data.data;
-          bookingsPagination.value = response.data.pagination;
+          bookings.value = response.data.data || [];
+          bookingsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
           
           // Aggiorna statistiche
           updateStats();
         } catch (error) {
           showToast('Errore', `Impossibile caricare le prenotazioni: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
           console.error('Errore caricamento prenotazioni:', error);
+          
+          // Initialize with empty arrays
+          bookings.value = [];
+          bookingsPagination.value = { total: 0, page: 1, limit: 10, pages: 0 };
+          updateStats();
         } finally {
           isLoading.value = false;
         }
@@ -1854,14 +1853,19 @@
           isLoading.value = true;
           const response = await axios.get(`/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
           
-          events.value = response.data.data;
-          eventsPagination.value = response.data.pagination;
+          events.value = response.data.data || [];
+          eventsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 50, pages: 0 };
           
           // Aggiorna statistiche
           updateStats();
         } catch (error) {
           showToast('Errore', `Impossibile caricare gli eventi: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
           console.error('Errore caricamento eventi:', error);
+          
+          // Initialize with empty arrays
+          events.value = [];
+          eventsPagination.value = { total: 0, page: 1, limit: 50, pages: 0 };
+          updateStats();
         } finally {
           isLoading.value = false;
         }
@@ -1870,9 +1874,10 @@
       const loadRecentEvents = async () => {
         try {
           const response = await axios.get('/api/events?limit=5');
-          recentEvents.value = response.data.data;
+          recentEvents.value = response.data.data || [];
         } catch (error) {
           console.error('Errore caricamento eventi recenti:', error);
+          recentEvents.value = [];
         }
       };
       
@@ -2088,14 +2093,18 @@
             isLoading.value = true;
             const response = await axios.get(`/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
             
-            facebookLeads.value = response.data.data;
-            facebookLeadsPagination.value = response.data.pagination;
+            facebookLeads.value = response.data.data || [];
+            facebookLeadsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
             
             // Aggiorna statistiche
             updateStats();
           } catch (error) {
             showToast('Errore', `Impossibile caricare i lead Facebook: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
             console.error('Errore caricamento lead Facebook:', error);
+            
+            // Initialize with empty arrays
+            facebookLeads.value = [];
+            facebookLeadsPagination.value = { total: 0, page: 1, limit: 10, pages: 0 };
           } finally {
             isLoading.value = false;
           }
