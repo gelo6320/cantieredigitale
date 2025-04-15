@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Dashboard - Costruzione Digitale</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <!-- Caricamento Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+  <!-- Axios per le richieste HTTP -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #FF6B00;
+      --secondary-color: #212121;
+      --text-color: #FFFFFF;
+      --accent-color: #FF8C38;
+      --dark-bg: #151515;
+      --light-accent: #333333;
+      --success-color: #27ae60;
+      --warning-color: #e67e22;
+      --danger-color: #e74c3c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+      line-height: 1.6;
+      color: var(--text-color);
+      position: relative;
+      background-color: var(--secondary-color);
+      overflow-x: hidden;
+    }
+    
+    /* Pattern di sfondo stile Costruzione */
+    .construction-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(45deg, rgba(255, 107, 0, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 107, 0, 0.05) 50%, rgba(255, 107, 0, 0.05) 75%, transparent 75%, transparent);
+      background-size: 100px 100px;
+      opacity: 0.3;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .container-fluid {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header styling */
+    header {
+      background-color: var(--dark-bg);
+      padding: 0 15px; /* Aggiungere padding laterale */
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-brand {
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      font-weight: 700;
+    }
+    
+    .navbar-brand i {
+      color: var(--primary-color);
+      margin-right: 10px;
+    }
+    
+    .navbar-brand:hover {
+      color: var(--primary-color);
+    }
+    
+    .navbar-toggler {
+      color: var(--primary-color);
+      border: none;
+      padding: 8px;
+      display: none;
+    }
+    
+    .form-control-dark {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      max-width: calc(100% - 300px); /* Limita la larghezza */
+      margin-left: 15px; /* Spazio dalla navbar-brand */
+      margin-right: 20px;
+    }
+
+    
+    .form-control-dark:focus {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(255, 107, 0, 0.25);
+      color: var(--text-color);
+    }
+    
+    /* Sidebar styling */
+    .sidebar {
+      background-color: var(--dark-bg);
+      min-height: 100vh;
+      padding-top: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 250px;
+      z-index: 99;
+      padding-top: 100px;
+    }
+    
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 12px 15px;
+      border-radius: 0;
+      transition: all 0.3s ease;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .sidebar .nav-link i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar .nav-link:hover {
+      background-color: rgba(255, 107, 0, 0.1);
+      color: var(--primary-color);
+    }
+    
+    .sidebar .nav-link.active {
+      background-color: rgba(255, 107, 0, 0.2);
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+    }
+    
+    /* Main content */
+    main {
+      background-color: var(--secondary-color);
+      min-height: calc(100vh - 56px);
+      padding: 20px 30px; /* Aumentare il padding laterale */
+      margin-left: 250px;
+      transition: all 0.3s ease;
+    }
+    
+    /* Card styling */
+    .card {
+      background-color: var(--light-accent);
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      max-width: calc(100% - 20px); /* Aggiungere max-width */
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 15px 20px;
+      font-weight: 600;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .card-title {
+      color: var(--text-color);
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    /* Button styling */
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: #fff;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-primary:focus {
+      background-color: var(--primary-color);
+      color: #fff;
+    }
+    
+    /* Table styling */
+    .table {
+      color: var(--text-color);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .table th {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .table td {
+      border-color: rgba(255, 255, 255, 0.1);
+      vertical-align: middle;
+    }
+    
+    .table-hover tbody tr:hover {
+      background-color: rgba(255, 107, 0, 0.05);
+    }
+    
+    .table-striped > tbody > tr:nth-of-type(odd) {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Stats cards */
+    .stats-card {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .border-primary {
+      border-left: 4px solid var(--primary-color) !important;
+      border-top: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+    }
+    
+    .border-success {
+      border-left: 4px solid var(--success-color) !important;
+      border-top: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+    }
+    
+    .border-info {
+      border-left: 4px solid #3498db !important;
+      border-top: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+    }
+    
+    /* Form styling */
+    .form-label {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+    
+    .form-control, .form-select {
+      background-color: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      border-radius: 8px;
+      padding: 10px 15px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(255, 107, 0, 0.25);
+      color: var(--text-color);
+    }
+    
+    .form-select option {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+    
+    .form-check-input {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    /* Badges */
+    .badge {
+      padding: 6px 10px;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+    
+    /* Pagination */
+    .pagination {
+      margin-top: 20px;
+    }
+    
+    .pagination .page-link {
+      color: var(--primary-color);
+      background-color: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .pagination .page-link:hover {
+      background-color: rgba(255, 107, 0, 0.1);
+      border-color: rgba(255, 107, 0, 0.2);
+      color: var(--primary-color);
+    }
+    
+    .pagination .page-item.active .page-link {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: #fff;
+    }
+    
+    /* Modals */
+    .modal-content {
+      background-color: var(--light-accent);
+      color: var(--text-color);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .timeline:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15px;
+      height: 100%;
+      width: 2px;
+      background-color: rgba(255, 107, 0, 0.3);
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .timeline-badge {
+      position: absolute;
+      left: -30px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      background-color: var(--primary-color);
+      color: #fff;
+      z-index: 1;
+    }
+    
+    .timeline-panel {
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+    }
+    
+    /* Code preview */
+    .code-preview {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      padding: 10px;
+      color: #f8f9fa;
+      font-family: monospace;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    
+    /* Dropdown menu */
+    .dropdown-menu {
+      background-color: var(--light-accent);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dropdown-item {
+      color: var(--text-color);
+    }
+    
+    .dropdown-item:hover, .dropdown-item:focus {
+      background-color: rgba(255, 107, 0, 0.1);
+      color: var(--primary-color);
+    }
+    
+    /* Toast notification */
+    .toast {
+      background-color: var(--light-accent);
+      border: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .toast-header {
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .toast-body {
+      color: var(--text-color);
+    }
+    
+    /* Animation */
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Progress bars */
+    .progress {
+      background-color: rgba(0, 0, 0, 0.2);
+      height: 10px;
+      border-radius: 5px;
+    }
+    
+    .progress-bar {
+      background-color: var(--primary-color);
+    }
+    
+    /* Tabs */
+    .nav-tabs {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-tabs .nav-link {
+      color: var(--text-color);
+      background-color: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      padding: 10px 15px;
+    }
+    
+    .nav-tabs .nav-link:hover {
+      border-color: rgba(255, 107, 0, 0.5);
+      color: var(--primary-color);
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--primary-color);
+      background-color: transparent;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    /* Alert */
+    .alert {
+      border-radius: 8px;
+      border: none;
+    }
+    
+    .alert-info {
+      background-color: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+    }
+    
+    .alert-danger {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+    
+    .alert-warning {
+      background-color: rgba(230, 126, 34, 0.1);
+      color: #e67e22;
+    }
+    
+    .alert-success {
+      background-color: rgba(39, 174, 96, 0.1);
+      color: #27ae60;
+    }
+    
+    /* Custom mobile sidebar overlay */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 90;
+      display: none;
+    }
+    
+    /* Mobile optimization */
+    @media (max-width: 767.98px) {
+      /* Header */
+      .navbar-brand {
+        font-size: 16px;
+        padding: 8px 12px;
+      }
+      
+      /* Sidebar */
+      .sidebar {
+        width: 50%;
+        transform: translateX(100%); /* Cambiare da -100% a 100% per uscire da destra */
+        padding-top: 60px;
+        right: 0; /* Aggiungere questa riga */
+        left: auto; /* Aggiungere questa riga */
+      }
+      
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      
+      .sidebar .nav-link {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+      
+      .sidebar .nav-link i {
+        font-size: 16px;
+      }
+      
+      /* Main content */
+      main {
+        margin-left: 0;
+        padding: 15px;
+      }
+      
+      /* Typography */
+      h1, .h1 {
+        font-size: 24px;
+      }
+      
+      h2, .h2 {
+        font-size: 20px;
+      }
+      
+      .card-title {
+        font-size: 16px;
+      }
+      
+      .card-text, p {
+        font-size: 14px;
+      }
+      
+      /* Cards */
+      .card-body {
+        padding: 15px;
+      }
+
+      .form-control {
+        display: none;
+      }
+      
+      .form-label {
+        font-size: 14px;
+      }
+      
+      /* Tables */
+      .table {
+        font-size: 13px;
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 5px;
+      }
+      
+      /* Buttons */
+      .btn {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+      
+      /* Dashboard */
+      .dashboard-row {
+        gap: 15px;
+      }
+
+      .navbar-toggler {
+        display: block;
+      }
+
+      .navbar {
+        padding-right: 20px;
+      }
+    }
+    
+    /* Very small screens */
+    @media (max-width: 575.98px) {
+      .sidebar {
+        width: 70%;
+      }
+      
+      .table {
+        font-size: 12px;
+      }
+      
+      .action-buttons .btn {
+        padding: 4px 8px;
+      }
+      
+      .btn-sm {
+        padding: 3px 6px;
+        font-size: 12px;
+      }
+      
+      .pagination .page-link {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+
+        .mainmobile {
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Pattern di sfondo stile Costruzione -->
+    <div class="construction-pattern"></div>
+    
+    <!-- Overlay per sidebar mobile -->
+    <div class="sidebar-overlay" :class="{ 'd-block': sidebarVisible && windowSize.innerWidth < 768 }" @click="toggleSidebar"></div>
+    
+    <!-- Header -->
+    <header class="navbar navbar-dark sticky-top" style="flex-wrap: nowrap;">
+      <a class="navbar-brand" href="#" @click.prevent="activeTab = 'dashboard'">
+        <i class="bi bi-facebook"></i> Costruzione <span style="color: var(--primary-color)">Digitale</span> CRM
+      </a>
+      <button class="navbar-toggler" type="button" @click="toggleSidebar" aria-label="Toggle sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+      <input class="form-control form-control-dark w-100" type="text" placeholder="Cerca..." 
+             v-model="searchQuery" @input="debounceSearch">
+    </header>
+  
+    <div class="container-fluid p-0">
+      <div class="row g-0">
+        <!-- Sidebar -->
+        <nav id="sidebarMenu" class="sidebar" :class="{ 'show': sidebarVisible }">
+          <div class="position-sticky">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'dashboard' }" href="#" 
+                   @click.prevent="activeTab = 'dashboard'">
+                  <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'forms' }" href="#" 
+                   @click.prevent="activeTab = 'forms'">
+                  <i class="bi bi-file-text"></i> Form di contatto
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'facebookLeads' }" href="#" 
+                   @click.prevent="activeTab = 'facebookLeads'">
+                  <i class="bi bi-facebook"></i> Lead Facebook
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'bookings' }" href="#" 
+                   @click.prevent="activeTab = 'bookings'">
+                  <i class="bi bi-calendar2-check"></i> Prenotazioni
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'events' }" href="#" 
+                   @click.prevent="activeTab = 'events'">
+                  <i class="bi bi-share"></i> Eventi Facebook
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'settings' }" href="#" 
+                   @click.prevent="activeTab = 'settings'">
+                  <i class="bi bi-gear"></i> Impostazioni
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+  
+        <!-- Contenuto principale -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mainmobile">
+          <!-- Dashboard principale -->
+          <div v-if="activeTab === 'dashboard'">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+              <h1 class="h2">Dashboard</h1>
+            </div>
+            
+            <div class="row dashboard-row">
+              <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card stats-card border-primary fade-in">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-file-text me-2"></i>Form di contatto</h5>
+                    <p class="card-text">Totale: {{ stats.forms.total }}</p>
+                    <div class="progress mb-2">
+                      <div class="progress-bar" role="progressbar" 
+                           :style="{width: stats.forms.conversionRate + '%'}" 
+                           :aria-valuenow="stats.forms.conversionRate" 
+                           aria-valuemin="0" aria-valuemax="100">
+                        {{ stats.forms.conversionRate }}%
+                      </div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-outline-primary" @click.prevent="activeTab = 'forms'">
+                      Visualizza tutti
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card stats-card border-success fade-in">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-calendar2-check me-2"></i>Prenotazioni</h5>
+                    <p class="card-text">Totale: {{ stats.bookings.total }}</p>
+                    <div class="progress mb-2">
+                      <div class="progress-bar bg-success" role="progressbar" 
+                           :style="{width: stats.bookings.conversionRate + '%'}" 
+                           :aria-valuenow="stats.bookings.conversionRate" 
+                           aria-valuemin="0" aria-valuemax="100">
+                        {{ stats.bookings.conversionRate }}%
+                      </div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-outline-success" @click.prevent="activeTab = 'bookings'">
+                      Visualizza tutte
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card stats-card border-info fade-in">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-share me-2"></i>Eventi Facebook</h5>
+                    <p class="card-text">Totale inviati: {{ stats.events.total }}</p>
+                    <div class="progress mb-2">
+                      <div class="progress-bar bg-info" role="progressbar" 
+                           :style="{width: stats.events.successRate + '%'}" 
+                           :aria-valuenow="stats.events.successRate" 
+                           aria-valuemin="0" aria-valuemax="100">
+                        {{ stats.events.successRate }}%
+                      </div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-outline-info" @click.prevent="activeTab = 'events'">
+                      Visualizza tutti
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mt-3">
+              <div class="col-12">
+                <div class="card fade-in">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Ultimi eventi CRM inviati a Facebook</h5>
+                    <button @click="loadRecentEvents()" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Data</th>
+                            <th>Tipo lead</th>
+                            <th>Evento</th>
+                            <th>Stato</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="event in recentEvents" :key="event._id" 
+                              :class="{'table-success': event.success, 'table-danger': !event.success}">
+                            <td>{{ formatDate(event.createdAt) }}</td>
+                            <td>{{ event.leadType === 'form' ? 'Form contatto' : 'Prenotazione' }}</td>
+                            <td>{{ event.eventName }}</td>
+                            <td>
+                              <span v-if="event.success" class="badge bg-success"><i class="bi bi-check-circle"></i> Inviato</span>
+                              <span v-else class="badge bg-danger"><i class="bi bi-x-circle"></i> Errore</span>
+                            </td>
+                          </tr>
+                          <tr v-if="recentEvents.length === 0">
+                            <td colspan="4" class="text-center">Nessun evento recente</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Form di contatto -->
+          <div v-if="activeTab === 'forms'">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+              <h1 class="h2">Form di contatto</h1>
+              <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                  <button @click="loadForms()" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                        type="button" id="dropdownMenuFilter" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">Filtra</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuFilter">
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('')">Tutti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('new')">Nuovi</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('contacted')">Contattati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('qualified')">Qualificati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('opportunity')">Opportunità</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('customer')">Clienti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFormsByStatus('lost')">Persi</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Nome</th>
+                  <th class="d-none d-md-table-cell">Email</th>
+                  <th class="d-none d-sm-table-cell">Telefono</th>
+                  <th>Stato</th>
+                  <th class="d-none d-md-table-cell">Fonte</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="form in forms" :key="form._id">
+                  <td>{{ formatDate(form.createdAt) }}</td>
+                  <td>{{ form.name }}</td>
+                  <td class="d-none d-md-table-cell">{{ form.email }}</td>
+                  <td class="d-none d-sm-table-cell">{{ form.phone }}</td>
+                  <td>
+                    <span class="badge" :class="getStatusBadgeClass(form.status)">
+                      {{ getStatusLabel(form.status) }}
+                    </span>
+                  </td>
+                  <td class="d-none d-md-table-cell">{{ form.source }}</td>
+                  <td class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary me-1" @click="openLeadModal(form, 'form')">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" @click="viewEvents(form._id, 'form')">
+                      <i class="bi bi-clock-history"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="forms.length === 0">
+                  <td colspan="7" class="text-center">Nessun form trovato</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginazione -->
+          <nav aria-label="Navigazione pagine">
+            <ul class="pagination justify-content-center flex-wrap">
+              <li class="page-item" :class="{ disabled: formsPagination.page === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('forms', formsPagination.page - 1)">
+                  <i class="bi bi-chevron-left d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Precedente</span>
+                </a>
+              </li>
+              <li v-for="page in getPageNumbers(formsPagination.pages)" 
+                  :key="'form-page-' + page" 
+                  class="page-item d-none d-sm-block" 
+                  :class="{ active: formsPagination.page === page, 'd-block': page === 1 || page === formsPagination.pages || Math.abs(page - formsPagination.page) <= 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('forms', page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: formsPagination.page === formsPagination.pages }">
+                <a class="page-link" href="#" @click.prevent="changePage('forms', formsPagination.page + 1)">
+                  <i class="bi bi-chevron-right d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Successiva</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        
+        <!-- Prenotazioni -->
+        <div v-if="activeTab === 'bookings'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Prenotazioni</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button @click="loadBookings()" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                        type="button" id="dropdownMenuFilterBooking" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">Filtra</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuFilterBooking">
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('')">Tutti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('pending')">In attesa</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('confirmed')">Confermati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('completed')">Completati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('cancelled')">Cancellati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('qualified')">Qualificati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('opportunity')">Opportunità</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('customer')">Clienti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterBookingsByStatus('lost')">Persi</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Nome</th>
+                  <th class="d-none d-md-table-cell">Email</th>
+                  <th class="d-none d-sm-table-cell">Telefono</th>
+                  <th>Ora</th>
+                  <th>Stato</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="booking in bookings" :key="booking._id">
+                  <td>{{ formatDate(booking.bookingTimestamp) }}</td>
+                  <td>{{ booking.name }}</td>
+                  <td class="d-none d-md-table-cell">{{ booking.email }}</td>
+                  <td class="d-none d-sm-table-cell">{{ booking.phone }}</td>
+                  <td>{{ booking.bookingTime }}</td>
+                  <td>
+                    <span class="badge" :class="getStatusBadgeClass(booking.status)">
+                      {{ getStatusLabel(booking.status) }}
+                    </span>
+                  </td>
+                  <td class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary me-1" @click="openLeadModal(booking, 'booking')">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" @click="viewEvents(booking._id, 'booking')">
+                      <i class="bi bi-clock-history"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="bookings.length === 0">
+                  <td colspan="7" class="text-center">Nessuna prenotazione trovata</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginazione -->
+          <nav aria-label="Navigazione pagine">
+            <ul class="pagination justify-content-center flex-wrap">
+              <li class="page-item" :class="{ disabled: bookingsPagination.page === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('bookings', bookingsPagination.page - 1)">
+                  <i class="bi bi-chevron-left d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Precedente</span>
+                </a>
+              </li>
+              <li v-for="page in getPageNumbers(bookingsPagination.pages)" 
+                  :key="'booking-page-' + page" 
+                  class="page-item d-none d-sm-block" 
+                  :class="{ active: bookingsPagination.page === page, 'd-block': page === 1 || page === bookingsPagination.pages || Math.abs(page - bookingsPagination.page) <= 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('bookings', page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: bookingsPagination.page === bookingsPagination.pages }">
+                <a class="page-link" href="#" @click.prevent="changePage('bookings', bookingsPagination.page + 1)">
+                  <i class="bi bi-chevron-right d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Successiva</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        
+        <!-- Eventi Facebook -->
+        <div v-if="activeTab === 'events'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Eventi Facebook</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button @click="loadEvents()" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                        type="button" id="dropdownMenuFilterEvents" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">Filtra</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuFilterEvents">
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterEventsBySuccess('')">Tutti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterEventsBySuccess('true')">Successo</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterEventsBySuccess('false')">Errore</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th class="d-none d-md-table-cell">Tipo lead</th>
+                  <th>Nome evento</th>
+                  <th>Stato</th>
+                  <th>Dettagli</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="event in events" :key="event._id" 
+                    :class="{'table-success': event.success, 'table-danger': !event.success}">
+                  <td>{{ formatDateTime(event.createdAt) }}</td>
+                  <td class="d-none d-md-table-cell">{{ event.leadType === 'form' ? 'Form contatto' : 'Prenotazione' }}</td>
+                  <td>{{ event.eventName }}</td>
+                  <td>
+                    <span v-if="event.success" class="badge bg-success">
+                      <i class="bi bi-check-circle"></i> <span class="d-none d-sm-inline">Inviato</span>
+                    </span>
+                    <span v-else class="badge bg-danger">
+                      <i class="bi bi-x-circle"></i> <span class="d-none d-sm-inline">Errore</span>
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-info" @click="openEventDetailsModal(event)">
+                      <i class="bi bi-search"></i> <span class="d-none d-sm-inline">Dettagli</span>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="events.length === 0">
+                  <td colspan="5" class="text-center">Nessun evento trovato</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginazione -->
+          <nav aria-label="Navigazione pagine">
+            <ul class="pagination justify-content-center flex-wrap">
+              <li class="page-item" :class="{ disabled: eventsPagination.page === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('events', eventsPagination.page - 1)">
+                  <i class="bi bi-chevron-left d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Precedente</span>
+                </a>
+              </li>
+              <li v-for="page in getPageNumbers(eventsPagination.pages)" 
+                  :key="'event-page-' + page" 
+                  class="page-item d-none d-sm-block" 
+                  :class="{ active: eventsPagination.page === page, 'd-block': page === 1 || page === eventsPagination.pages || Math.abs(page - eventsPagination.page) <= 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('events', page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: eventsPagination.page === eventsPagination.pages }">
+                <a class="page-link" href="#" @click.prevent="changePage('events', eventsPagination.page + 1)">
+                  <i class="bi bi-chevron-right d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Successiva</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        
+        <!-- Lead Facebook -->
+        <div v-if="activeTab === 'facebookLeads'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Lead Facebook</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button @click="loadFacebookLeads()" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                        type="button" id="dropdownMenuFilterFB" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">Filtra</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuFilterFB">
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('')">Tutti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('new')">Nuovi</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('contacted')">Contattati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('qualified')">Qualificati</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('opportunity')">Opportunità</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('customer')">Clienti</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="filterFacebookLeadsByStatus('lost')">Persi</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Nome</th>
+                  <th class="d-none d-md-table-cell">Email</th>
+                  <th class="d-none d-sm-table-cell">Telefono</th>
+                  <th class="d-none d-md-table-cell">Form ID</th>
+                  <th>Stato</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="lead in facebookLeads" :key="lead._id">
+                  <td>{{ formatDate(lead.createdAt) }}</td>
+                  <td>{{ lead.name }}</td>
+                  <td class="d-none d-md-table-cell">{{ lead.email }}</td>
+                  <td class="d-none d-sm-table-cell">{{ lead.phone }}</td>
+                  <td class="d-none d-md-table-cell"><small>{{ lead.formId }}</small></td>
+                  <td>
+                    <span class="badge" :class="getStatusBadgeClass(lead.status)">
+                      {{ getStatusLabel(lead.status) }}
+                    </span>
+                  </td>
+                  <td class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary me-1" @click="openLeadModal(lead, 'facebook')">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" @click="viewLeadDetails(lead)">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="facebookLeads.length === 0">
+                  <td colspan="7" class="text-center">Nessun lead Facebook trovato</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginazione -->
+          <nav aria-label="Navigazione pagine">
+            <ul class="pagination justify-content-center flex-wrap">
+              <li class="page-item" :class="{ disabled: facebookLeadsPagination.page === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('facebookLeads', facebookLeadsPagination.page - 1)">
+                  <i class="bi bi-chevron-left d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Precedente</span>
+                </a>
+              </li>
+              <li v-for="page in getPageNumbers(facebookLeadsPagination.pages)" 
+                  :key="'fb-page-' + page" 
+                  class="page-item d-none d-sm-block" 
+                  :class="{ active: facebookLeadsPagination.page === page, 'd-block': page === 1 || page === facebookLeadsPagination.pages || Math.abs(page - facebookLeadsPagination.page) <= 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage('facebookLeads', page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: facebookLeadsPagination.page === facebookLeadsPagination.pages }">
+                <a class="page-link" href="#" @click.prevent="changePage('facebookLeads', facebookLeadsPagination.page + 1)">
+                  <i class="bi bi-chevron-right d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Successiva</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        
+        <!-- Impostazioni -->
+        <div v-if="activeTab === 'settings'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Impostazioni</h1>
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-8 col-md-10 mx-auto">
+              <div class="card mb-4 fade-in">
+                <div class="card-header">
+                  <h5>Configurazione Facebook Conversion API</h5>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="saveSettings">
+                    <div class="mb-3">
+                      <label for="facebookAccessToken" class="form-label">Access Token</label>
+                      <div class="input-group">
+                        <input type="password" class="form-control" id="facebookAccessToken" 
+                               v-model="settings.facebookAccessToken" required>
+                        <button class="btn btn-outline-primary" type="button" @click="togglePasswordVisibility">
+                          <i class="bi" :class="passwordVisible ? 'bi-eye-slash' : 'bi-eye'"></i>
+                        </button>
+                      </div>
+                      <div class="form-text text-light opacity-75">Il token di accesso a Facebook Conversion API</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="facebookPixelId" class="form-label">Pixel ID</label>
+                      <input type="text" class="form-control" id="facebookPixelId" 
+                             v-model="settings.facebookPixelId" required>
+                      <div class="form-text text-light opacity-75">L'ID del tuo pixel Facebook (es. 1543790469631614)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="facebookTestEventCode" class="form-label">Test Event Code</label>
+                      <input type="text" class="form-control" id="facebookTestEventCode" 
+                             v-model="settings.facebookTestEventCode">
+                      <div class="form-text text-light opacity-75">Opzionale: codice di test per l'ambiente di sviluppo</div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                      <input type="checkbox" class="form-check-input" id="isDevelopment" 
+                             v-model="settings.isDevelopment">
+                      <label class="form-check-label" for="isDevelopment">
+                        Modalità sviluppo (usa il codice di test)
+                      </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                      <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                        <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Salva impostazioni
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              
+              <div class="card fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="m-0">Configurazione eventi CRM</h5>
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          type="button" 
+                          data-bs-toggle="collapse" 
+                          data-bs-target="#eventsInfoCollapse" 
+                          aria-expanded="true">
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                </div>
+                <div class="collapse show" id="eventsInfoCollapse">
+                  <div class="card-body">
+                    <div class="alert alert-info">
+                      <i class="bi bi-info-circle me-2"></i>
+                      Gli eventi CRM permettono di informare Facebook sulle fasi più avanzate 
+                      del percorso cliente, migliorando l'ottimizzazione delle campagne pubblicitarie.
+                    </div>
+                    
+                    <div class="table-responsive">
+                      <table class="table table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Nome evento</th>
+                            <th>Descrizione</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>QualifiedLead</code></td>
+                            <td>Lead qualificato dopo il contatto iniziale</td>
+                          </tr>
+                          <tr>
+                            <td><code>Meeting</code></td>
+                            <td>Cliente ha partecipato ad un meeting/chiamata</td>
+                          </tr>
+                          <tr>
+                            <td><code>Opportunity</code></td>
+                            <td>Lead trasformato in opportunità commerciale</td>
+                          </tr>
+                          <tr>
+                            <td><code>ProposalSent</code></td>
+                            <td>Preventivo/proposta inviata al cliente</td>
+                          </tr>
+                          <tr>
+                            <td><code>Purchase</code></td>
+                            <td>Cliente ha acquistato/sottoscritto un servizio</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODALI -->
+  
+  <!-- Modale modifica stato lead -->
+  <div class="modal fade" id="leadModal" tabindex="-1" aria-labelledby="leadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="leadModalLabel">Aggiorna stato lead</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-lg-6 mb-3 mb-lg-0">
+              <div class="card">
+                <div class="card-body p-3">
+                  <h6 class="card-title mb-3"><i class="bi bi-person me-2"></i>Informazioni lead</h6>
+                  <dl class="row mb-0">
+                    <dt class="col-sm-4">Nome:</dt>
+                    <dd class="col-sm-8">{{ currentLead.name }}</dd>
+                    
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">{{ currentLead.email }}</dd>
+                    
+                    <dt class="col-sm-4">Telefono:</dt>
+                    <dd class="col-sm-8">{{ currentLead.phone }}</dd>
+                      
+                    <template v-if="currentLeadType === 'booking'">
+                      <dt class="col-sm-4">Data prenotazione:</dt>
+                      <dd class="col-sm-8">{{ currentLead.bookingDate }} {{ currentLead.bookingTime }}</dd>
+                    </template>
+                    
+                    <dt class="col-sm-4">Fonte:</dt>
+                    <dd class="col-sm-8">{{ currentLead.source }}</dd>
+                    
+                    <dt class="col-sm-4">Stato attuale:</dt>
+                    <dd class="col-sm-8">
+                      <span class="badge" :class="getStatusBadgeClass(currentLead.status)">
+                        {{ getStatusLabel(currentLead.status) }}
+                      </span>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-body p-3">
+                  <h6 class="card-title mb-3"><i class="bi bi-clock-history me-2"></i>Cronologia eventi</h6>
+                  <div class="timeline-wrapper" style="max-height: 200px; overflow-y: auto;">
+                    <ul class="timeline list-unstyled">
+                      <li v-for="(event, index) in currentLead.crmEvents" :key="index" class="timeline-item">
+                        <div class="timeline-badge bg-primary"><i class="bi bi-check"></i></div>
+                        <div class="timeline-panel">
+                          <div class="timeline-heading">
+                            <h6 class="timeline-title">{{ event.eventName }}</h6>
+                            <p><small class="text-muted"><i class="bi bi-clock"></i> {{ formatDateTime(event.eventTime) }}</small></p>
+                          </div>
+                          <div class="timeline-body">
+                            <p>Inviato a Facebook: 
+                              <span v-if="event.sentToFacebook" class="badge bg-success">Sì</span>
+                              <span v-else class="badge bg-danger">No</span>
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                      <li v-if="!currentLead.crmEvents || currentLead.crmEvents.length === 0" class="text-center">
+                        <p>Nessun evento registrato</p>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <hr class="border-secondary">
+          
+          <form @submit.prevent="updateLeadStatus" class="needs-validation" novalidate>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="newStatus" class="form-label">Nuovo stato</label>
+                <select class="form-select" id="newStatus" v-model="newStatus" required>
+                  <option value="" disabled>Seleziona nuovo stato</option>
+                  <!-- Opzioni per Form -->
+                  <template v-if="currentLeadType === 'form'">
+                    <option value="new">Nuovo</option>
+                    <option value="contacted">Contattato</option>
+                    <option value="qualified">Qualificato</option>
+                    <option value="opportunity">Opportunità</option>
+                    <option value="customer">Cliente</option>
+                    <option value="lost">Perso</option>
+                  </template>
+                  <!-- Opzioni per Prenotazioni -->
+                  <template v-else>
+                    <option value="pending">In attesa</option>
+                    <option value="confirmed">Confermato</option>
+                    <option value="completed">Completato</option>
+                    <option value="cancelled">Cancellato</option>
+                    <option value="qualified">Qualificato</option>
+                    <option value="opportunity">Opportunità</option>
+                    <option value="customer">Cliente</option>
+                    <option value="lost">Perso</option>
+                  </template>
+                </select>
+                <div class="invalid-feedback">
+                  Seleziona un nuovo stato
+                </div>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="eventName" class="form-label">Evento Facebook</label>
+                <select class="form-select" id="eventName" v-model="eventName" required>
+                  <option value="" disabled>Seleziona evento</option>
+                  <option value="QualifiedLead">Lead Qualificato</option>
+                  <option value="Meeting">Meeting/Chiamata</option>
+                  <option value="Opportunity">Opportunità</option>
+                  <option value="ProposalSent">Preventivo Inviato</option>
+                  <option value="Purchase">Acquisto</option>
+                  <option value="Lost">Lead Perso</option>
+                </select>
+                <div class="invalid-feedback">
+                  Seleziona un evento
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="eventNote" class="form-label">Note (opzionale)</label>
+              <textarea class="form-control" id="eventNote" v-model="eventNote" rows="3"></textarea>
+            </div>
+            
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="hasFbclid" v-model="hasFbclid">
+              <label class="form-check-label" for="hasFbclid">
+                Il lead ha un fbclid associato
+              </label>
+            </div>
+            
+            <div class="mb-3" v-if="hasFbclid">
+              <label for="fbclid" class="form-label">Facebook Click ID (fbclid)</label>
+              <input type="text" class="form-control" id="fbclid" v-model="fbclid" 
+                     placeholder="Es. fbclid_123456789">
+              <div class="form-text text-light opacity-75">Identificativo del click proveniente da Facebook</div>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Questo aggiornerà lo stato del lead e invierà l'evento selezionato alla Conversion API di Facebook.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button type="button" class="btn btn-primary" @click="updateLeadStatus" :disabled="isUpdating">
+            <span v-if="isUpdating" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Aggiorna e invia evento
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modale dettagli evento -->
+  <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eventDetailsModalLabel">Dettagli evento Facebook</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" id="eventDetailsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="info-tab" data-bs-toggle="tab" 
+                      data-bs-target="#info-tab-pane" type="button" role="tab" 
+                      aria-controls="info-tab-pane" aria-selected="true">
+                <i class="bi bi-info-circle me-1"></i> Info
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="data-tab" data-bs-toggle="tab" 
+                      data-bs-target="#data-tab-pane" type="button" role="tab" 
+                      aria-controls="data-tab-pane" aria-selected="false">
+                <i class="bi bi-code-square me-1"></i> Dati
+              </button>
+            </li>
+            <li class="nav-item" role="presentation" v-if="!currentEvent.success">
+              <button class="nav-link" id="error-tab" data-bs-toggle="tab" 
+                      data-bs-target="#error-tab-pane" type="button" role="tab" 
+                      aria-controls="error-tab-pane" aria-selected="false">
+                <i class="bi bi-exclamation-triangle me-1"></i> Errore
+              </button>
+            </li>
+          </ul>
+          
+          <div class="tab-content" id="eventDetailsTabsContent">
+            <!-- Tab Informazioni -->
+            <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" 
+                 aria-labelledby="info-tab" tabindex="0">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <dl class="row">
+                            <dt class="col-sm-4">Nome evento:</dt>
+                            <dd class="col-sm-8">{{ currentEvent.eventName }}</dd>
+                            
+                            <dt class="col-sm-4">Data invio:</dt>
+                            <dd class="col-sm-8">{{ formatDateTime(currentEvent.createdAt) }}</dd>
+                            
+                            <dt class="col-sm-4">Tipo lead:</dt>
+                            <dd class="col-sm-8">{{ currentEvent.leadType === 'form' ? 'Form contatto' : 'Prenotazione' }}</dd>
+                          </dl>
+                        </div>
+                        <div class="col-md-6">
+                          <dl class="row">
+                            <dt class="col-sm-4">Stato:</dt>
+                            <dd class="col-sm-8">
+                              <span v-if="currentEvent.success" class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Inviato con successo
+                              </span>
+                              <span v-else class="badge bg-danger">
+                                <i class="bi bi-x-circle"></i> Errore
+                              </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Event ID:</dt>
+                            <dd class="col-sm-8"><code>{{ currentEvent.eventId || 'N/A' }}</code></dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tab Dati -->
+            <div class="tab-pane fade" id="data-tab-pane" role="tabpanel" 
+                 aria-labelledby="data-tab" tabindex="0">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <h6><i class="bi bi-person me-2"></i>Dati utente</h6>
+                  <div class="card">
+                    <div class="card-body">
+                      <pre class="mb-0 code-preview">{{ prettyPrintJson(currentEvent.userData) }}</pre>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                  <h6><i class="bi bi-gear me-2"></i>Dati personalizzati</h6>
+                  <div class="card">
+                    <div class="card-body">
+                      <pre class="mb-0 code-preview">{{ prettyPrintJson(currentEvent.customData) }}</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tab Errore -->
+            <div class="tab-pane fade" id="error-tab-pane" role="tabpanel" 
+                 aria-labelledby="error-tab" tabindex="0" v-if="!currentEvent.success">
+              <div class="alert alert-danger">
+                <h6><i class="bi bi-exclamation-triangle-fill me-2"></i> Dettagli errore</h6>
+                <p>{{ currentEvent.error }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button v-if="!currentEvent.success" type="button" class="btn btn-primary" @click="retryEvent" :disabled="isRetrying">
+            <span v-if="isRetrying" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Riprova invio
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast per notifiche -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header" :class="toastClass">
+        <i :class="toastIconClass"></i>
+        <strong class="me-auto">{{ toastTitle }}</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Chiudi"></button>
+      </div>
+      <div class="toast-body">
+        {{ toastMessage }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript principale -->
+<script>
+  // Inizializzazione Vue.js
+  const { createApp, ref, computed, onMounted, watch } = Vue;
+  
+  const app = createApp({
+    setup() {
+      // Stato dell'applicazione
+      const activeTab = ref('dashboard');
+      const windowSize = ref({
+        innerWidth: window.innerWidth,
+        innerHeight: window.innerHeight
+      });
+      const sidebarVisible = ref(windowSize.value.innerWidth >= 768); // Nascondi la sidebar su mobile di default
+      const searchQuery = ref('');
+      const isLoading = ref(false);
+      const isUpdating = ref(false);
+      const isRetrying = ref(false);
+      const passwordVisible = ref(false);
+      
+      // Dati per form
+      const forms = ref([]);
+      const formsPagination = ref({
+        total: 0,
+        page: 1,
+        limit: 10,
+        pages: 0
+      });
+      const formsFilter = ref('');
+      
+      // Dati per prenotazioni
+      const bookings = ref([]);
+      const bookingsPagination = ref({
+        total: 0,
+        page: 1,
+        limit: 10,
+        pages: 0
+      });
+      const bookingsFilter = ref('');
+
+      const facebookLeads = ref([]);
+      const facebookLeadsPagination = ref({
+        total: 0,
+        page: 1,
+        limit: 10,
+        pages: 0
+      });
+      const facebookLeadsFilter = ref('');
+      
+      // Dati per eventi
+      const events = ref([]);
+      const eventsPagination = ref({
+        total: 0,
+        page: 1,
+        limit: 50,
+        pages: 0
+      });
+      const eventsFilter = ref('');
+      const recentEvents = ref([]);
+      
+      // Statistiche
+      const stats = ref({
+        forms: {
+          total: 0,
+          converted: 0,
+          conversionRate: 0
+        },
+        bookings: {
+          total: 0,
+          converted: 0,
+          conversionRate: 0
+        },
+        events: {
+          total: 0,
+          success: 0,
+          successRate: 0
+        }
+      });
+      
+      // Dati per modali
+      const currentLead = ref({});
+      const currentLeadType = ref('');
+      const newStatus = ref('');
+      const eventName = ref('');
+      const eventNote = ref('');
+      const hasFbclid = ref(false);
+      const fbclid = ref('');
+      
+      const currentEvent = ref({});
+      
+      // Impostazioni
+      const settings = ref({
+        facebookAccessToken: '',
+        facebookPixelId: '',
+        facebookTestEventCode: '',
+        isDevelopment: false
+      });
+      
+      // Toast per notifiche
+      const toastTitle = ref('');
+      const toastMessage = ref('');
+      const toastClass = ref('');
+      const toastIconClass = ref('');
+      
+      // Funzioni helper
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('it-IT');
+      };
+      
+      const formatDateTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleString('it-IT');
+      };
+      
+      const getStatusBadgeClass = (status) => {
+        switch (status) {
+          case 'new': return 'bg-secondary';
+          case 'contacted': return 'bg-info';
+          case 'qualified': return 'bg-primary';
+          case 'opportunity': return 'bg-warning';
+          case 'customer': return 'bg-success';
+          case 'lost': return 'bg-danger';
+          case 'pending': return 'bg-secondary';
+          case 'confirmed': return 'bg-primary';
+          case 'completed': return 'bg-success';
+          case 'cancelled': return 'bg-danger';
+          default: return 'bg-secondary';
+        }
+      };
+      
+      const getStatusLabel = (status) => {
+        switch (status) {
+          case 'new': return 'Nuovo';
+          case 'contacted': return 'Contattato';
+          case 'qualified': return 'Qualificato';
+          case 'opportunity': return 'Opportunità';
+          case 'customer': return 'Cliente';
+          case 'lost': return 'Perso';
+          case 'pending': return 'In attesa';
+          case 'confirmed': return 'Confermato';
+          case 'completed': return 'Completato';
+          case 'cancelled': return 'Cancellato';
+          default: return status;
+        }
+      };
+      
+      const getPageNumbers = (total) => {
+        if (total <= 5) {
+          return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        
+        // Mostra sempre le prime 2, le ultime 2 e quelle intorno alla pagina corrente
+        const current = formsPagination.value.page;
+        let pages = [1, 2, total - 1, total];
+        
+        if (current > 2 && current < total - 1) {
+          pages.push(current - 1, current, current + 1);
+        } else if (current === 2) {
+          pages.push(current, current + 1);
+        } else if (current === total - 1) {
+          pages.push(current - 1, current);
+        }
+        
+        return [...new Set(pages)].sort((a, b) => a - b);
+      };
+      
+      const prettyPrintJson = (obj) => {
+        if (!obj) return 'Nessun dato';
+        try {
+          return JSON.stringify(obj, null, 2);
+        } catch (e) {
+          return 'Errore nella formattazione JSON';
+        }
+      };
+      
+      // Funzioni per le API
+      const loadForms = async () => {
+        try {
+          isLoading.value = true;
+          const response = await axios.get(`/api/leads/forms?page=${formsPagination.value.page}&limit=${formsPagination.value.limit}${formsFilter.value ? `&status=${formsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          
+          forms.value = response.data.data;
+          formsPagination.value = response.data.pagination;
+          
+          // Aggiorna statistiche
+          updateStats();
+        } catch (error) {
+          showToast('Errore', `Impossibile caricare i form: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          console.error('Errore caricamento form:', error);
+        } finally {
+          isLoading.value = false;
+        }
+      };
+      
+      const loadBookings = async () => {
+        try {
+          isLoading.value = true;
+          const response = await axios.get(`/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          
+          bookings.value = response.data.data;
+          bookingsPagination.value = response.data.pagination;
+          
+          // Aggiorna statistiche
+          updateStats();
+        } catch (error) {
+          showToast('Errore', `Impossibile caricare le prenotazioni: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          console.error('Errore caricamento prenotazioni:', error);
+        } finally {
+          isLoading.value = false;
+        }
+      };
+      
+      const loadEvents = async () => {
+        try {
+          isLoading.value = true;
+          const response = await axios.get(`/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          
+          events.value = response.data.data;
+          eventsPagination.value = response.data.pagination;
+          
+          // Aggiorna statistiche
+          updateStats();
+        } catch (error) {
+          showToast('Errore', `Impossibile caricare gli eventi: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          console.error('Errore caricamento eventi:', error);
+        } finally {
+          isLoading.value = false;
+        }
+      };
+      
+      const loadRecentEvents = async () => {
+        try {
+          const response = await axios.get('/api/events?limit=5');
+          recentEvents.value = response.data.data;
+        } catch (error) {
+          console.error('Errore caricamento eventi recenti:', error);
+        }
+      };
+      
+      const updateStats = async () => {
+        try {
+          // Statistiche form
+          stats.value.forms.total = formsPagination.value.total;
+          stats.value.forms.converted = forms.value.filter(f => f.status === 'customer').length;
+          stats.value.forms.conversionRate = stats.value.forms.total > 0 
+            ? Math.round((stats.value.forms.converted / stats.value.forms.total) * 100) 
+            : 0;
+          
+          // Statistiche prenotazioni
+          stats.value.bookings.total = bookingsPagination.value.total;
+          stats.value.bookings.converted = bookings.value.filter(b => b.status === 'customer' || b.status === 'completed').length;
+          stats.value.bookings.conversionRate = stats.value.bookings.total > 0 
+            ? Math.round((stats.value.bookings.converted / stats.value.bookings.total) * 100) 
+            : 0;
+          
+          // Statistiche eventi
+          stats.value.events.total = eventsPagination.value.total;
+          stats.value.events.success = events.value.filter(e => e.success).length;
+          stats.value.events.successRate = stats.value.events.total > 0 
+            ? Math.round((stats.value.events.success / stats.value.events.total) * 100) 
+            : 0;
+        } catch (error) {
+          console.error('Errore aggiornamento statistiche:', error);
+        }
+      };
+      
+      const loadSettings = async () => {
+        try {
+          // In una implementazione reale, questo dovrebbe caricare le impostazioni dal server
+          // Per ora usiamo localStorage come esempio
+          const savedSettings = localStorage.getItem('crmSettings');
+          if (savedSettings) {
+            settings.value = JSON.parse(savedSettings);
+          }
+        } catch (error) {
+          console.error('Errore caricamento impostazioni:', error);
+        }
+      };
+      
+      const saveSettings = async () => {
+        try {
+          isLoading.value = true;
+          
+          // In una implementazione reale, questo invierebbe le impostazioni al server
+          // Per ora usiamo localStorage come esempio
+          localStorage.setItem('crmSettings', JSON.stringify(settings.value));
+          
+          showToast('Successo', 'Impostazioni salvate con successo', 'bg-success', 'bi bi-check-circle-fill me-2');
+        } catch (error) {
+          showToast('Errore', `Impossibile salvare le impostazioni: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          console.error('Errore salvataggio impostazioni:', error);
+        } finally {
+          isLoading.value = false;
+        }
+      };
+      
+      // Funzioni per i filtri
+      const filterFormsByStatus = (status) => {
+        formsFilter.value = status;
+        formsPagination.value.page = 1;
+        loadForms();
+      };
+      
+      const filterBookingsByStatus = (status) => {
+        bookingsFilter.value = status;
+        bookingsPagination.value.page = 1;
+        loadBookings();
+      };
+      
+      const filterEventsBySuccess = (success) => {
+        eventsFilter.value = success;
+        eventsPagination.value.page = 1;
+        loadEvents();
+      };
+      
+      const changePage = (type, page) => {
+        if (type === 'forms') {
+          formsPagination.value.page = page;
+          loadForms();
+        } else if (type === 'bookings') {
+          bookingsPagination.value.page = page;
+          loadBookings();
+        } else if (type === 'events') {
+          eventsPagination.value.page = page;
+          loadEvents();
+        }
+      };
+      
+      // Gestione dei modali
+      const openLeadModal = (lead, type) => {
+        currentLead.value = JSON.parse(JSON.stringify(lead)); // Deep copy
+        currentLeadType.value = type;
+        newStatus.value = lead.status;
+        eventName.value = '';
+        eventNote.value = '';
+        hasFbclid.value = !!lead.fbclid;
+        fbclid.value = lead.fbclid || '';
+        
+        // Apri modale
+        const modal = new bootstrap.Modal(document.getElementById('leadModal'));
+        modal.show();
+      };
+      
+      const updateLeadStatus = async () => {
+        try {
+          if (!newStatus.value || !eventName.value) {
+            showToast('Attenzione', 'Seleziona un nuovo stato e un evento', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+            return;
+          }
+          
+          isUpdating.value = true;
+          
+          // Prepara i dati per l'aggiornamento
+          const payload = {
+            newStatus: newStatus.value,
+            eventName: eventName.value,
+            eventMetadata: {
+              note: eventNote.value
+            }
+          };
+          
+          // Se è stato specificato un fbclid, aggiungilo
+          if (hasFbclid.value && fbclid.value) {
+            payload.fbclid = fbclid.value;
+          }
+          
+          // Effettua la richiesta in base al tipo di lead
+          let endpoint;
+          if (currentLeadType.value === 'form') {
+            endpoint = `/api/leads/forms/${currentLead.value._id}/update`;
+          } else if (currentLeadType.value === 'booking') {
+            endpoint = `/api/leads/bookings/${currentLead.value._id}/update`;
+          } else if (currentLeadType.value === 'facebook') {
+            endpoint = `/api/leads/facebook/${currentLead.value._id}/update`;
+          }         
+          
+          const response = await axios.post(endpoint, payload);
+          
+          // Chiudi il modale
+          const modal = bootstrap.Modal.getInstance(document.getElementById('leadModal'));
+          modal.hide();
+          
+          // Mostra notifica di successo
+          if (response.data.facebookResult.success) {
+            showToast('Successo', `Stato aggiornato e evento "${eventName.value}" inviato a Facebook`, 'bg-success', 'bi bi-check-circle-fill me-2');
+          } else {
+            showToast('Avviso', `Stato aggiornato ma invio a Facebook fallito: ${response.data.facebookResult.error}`, 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+          }
+          
+          // Ricarica i dati
+          if (currentLeadType.value === 'form') {
+            loadForms();
+          } else {
+            loadBookings();
+          }
+          loadRecentEvents();
+          
+        } catch (error) {
+          showToast('Errore', `Impossibile aggiornare il lead: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          console.error('Errore aggiornamento lead:', error);
+        } finally {
+          isUpdating.value = false;
+        }
+      };
+
+      const viewEvents = (leadId, type) => {
+          // Nella versione completa, qui si vedrebbero solo gli eventi per il lead specifico
+          activeTab.value = 'events';
+          
+          // Filtra gli eventi per questo lead
+          // Implementazione: loadEvents(leadId, type);
+        };
+        
+        const openEventDetailsModal = (event) => {
+          currentEvent.value = JSON.parse(JSON.stringify(event)); // Deep copy
+          
+          // Apri modale
+          const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+          modal.show();
+        };
+        
+        const retryEvent = async () => {
+          try {
+            isRetrying.value = true;
+            
+            // In una implementazione reale, questa funzione invierebbe nuovamente l'evento a Facebook
+            setTimeout(() => {
+              showToast('Successo', 'Evento re-inviato con successo', 'bg-success', 'bi bi-check-circle-fill me-2');
+              
+              // Chiudi il modale
+              const modal = bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal'));
+              modal.hide();
+              
+              // Ricarica gli eventi
+              loadEvents();
+              loadRecentEvents();
+            }, 1500);
+            
+          } catch (error) {
+            showToast('Errore', `Impossibile re-inviare l'evento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore re-invio evento:', error);
+          } finally {
+            isRetrying.value = false;
+          }
+        };
+
+        const loadFacebookLeads = async () => {
+          try {
+            isLoading.value = true;
+            const response = await axios.get(`/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+            
+            facebookLeads.value = response.data.data;
+            facebookLeadsPagination.value = response.data.pagination;
+            
+            // Aggiorna statistiche
+            updateStats();
+          } catch (error) {
+            showToast('Errore', `Impossibile caricare i lead Facebook: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore caricamento lead Facebook:', error);
+          } finally {
+            isLoading.value = false;
+          }
+        };
+        
+        const filterFacebookLeadsByStatus = (status) => {
+          facebookLeadsFilter.value = status;
+          facebookLeadsPagination.value.page = 1;
+          loadFacebookLeads();
+        };
+        
+        const viewLeadDetails = (lead) => {
+          // Mostra i dettagli completi del lead Facebook
+          // Puoi implementare una visualizzazione più dettagliata qui
+          const details = {
+            ...lead,
+            customFields: lead.customFields || {},
+            rawData: lead.rawData || {}
+          };
+          
+          currentEvent.value = {
+            eventName: 'Dettagli Lead Facebook',
+            createdAt: lead.createdAt,
+            userData: {
+              name: lead.name,
+              email: lead.email,
+              phone: lead.phone
+            },
+            customData: {
+              leadId: lead.leadId,
+              formId: lead.formId,
+              adId: lead.adId,
+              customFields: lead.customFields
+            },
+            success: true
+          };
+          
+          // Usa il modale dei dettagli evento per mostrare i dettagli del lead
+          const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+          modal.show();
+        };
+        
+        // Altre funzioni di utilità
+        const toggleSidebar = () => {
+          sidebarVisible.value = !sidebarVisible.value;
+          
+          // Se la sidebar è visibile su mobile, nascondi lo scroll del body
+          if (windowSize.value.innerWidth < 768) {
+            if (sidebarVisible.value) {
+              document.body.style.overflow = 'hidden';
+            } else {
+              document.body.style.overflow = '';
+            }
+          }
+        };
+        
+        const togglePasswordVisibility = () => {
+          passwordVisible.value = !passwordVisible.value;
+        };
+        
+        const showToast = (title, message, colorClass, iconClass) => {
+          toastTitle.value = title;
+          toastMessage.value = message;
+          toastClass.value = colorClass;
+          toastIconClass.value = iconClass;
+          
+          const toastEl = document.getElementById('notificationToast');
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show();
+        };
+        
+        // Debounce per la ricerca
+        let searchTimeout;
+        const debounceSearch = () => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+            if (activeTab.value === 'forms') {
+              formsPagination.value.page = 1;
+              loadForms();
+            } else if (activeTab.value === 'bookings') {
+              bookingsPagination.value.page = 1;
+              loadBookings();
+            } else if (activeTab.value === 'events') {
+              eventsPagination.value.page = 1;
+              loadEvents();
+            } else if (activeTab.value === 'facebookLeads') {
+              facebookLeadsPagination.value.page = 1;
+              loadFacebookLeads();
+            }
+          }, 500);
+        };
+        
+        // Gestione del resize della finestra
+        const handleResize = () => {
+          windowSize.value.innerWidth = windowSize.innerWidth;
+          windowSize.value.innerHeight = windowSize.innerHeight;
+          
+          // Chiudi automaticamente la sidebar su mobile quando la finestra viene ridimensionata
+          if (windowSize.value.innerWidth < 768) {
+            sidebarVisible.value = false;
+            document.body.style.overflow = '';
+          } else {
+            // Ripristina la sidebar in vista su desktop
+            sidebarVisible.value = true;
+          }
+        };
+        
+        // Watch per cambiamenti di tab
+        watch(activeTab, (newTab) => {
+          searchQuery.value = '';
+          
+          if (newTab === 'forms') {
+            loadForms();
+          } else if (newTab === 'bookings') {
+            loadBookings();
+          } else if (newTab === 'events') {
+            loadEvents();
+          } else if (newTab === 'settings') {
+            loadSettings();
+          } else if (newTab === 'dashboard') {
+            loadForms();
+            loadBookings();
+            loadEvents();
+            loadRecentEvents();
+          } else if (newTab === 'facebookLeads') {
+            loadFacebookLeads();
+          }
+          
+          // Chiudi automaticamente la sidebar su mobile al cambio di tab
+          if (windowSize.value.innerWidth < 768) {
+            sidebarVisible.value = false;
+            document.body.style.overflow = '';
+          }
+        });
+        
+        // Al montaggio dell'app
+        onMounted(() => {
+              // Aggiungi event listener per il resize della finestra
+              window.addEventListener('resize', handleResize);
+          
+          // Carica i dati iniziali
+          loadForms();
+          loadBookings();
+          loadEvents();
+          loadRecentEvents();
+          loadSettings();
+          
+          // Inizializza popovers
+          const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+          popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+          });
+          
+          // Inizializza lo stato della sidebar in base alla dimensione dello schermo
+          handleResize();
+        });
+        
+        return {
+          // Stato
+          activeTab,
+          sidebarVisible,
+          searchQuery,
+          isLoading,
+          isUpdating,
+          isRetrying,
+          passwordVisible,
+          windowSize,
+          
+          // Dati
+          forms,
+          formsPagination,
+          formsFilter,
+          bookings,
+          bookingsPagination,
+          bookingsFilter,
+          events,
+          eventsPagination,
+          eventsFilter,
+          recentEvents,
+          stats,
+          
+          // Modali
+          currentLead,
+          currentLeadType,
+          newStatus,
+          eventName,
+          eventNote,
+          hasFbclid,
+          fbclid,
+          currentEvent,
+          
+          // Impostazioni
+          settings,
+          
+          // Toast
+          toastTitle,
+          toastMessage,
+          toastClass,
+          toastIconClass,
+
+          facebookLeads,
+          facebookLeadsPagination, 
+          facebookLeadsFilter,
+          loadFacebookLeads,
+          filterFacebookLeadsByStatus,
+          viewLeadDetails,
+          
+          // Funzioni
+          formatDate,
+          formatDateTime,
+          getStatusBadgeClass,
+          getStatusLabel,
+          getPageNumbers,
+          prettyPrintJson,
+          loadForms,
+          loadBookings,
+          loadEvents,
+          loadRecentEvents,
+          updateStats,
+          loadSettings,
+          saveSettings,
+          filterFormsByStatus,
+          filterBookingsByStatus,
+          filterEventsBySuccess,
+          changePage,
+          openLeadModal,
+          updateLeadStatus,
+          viewEvents,
+          openEventDetailsModal,
+          retryEvent,
+          toggleSidebar,
+          togglePasswordVisibility,
+          showToast,
+          debounceSearch
+        };
+      }
+    });
+    
+    // Monta l'app
+    app.mount('#app');
+  </script>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script per effetti aggiuntivi e miglioramenti UX -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Aggiungi classe fade-in ad elementi con animazione
+      const animateElements = document.querySelectorAll('.card, .btn-group, .table');
+      animateElements.forEach(element => {
+        if (!element.classList.contains('fade-in')) {
+          element.classList.add('fade-in');
+        }
+      });
+      
+      // Effetto hover per le card
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-5px)';
+          this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+          this.style.transform = '';
+          this.style.boxShadow = '';
+        });
+      });
+      
+      // Effetto per le righe delle tabelle
+      const tableRows = document.querySelectorAll('tbody tr');
+      tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.backgroundColor = 'rgba(255, 107, 0, 0.05)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+          this.style.backgroundColor = '';
+        });
+      });
+      
+      // Fix per il closing della sidebar in mobile
+      const sidebarOverlay = document.querySelector('.sidebar-overlay');
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+          // Questa funzione è più un backup, la logica principale è in Vue
+          const app = document.getElementById('app').__vue_app__;
+          if (app && app._instance && app._instance.exposed) {
+            app._instance.exposed.toggleSidebar();
+          }
+        });
+      }
+      
+      // Rimuovi possibili scroll orizzontali su mobile
+      function checkAndFixOverflow() {
+        const tables = document.querySelectorAll('.table-responsive');
+        tables.forEach(table => {
+          if (table.scrollWidth > table.clientWidth) {
+            table.style.overflowX = 'auto';
+            
+            // Aggiungi indicatore di scroll solo se non esiste già
+            if (!table.querySelector('.scroll-indicator')) {
+              const indicator = document.createElement('div');
+              indicator.className = 'scroll-indicator';
+              indicator.textContent = '◀ scorri ▶';
+              indicator.style.textAlign = 'center';
+              indicator.style.fontSize = '0.8rem';
+              indicator.style.padding = '5px 0';
+              indicator.style.color = 'rgba(255,255,255,0.5)';
+              table.appendChild(indicator);
+            }
+          }
+        });
+      }
+      
+      // Esegui al caricamento e al resize
+      checkAndFixOverflow();
+      window.addEventListener('resize', checkAndFixOverflow);
+      
+      // Supporto per tema dark
+      function setThemeColors() {
+        // Il tema è già dark per default, ma qui puoi aggiungere logica per temi alternativi
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+      
+      setThemeColors();
+    });
+  </script>
+</body>
+</html>
