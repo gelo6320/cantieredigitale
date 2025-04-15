@@ -1887,30 +1887,18 @@ if (document.readyState === 'loading') {
 
 // Middleware per verificare l'autenticazione
 const isAuthenticated = (req, res, next) => {
-  console.log('=== AUTH CHECK ===');
-  console.log('Path richiesto:', req.path);
-  console.log('Metodo:', req.method);
-  console.log('User-Agent:', req.headers['user-agent']);
-  console.log('IP:', req.ip);
-  console.log('Session exists:', !!req.session);
-  console.log('Session ID:', req.session ? req.session.id : 'nessuna sessione');
-  console.log('isAuthenticated:', req.session ? !!req.session.isAuthenticated : false);
-  console.log('User in session:', req.session && req.session.user ? JSON.stringify(req.session.user) : 'nessun utente');
-  
   if (req.session && req.session.isAuthenticated) {
-    console.log('✅ Autenticazione verificata - accesso consentito');
     return next();
   }
   
-  console.log('❌ Autenticazione fallita - reindirizzamento a login');
-  // Salva l'URL originale per reindirizzare dopo il login
+  // Verifica che la sessione esista prima di impostare returnTo
   if (req.session) {
     req.session.returnTo = req.originalUrl;
-    console.log('URL salvato per reindirizzamento:', req.originalUrl);
   }
   
   res.redirect('/login');
 };
+
 
 app.use('/crm', isAuthenticated);
 app.use('/api/crm', isAuthenticated);
