@@ -40,24 +40,6 @@ app.use(compression({
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// Middleware per verificare l'autenticazione
-const isAuthenticated = (req, res, next) => {
-  if (req.session && req.session.isAuthenticated) {
-    return next();
-  }
-  // Salva l'URL originale per reindirizzare dopo il login
-  req.session.returnTo = req.originalUrl;
-  res.redirect('/login');
-};
-
-app.use('/crm', isAuthenticated);
-app.use('/crm.html', isAuthenticated);
-
-app.use(express.static(path.join(__dirname, 'www'), {
-  extensions: ['html'],
-  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
-}));
-
 // Configurazione CORS
 app.use(cors({
   origin: function(origin, callback) {
@@ -1885,6 +1867,18 @@ if (document.readyState === 'loading') {
 `);
 });
 
+// ----- MIDDLEWARE DI AUTENTICAZIONE -----
+
+// Middleware per verificare l'autenticazione
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.isAuthenticated) {
+    return next();
+  }
+  // Salva l'URL originale per reindirizzare dopo il login
+  req.session.returnTo = req.originalUrl;
+  res.redirect('/login');
+};
+
 // ----- ROUTE PER L'AUTENTICAZIONE -----
 
 // Pagina di login
@@ -1950,6 +1944,11 @@ app.get('/api/logout', (req, res) => {
 app.get('/crm', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'www', 'crm.html'));
 });
+
+app.use(express.static(path.join(__dirname, 'www'), {
+  extensions: ['html'],
+  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
+}));
 
 // Route di fallback per SPA
 app.get('*', (req, res) => {
