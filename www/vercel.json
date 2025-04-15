@@ -1,0 +1,12 @@
+{
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "rewrites": [
+      { "source": "/js/cookie-consent-manager.js", "destination": "/js/cookie-consent-manager.js" },
+      { "source": "/:path", "destination": "/:path.html" },
+      { "source": "/:path/", "destination": "/:path.html" },
+      { "source": "/(.*)/", "destination": "/$1" },
+      { "source": "/js/tracking.js", "destination": "/api/tracking.js" },
+      { "source": "/api/:path*", "destination": "https://api.costruzionedigitale.com/api/:path*" }
+    ]
+  }
