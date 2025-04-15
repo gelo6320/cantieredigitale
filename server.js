@@ -267,6 +267,17 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  debug: true, // Mostra log di debug
+  logger: true // Abilita il logger
+});
+
+// Verifica la connessione all'avvio
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('Errore nella configurazione del trasportatore email:', error);
+  } else {
+    console.log('Server email pronto per l\'invio');
   }
 });
 
