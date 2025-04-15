@@ -1940,8 +1940,9 @@ app.get('/api/logout', (req, res) => {
 
 // ----- PROTEZIONE DEL CRM -----
 
+// Protezione delle pagine del CRM
 app.get('/crm', isAuthenticated, (req, res) => {
-  res.sendFile(path.join(__dirname, 'privata', 'crm.html'));
+  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
 });
 
 app.use(express.static(path.join(__dirname, 'www'), {
