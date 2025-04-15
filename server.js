@@ -39,6 +39,9 @@ app.use(compression({
 // Middleware
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+app.use('/crm', isAuthenticated);
+
 app.use(express.static(path.join(__dirname, 'www'), {
   extensions: ['html'],
   index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
@@ -1447,11 +1450,6 @@ app.get('*.html', (req, res) => {
   const urlWithoutExt = req.path.replace('.html', '');
   res.redirect(301, urlWithoutExt);
 });
-
-app.use(express.static(path.join(__dirname, 'www'), {
-  extensions: ['html'],
-  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
-}));
 
 // In server.js: Aggiungi una nuova route per servire script di tracciamento basati sul consenso
 app.get('/js/tracking.js', async (req, res) => {
