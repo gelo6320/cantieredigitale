@@ -2568,19 +2568,22 @@
             const mobileMenuClose = document.getElementById('mobile-menu-close');
             
             if (mobileMenuToggle && mobileMenu && mobileMenuClose) {
-                mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.preventDefault(); // Previeni comportamento predefinito
                     mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Blocca lo scroll della pagina
+                    document.body.style.overflow = 'hidden';
                 });
                 
-                mobileMenuClose.addEventListener('click', function() {
+                mobileMenuClose.addEventListener('click', function(e) {
+                    e.preventDefault(); // Previeni comportamento predefinito
                     mobileMenu.classList.remove('active');
-                    document.body.style.overflow = ''; // Ripristina lo scroll della pagina
+                    document.body.style.overflow = '';
                 });
                 
                 // Chiudi il menu quando viene cliccato un link
                 document.querySelectorAll('#mobile-menu a').forEach(link => {
-                    link.addEventListener('click', function() {
+                    link.addEventListener('click', function(e) {
+                        // Non prevenire il comportamento predefinito qui
                         mobileMenu.classList.remove('active');
                         document.body.style.overflow = '';
                     });
@@ -2698,18 +2701,30 @@
           // Animazione dello spotlight per il pulsante CTA
           const ctaButtons = document.querySelectorAll('.btn-lg, .hero-button');
           
+
           ctaButtons.forEach(button => {
+              // Aggiungi gestori per eventi touch
+              button.addEventListener('touchstart', function(e) {
+                  // Aggiungi classe attiva o effetto di focus
+                  this.classList.add('touch-active');
+              }, {passive: true});
+              
+              button.addEventListener('touchend', function(e) {
+                  // Rimuovi classe attiva
+                  this.classList.remove('touch-active');
+                  // Simula il click
+                  this.click();
+              }, {passive: true});
+              
+              // Mantieni i gestori per mouse
               button.addEventListener('mousemove', function(e) {
                   const rect = this.getBoundingClientRect();
-                  const x = e.clientX - rect.left; // posizione x del mouse relativa al pulsante
-                  const y = e.clientY - rect.top; // posizione y del mouse relativa al pulsante
-                  
-                  // Aggiungi un effetto spotlight
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
                   this.style.background = `radial-gradient(circle at ${x}px ${y}px, #FF8C38 0%, #FF6B00 70%)`;
               });
               
               button.addEventListener('mouseleave', function() {
-                  // Ripristina il background originale
                   this.style.background = '';
               });
           });
