@@ -12,7 +12,6 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const fs = require('fs');
 const compression = require('compression');
-const hubspot = require('@hubspot/api-client');
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -22,8 +21,6 @@ dotenv.config();
 // Inizializza Express
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_API_KEY });
 
 // Aggiungi questo middleware all'inizio, prima degli altri middleware
 app.use(compression({
@@ -347,7 +344,7 @@ app.use(async (req, res, next) => {
       // Invia l'evento PageView alla CAPI
       console.log('Invio evento PageView a Facebook...');
       const response = await axios.post(
-        `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+        `https://graph.facebook.com/v17.0/1543790469631614/events`,
         payload
       );
       
@@ -693,14 +690,6 @@ app.post('/api/submit-booking', async (req, res) => {
       // Continuiamo comunque perché la prenotazione è stata salvata
     }
     
-    // Integra con HubSpot
-    try {
-      await createHubspotContact(booking);
-    } catch (hubspotError) {
-      console.error('Errore nell\'integrazione con HubSpot:', hubspotError);
-      // Non blocchiamo il flusso se l'integrazione HubSpot fallisce
-    }
-    
     // Invia evento alla Facebook Conversion API
     try {
       const userData = {
@@ -752,78 +741,6 @@ app.post('/api/submit-booking', async (req, res) => {
     });
   }
 });
-
-// Aggiungi questa nuova funzione per gestire l'integrazione con HubSpot
-async function createHubspotContact(booking) {
-  try {
-    // 1. Prima verifica se il contatto esiste già usando l'email
-    let contactId;
-    try {
-      const searchResponse = await hubspotClient.crm.contacts.searchApi.doSearch({
-        filterGroups: [{
-          filters: [{
-            propertyName: 'email',
-            operator: 'EQ',
-            value: booking.email
-          }]
-        }]
-      });
-      
-      if (searchResponse.results && searchResponse.results.length > 0) {
-        // Contatto esistente
-        contactId = searchResponse.results[0].id;
-        console.log(`Contatto esistente trovato in HubSpot con ID: ${contactId}`);
-        
-        // Aggiorna il contatto esistente con eventuali nuove informazioni
-        try {
-          await hubspotClient.crm.contacts.basicApi.update(contactId, {
-            properties: {
-              firstname: booking.name.split(' ')[0],
-              lastname: booking.name.split(' ').slice(1).join(' ') || booking.name,
-              phone: booking.phone,
-              lifecyclestage: 'lead', // Imposta il ciclo di vita a "lead"
-              hs_lead_status: 'NEW' // Imposta lo stato del lead a "NUOVO"
-            }
-          });
-          console.log(`Contatto esistente aggiornato con successo in HubSpot come lead nuovo.`);
-        } catch (updateError) {
-          console.error('Errore nell\'aggiornamento del contatto esistente:', updateError.message);
-          // Continua comunque, abbiamo almeno trovato il contatto
-        }
-      } else {
-        // Crea un nuovo contatto
-        try {
-          const contactResponse = await hubspotClient.crm.contacts.basicApi.create({
-            properties: {
-              email: booking.email,
-              firstname: booking.name.split(' ')[0],
-              lastname: booking.name.split(' ').slice(1).join(' ') || booking.name,
-              phone: booking.phone,
-              lifecyclestage: 'lead', // Imposta il ciclo di vita a "lead"
-              hs_lead_status: 'NEW' // Imposta lo stato del lead a "NUOVO"
-            }
-          });
-          contactId = contactResponse.id;
-          console.log(`Nuovo contatto creato in HubSpot con ID: ${contactId} e stato lead NUOVO.`);
-        } catch (createError) {
-          console.error('Errore nella creazione del nuovo contatto:', createError.message);
-          throw createError;
-        }
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Errore specifico in HubSpot:", error.message);
-      if (error.body) {
-        console.error("Dettagli errore:", JSON.stringify(error.body, null, 2));
-      }
-      throw error;
-    }
-  } catch (error) {
-    console.error('Errore durante la gestione del contatto in HubSpot:', error);
-    throw error;
-  }
-}
 
 // NUOVO: Route per verificare disponibilità delle date
 app.get('/api/booking/availability', async (req, res) => {
@@ -1251,7 +1168,7 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
         };
       
         const response = await axios.post(
-          `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+          `https://graph.facebook.com/v17.0/1543790469631614/events`,
           payload
         );
       
@@ -1310,7 +1227,7 @@ async function sendFacebookConversionEvent(eventName, userData, eventData, event
     // Invio dell'evento alla CAPI
     console.log('Invio evento a Facebook...');
     const response = await axios.post(
-      `https://graph.facebook.com/v17.0/${process.env.HUBSPOT_API_KEY ? '1543790469631614' : '1543790469631614'}/events`,
+      `https://graph.facebook.com/v17.0/1543790469631614/events`,
       payload
     );
 
