@@ -1874,10 +1874,19 @@ const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.isAuthenticated) {
     return next();
   }
+  
+  // Controlla se è una richiesta API
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ success: false, message: 'Autenticazione richiesta' });
+  }
+  
   // Salva l'URL originale per reindirizzare dopo il login
   req.session.returnTo = req.originalUrl;
   res.redirect('/login');
 };
+
+app.use('/crm', isAuthenticated);
+app.use('/api/crm', isAuthenticated);
 
 // ----- ROUTE PER L'AUTENTICAZIONE -----
 
