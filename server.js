@@ -1885,23 +1885,39 @@ if (document.readyState === 'loading') {
 
 // ----- MIDDLEWARE DI AUTENTICAZIONE -----
 
-// Middleware per verificare l'autenticazione
+// Aggiorna il middleware di autenticazione per assicurarsi che reindirizza correttamente
 const isAuthenticated = (req, res, next) => {
+  console.log('=== CONTROLLO AUTENTICAZIONE ===');
+  console.log('Path richiesto:', req.path);
+  console.log('Session:', !!req.session);
+  console.log('isAuthenticated:', req.session ? !!req.session.isAuthenticated : 'No session');
+  
   if (req.session && req.session.isAuthenticated) {
+    console.log('✅ Utente autenticato, accesso consentito');
     return next();
   }
   
   // Verifica che la sessione esista prima di impostare returnTo
   if (req.session) {
     req.session.returnTo = req.originalUrl;
+    console.log('👉 Impostato returnTo:', req.originalUrl);
   }
   
-  res.redirect('/login');
+  console.log('🔒 Accesso negato, reindirizzamento al login');
+  return res.redirect('/login');
 };
 
 
 app.use('/crm', isAuthenticated);
 app.use('/api/crm', isAuthenticated);
+
+app.get('/crm', (req, res) => {
+  console.log('=== ACCESSO CRM ===');
+  console.log('Sessione completa:', req.session);
+  console.log('isAuthenticated:', req.session.isAuthenticated);
+  console.log('Session ID:', req.session.id);
+  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
+});
 
 // ----- ROUTE PER L'AUTENTICAZIONE -----
 
@@ -1998,7 +2014,7 @@ app.get('/crm', isAuthenticated, (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'www'), {
   extensions: ['html'],
-  index: false  // Disabilita il comportamento predefinito di servire index.html nelle directory
+  index: false
 }));
 
 // Route di fallback per SPA
