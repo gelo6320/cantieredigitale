@@ -3141,6 +3141,8 @@
       });
       const bookingsFilter = ref('');
 
+      let isScrollLock = false;
+
       const facebookLeads = ref([]);
       const facebookLeadsPagination = ref({
         total: 0,
@@ -3627,15 +3629,12 @@
         
         // Altre funzioni di utilità
         const toggleSidebar = () => {
+          if (isScrollLock) return;
+        
           sidebarVisible.value = !sidebarVisible.value;
-          
-          // Se la sidebar è visibile su mobile, nascondi lo scroll del body
+        
           if (windowSize.value.innerWidth < 768) {
-            if (sidebarVisible.value) {
-              document.body.style.overflow = 'hidden';
-            } else {
-              document.body.style.overflow = '';
-            }
+            document.body.style.overflow = sidebarVisible.value ? 'hidden' : '';
           }
         };
         
@@ -3747,11 +3746,15 @@
             return new bootstrap.Popover(popoverTriggerEl);
           });
 
-          // Blocca apertura sidebar su scroll mobile
           window.addEventListener('scroll', () => {
-            if (window.innerWidth < 768 && sidebarVisible.value) {
+            if (window.innerWidth < 768) {
+              isScrollLock = true;
               sidebarVisible.value = false;
               document.body.style.overflow = '';
+          
+              setTimeout(() => {
+                isScrollLock = false;
+              }, 500); // Sblocco dopo mezzo secondo
             }
           });
           
