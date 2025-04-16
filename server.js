@@ -66,20 +66,21 @@ app.use(cors({
 
 
 // Configurazione sessione
+// Configurazione sessione (uguale in entrambi i server)
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'neosmile-secret-key',
+  secret: process.env.SESSION_SECRET || 'neosmile-secret-key', // Usa lo stesso secret
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URL || process.env.MONGODB_URI,
-    collectionName: 'sessions', // Deve essere lo stesso in entrambi i server
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
     ttl: 24 * 60 * 60
   }),
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    domain: process.env.COOKIE_DOMAIN || undefined, // Aggiungi questa opzione
-    path: '/' // Aggiungi questa opzione
+    sameSite: 'lax', // Cambia da 'strict' a 'lax' per permettere le chiamate cross-domain
+    domain: process.env.COOKIE_DOMAIN || undefined,
+    path: '/'
   }
 }));
 
@@ -2072,6 +2073,33 @@ fetch('http://localhost:5000/api/dashboard/init-session', {
 })
 .catch(error => {
   console.error('Errore inizializzazione sessione dashboard:', error);
+});
+
+// MODIFICA nel server principale (primo server.js)
+// Sostituisci o aggiungi questa route per inizializzare la sessione dashboard
+app.get('/api/init-dashboard-session', (req, res) => {
+  console.log('=== INIZIALIZZAZIONE SESSIONE DASHBOARD ===');
+  console.log('Session ID:', req.session?.id || 'nessuna sessione');
+  console.log('isAuthenticated:', req.session?.isAuthenticated || false);
+  console.log('User in sessione:', req.session?.user?.username || 'nessun utente');
+  console.log('userConfig in sessione:', !!req.session?.userConfig);
+  
+  // Verifica l'autenticazione
+  if (!req.session || !req.session.isAuthenticated) {
+    return res.status(401).json({
+      success: false,
+      message: 'Non autenticato',
+      sessionExists: !!req.session
+    });
+  }
+  
+  // Se autenticato, invia le informazioni di configurazione
+  res.json({
+    success: true,
+    sessionId: req.session.id,
+    user: req.session.user,
+    userConfig: req.session.userConfig
+  });
 });
 
 // Logout
