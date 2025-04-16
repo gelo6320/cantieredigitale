@@ -3862,28 +3862,6 @@
         });
       });
       
-      // Rimuovi possibili scroll orizzontali su mobile
-      function checkAndFixOverflow() {
-        const tables = document.querySelectorAll('.table-responsive');
-        tables.forEach(table => {
-          if (table.scrollWidth > table.clientWidth) {
-            table.style.overflowX = 'auto';
-            
-            // Aggiungi indicatore di scroll solo se non esiste già
-            if (!table.querySelector('.scroll-indicator')) {
-              const indicator = document.createElement('div');
-              indicator.className = 'scroll-indicator';
-              indicator.textContent = '◀ scorri ▶';
-              indicator.style.textAlign = 'center';
-              indicator.style.fontSize = '0.8rem';
-              indicator.style.padding = '5px 0';
-              indicator.style.color = 'rgba(255,255,255,0.5)';
-              table.appendChild(indicator);
-            }
-          }
-        });
-      }
-      
       // Esegui al caricamento e al resize
       checkAndFixOverflow();
       window.addEventListener('resize', checkAndFixOverflow);
