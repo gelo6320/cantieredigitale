@@ -273,16 +273,77 @@
       }
     }
     
-    /* Responsive */
+    /* Responsive migliorato */
     @media (max-width: 480px) {
       .login-container {
-        max-width: 90%;
-        padding: 30px 20px;
+        max-width: 95%;
+        padding: 20px 15px;
+        max-height: 95vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .logo-wrapper {
+        margin-bottom: 15px;
       }
       
       .logo {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+      }
+      
+      .brand-name {
+        font-size: 18px;
+        margin-top: 5px;
+      }
+      
+      .form-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+      
+      .form-group {
+        margin-bottom: 12px;
+      }
+      
+      .form-label {
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+      
+      .form-control {
+        padding: 10px;
+        font-size: 14px;
+      }
+      
+      .login-btn {
+        padding: 10px;
+        font-size: 14px;
+      }
+      
+      .error-message {
+        font-size: 12px;
+        margin-top: 10px;
+      }
+    }
+    
+    /* Fix per dispositivi molto piccoli */
+    @media (max-height: 600px) {
+      .login-container {
+        padding: 15px 10px;
+      }
+      
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .logo-wrapper {
+        margin-bottom: 10px;
+      }
+      
+      .form-group {
+        margin-bottom: 8px;
       }
     }
   </style>
@@ -390,6 +451,15 @@
     // Inizializza le animazioni quando la pagina è caricata
     window.addEventListener('load', function() {
       createParticles();
+      
+      // Regola altezza sugli schermi piccoli
+      function adjustHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      }
+      
+      adjustHeight();
+      window.addEventListener('resize', adjustHeight);
     });
   </script>
 </body>
