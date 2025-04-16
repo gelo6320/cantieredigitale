@@ -2092,52 +2092,6 @@ app.post('/api/user/config', isAuthenticated, async (req, res) => {
   }
 });
 
-// 7. Crea una route per aggiungere nuovi utenti con configurazioni personalizzate
-app.post('/api/admin/users', isAuthenticated, async (req, res) => {
-  try {
-    // Solo l'admin può creare nuovi utenti
-    if (req.session.user.username !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Solo l\'admin può creare nuovi utenti' });
-    }
-    
-    const { username, password, mongodb_uri, access_token, meta_pixel_id } = req.body;
-    
-    // Verifica che username e password siano forniti
-    if (!username || !password) {
-      return res.status(400).json({ success: false, message: 'Username e password sono richiesti' });
-    }
-    
-    // Verifica che l'username non esista già
-    const existingUser = await Admin.findOne({ username });
-    if (existingUser) {
-      return res.status(409).json({ success: false, message: 'Username già esistente' });
-    }
-    
-    // Crea il nuovo utente
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await Admin.create({
-      username,
-      password: hashedPassword,
-      config: {
-        mongodb_uri,
-        access_token,
-        meta_pixel_id
-      }
-    });
-    
-    res.status(201).json({ 
-      success: true, 
-      message: 'Utente creato con successo',
-      user: {
-        id: newUser._id,
-        username: newUser.username
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Errore nella creazione dell\'utente' });
-  }
-});
-
 // ----- PROTEZIONE DEL CRM -----
 
 // Aggiungi una route per verificare lo stato dell'autenticazione
