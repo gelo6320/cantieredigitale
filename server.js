@@ -64,6 +64,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
+
 // Configurazione sessione
 app.use(session({
   secret: process.env.SESSION_SECRET || 'neosmile-secret-key',
@@ -71,13 +72,14 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URL || process.env.MONGODB_URI,
-    collectionName: 'sessions',
+    collectionName: 'sessions', // Deve essere lo stesso in entrambi i server
     ttl: 24 * 60 * 60
   }),
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-    // Rimuovere maxAge per far sì che il cookie di sessione scada alla chiusura del browser
+    sameSite: 'strict',
+    domain: process.env.COOKIE_DOMAIN || undefined, // Aggiungi questa opzione
+    path: '/' // Aggiungi questa opzione
   }
 }));
 
@@ -1998,7 +2000,6 @@ app.get('/login', (req, res) => {
 });
 
 // API per il login
-// In server.js (il server principale), modifica l'API di login
 app.post('/api/login', async (req, res) => {
   console.log('=== INIZIO LOGIN ===');
   console.log('Username fornito:', req.body.username);
@@ -2055,6 +2056,22 @@ app.post('/api/login', async (req, res) => {
     console.error('❌ Errore durante il login:', error);
     res.status(500).json({ success: false, message: 'Errore durante il login' });
   }
+});
+
+// Dopo il login, inizializza la sessione anche sul server dashboard
+fetch('http://localhost:5000/api/dashboard/init-session', {
+  method: 'GET',
+  credentials: 'include' // Importante per inviare i cookie
+})
+.then(response => response.json())
+.then(data => {
+  console.log('Sessione dashboard inizializzata:', data);
+  
+  // Ora puoi caricare i dati dal dashboard
+  loadDashboardData();
+})
+.catch(error => {
+  console.error('Errore inizializzazione sessione dashboard:', error);
 });
 
 // Logout
