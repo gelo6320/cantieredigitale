@@ -5,10 +5,16 @@ const dotenv = require('dotenv');
 // Carica variabili d'ambiente
 dotenv.config();
 
-// Schema utente admin (deve essere identico a quello nel server.js)
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  config: {
+    mongodb_uri: String,
+    access_token: String,
+    meta_pixel_id: String
+    // Puoi aggiungere altre configurazioni qui se necessario
+  },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // Modello

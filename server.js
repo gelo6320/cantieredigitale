@@ -145,10 +145,16 @@ const FormDataSchema = new mongoose.Schema({
   }
 });
 
-// Schema utente admin
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  config: {
+    mongodb_uri: String,
+    access_token: String,
+    meta_pixel_id: String
+    // Puoi aggiungere altre configurazioni qui se necessario
+  },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // Schema Cookie Consent
@@ -1123,6 +1129,50 @@ function formatStatus(status) {
   }
 }
 
+async function getUserConfig(username) {
+  try {
+    if (!username) {
+      console.log('Nessun username fornito, uso configurazioni predefinite');
+      return {
+        mongodb_uri: process.env.MONGODB_URI,
+        access_token: process.env.ACCESS_TOKEN,
+        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+      };
+    }
+    
+    // Cerca l'utente nel database
+    const user = await Admin.findOne({ username });
+    
+    if (!user) {
+      console.log(`Utente ${username} non trovato, uso configurazioni predefinite`);
+      return {
+        mongodb_uri: process.env.MONGODB_URI,
+        access_token: process.env.ACCESS_TOKEN,
+        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+      };
+    }
+    
+    // Unisci le configurazioni del database con quelle delle variabili d'ambiente (con priorità)
+    const config = {
+      // Prima cerca nel database
+      mongodb_uri: user.config?.mongodb_uri || process.env.MONGODB_URI,
+      access_token: user.config?.access_token || process.env.ACCESS_TOKEN,
+      meta_pixel_id: user.config?.meta_pixel_id || process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+    };
+    
+    console.log(`Configurazioni per l'utente ${username} recuperate dal database`);
+    return config;
+  } catch (error) {
+    console.error('Errore nel recupero delle configurazioni:', error);
+    // Fallback alle configurazioni predefinite
+    return {
+      mongodb_uri: process.env.MONGODB_URI,
+      access_token: process.env.ACCESS_TOKEN,
+      meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+    };
+  }
+}
+
 // Funzione per inviare eventi alla Facebook Conversion API
 async function sendFacebookConversionEvent(eventName, userData, eventData, eventId, req) {
   console.log(`\n========== INVIO EVENTO ${eventName} ==========`);
@@ -1949,54 +1999,36 @@ app.get('/login', (req, res) => {
 
 // API per il login
 app.post('/api/login', async (req, res) => {
-  console.log('=== TENTATIVO LOGIN ===');
-  console.log('Username fornito:', req.body.username);
-  console.log('Password fornita:', req.body.password ? '***' : 'mancante');
-  
   try {
     const { username, password } = req.body;
     
-    // Cerca l'utente nel database
+    // Verifica le credenziali
     const user = await Admin.findOne({ username });
-    console.log('Utente trovato nel DB:', !!user);
     
-    if (!user) {
-      console.log('❌ Login fallito: utente non trovato');
+    if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ success: false, message: 'Credenziali non valide' });
     }
     
-    // Verifica la password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    console.log('Password valida:', isValidPassword);
+    // Recupera le configurazioni dell'utente
+    const userConfig = await getUserConfig(username);
     
-    if (!isValidPassword) {
-      console.log('❌ Login fallito: password non valida');
-      return res.status(401).json({ success: false, message: 'Credenziali non valide' });
-    }
-    
-    // Imposta la sessione come autenticata
+    // Imposta la sessione
     req.session.isAuthenticated = true;
     req.session.user = {
       id: user._id,
       username: user.username
     };
     
-    console.log('✅ Login riuscito - impostazione sessione');
-    console.log('Session ID:', req.session.id);
-    console.log('returnTo URL:', req.session.returnTo || 'non impostato');
+    // Memorizza le configurazioni nella sessione per un accesso rapido
+    req.session.userConfig = userConfig;
     
-    // Salva la sessione e rispondi
     req.session.save((err) => {
       if (err) {
-        console.error('❌ Errore nel salvataggio della sessione:', err);
         return res.status(500).json({ success: false, message: 'Errore durante il login' });
       }
-      
-      console.log('✅ Sessione salvata con successo');
       res.status(200).json({ success: true, message: 'Login effettuato con successo' });
     });
   } catch (error) {
-    console.error('❌ Errore durante il login:', error);
     res.status(500).json({ success: false, message: 'Errore durante il login' });
   }
 });
@@ -2016,6 +2048,94 @@ app.get('/api/logout', (req, res) => {
     console.log('✅ Sessione distrutta con successo');
     res.redirect('/'); // Reindirizza alla homepage
   });
+});
+
+// 5. Aggiungi una route per aggiornare le configurazioni dell'utente
+app.post('/api/user/config', isAuthenticated, async (req, res) => {
+  try {
+    const { mongodb_uri, access_token, meta_pixel_id } = req.body;
+    const username = req.session.user.username;
+    
+    // Verifica che l'utente esista
+    const user = await Admin.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utente non trovato' });
+    }
+    
+    // Inizializza l'oggetto config se non esiste
+    if (!user.config) {
+      user.config = {};
+    }
+    
+    // Aggiorna solo i campi forniti
+    if (mongodb_uri !== undefined) user.config.mongodb_uri = mongodb_uri;
+    if (access_token !== undefined) user.config.access_token = access_token;
+    if (meta_pixel_id !== undefined) user.config.meta_pixel_id = meta_pixel_id;
+    
+    // Salva le modifiche
+    await user.save();
+    
+    // Aggiorna le configurazioni in sessione
+    req.session.userConfig = await getUserConfig(username);
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Configurazioni aggiornate con successo',
+      config: {
+        mongodb_uri: user.config.mongodb_uri ? '(configurato)' : '(non configurato)',
+        access_token: user.config.access_token ? '(configurato)' : '(non configurato)',
+        meta_pixel_id: user.config.meta_pixel_id || '(non configurato)'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento delle configurazioni' });
+  }
+});
+
+// 7. Crea una route per aggiungere nuovi utenti con configurazioni personalizzate
+app.post('/api/admin/users', isAuthenticated, async (req, res) => {
+  try {
+    // Solo l'admin può creare nuovi utenti
+    if (req.session.user.username !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Solo l\'admin può creare nuovi utenti' });
+    }
+    
+    const { username, password, mongodb_uri, access_token, meta_pixel_id } = req.body;
+    
+    // Verifica che username e password siano forniti
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username e password sono richiesti' });
+    }
+    
+    // Verifica che l'username non esista già
+    const existingUser = await Admin.findOne({ username });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'Username già esistente' });
+    }
+    
+    // Crea il nuovo utente
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await Admin.create({
+      username,
+      password: hashedPassword,
+      config: {
+        mongodb_uri,
+        access_token,
+        meta_pixel_id
+      }
+    });
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Utente creato con successo',
+      user: {
+        id: newUser._id,
+        username: newUser.username
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Errore nella creazione dell\'utente' });
+  }
 });
 
 // ----- PROTEZIONE DEL CRM -----
@@ -2096,10 +2216,15 @@ const createInitialAdmin = async () => {
       
       await Admin.create({
         username: 'admin',
-        password: hashedPassword
+        password: hashedPassword,
+        config: {
+          mongodb_uri: process.env.MONGODB_URI,
+          access_token: process.env.ACCESS_TOKEN,
+          meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+        }
       });
       
-      console.log('Utente admin creato con successo. Username: admin, Password:', password);
+      console.log('Utente admin creato con successo con configurazioni predefinite');
     }
   } catch (error) {
     console.error('Errore nella creazione dell\'admin:', error);
