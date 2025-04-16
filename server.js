@@ -75,7 +75,7 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    domain: process.env.COOKIE_DOMAIN || undefined,
+    domain: '.costruzionedigitale.com', // Aggiungi il punto davanti per includere tutti i sottodomini
     path: '/'
   }
 }));
@@ -705,31 +705,23 @@ const isAuthenticated = (req, res, next) => {
 
   // Middleware per API (restituisce dati vuoti, non reindirizza)
 const checkApiAuth = async (req, res, next) => {
-    if (req.session && req.session.isAuthenticated) {
-      return next();
+  // Se autenticato, continua normalmente
+  if (req.session && req.session.isAuthenticated) {
+    return next();
+  }
+  
+  // Per tutte le API, restituisci dati vuoti con successo
+  return res.json({
+    success: true,
+    data: [],
+    pagination: {
+      total: 0,
+      page: req.query.page || 1,
+      limit: req.query.limit || 20,
+      pages: 0
     }
-    
-    // Per API, restituisci dati vuoti con successo
-    // Questo emula il comportamento originale
-    if (req.path.startsWith('/api/leads/') || req.path.startsWith('/api/events')) {
-      return res.json({
-        success: true,
-        data: [],
-        pagination: {
-          total: 0,
-          page: req.query.page || 1,
-          limit: req.query.limit || 20,
-          pages: 0
-        }
-      });
-    }
-    
-    // Per altre API, restituisci errore 401
-    return res.status(401).json({
-      success: false,
-      message: 'Utente non autenticato'
-    });
-  };
+  });
+};
 
 // Middleware per catturare fbclid e inviare PageView alla CAPI
 app.use(async (req, res, next) => {

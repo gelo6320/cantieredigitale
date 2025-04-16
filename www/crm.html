@@ -3312,7 +3312,10 @@
       const loadForms = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`https://api.costruzionedigitale.com/api/leads/forms?page=${formsPagination.value.page}&limit=${formsPagination.value.limit}${formsFilter.value ? `&status=${formsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(
+            `https://api.costruzionedigitale.com/api/leads/forms?page=${formsPagination.value.page}&limit=${formsPagination.value.limit}${formsFilter.value ? `&status=${formsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`,
+            { withCredentials: true } // Esta es la línea clave que debes agregar
+          );
           
           forms.value = response.data.data || [];
           formsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
@@ -3335,7 +3338,10 @@
       const loadBookings = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`https://api.costruzionedigitale.com/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(
+            `https://api.costruzionedigitale.com/api/leads/bookings?page=${bookingsPagination.value.page}&limit=${bookingsPagination.value.limit}${bookingsFilter.value ? `&status=${bookingsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`,
+            { withCredentials: true }
+          );
           
           bookings.value = response.data.data || [];
           bookingsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
@@ -3358,7 +3364,10 @@
       const loadEvents = async () => {
         try {
           isLoading.value = true;
-          const response = await axios.get(`https://api.costruzionedigitale.com/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+          const response = await axios.get(
+            `https://api.costruzionedigitale.com/api/events?page=${eventsPagination.value.page}&limit=${eventsPagination.value.limit}${eventsFilter.value ? `&success=${eventsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`,
+            { withCredentials: true }
+          );
           
           events.value = response.data.data || [];
           eventsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 50, pages: 0 };
@@ -3380,7 +3389,10 @@
       
       const loadRecentEvents = async () => {
         try {
-          const response = await axios.get('https://api.costruzionedigitale.com/api/events?limit=5');
+          const response = await axios.get(
+            'https://api.costruzionedigitale.com/api/events?limit=5',
+            { withCredentials: true }
+          );
           recentEvents.value = response.data.data || [];
         } catch (error) {
           console.error('Errore caricamento eventi recenti:', error);
@@ -3598,7 +3610,10 @@
         const loadFacebookLeads = async () => {
           try {
             isLoading.value = true;
-            const response = await axios.get(`https://api.costruzionedigitale.com/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`);
+            const response = await axios.get(
+              `https://api.costruzionedigitale.com/api/leads/facebook?page=${facebookLeadsPagination.value.page}&limit=${facebookLeadsPagination.value.limit}${facebookLeadsFilter.value ? `&status=${facebookLeadsFilter.value}` : ''}${searchQuery.value ? `&search=${searchQuery.value}` : ''}`,
+              { withCredentials: true }
+            );
             
             facebookLeads.value = response.data.data || [];
             facebookLeadsPagination.value = response.data.pagination || { total: 0, page: 1, limit: 10, pages: 0 };
