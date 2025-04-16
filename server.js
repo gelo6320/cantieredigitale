@@ -1995,57 +1995,6 @@ app.get('/api/logout', (req, res) => {
 
 // ----- PROTEZIONE DEL CRM -----
 
-// In server.js, modifica la route /crm
-// Aggiungi nella tua definizione di route /crm (dopo il middleware isAuthenticated)
-app.get('/crm', isAuthenticated, (req, res) => {
-  console.log('=== ACCESSO CRM ===');
-  console.log('Sessione completa:', req.session);
-  console.log('isAuthenticated:', req.session.isAuthenticated);
-  console.log('Session ID:', req.session.id);
-  
-  // Inserisci gli script di debug nella pagina CRM
-  const crmPath = path.join(__dirname, 'www', 'crm.html');
-  
-  fs.readFile(crmPath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Errore nella lettura del file crm.html:', err);
-      return res.status(500).send('Errore interno del server');
-    }
-    
-    // Aggiungi lo script di debug all'inizio del body
-    const debugScript = `
-    <script>
-      console.log('%c=== DEBUG INFO AUTENTICAZIONE ===', 'background: #4CAF50; color: white; font-size: 12px; padding: 4px;');
-      console.log('Session ID:', '${req.session.id}');
-      console.log('Autenticato:', ${!!req.session.isAuthenticated});
-      console.log('Utente:', ${JSON.stringify(req.session.user || null)});
-      console.log('Cookie sessionID presente:', ${!!req.cookies['connect.sid']});
-      console.log('Timestamp:', new Date().toISOString());
-      
-      // Verifica periodica dello stato della sessione
-      setInterval(() => {
-        fetch('/api/check-auth', { 
-          credentials: 'include' 
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('%c=== VERIFICA AUTENTICAZIONE ===', 'background: #2196F3; color: white; font-size: 12px; padding: 4px;');
-          console.log('Stato autenticazione:', data);
-        })
-        .catch(err => {
-          console.error('Errore verifica autenticazione:', err);
-        });
-      }, 30000); // Verifica ogni 30 secondi
-    </script>
-    `;
-    
-    // Inserisci lo script all'inizio del body
-    const modifiedData = data.replace('<body>', '<body>' + debugScript);
-    
-    res.send(modifiedData);
-  });
-});
-
 // Aggiungi una route per verificare lo stato dell'autenticazione
 app.get('/api/check-auth', (req, res) => {
   res.json({ 
@@ -2062,6 +2011,12 @@ app.use(express.static(path.join(__dirname, 'www'), {
   index: false
 }));
 
+app.get('/crm', isAuthenticated, (req, res) => {
+  console.log('=== ACCESSO CRM ===');
+  console.log('isAuthenticated:', !!req.session.isAuthenticated);
+  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
+});
+
 // Route di fallback per SPA
 app.get('*', (req, res) => {
   // Ottieni il percorso richiesto
@@ -2073,6 +2028,10 @@ app.get('*', (req, res) => {
   }
   if (filePath.endsWith('/')) {
     filePath = filePath.slice(0, -1);
+  }
+
+  if (req.path === '/crm' || req.path.startsWith('/crm/')) {
+    return res.redirect('/login');
   }
   
   // Se il percorso è vuoto, servi index.html
@@ -2103,9 +2062,6 @@ app.get('*', (req, res) => {
       return res.sendFile(indexPath);
     }
   }
-  
-  // Altrimenti serve la homepage come fallback
-  return res.sendFile(path.join(__dirname, 'www', 'index.html'));
 });
 
 // Crea utente admin iniziale (solo al primo avvio)
