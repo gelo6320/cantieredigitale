@@ -2,19 +2,18 @@
   "outputDirectory": "www",
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/crm", "dest": "https://api.costruzionedigitale.com/crm" },
-    { "src": "/crm/(.*)", "dest": "https://api.costruzionedigitale.com/crm/$1" },
-    { "src": "/login", "dest": "https://api.costruzionedigitale.com/login" },
-    { "src": "/api/check-auth", "dest": "https://api.costruzionedigitale.com/api/check-auth" },
-    { "src": "/api/login", "dest": "https://api.costruzionedigitale.com/api/login" },
-    { "src": "/api/logout", "dest": "https://api.costruzionedigitale.com/api/logout" },
-    { "src": "/js/cookie-consent-manager.js", "dest": "/js/cookie-consent-manager.js" },
-    { "src": "/:path", "dest": "/:path.html" },
-    { "src": "/:path/", "dest": "/:path.html" },
-    { "src": "/(.*)/", "dest": "/$1" },
-    { "src": "/js/tracking.js", "dest": "/api/tracking.js" },
-    { "src": "/api/:path*", "dest": "https://api.costruzionedigitale.com/api/:path*" }
+  "rewrites": [
+    { "source": "/crm", "destination": "https://api.costruzionedigitale.com/crm" },
+    { "source": "/crm/(.*)", "destination": "https://api.costruzionedigitale.com/crm/$1" },
+    { "source": "/login", "destination": "https://api.costruzionedigitale.com/login" },
+    { "source": "/api/check-auth", "destination": "https://api.costruzionedigitale.com/api/check-auth" },
+    { "source": "/api/login", "destination": "https://api.costruzionedigitale.com/api/login" },
+    { "source": "/api/logout", "destination": "https://api.costruzionedigitale.com/api/logout" },
+    { "source": "/js/cookie-consent-manager.js", "destination": "/js/cookie-consent-manager.js" },
+    { "source": "/:path", "destination": "/:path.html" },
+    { "source": "/:path/", "destination": "/:path.html" },
+    { "source": "/(.*)/", "destination": "/$1" },
+    { "source": "/js/tracking.js", "destination": "/api/tracking.js" },
+    { "source": "/api/:path*", "destination": "https://api.costruzionedigitale.com/api/:path*" }
   ]
 }
