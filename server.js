@@ -692,17 +692,44 @@ const checkCookieConsent = async (req, res, next) => {
 
 // Middleware per verificare autenticazione
 const isAuthenticated = (req, res, next) => {
-  if (req.session && req.session.isAuthenticated) {
-    return next();
-  }
-  
-  // Verifica che la sessione esista prima di impostare returnTo
-  if (req.session) {
-    req.session.returnTo = req.originalUrl;
-  }
-  
-  return res.redirect('/login');
-};
+    if (req.session && req.session.isAuthenticated) {
+      return next();
+    }
+    
+    if (req.session) {
+      req.session.returnTo = req.originalUrl;
+    }
+    
+    return res.redirect('/login');
+  };
+
+  // Middleware per API (restituisce dati vuoti, non reindirizza)
+const checkApiAuth = async (req, res, next) => {
+    if (req.session && req.session.isAuthenticated) {
+      return next();
+    }
+    
+    // Per API, restituisci dati vuoti con successo
+    // Questo emula il comportamento originale
+    if (req.path.startsWith('/api/leads/') || req.path.startsWith('/api/events')) {
+      return res.json({
+        success: true,
+        data: [],
+        pagination: {
+          total: 0,
+          page: req.query.page || 1,
+          limit: req.query.limit || 20,
+          pages: 0
+        }
+      });
+    }
+    
+    // Per altre API, restituisci errore 401
+    return res.status(401).json({
+      success: false,
+      message: 'Utente non autenticato'
+    });
+  };
 
 // Middleware per catturare fbclid e inviare PageView alla CAPI
 app.use(async (req, res, next) => {
@@ -780,8 +807,10 @@ app.use(checkCookieConsent);
 
 // Proteggi le route CRM
 app.use('/crm', isAuthenticated);
-app.use('/api/crm', isAuthenticated);
-app.use('/api/dashboard', isAuthenticated);
+app.use('/dashboard', isAuthenticated);
+
+app.use('/api/leads', checkApiAuth);
+app.use('/api/events', checkApiAuth);
 
 // ===== ROUTE API =====
 
@@ -1369,7 +1398,7 @@ app.get('/api/dashboard/init-session', (req, res) => {
 });
 
 // API per ottenere i form
-app.get('/api/leads/forms', isAuthenticated, async (req, res) => {
+app.get('/api/leads/forms', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -1432,7 +1461,7 @@ app.get('/api/leads/forms', isAuthenticated, async (req, res) => {
 });
 
 // API per ottenere le prenotazioni
-app.get('/api/leads/bookings', isAuthenticated, async (req, res) => {
+app.get('/api/leads/bookings', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -1495,7 +1524,7 @@ app.get('/api/leads/bookings', isAuthenticated, async (req, res) => {
 });
 
 // API per ottenere i lead di Facebook
-app.get('/api/leads/facebook', isAuthenticated, async (req, res) => {
+app.get('/api/leads/facebook', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -1559,7 +1588,7 @@ app.get('/api/leads/facebook', isAuthenticated, async (req, res) => {
 });
 
 // API per ottenere gli eventi
-app.get('/api/events', isAuthenticated, async (req, res) => {
+app.get('/api/events', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -1616,7 +1645,7 @@ app.get('/api/events', isAuthenticated, async (req, res) => {
 });
 
 // API per aggiornare lo stato di un form
-app.post('/api/leads/forms/:id/update', isAuthenticated, async (req, res) => {
+app.post('/api/leads/forms/:id/update', async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus, eventName, eventMetadata } = req.body;
@@ -1722,7 +1751,7 @@ app.post('/api/leads/forms/:id/update', isAuthenticated, async (req, res) => {
 });
 
 // API per aggiornare lo stato di una prenotazione
-app.post('/api/leads/bookings/:id/update', isAuthenticated, async (req, res) => {
+app.post('/api/leads/bookings/:id/update', async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus, eventName, eventMetadata } = req.body;
@@ -1829,7 +1858,7 @@ app.post('/api/leads/bookings/:id/update', isAuthenticated, async (req, res) => 
 });
 
 // API per aggiornare lo stato di un lead Facebook
-app.post('/api/leads/facebook/:id/update', isAuthenticated, async (req, res) => {
+app.post('/api/leads/facebook/:id/update', async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus, eventName, eventMetadata } = req.body;
