@@ -2060,7 +2060,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Dopo il login, inizializza la sessione anche sul server dashboard
-fetch('http://localhost:5000/api/dashboard/init-session', {
+fetch('http://localhost:5001/api/dashboard/init-session', {
   method: 'GET',
   credentials: 'include' // Importante per inviare i cookie
 })
