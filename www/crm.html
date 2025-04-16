@@ -3746,6 +3746,14 @@
           popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl);
           });
+
+          // Blocca apertura sidebar su scroll mobile
+          window.addEventListener('scroll', () => {
+            if (window.innerWidth < 768 && sidebarVisible.value) {
+              sidebarVisible.value = false;
+              document.body.style.overflow = '';
+            }
+          });
           
           // Inizializza lo stato della sidebar in base alla dimensione dello schermo
           handleResize();
