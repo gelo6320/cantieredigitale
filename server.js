@@ -96,6 +96,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Aggiungi prima della configurazione delle route express.static
+app.use((req, res, next) => {
+  // Proteggi l'accesso diretto al file crm.html
+  if (req.path.includes('/crm.html')) {
+    console.log('⛔ Tentativo di accesso diretto a crm.html');
+    return res.redirect('/login');
+  }
+  next();
+});
+
 // Aggiungi questo middleware dopo la configurazione della sessione
 app.use((req, res, next) => {
   if (req.path.includes('/api/') || req.path.includes('/crm') || req.path === '/login') {
