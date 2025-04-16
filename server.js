@@ -799,7 +799,8 @@ app.use(checkCookieConsent);
 
 // Proteggi le route CRM
 app.use('/crm', isAuthenticated);
-app.use('/dashboard', isAuthenticated);
+app.use('/api/crm', isAuthenticated);
+app.use('/api/dashboard', isAuthenticated);
 
 app.use('/api/leads', checkApiAuth);
 app.use('/api/events', checkApiAuth);
