@@ -64,6 +64,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
+// Aggiungi questo all'inizio, subito dopo i middleware principali
+app.use((req, res, next) => {
+  console.log("\n\n🔍 INTERCETTO ROUTE:", req.path);
+  
+  // Proteggi esplicitamente tutte le route /crm
+  if (req.path === '/crm' || req.path.startsWith('/crm/')) {
+    // Verifica l'autenticazione
+    if (!(req.session && req.session.isAuthenticated)) {
+      console.log('⛔ ACCESSO NEGATO: utente non autenticato su', req.path);
+      return res.redirect('/login');
+    }
+  }
+  next();
+});
+
 // Configurazione sessione
 app.use(session({
   secret: process.env.SESSION_SECRET || 'neosmile-secret-key',
@@ -2028,10 +2043,6 @@ app.get('*', (req, res) => {
   }
   if (filePath.endsWith('/')) {
     filePath = filePath.slice(0, -1);
-  }
-
-  if (req.path === '/crm' || req.path.startsWith('/crm/')) {
-    return res.redirect('/login');
   }
   
   // Se il percorso è vuoto, servi index.html
