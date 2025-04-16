@@ -1987,10 +1987,11 @@ app.get('/api/logout', (req, res) => {
 
 // ----- PROTEZIONE DEL CRM -----
 
-// Protezione delle pagine del CRM
+// In server.js, modifica la route /crm
 app.get('/crm', isAuthenticated, (req, res) => {
   console.log('=== ACCESSO CRM ===');
-  console.log('Utente autenticato:', req.session.user.username);
+  console.log('Sessione completa:', req.session);
+  console.log('isAuthenticated:', req.session.isAuthenticated);
   console.log('Session ID:', req.session.id);
   res.sendFile(path.join(__dirname, 'www', 'crm.html'));
 });
