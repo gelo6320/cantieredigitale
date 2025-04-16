@@ -659,15 +659,9 @@
     
     .sidebar-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 90;
-      display: none;
-      pointer-events: auto;
-      cursor: pointer;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 99;
     }
     
     .position-sticky {
@@ -2113,13 +2107,15 @@
   <div id="app">
     <!-- Pattern di sfondo stile Costruzione -->
     <div style="color: #151515;"></div>
+
+    <div v-if="sidebarVisible && isMobile" class="sidebar-overlay" @click="closeSidebar"></div>
     
     <!-- Header -->
     <header class="navbar navbar-dark sticky-top" style="flex-wrap: nowrap;">
       <a class="navbar-brand" href="#" @click.prevent="selectTab('dashboard')">
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg> Costruzione <span style="color: var(--primary-color)">Digitale</span> CRM
       </a>
-      <button class="navbar-toggler" type="button" @click="toggleSidebar" aria-label="Toggle sidebar">
+      <button class="navbar-toggler" @click="toggleSidebar" aria-label="Toggle sidebar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
           <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path>
         </svg>
@@ -3096,13 +3092,33 @@
   
   const app = createApp({
     setup() {
+
+      const sidebarVisible = ref(false);
+      const isMobile = ref(window.innerWidth < 768);
+
+      const toggleSidebar = () => {
+        sidebarVisible.value = !sidebarVisible.value;
+        document.body.style.overflow = sidebarVisible.value && isMobile.value ? 'hidden' : '';
+      };
+
+      const closeSidebar = () => {
+        sidebarVisible.value = false;
+        document.body.style.overflow = '';
+      };
+
+      const handleResize = () => {
+        isMobile.value = window.innerWidth < 768;
+        if (!isMobile.value) {
+          closeSidebar();
+        }
+      };
+
       // Stato dell'applicazione
       const activeTab = ref('dashboard');
       const windowSize = ref({
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight
       });
-      const sidebarVisible = ref(windowSize.value.innerWidth >= 768); // Nascondi la sidebar su mobile di default
       const searchQuery = ref('');
       const isLoading = ref(false);
       const isUpdating = ref(false);
@@ -3627,17 +3643,6 @@
           modal.show();
         };
         
-        // Altre funzioni di utilità
-        const toggleSidebar = () => {
-          if (isScrollLock) return;
-        
-          sidebarVisible.value = !sidebarVisible.value;
-        
-          if (windowSize.value.innerWidth < 768) {
-            document.body.style.overflow = sidebarVisible.value ? 'hidden' : '';
-          }
-        };
-        
         const togglePasswordVisibility = () => {
           passwordVisible.value = !passwordVisible.value;
         };
@@ -3673,32 +3678,6 @@
             }
           }, 500);
         };
-
-        const selectTab = (tab) => {
-          activeTab.value = tab;
-          // Chiudi la sidebar su mobile indipendentemente dalle dimensioni dello schermo
-          sidebarVisible.value = false;
-          
-          // Solo su mobile, ripristina il normale overflow del body
-          if (windowSize.value.innerWidth < 768) {
-            document.body.style.overflow = '';
-          }
-        };
-        
-        // Gestione del resize della finestra
-        const handleResize = () => {
-          windowSize.value.innerWidth = windowSize.innerWidth;
-          windowSize.value.innerHeight = windowSize.innerHeight;
-          
-          // Chiudi automaticamente la sidebar su mobile quando la finestra viene ridimensionata
-          if (windowSize.value.innerWidth < 768) {
-            sidebarVisible.value = false;
-            document.body.style.overflow = '';
-          } else {
-            // Ripristina la sidebar in vista su desktop
-            sidebarVisible.value = true;
-          }
-        };
         
         // Watch per cambiamenti di tab
         watch(activeTab, (newTab) => {
@@ -3720,18 +3699,12 @@
           } else if (newTab === 'facebookLeads') {
             loadFacebookLeads();
           }
-          
-          // Chiudi automaticamente la sidebar su mobile al cambio di tab
-          if (windowSize.value.innerWidth < 768) {
-            sidebarVisible.value = false;
-            document.body.style.overflow = '';
-          }
         });
         
         // Al montaggio dell'app
         onMounted(() => {
-              // Aggiungi event listener per il resize della finestra
               window.addEventListener('resize', handleResize);
+          handleResize();
           
           // Carica i dati iniziali
           loadForms();
@@ -3745,21 +3718,6 @@
           popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl);
           });
-
-          window.addEventListener('scroll', () => {
-            if (window.innerWidth < 768) {
-              isScrollLock = true;
-              sidebarVisible.value = false;
-              document.body.style.overflow = '';
-          
-              setTimeout(() => {
-                isScrollLock = false;
-              }, 500); // Sblocco dopo mezzo secondo
-            }
-          });
-          
-          // Inizializza lo stato della sidebar in base alla dimensione dello schermo
-          handleResize();
         });
         
         return {
@@ -3840,7 +3798,11 @@
           togglePasswordVisibility,
           showToast,
           debounceSearch,
-          logout
+          logout,
+          sidebarVisible,
+          toggleSidebar,
+          closeSidebar,
+          isMobile
         };
       }
     });
