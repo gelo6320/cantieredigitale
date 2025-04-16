@@ -1,6 +1,12 @@
 {
+  "outputDirectory": "www",
   "cleanUrls": true,
   "trailingSlash": false,
+  "buildOutputOptions": {
+    "excludeFiles": [
+      "crm.html"
+    ]
+  },
   "rewrites": [
     { "source": "/crm", "destination": "https://api.costruzionedigitale.com/crm" },
     { "source": "/crm/(.*)", "destination": "https://api.costruzionedigitale.com/crm/$1" },
