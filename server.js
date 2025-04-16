@@ -50,7 +50,8 @@ app.use(cors({
     const allowedOrigins = [
       'https://costruzionedigitale.com',
       'https://www.costruzionedigitale.com',
-      'http://localhost:3000'
+      'http://localhost:3000',
+      'http://localhost:5001'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
@@ -1998,6 +1999,25 @@ app.get('/login', (req, res) => {
     return res.redirect('/crm');
   }
   res.sendFile(path.join(__dirname, 'www', 'login.html'));
+});
+
+// API per la sincronizzazione della sessione con il dashboard
+app.get('/api/sync-dashboard-session', (req, res) => {
+  console.log('=== RICHIESTA SINCRONIZZAZIONE DASHBOARD ===');
+  console.log('Session ID:', req.session?.id || 'nessuna sessione');
+  console.log('isAuthenticated:', req.session?.isAuthenticated || false);
+  console.log('User presente:', !!req.session?.user);
+  console.log('userConfig presente:', !!req.session?.userConfig);
+  
+  // Invia tutti i dati rilevanti anche se non autenticato (per debug)
+  res.json({
+    success: !!req.session?.isAuthenticated,
+    authenticated: !!req.session?.isAuthenticated,
+    sessionExists: !!req.session,
+    sessionId: req.session?.id || null,
+    user: req.session?.user || null,
+    userConfig: req.session?.userConfig || null
+  });
 });
 
 // API per il login
