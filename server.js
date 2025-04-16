@@ -1911,14 +1911,6 @@ const isAuthenticated = (req, res, next) => {
 app.use('/crm', isAuthenticated);
 app.use('/api/crm', isAuthenticated);
 
-app.get('/crm', (req, res) => {
-  console.log('=== ACCESSO CRM ===');
-  console.log('Sessione completa:', req.session);
-  console.log('isAuthenticated:', req.session.isAuthenticated);
-  console.log('Session ID:', req.session.id);
-  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
-});
-
 // ----- ROUTE PER L'AUTENTICAZIONE -----
 
 // Pagina di login
@@ -2004,12 +1996,65 @@ app.get('/api/logout', (req, res) => {
 // ----- PROTEZIONE DEL CRM -----
 
 // In server.js, modifica la route /crm
+// Aggiungi nella tua definizione di route /crm (dopo il middleware isAuthenticated)
 app.get('/crm', isAuthenticated, (req, res) => {
   console.log('=== ACCESSO CRM ===');
   console.log('Sessione completa:', req.session);
   console.log('isAuthenticated:', req.session.isAuthenticated);
   console.log('Session ID:', req.session.id);
-  res.sendFile(path.join(__dirname, 'www', 'crm.html'));
+  
+  // Inserisci gli script di debug nella pagina CRM
+  const crmPath = path.join(__dirname, 'www', 'crm.html');
+  
+  fs.readFile(crmPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Errore nella lettura del file crm.html:', err);
+      return res.status(500).send('Errore interno del server');
+    }
+    
+    // Aggiungi lo script di debug all'inizio del body
+    const debugScript = `
+    <script>
+      console.log('%c=== DEBUG INFO AUTENTICAZIONE ===', 'background: #4CAF50; color: white; font-size: 12px; padding: 4px;');
+      console.log('Session ID:', '${req.session.id}');
+      console.log('Autenticato:', ${!!req.session.isAuthenticated});
+      console.log('Utente:', ${JSON.stringify(req.session.user || null)});
+      console.log('Cookie sessionID presente:', ${!!req.cookies['connect.sid']});
+      console.log('Timestamp:', new Date().toISOString());
+      
+      // Verifica periodica dello stato della sessione
+      setInterval(() => {
+        fetch('/api/check-auth', { 
+          credentials: 'include' 
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('%c=== VERIFICA AUTENTICAZIONE ===', 'background: #2196F3; color: white; font-size: 12px; padding: 4px;');
+          console.log('Stato autenticazione:', data);
+        })
+        .catch(err => {
+          console.error('Errore verifica autenticazione:', err);
+        });
+      }, 30000); // Verifica ogni 30 secondi
+    </script>
+    `;
+    
+    // Inserisci lo script all'inizio del body
+    const modifiedData = data.replace('<body>', '<body>' + debugScript);
+    
+    res.send(modifiedData);
+  });
+});
+
+// Aggiungi una route per verificare lo stato dell'autenticazione
+app.get('/api/check-auth', (req, res) => {
+  res.json({ 
+    authenticated: !!(req.session && req.session.isAuthenticated),
+    sessionExists: !!req.session,
+    user: req.session && req.session.user ? req.session.user.username : null,
+    sessionId: req.session ? req.session.id : null,
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use(express.static(path.join(__dirname, 'www'), {
