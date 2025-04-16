@@ -1998,7 +1998,11 @@ app.get('/login', (req, res) => {
 });
 
 // API per il login
+// In server.js (il server principale), modifica l'API di login
 app.post('/api/login', async (req, res) => {
+  console.log('=== INIZIO LOGIN ===');
+  console.log('Username fornito:', req.body.username);
+  
   try {
     const { username, password } = req.body;
     
@@ -2006,11 +2010,19 @@ app.post('/api/login', async (req, res) => {
     const user = await Admin.findOne({ username });
     
     if (!user || !await bcrypt.compare(password, user.password)) {
+      console.log('❌ Autenticazione fallita per:', username);
       return res.status(401).json({ success: false, message: 'Credenziali non valide' });
     }
     
+    console.log('✅ Autenticazione riuscita per:', username);
+    
     // Recupera le configurazioni dell'utente
     const userConfig = await getUserConfig(username);
+    console.log('Configurazioni recuperate:', {
+      mongodb_uri: userConfig.mongodb_uri ? '(presente)' : '(assente)',
+      access_token: userConfig.access_token ? '(presente)' : '(assente)',
+      meta_pixel_id: userConfig.meta_pixel_id ? '(presente)' : '(assente)'
+    });
     
     // Imposta la sessione
     req.session.isAuthenticated = true;
@@ -2019,16 +2031,28 @@ app.post('/api/login', async (req, res) => {
       username: user.username
     };
     
-    // Memorizza le configurazioni nella sessione per un accesso rapido
+    // Memorizza le configurazioni nella sessione
     req.session.userConfig = userConfig;
     
+    // Salva la sessione e mostra un log dettagliato
     req.session.save((err) => {
       if (err) {
+        console.error('❌ Errore salvataggio sessione:', err);
         return res.status(500).json({ success: false, message: 'Errore durante il login' });
       }
+      
+      console.log('✅ Sessione salvata con successo');
+      console.log('Dettagli sessione:');
+      console.log('- ID:', req.session.id);
+      console.log('- User:', req.session.user);
+      console.log('- Cookie:', req.session.cookie);
+      console.log('- userConfig nella sessione:', !!req.session.userConfig);
+      console.log('=== FINE LOGIN ===');
+      
       res.status(200).json({ success: true, message: 'Login effettuato con successo' });
     });
   } catch (error) {
+    console.error('❌ Errore durante il login:', error);
     res.status(500).json({ success: false, message: 'Errore durante il login' });
   }
 });
