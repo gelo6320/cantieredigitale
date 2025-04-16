@@ -2114,11 +2114,6 @@
     <!-- Pattern di sfondo stile Costruzione -->
     <div style="color: #151515;"></div>
     
-    <!-- Overlay per sidebar mobile -->
-    <div class="sidebar-overlay" 
-     :style="{ display: sidebarVisible && windowSize.innerWidth < 768 ? 'block' : 'none' }" 
-     @click="toggleSidebar"></div>
-    
     <!-- Header -->
     <header class="navbar navbar-dark sticky-top" style="flex-wrap: nowrap;">
       <a class="navbar-brand" href="#" @click.prevent="selectTab('dashboard')">
