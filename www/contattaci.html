@@ -2287,7 +2287,6 @@
             function fetchAvailableTimeSlots(date) {
                 // Mostra il loader
                 timeSlotsContainer.innerHTML = '';
-                loaderCalendar.style.display = 'block';
                 
                 // Formatta la data per l'API (assicurati che sia nel formato corretto YYYY-MM-DD)
                 const formattedDate = formatDateForAPI(date);
@@ -2303,7 +2302,6 @@
                         return response.json();
                     })
                     .then(data => {
-                        loaderCalendar.style.display = 'none';
                         
                         if (data.success && data.availability && Array.isArray(data.availability)) {
                             // Usa i dati di disponibilità dall'API
@@ -2318,7 +2316,6 @@
                     })
                     .catch(error => {
                         console.error('Error fetching availability:', error);
-                        loaderCalendar.style.display = 'none';
                         
                         // Fallback in caso di errore
                         useStaticTimeSlots(date);
