@@ -221,12 +221,24 @@
         }
         
         .mobile-menu-toggle {
-            display: none;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            cursor: pointer;
+          font-size: 1.8rem;
+          padding: 5px;
+          color: var(--primary-color);
+          display: flex;
+          align-content: center;
+        }
+
+        svg {
+            display: inline-block;
+            vertical-align: -0.125em;
+            overflow: visible;
         }
         
+        .mobile-menu-toggle svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+
         /* Main booking section */
         .booking-hero {
             min-height: calc(100vh - 110px);
@@ -746,20 +758,117 @@
         }
         
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 24px;
-            border-radius: 50px;
-            font-weight: 700;
+          display: inline-block;
+          background-color: var(--primary-color);
+          color: #fff;
+          padding: 18px 35px;
+          text-decoration: none;
+          border-radius: 50px;
+          font-weight: 700;
+          font-size: 1.1rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          transition: all 0.3s ease;
+          border: 2px solid var(--primary-color);
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+          text-align: center;
+          margin: 10px auto;
+        }
+        .btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.2);
+          transition: all 0.4s ease;
+          z-index: 1;
+        }
+        .btn:hover::before {
+          left: 100%;
+        }
+        .btn:hover {
+          background-color: var(--accent-color);
+          border-color: var(--accent-color);
+          box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
+          transform: translateY(-2px);
+        }
+        .btn span {
+          position: relative;
+          z-index: 2;
+        }
+        .btn-lg {
+          font-size: 1.3rem;
+          padding: 20px 40px;
+        }
+
+        @media (max-width: 480px) {
+        
+          .btn {
+            padding: 15px 25px;
             font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border: none;
-            cursor: pointer;
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
+          }
+        }
+
+        .btn::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background: linear-gradient(
+            45deg,
+            var(--primary-color) 0,
+            var(--accent-color) 100%
+          );
+          z-index: -1;
+          transition: all 0.5s ease;
+        }
+        .btn:hover::after {
+          transform: scale(1.1);
+          opacity: 0.9;
+        }
+        .btn,
+        .guarantee-box,
+        .service-card,
+        .stat-item,
+        .step {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before,
+        .hero-button::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.15);
+          transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+          z-index: -1;
+        }
+  
+        .btn:hover::before,
+        .hero-button:hover::before {
+          left: 100%;
+        }
+  
+        .btn:hover,
+        .hero-button:hover {
+          transform: translateY(-5px) scale(1.01);
+          box-shadow: 0 10px 25px rgba(255, 107, 0, 0.5);
+        }
+  
+        .btn:active,
+        .hero-button:active {
+          transform: translateY(-2px) scale(0.98);
+          transition-duration: 0.1s;
         }
         
         .btn-content {
@@ -1066,16 +1175,31 @@
         }
         
         .mobile-menu-close {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-close {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: none;
+            background: 0 0;
             border: none;
             color: var(--text-color);
             font-size: 1.8rem;
             cursor: pointer;
+            }
         }
-        
+
         .mobile-menu-items {
             list-style: none;
             padding: 0;
@@ -1112,11 +1236,11 @@
         }
         
         .mobile-menu-button {
-            margin-top: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          margin-top: 30px;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
         
         /* Animations */
@@ -1221,14 +1345,6 @@
         @media (max-width: 768px) {
             nav ul {
                 display: none;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-                font-size: 1.8rem;
-                padding: 5px;
-                color: var(--primary-color);
-                display: flex;
             }
             
             .logo-icon {
@@ -1376,6 +1492,12 @@
                 border: 1px solid #ccc;
             }
         }
+
+        @media (max-width: 768px) {
+            .mobile-menu-container {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1434,7 +1556,7 @@
                 </svg> Servizi</a>
             </li>
         </ul>
-        <a href="/contattaci" class="btn btn-primary mobile-menu-button" id="mobile-book-now" title="Prenota una consulenza gratuita">
+        <a href="/contattaci" class="btn mobile-menu-button" id="mobile-book-now" title="Prenota una consulenza gratuita">
             <span class="btn-content">PRENOTA ORA</span>
         </a>
     </div>
