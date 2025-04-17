@@ -1048,7 +1048,7 @@ app.post('/api/submit-form', async (req, res) => {
 });
 
 // API per la gestione dell'invio della prenotazione
-app.post('https://api.costruzionedigitale.com/api/submit-booking', async (req, res) => {
+app.post('/api/submit-booking', async (req, res) => {
   try {
     // Genera un ID evento univoco per la deduplicazione
     const eventId = 'event_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
