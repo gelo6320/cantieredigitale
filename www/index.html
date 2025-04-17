@@ -2336,32 +2336,224 @@
       </section>
 
     <!-- Cookie Banner -->
-    <div class="cookie-banner" id="cookie-banner">
-        <div class="cookie-content">
-            <div class="cookie-header">
-                <h3>Informativa sui Cookie</h3>
-                <button class="mobile-menu-close" id="cookie-close" aria-label="Chiudi cookie banner">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"></path>
-                            </svg>
-                </button>
-            </div>
-            <p>
-                Utilizziamo i cookie per migliorare la tua esperienza sul nostro sito. 
-                I cookie essenziali sono necessari per il funzionamento del sito, mentre altri ci aiutano 
-                a migliorare i nostri servizi e l'esperienza utente. Puoi scegliere di accettare tutti i cookie 
-                o utilizzare solo quelli essenziali per la navigazione.
-            </p>
-            <div class="cookie-actions">
-                <button id="cookie-reject-all" class="btn-outline">Rifiuta tutti</button>
-                <button id="cookie-accept-all" class="btn btn-primary">Accetta tutti</button>
-            </div>
-            <div class="cookie-footer">
-                <a href="/privacy-policy" title="privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy" title="cookie-policy">Cookie Policy</a>
-            </div>
-        </div>
-    </div>
+    <div class="modern-cookie-banner" id="cookie-banner">
+      <div class="cookie-container">
+          <div class="cookie-content">
+              <div class="cookie-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" fill="#FF6B00">
+                      <path d="M247.2 17c-22.1-3.1-44.6 .9-64.4 11.4l-74 39.5C89.1 78.4 73.2 94.9 63.4 115L26.7 190.6c-9.8 20.1-13 42.9-9.1 64.9l14.5 82.8c3.9 22.1 14.6 42.3 30.7 57.9l60.3 58.4c16.1 15.6 36.6 25.6 58.7 28.7l83 11.7c22.1 3.1 44.6-.9 64.4-11.4l74-39.5c19.7-10.5 35.6-27 45.4-47.2l36.7-75.5c9.8-20.1 13-42.9 9.1-64.9l-14.6-82.8c-3.9-22.1-14.6-42.3-30.7-57.9L388.9 57.5c-16.1-15.6-36.6-25.6-58.7-28.7L247.2 17zM208 144a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM144 336a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm224-64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/>
+                  </svg>
+              </div>
+              <div class="cookie-text">
+                  <h3>Informativa Cookie</h3>
+                  <p>Utilizziamo i cookie per migliorare la tua esperienza sul nostro sito. Accetta tutti i cookie o personalizza le tue preferenze.</p>
+              </div>
+              <div class="cookie-actions">
+                  <button id="cookie-reject-all" class="cookie-btn cookie-btn-reject">Rifiuta</button>
+                  <button id="cookie-accept-all" class="cookie-btn cookie-btn-accept">Accetta tutti</button>
+              </div>
+              <button id="cookie-close" class="cookie-close" aria-label="Chiudi cookie banner">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="14" height="14" fill="currentColor">
+                      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+                  </svg>
+              </button>
+          </div>
+          <div class="cookie-footer">
+              <a href="/privacy-policy">Privacy Policy</a>
+              <a href="/cookie-policy">Cookie Policy</a>
+          </div>
+      </div>
+  </div>
+  
+  <style>
+      .modern-cookie-banner {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #1E1E1E;
+          color: #fff;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+          width: 90%;
+          max-width: 500px;
+          z-index: 1000;
+          border: 1px solid rgba(255, 107, 0, 0.2);
+          overflow: hidden;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease-in-out;
+          backdrop-filter: blur(10px);
+      }
+      
+      .modern-cookie-banner.show {
+          opacity: 1;
+          visibility: visible;
+      }
+      
+      .cookie-container {
+          padding: 20px;
+      }
+      
+      .cookie-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+      }
+      
+      .cookie-icon {
+          margin-bottom: 15px;
+      }
+      
+      .cookie-text {
+          text-align: center;
+          margin-bottom: 20px;
+      }
+      
+      .cookie-text h3 {
+          color: #FF6B00;
+          font-size: 18px;
+          margin: 0 0 10px;
+          font-weight: 600;
+      }
+      
+      .cookie-text p {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 14px;
+          line-height: 1.5;
+          margin: 0;
+      }
+      
+      .cookie-actions {
+          display: flex;
+          gap: 10px;
+          width: 100%;
+          margin-bottom: 10px;
+      }
+      
+      .cookie-btn {
+          flex: 1;
+          padding: 12px 15px;
+          border-radius: 8px;
+          border: none;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+      }
+      
+      .cookie-btn-reject {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: #fff;
+      }
+      
+      .cookie-btn-reject:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+      }
+      
+      .cookie-btn-accept {
+          background-color: #FF6B00;
+          color: #fff;
+      }
+      
+      .cookie-btn-accept:hover {
+          background-color: #FF8C38;
+      }
+      
+      .cookie-close {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: transparent;
+          border: none;
+          color: rgba(255, 255, 255, 0.6);
+          padding: 5px;
+          cursor: pointer;
+          transition: color 0.2s ease;
+      }
+      
+      .cookie-close:hover {
+          color: #fff;
+      }
+      
+      .cookie-footer {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-top: 5px;
+      }
+      
+      .cookie-footer a {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 12px;
+          text-decoration: none;
+          transition: color 0.2s ease;
+      }
+      
+      .cookie-footer a:hover {
+          color: #FF6B00;
+          text-decoration: underline;
+      }
+      
+      @media (min-width: 768px) {
+          .cookie-content {
+              flex-direction: row;
+              align-items: flex-start;
+              text-align: left;
+              gap: 15px;
+          }
+          
+          .cookie-text {
+              flex: 1;
+              text-align: left;
+              margin-bottom: 0;
+          }
+          
+          .cookie-actions {
+              width: auto;
+              margin-bottom: 0;
+          }
+          
+          .cookie-btn {
+              flex: none;
+              white-space: nowrap;
+          }
+          
+          .cookie-icon {
+              margin-bottom: 0;
+              margin-top: 5px;
+          }
+      }
+      
+      @media (max-width: 480px) {
+          .modern-cookie-banner {
+              bottom: 10px;
+              width: 95%;
+          }
+          
+          .cookie-container {
+              padding: 15px;
+          }
+          
+          .cookie-text h3 {
+              font-size: 16px;
+          }
+          
+          .cookie-text p {
+              font-size: 13px;
+          }
+          
+          .cookie-btn {
+              padding: 10px;
+              font-size: 13px;
+          }
+          
+          .cookie-footer {
+              gap: 15px;
+          }
+      }
+  </style>
 
     <section class="cta" id="contatto">
         <div class="container">
@@ -2486,6 +2678,48 @@
         <div class="cta-float-text">PRENOTA UNA CHIAMATA GRATUITA</div>
     </a>
     </div>
+
+    <!-- new cookie  -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const cookieBanner = document.getElementById('cookie-banner');
+          const acceptBtn = document.getElementById('cookie-accept-all');
+          const rejectBtn = document.getElementById('cookie-reject-all');
+          const closeBtn = document.getElementById('cookie-close');
+          
+          // Check if cookies are already accepted
+          if (!localStorage.getItem('cookiesAccepted')) {
+              // Show the banner with animation
+              setTimeout(() => {
+                  cookieBanner.classList.add('show');
+              }, 1000);
+          }
+          
+          // Accept cookies
+          acceptBtn.addEventListener('click', () => {
+              localStorage.setItem('cookiesAccepted', 'true');
+              hideBanner();
+          });
+          
+          // Reject cookies
+          rejectBtn.addEventListener('click', () => {
+              localStorage.setItem('cookiesAccepted', 'false');
+              hideBanner();
+          });
+          
+          // Close banner
+          closeBtn.addEventListener('click', () => {
+              hideBanner();
+          });
+          
+          function hideBanner() {
+              cookieBanner.classList.remove('show');
+              setTimeout(() => {
+                  cookieBanner.style.display = 'none';
+              }, 300);
+          }
+      });
+  </script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
