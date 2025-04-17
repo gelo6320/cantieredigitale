@@ -1690,7 +1690,7 @@
                                         Cambia data
                                     </span>
                                 </button>
-                                <button class="btn btn-primary" id="continue-to-step-3" disabled>
+                                <button class="btn btn-primary" id="confirmTimeSlot" disabled>
                                     <span class="btn-content">
                                         Conferma orario
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
@@ -1958,6 +1958,7 @@
             // Time slots
             const timeSlotsContainer = document.getElementById('time-slots');
             const selectedDateDisplay = document.getElementById('selected-date-display');
+            const confirmTimeSlotBtn = document.getElementById('confirmTimeSlot');
             
             // Booking details displays
             const summaryDate = document.getElementById('summary-date');
