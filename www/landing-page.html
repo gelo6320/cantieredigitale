@@ -1196,20 +1196,53 @@
                 });
             }
             
-            // Cookie Banner - CORREZIONE
+            // Cookie Banner - CORREZIONE COMPLETA
             const cookieBanner = document.getElementById('cookie-banner');
             const acceptButton = document.getElementById('cookie-accept');
             const rejectButton = document.getElementById('cookie-reject');
+            
+            // Funzione per sincronizzare le preferenze con il cookie manager
+            function syncWithCookieManager(acceptAll) {
+                try {
+                    if (window.cookieConsentManager) {
+                        // Aggiorna le preferenze nel cookie manager
+                        if (acceptAll && typeof window.cookieConsentManager.acceptAll === 'function') {
+                            window.cookieConsentManager.acceptAll();
+                            console.log("Preferenze sincronizzate: tutti i cookie accettati");
+                        } else if (!acceptAll && typeof window.cookieConsentManager.rejectNonEssential === 'function') {
+                            window.cookieConsentManager.rejectNonEssential();
+                            console.log("Preferenze sincronizzate: solo cookie essenziali");
+                        }
+                        
+                        // Ricarica la pagina per applicare le nuove preferenze
+                        setTimeout(function() {
+                            location.reload();
+                        }, 300);
+                    } else {
+                        console.log("Cookie manager non trovato, ma le preferenze sono state salvate in localStorage");
+                        // Ricarica comunque la pagina per coerenza
+                        setTimeout(function() {
+                            location.reload();
+                        }, 300);
+                    }
+                } catch (error) {
+                    console.error("Errore durante la sincronizzazione con il cookie manager:", error);
+                }
+            }
             
             // Verifica se le preferenze cookie sono state già configurate
             function shouldShowBanner() {
                 // 1. Controlla se il cookie manager esterno ha già configurato i cookie
                 if (window.cookieConsentManager && 
                     typeof window.cookieConsentManager.getPreferences === 'function') {
-                    const preferences = window.cookieConsentManager.getPreferences();
-                    if (preferences && preferences.configured === true) {
-                        console.log("Cookie già configurati dal cookie manager esterno");
-                        return false;
+                    try {
+                        const preferences = window.cookieConsentManager.getPreferences();
+                        if (preferences && preferences.configured === true) {
+                            console.log("Cookie già configurati dal cookie manager esterno");
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error("Errore durante la verifica delle preferenze:", error);
                     }
                 }
                 
@@ -1238,11 +1271,8 @@
                     localStorage.setItem('cookiesAccepted', 'true');
                     cookieBanner.classList.remove('show');
                     
-                    // Sincronizza con il cookie manager esterno se esiste
-                    if (window.cookieConsentManager && window.cookieConsentManager.acceptAll) {
-                        window.cookieConsentManager.acceptAll();
-                        console.log("Preferenze sincronizzate con il cookie manager - tutti accettati");
-                    }
+                    // Sincronizza con il cookie manager e ricarica la pagina
+                    syncWithCookieManager(true);
                 });
             }
             
@@ -1253,11 +1283,8 @@
                     localStorage.setItem('cookiesAccepted', 'false');
                     cookieBanner.classList.remove('show');
                     
-                    // Sincronizza con il cookie manager esterno se esiste
-                    if (window.cookieConsentManager && window.cookieConsentManager.rejectNonEssential) {
-                        window.cookieConsentManager.rejectNonEssential();
-                        console.log("Preferenze sincronizzate con il cookie manager - solo essenziali");
-                    }
+                    // Sincronizza con il cookie manager e ricarica la pagina
+                    syncWithCookieManager(false);
                 });
             }
         });
