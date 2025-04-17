@@ -312,7 +312,7 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
 
   console.log('EventName:', eventName);
   console.log('CustomData ricevuto:', JSON.stringify(customData));
-  
+
   try {
     // Usa direttamente le configurazioni dalla sessione
     let accessToken = process.env.FACEBOOK_ACCESS_TOKEN || process.env.ACCESS_TOKEN;
@@ -382,18 +382,21 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
       partner_agent: 'costruzionedigitale-nodejs-crm'
     };
     
-    // Dopo aver creato il payload, puoi modificare i custom_data per gli acquisti
-    if (eventName === 'Purchase' && customData.value) {
+    if (eventName === 'Purchase') {
+      // Se customData.value non è definito ma esiste eventMetadata.value, usalo 
+      const purchaseValue = customData.value || (customData.eventMetadata && customData.eventMetadata.value) || 0;
+      
+      // Aggiorna il payload con i parametri richiesti per l'evento Purchase
       payload.data[0].custom_data = {
         ...payload.data[0].custom_data,
-        value: customData.value,
+        value: purchaseValue,
         currency: customData.currency || 'EUR',
         content_type: customData.content_type || 'product',
-        content_name: customData.content_name || 'Servizio',
+        content_name: customData.content_name || 'Servizio'
       };
+      
+      console.log('Payload aggiornato per evento Purchase:', JSON.stringify(payload.data[0].custom_data));
     }
-
-    console.log('Payload finale per Facebook:', JSON.stringify(payload));
     
     // Invia l'evento
     const response = await axios.post(

@@ -3551,21 +3551,22 @@
               note: eventNote.value
             }
           };
-          
-          // Se è stato specificato un fbclid, aggiungilo
-          if (hasFbclid.value && fbclid.value) {
-            payload.fbclid = fbclid.value;
-          }
 
+          // Dopo aver creato il payload di base
           if (eventName.value === 'Purchase' && purchaseValue.value) {
             payload.eventMetadata = {
               ...payload.eventMetadata,
               note: eventNote.value,
-              value: parseFloat(purchaseValue.value),  // Assicurati che questo campo si chiami esattamente "value"
+              value: parseFloat(purchaseValue.value), // Assicurati di usare "value" come nome del campo
               currency: 'EUR',
               content_type: 'product',
               content_name: 'Servizio di consulenza'
             };
+          }
+          
+          // Se è stato specificato un fbclid, aggiungilo
+          if (hasFbclid.value && fbclid.value) {
+            payload.fbclid = fbclid.value;
           }
           
           // Effettua la richiesta in base al tipo di lead
