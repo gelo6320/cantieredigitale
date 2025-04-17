@@ -1319,86 +1319,6 @@
       color: var(--success-color);
     }
     
-    /* Modal */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1050;
-      display: none;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      outline: 0;
-    }
-    
-    .modal-dialog {
-      position: relative;
-      width: auto;
-      margin: 0.5rem;
-      pointer-events: none;
-      max-width: 500px;
-      margin: 1.75rem auto;
-    }
-    
-    .modal-lg {
-      max-width: 800px;
-    }
-    
-    .modal-content {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      pointer-events: auto;
-      background-color: var(--light-accent);
-      background-clip: padding-box;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--border-radius-lg);
-      outline: 0;
-      color: var(--text-color);
-    }
-    
-    .modal-header {
-      display: flex;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      border-top-left-radius: calc(var(--border-radius-lg) - 1px);
-      border-top-right-radius: calc(var(--border-radius-lg) - 1px);
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-    
-    .modal-body {
-      position: relative;
-      flex: 1 1 auto;
-      padding: 1rem;
-    }
-    
-    .modal-footer {
-      display: flex;
-      flex-wrap: wrap;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0.75rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      background-color: rgba(0, 0, 0, 0.1);
-      border-bottom-right-radius: calc(var(--border-radius-lg) - 1px);
-      border-bottom-left-radius: calc(var(--border-radius-lg) - 1px);
-    }
-    
-    .modal-footer > * {
-      margin: 0.25rem;
-    }
-    
-    .modal-title {
-      margin-bottom: 0;
-      line-height: 1.5;
-    }
-    
     .fade {
       transition: opacity 0.15s linear;
     }
@@ -2104,6 +2024,179 @@
       gap: 10px;
       justify-content: center;
     }
+
+    /* Nuovo stile compact-modal per il modale di modifica stato lead */
+    .compact-modal .modal-dialog {
+      max-width: 95%;
+      margin: 0.5rem auto;
+    }
+    
+    .compact-modal .modal-content {
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .compact-modal .modal-header {
+      padding: 0.6rem 1rem;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .compact-modal .modal-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    
+    .compact-modal .modal-body {
+      padding: 0.75rem;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    
+    .compact-modal .modal-footer {
+      padding: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .compact-modal .card {
+      margin-bottom: 0.5rem;
+    }
+    
+    .compact-modal .card-body {
+      padding: 0.5rem;
+    }
+    
+    .compact-modal .card-title {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .compact-modal .icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+    }
+    
+    .compact-modal dl.row {
+      margin-bottom: 0;
+      font-size: 0.8rem;
+    }
+    
+    .compact-modal dt {
+      font-size: 0.75rem;
+      opacity: 0.85;
+    }
+    
+    .compact-modal dd {
+      font-size: 0.8rem;
+    }
+    
+    .compact-modal .form-label {
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .compact-modal .form-control,
+    .compact-modal .form-select {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      height: auto;
+    }
+    
+    .compact-modal .form-text {
+      font-size: 0.7rem;
+      margin-top: 0.15rem;
+    }
+    
+    .compact-modal .btn {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+    }
+    
+    .compact-modal .timeline-wrapper {
+      max-height: 130px;
+    }
+    
+    .compact-modal .timeline-item {
+      margin-bottom: 10px;
+    }
+    
+    .compact-modal .timeline-badge {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      font-size: 0.7rem;
+    }
+    
+    .compact-modal .timeline-panel {
+      padding: 6px 10px;
+    }
+    
+    .compact-modal .timeline-title {
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    
+    .compact-modal .timeline-body p {
+      font-size: 0.75rem;
+      margin-bottom: 0;
+    }
+    
+    .compact-modal .form-check {
+      min-height: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .compact-modal .form-check-label {
+      font-size: 0.8rem;
+    }
+    
+    .compact-modal .alert {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .compact-modal hr {
+      margin: 0.5rem 0;
+    }
+    
+    .compact-modal .row {
+      margin-left: -5px;
+      margin-right: -5px;
+    }
+    
+    .compact-modal [class*="col-"] {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    
+    .compact-modal .mb-3 {
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .compact-modal textarea.form-control {
+      max-height: 60px;
+    }
+    
+    .compact-modal .badge {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+    }
+    
+    /* Layout a due colonne compatto per dispositivi piccoli */
+    @media (max-width: 767.98px) {
+      .compact-modal .modal-dialog {
+        max-width: 98%;
+        margin: 0.25rem auto;
+      }
+      
+      .compact-modal .modal-body {
+        padding: 0.5rem;
+        max-height: calc(100vh - 100px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -2791,7 +2884,7 @@
   <!-- MODALI -->
   
   <!-- Modale modifica stato lead -->
-  <div class="modal fade" id="leadModal" tabindex="-1" aria-labelledby="leadModalLabel" aria-hidden="true">
+  <div class="modal fade compact-modal" id="leadModal" tabindex="-1" aria-labelledby="leadModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
