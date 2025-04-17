@@ -3564,10 +3564,11 @@
           modal.hide();
           
           // Mostra notifica di successo
-          if (response.data.facebookResult.success) {
+          if (response.data.facebookResult && response.data.facebookResult.success) {
             showToast('Successo', `Stato aggiornato e evento "${eventName.value}" inviato a Facebook`, 'bg-success', 'bi bi-check-circle-fill me-2');
           } else {
-            showToast('Avviso', `Stato aggiornato ma invio a Facebook fallito: ${response.data.facebookResult.error}`, 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+            const errorMsg = response.data.facebookResult ? response.data.facebookResult.error : 'Errore sconosciuto';
+            showToast('Avviso', `Stato aggiornato ma invio a Facebook fallito: ${errorMsg}`, 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
           }
           
           // Ricarica i dati
