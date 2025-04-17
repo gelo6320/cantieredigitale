@@ -2294,7 +2294,7 @@
                 console.log('Fetching availability for date:', formattedDate);
                 
                 // Chiama l'API per verificare la disponibilità
-                fetch(`/api/booking/availability?date=${formattedDate}`)
+                fetch(`https://api.costruzionedigitale.com/api/booking/availability?date=${formattedDate}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -2409,7 +2409,7 @@
               };
               
               // Invia i dati al server
-              fetch('/api/submit-booking', {
+              fetch('https://api.costruzionedigitale.com/api/submit-booking', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
