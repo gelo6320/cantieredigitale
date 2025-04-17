@@ -3540,11 +3540,11 @@
           // Effettua la richiesta in base al tipo di lead
           let endpoint;
           if (currentLeadType.value === 'form') {
-            endpoint = `/api/leads/forms/${currentLead.value._id}/update`;
+            endpoint = `https://api.costruzionedigitale.com/api/leads/forms/${currentLead.value._id}/update`;
           } else if (currentLeadType.value === 'booking') {
-            endpoint = `/api/leads/bookings/${currentLead.value._id}/update`;
+            endpoint = `https://api.costruzionedigitale.com//api/leads/bookings/${currentLead.value._id}/update`;
           } else if (currentLeadType.value === 'facebook') {
-            endpoint = `/api/leads/facebook/${currentLead.value._id}/update`;
+            endpoint = `https://api.costruzionedigitale.com//api/leads/facebook/${currentLead.value._id}/update`;
           }         
           
           const response = await axios.post(endpoint, payload);
