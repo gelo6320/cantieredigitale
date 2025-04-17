@@ -1196,33 +1196,74 @@
                 });
             }
             
-            // Cookie Banner
-            const cookieBanner = document.getElementById('cookie-banner');
-            const acceptButton = document.getElementById('cookie-accept');
-            const rejectButton = document.getElementById('cookie-reject');
-            
-            // Mostra il banner dei cookie se non è stato già accettato
-            if (!localStorage.getItem('cookiesAccepted')) {
-                setTimeout(function() {
-                    cookieBanner.classList.add('show');
-                }, 1000);
-            }
-            
-            // Gestione accettazione cookie
-            if (acceptButton) {
-                acceptButton.addEventListener('click', function() {
-                    localStorage.setItem('cookiesAccepted', 'true');
-                    cookieBanner.classList.remove('show');
-                });
-            }
-            
-            // Gestione rifiuto cookie
-            if (rejectButton) {
-                rejectButton.addEventListener('click', function() {
-                    localStorage.setItem('cookiesAccepted', 'false');
-                    cookieBanner.classList.remove('show');
-                });
-            }
+            /**
+             * Questa soluzione coordina il cookie banner nativo con il cookie manager esterno
+             * per evitare che il banner appaia quando i cookie sono già stati configurati.
+             */
+            document.addEventListener('DOMContentLoaded', function() {
+                // Cookie Banner
+                const cookieBanner = document.getElementById('cookie-banner');
+                const acceptButton = document.getElementById('cookie-accept');
+                const rejectButton = document.getElementById('cookie-reject');
+                
+                // Verifica se le preferenze cookie sono state già configurate
+                function shouldShowBanner() {
+                    // 1. Controlla se il cookie manager esterno ha già configurato i cookie
+                    // I log mostrano che il cookie manager carica preferenze come: 
+                    // {essential: true, analytics: true, marketing: true, configured: true}
+                    if (window.cookieConsentManager && 
+                        window.cookieConsentManager.getPreferences && 
+                        window.cookieConsentManager.getPreferences().configured === true) {
+                        console.log("Cookie già configurati dal cookie manager esterno");
+                        return false;
+                    }
+                    
+                    // 2. Controlla anche il localStorage per mantenere la compatibilità con la logica precedente
+                    const localStorageValue = localStorage.getItem('cookiesAccepted');
+                    if (localStorageValue === 'true' || localStorageValue === 'false') {
+                        console.log("Cookie già configurati tramite localStorage");
+                        return false;
+                    }
+                    
+                    // Se nessuno dei due sistemi ha configurato i cookie, mostra il banner
+                    return true;
+                }
+                
+                // Mostra il banner solo quando necessario
+                if (shouldShowBanner()) {
+                    setTimeout(function() {
+                        cookieBanner.classList.add('show');
+                    }, 1000);
+                }
+                
+                // Gestione accettazione cookie - sincronizza con il cookie manager esterno
+                if (acceptButton) {
+                    acceptButton.addEventListener('click', function() {
+                        localStorage.setItem('cookiesAccepted', 'true');
+                        cookieBanner.classList.remove('show');
+                        
+                        // Sincronizza con il cookie manager esterno se esiste
+                        if (window.cookieConsentManager && window.cookieConsentManager.acceptAll) {
+                            window.cookieConsentManager.acceptAll();
+                            console.log("Preferenze sincronizzate con il cookie manager - tutti accettati");
+                        }
+                    });
+                }
+                
+                // Gestione rifiuto cookie - sincronizza con il cookie manager esterno
+                if (rejectButton) {
+                    rejectButton.addEventListener('click', function() {
+                        localStorage.setItem('cookiesAccepted', 'false');
+                        cookieBanner.classList.remove('show');
+                        
+                        // Sincronizza con il cookie manager esterno se esiste
+                        if (window.cookieConsentManager && window.cookieConsentManager.rejectNonEssential) {
+                            window.cookieConsentManager.rejectNonEssential();
+                            console.log("Preferenze sincronizzate con il cookie manager - solo essenziali");
+                        }
+                    });
+                }
+            });
         });
     </script>
 
