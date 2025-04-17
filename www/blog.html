@@ -1,1962 +1,2112 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
+  <head>
     <script src="/js/cookie-consent-manager.js" defer></script>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda nel settore delle costruzioni.">
-    <title>Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale</title>
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda nel settore delle costruzioni."
+    />
+    <title>
+      Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale
+    </title>
+
     <!-- SEO Meta Tags -->
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="Costruzione Digitale">
-    <meta name="keywords" content="marketing edilizia, blog imprese edili, serramenti marketing, fotovoltaico vendita, strategie marketing costruzioni">
-    
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Costruzione Digitale" />
+    <meta
+      name="keywords"
+      content="marketing edilizia, blog imprese edili, serramenti marketing, fotovoltaico vendita, strategie marketing costruzioni"
+    />
+
     <!-- Open Graph per condivisione sui social media -->
-    <meta property="og:site_name" content="Costruzione Digitale">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://costruzionedigitale.com/blog/">
-    <meta property="og:title" content="Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale">
-    <meta property="og:description" content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda.">
-    <meta property="og:image" content="https://costruzionedigitale.com/logosito.webp">
-    
+    <meta property="og:site_name" content="Costruzione Digitale" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://costruzionedigitale.com/blog/" />
+    <meta
+      property="og:title"
+      content="Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale"
+    />
+    <meta
+      property="og:description"
+      content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda."
+    />
+    <meta
+      property="og:image"
+      content="https://costruzionedigitale.com/logosito.webp"
+    />
+
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://costruzionedigitale.com/blog/">
-    <meta name="twitter:title" content="Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale">
-    <meta name="twitter:description" content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda.">
-    <meta name="twitter:image" content="https://costruzionedigitale.com/logosito.webp">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://costruzionedigitale.com/blog/" />
+    <meta
+      name="twitter:title"
+      content="Blog - Strategie di Marketing per Imprese Edili | Costruzione Digitale"
+    />
+    <meta
+      name="twitter:description"
+      content="Blog di marketing digitale per imprese edili, serramenti e fotovoltaico. Strategie, consigli e casi studio per far crescere la tua azienda."
+    />
+    <meta
+      name="twitter:image"
+      content="https://costruzionedigitale.com/logosito.webp"
+    />
 
     <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-    <link rel="canonical" href="https://costruzionedigitale.com/blog/">
-    <link rel="preload" href="logosito.webp" as="image" fetchpriority="high">
+    <link rel="canonical" href="https://costruzionedigitale.com/blog/" />
+    <link rel="preload" href="logosito.webp" as="image" fetchpriority="high" />
 
     <style>
-        :root {
-            --primary-color: #FF6B00; /* Arancione pronunciato */
-            --secondary-color: #212121; /* Nero profondo */
-            --text-color: #FFFFFF; /* Testo bianco */
-            --accent-color: #FF8C38; /* Arancione più chiaro */
-            --dark-bg: #151515; /* Sfondo nero più scuro */
-            --light-accent: #333333; /* Grigio scuro */
-            --success-color: #27ae60; /* Verde per elementi positivi */
-            --warning-color: #e67e22; /* Arancione per avvertimenti */
-            --danger-color: #e74c3c; /* Rosso per errori */
-            --section-padding: 80px 0;
-            --card-bg: #262626; /* Sfondo per le card del blog */
-            --light-text: rgba(255, 255, 255, 0.8); /* Testo chiaro */
-            --divider: rgba(255, 255, 255, 0.1); /* Colore divisori */
-        }
-        
-        * { 
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-        
-        body {
-            line-height: 1.6;
-            color: var(--text-color);
-            position: relative;
-            background-color: var(--secondary-color);
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Pattern di sfondo stile Costruzione */
-        .construction-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(45deg, rgba(255,107,0,0.05) 25%, transparent 25%, transparent 50%, 
-                rgba(255,107,0,0.05) 50%, rgba(255,107,0,0.05) 75%, transparent 75%, transparent);
-            background-size: 100px 100px;
-            opacity: 0.3;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        header {
-            background-color: var(--dark-bg);
-            padding: 15px 0;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-        
-        header.scrolled {
-            padding: 10px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-        }
-        
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: var(--text-color);
-        }
-        
-        .logo-icon {
-            padding: 0;
-            margin-right: 20px;
-            width: 120px;
-            height: 80px;
-        }
-        
-        .logo-text {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--text-color);
-        }
-        
-        .logo-text span {
-            color: var(--primary-color);
-            font-weight: 900;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            justify-content: center;
-        }
-        
-        nav ul li {
-            margin-left: 30px;
-            position: relative;
-        }
-        
-        nav ul li a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            padding: 10px 0;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        nav ul li a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-        
-        nav ul li a:hover::after {
-            width: 100%;
-        }
-        
-        nav ul li a:hover {
-            color: var(--primary-color);
-        }
-        
-        /* Blog Hero Section */
-        .blog-hero {
-            padding: 80px 0 60px;
-            position: relative;
-            background-color: var(--secondary-color);
-            overflow: hidden;
-            text-align: center;
-        }
-        
-        .blog-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 45%;
-            height: 100%;
-            background-color: var(--primary-color);
-            clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
-            opacity: 0.1;
-            z-index: 0;
-        }
-        
-        .blog-hero-content {
-            max-width: 900px;
-            margin: 0 auto 40px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .blog-hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 25px;
-            color: var(--text-color);
-            line-height: 1.2;
-            font-weight: 800;
-            position: relative;
-            text-transform: uppercase;
-        }
-        
-        .blog-hero h1 span {
-            color: var(--primary-color);
-            display: block;
-            font-size: 2.8rem;
-        }
-        
-        .blog-hero p {
-            font-size: 1.4rem;
-            margin-bottom: 30px;
-            max-width: 800px;
-            position: relative;
-            margin: 0 auto 20px;
-        }
-        
-        .blog-hero p strong {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        /* Breadcrumb */
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .breadcrumb-item {
-            display: flex;
-            align-items: center;
-            color: var(--light-text);
-            font-size: 0.9rem;
-        }
-        
-        .breadcrumb-item a {
-            color: var(--light-text);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .breadcrumb-item a:hover {
-            color: var(--primary-color);
-        }
-        
-        .breadcrumb-divider {
-            margin: 0 10px;
-            color: var(--primary-color);
-        }
-        
-        .breadcrumb-item.active {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        /* Blog Layout */
-        .blog-layout {
-            padding: 60px 0;
-            position: relative;
-        }
-        
-        .blog-container {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 40px;
-        }
-        
-        .blog-main {
-            width: 100%;
-        }
-        
-        .blog-sidebar {
-            width: 100%;
-        }
-        
-        /* Blog Categories Pills */
-        .blog-categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 40px;
-        }
-        
-        .category-pill {
-            padding: 8px 16px;
-            background-color: var(--light-accent);
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-color);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        
-        .category-pill:hover, .category-pill.active {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        /* Blog Grid */
-        .blog-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-        
-        /* Featured Post */
-        .featured-post {
-            grid-column: span 2;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .featured-post:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-        
-        .featured-image {
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .featured-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .featured-post:hover .featured-image img {
-            transform: scale(1.05);
-        }
-        
-        .featured-badge {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-            z-index: 1;
-        }
-        
-        .featured-content {
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .featured-meta {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: var(--light-text);
-        }
-        
-        .featured-meta .category {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-right: 15px;
-        }
-        
-        .featured-meta .date {
-            display: flex;
-            align-items: center;
-        }
-        
-        .featured-meta .date svg {
-            margin-right: 5px;
-            width: 14px;
-            height: 14px;
-        }
-        
-        .featured-title {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            line-height: 1.3;
-        }
-        
-        .featured-title a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .featured-title a:hover {
-            color: var(--primary-color);
-        }
-        
-        .featured-excerpt {
-            color: var(--light-text);
-            margin-bottom: 25px;
-            line-height: 1.6;
-            flex-grow: 1;
-        }
-        
-        .read-more {
-            display: inline-flex;
-            align-items: center;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-decoration: none;
-            padding: 5px 0;
-            position: relative;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-        
-        .read-more::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-        
-        .read-more:hover::after {
-            width: 100%;
-        }
-        
-        .read-more svg {
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-        }
-        
-        .read-more:hover svg {
-            transform: translateX(5px);
-        }
-        
-        /* Blog Card */
-        .blog-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
-        .blog-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-        
-        .card-image {
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card-image img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .blog-card:hover .card-image img {
-            transform: scale(1.05);
-        }
-        
-        .card-content {
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-        
-        .card-meta {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: var(--light-text);
-        }
-        
-        .card-meta .category {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-right: 15px;
-        }
-        
-        .card-meta .date {
-            display: flex;
-            align-items: center;
-        }
-        
-        .card-meta .date svg {
-            margin-right: 5px;
-            width: 14px;
-            height: 14px;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            line-height: 1.3;
-        }
-        
-        .card-title a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .card-title a:hover {
-            color: var(--primary-color);
-        }
-        
-        .card-excerpt {
-            color: var(--light-text);
-            margin-bottom: 25px;
-            line-height: 1.6;
-            flex-grow: 1;
-        }
-        
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 60px;
-        }
-        
-        .pagination-link {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--light-accent);
-            color: var(--text-color);
-            border-radius: 50%;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .pagination-link:hover, .pagination-link.active {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .pagination-prev, .pagination-next {
-            width: auto;
-            padding: 0 20px;
-            border-radius: 50px;
-        }
-        
-        /* Sidebar */
-        .sidebar-section {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .sidebar-title {
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            position: relative;
-            padding-bottom: 15px;
-        }
-        
-        .sidebar-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background-color: var(--primary-color);
-        }
-        
-        .search-form {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        
-        .search-input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-right: none;
-            border-radius: 8px 0 0 8px;
-            background-color: rgba(0,0,0,0.2);
-            color: var(--text-color);
-            font-size: 0.95rem;
-        }
-        
-        .search-input:focus {
-            outline: none;
-        }
-        
-        .search-button {
-            padding: 0 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0 8px 8px 0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .search-button:hover {
-            background-color: var(--accent-color);
-        }
-        
-        .category-list {
-            list-style: none;
-        }
-        
-        .category-list li {
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--divider);
-            padding-bottom: 15px;
-        }
-        
-        .category-list li:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-        
-        .category-list a {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .category-list a:hover {
-            color: var(--primary-color);
-        }
-        
-        .category-count {
-            background-color: var(--light-accent);
-            padding: 2px 10px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--light-text);
-            transition: all 0.3s ease;
-        }
-        
-        .category-list a:hover .category-count {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .popular-post {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--divider);
-        }
-        
-        .popular-post:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        
-        .popular-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-        
-        .popular-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .popular-post:hover .popular-image img {
-            transform: scale(1.05);
-        }
-        
-        .popular-content {
-            flex-grow: 1;
-        }
-        
-        .popular-title {
-            font-size: 1rem;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        
-        .popular-title a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .popular-title a:hover {
-            color: var(--primary-color);
-        }
-        
-        .popular-date {
-            font-size: 0.8rem;
-            color: var(--light-text);
-            display: flex;
-            align-items: center;
-        }
-        
-        .popular-date svg {
-            margin-right: 5px;
-            width: 12px;
-            height: 12px;
-        }
-        
-        .tag-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .tag-link {
-            padding: 6px 15px;
-            background-color: var(--light-accent);
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--light-text);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .tag-link:hover {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .newsletter-form {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-control {
-            padding: 12px 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background-color: rgba(0,0,0,0.2);
-            color: var(--text-color);
-            font-size: 0.95rem;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 18px 35px;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            border: 2px solid var(--primary-color);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-            text-align: center;
-            margin: 10px auto;
-        }
+      :root {
+        --primary-color: #ff6b00; /* Arancione pronunciato */
+        --secondary-color: #212121; /* Nero profondo */
+        --text-color: #ffffff; /* Testo bianco */
+        --accent-color: #ff8c38; /* Arancione più chiaro */
+        --dark-bg: #151515; /* Sfondo nero più scuro */
+        --light-accent: #333333; /* Grigio scuro */
+        --success-color: #27ae60; /* Verde per elementi positivi */
+        --warning-color: #e67e22; /* Arancione per avvertimenti */
+        --danger-color: #e74c3c; /* Rosso per errori */
+        --section-padding: 80px 0;
+        --card-bg: #262626; /* Sfondo per le card del blog */
+        --light-text: rgba(255, 255, 255, 0.8); /* Testo chiaro */
+        --divider: rgba(255, 255, 255, 0.1); /* Colore divisori */
+      }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.4s ease;
-            z-index: 1;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
-        }
-        
-        .btn:hover {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        /* CTA Section */
-        .cta {
-            padding: var(--section-padding);
-            background-color: var(--secondary-color);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Montserrat", sans-serif;
+      }
 
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, rgba(0,0,0,0) 70%);
-            z-index: 0;
-        }
-        
-        .cta h2 {
-            font-size: 2.8rem;
-            color: var(--text-color);
-            margin-bottom: 25px;
-            line-height: 1.2;
-            text-transform: uppercase;
-        }
-        
-        .cta p {
-            font-size: 1.2rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .cta .btn-lg {
-            padding: 15px 30px;
-            font-size: 1.1rem;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: var(--dark-bg);
-            color: white;
-            padding: 80px 0 20px;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-        }
-        
-        footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B00' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        
-        .footer-logo-icon {
-            width: 105px;
-            height: 70px;
-            margin-right: 15px;
-        }
-        
-        .footer-logo-text {
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .footer-logo-text span {
-            color: var(--primary-color);
-        }
-        
-        .footer-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 50px;
-            text-align: left;
-        }
-        
-        .footer-section {
-            flex: 1;
-            min-width: 250px;
-            margin-bottom: 30px;
-            padding-right: 30px;
-        }
-        
-        .footer-section h3 {
-            margin-bottom: 25px;
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 15px;
-        }
-        
-        .footer-section h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background-color: var(--primary-color);
-        }
-        
-        .footer-section p {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 20px;
-            line-height: 1.7;
-        }
-        
-        .footer-section ul {
-            list-style: none;
-        }
-        
-        .footer-section ul li {
-            margin-bottom: 15px;
-        }
-        
-        .footer-section ul li a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-        
-        .footer-section ul li a:hover {
-            color: var(--primary-color);
-            transform: translateX(5px);
-        }
-        
-        .footer-section ul li a i {
-            margin-right: 10px;
-            color: var(--primary-color);
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-            justify-content: flex-start;
-        }
-        
-        .social-link {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .social-link:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-5px);
-        }
-        
-        .copyright {
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-        
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .footer-links {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 0 auto;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-        
-        .footer-links a:hover {
-            color: var(--primary-color);
-        }
-        
-        /* Mobile Menu */
+      body {
+        line-height: 1.6;
+        color: var(--text-color);
+        position: relative;
+        background-color: var(--secondary-color);
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Pattern di sfondo stile Costruzione */
+      .construction-pattern {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(
+          45deg,
+          rgba(255, 107, 0, 0.05) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 107, 0, 0.05) 50%,
+          rgba(255, 107, 0, 0.05) 75%,
+          transparent 75%,
+          transparent
+        );
+        background-size: 100px 100px;
+        opacity: 0.3;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      header {
+        background-color: var(--dark-bg);
+        padding: 15px 0;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition: all 0.3s ease;
+      }
+
+      header.scrolled {
+        padding: 10px 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--text-color);
+      }
+
+      .logo-icon {
+        padding: 0;
+        margin-right: 20px;
+        width: 120px;
+        height: 80px;
+      }
+
+      .logo-text {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--text-color);
+      }
+
+      .logo-text span {
+        color: var(--primary-color);
+        font-weight: 900;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        justify-content: center;
+      }
+
+      nav ul li {
+        margin-left: 30px;
+        position: relative;
+      }
+
+      nav ul li a {
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      nav ul li a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary-color);
+        transition: width 0.3s ease;
+      }
+
+      nav ul li a:hover::after {
+        width: 100%;
+      }
+
+      nav ul li a:hover {
+        color: var(--primary-color);
+      }
+
+      /* Blog Hero Section */
+      .blog-hero {
+        padding: 80px 0 60px;
+        position: relative;
+        background-color: var(--secondary-color);
+        overflow: hidden;
+        text-align: center;
+      }
+
+      .blog-hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 45%;
+        height: 100%;
+        background-color: var(--primary-color);
+        clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
+        opacity: 0.1;
+        z-index: 0;
+      }
+
+      .blog-hero-content {
+        max-width: 900px;
+        margin: 0 auto 40px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .blog-hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 25px;
+        color: var(--text-color);
+        line-height: 1.2;
+        font-weight: 800;
+        position: relative;
+        text-transform: uppercase;
+      }
+
+      .blog-hero h1 span {
+        color: var(--primary-color);
+        display: block;
+        font-size: 2.8rem;
+      }
+
+      .blog-hero p {
+        font-size: 1.4rem;
+        margin-bottom: 30px;
+        max-width: 800px;
+        position: relative;
+        margin: 0 auto 20px;
+      }
+
+      .blog-hero p strong {
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        color: var(--light-text);
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb-item a {
+        color: var(--light-text);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .breadcrumb-item a:hover {
+        color: var(--primary-color);
+      }
+
+      .breadcrumb-divider {
+        margin: 0 10px;
+        color: var(--primary-color);
+      }
+
+      .breadcrumb-item.active {
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      /* Blog Layout */
+      .blog-layout {
+        padding: 60px 0;
+        position: relative;
+      }
+
+      .blog-container {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 40px;
+      }
+
+      .blog-main {
+        width: 100%;
+      }
+
+      .blog-sidebar {
+        width: 100%;
+      }
+
+      /* Blog Categories Pills */
+      .blog-categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 40px;
+      }
+
+      .category-pill {
+        padding: 8px 16px;
+        background-color: var(--light-accent);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+      }
+
+      .category-pill:hover,
+      .category-pill.active {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      /* Blog Grid */
+      .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 50px;
+      }
+
+      /* Featured Post */
+      .featured-post {
+        grid-column: span 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .featured-post:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .featured-image {
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .featured-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .featured-post:hover .featured-image img {
+        transform: scale(1.05);
+      }
+
+      .featured-badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+        z-index: 1;
+      }
+
+      .featured-content {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .featured-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
+        color: var(--light-text);
+      }
+
+      .featured-meta .category {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-right: 15px;
+      }
+
+      .featured-meta .date {
+        display: flex;
+        align-items: center;
+      }
+
+      .featured-meta .date svg {
+        margin-right: 5px;
+        width: 14px;
+        height: 14px;
+      }
+
+      .featured-title {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
+      }
+
+      .featured-title a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .featured-title a:hover {
+        color: var(--primary-color);
+      }
+
+      .featured-excerpt {
+        color: var(--light-text);
+        margin-bottom: 25px;
+        line-height: 1.6;
+        flex-grow: 1;
+      }
+
+      .read-more {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+        padding: 5px 0;
+        position: relative;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+      }
+
+      .read-more::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary-color);
+        transition: width 0.3s ease;
+      }
+
+      .read-more:hover::after {
+        width: 100%;
+      }
+
+      .read-more svg {
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+      }
+
+      .read-more:hover svg {
+        transform: translateX(5px);
+      }
+
+      /* Blog Card */
+      .blog-card {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .blog-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-image {
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .blog-card:hover .card-image img {
+        transform: scale(1.05);
+      }
+
+      .card-content {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+
+      .card-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
+        color: var(--light-text);
+      }
+
+      .card-meta .category {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-right: 15px;
+      }
+
+      .card-meta .date {
+        display: flex;
+        align-items: center;
+      }
+
+      .card-meta .date svg {
+        margin-right: 5px;
+        width: 14px;
+        height: 14px;
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
+      }
+
+      .card-title a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .card-title a:hover {
+        color: var(--primary-color);
+      }
+
+      .card-excerpt {
+        color: var(--light-text);
+        margin-bottom: 25px;
+        line-height: 1.6;
+        flex-grow: 1;
+      }
+
+      /* Pagination */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 60px;
+      }
+
+      .pagination-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--light-accent);
+        color: var(--text-color);
+        border-radius: 50%;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .pagination-link:hover,
+      .pagination-link.active {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+      }
+
+      .pagination-prev,
+      .pagination-next {
+        width: auto;
+        padding: 0 20px;
+        border-radius: 50px;
+      }
+
+      /* Sidebar */
+      .sidebar-section {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+
+      .sidebar-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        position: relative;
+        padding-bottom: 15px;
+      }
+
+      .sidebar-title::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary-color);
+      }
+
+      .search-form {
+        display: flex;
+        margin-bottom: 15px;
+      }
+
+      .search-input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-color);
+        font-size: 0.95rem;
+      }
+
+      .search-input:focus {
+        outline: none;
+      }
+
+      .search-button {
+        padding: 0 20px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .search-button:hover {
+        background-color: var(--accent-color);
+      }
+
+      .category-list {
+        list-style: none;
+      }
+
+      .category-list li {
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--divider);
+        padding-bottom: 15px;
+      }
+
+      .category-list li:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .category-list a {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .category-list a:hover {
+        color: var(--primary-color);
+      }
+
+      .category-count {
+        background-color: var(--light-accent);
+        padding: 2px 10px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--light-text);
+        transition: all 0.3s ease;
+      }
+
+      .category-list a:hover .category-count {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .popular-post {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--divider);
+      }
+
+      .popular-post:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .popular-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .popular-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .popular-post:hover .popular-image img {
+        transform: scale(1.05);
+      }
+
+      .popular-content {
+        flex-grow: 1;
+      }
+
+      .popular-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+
+      .popular-title a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .popular-title a:hover {
+        color: var(--primary-color);
+      }
+
+      .popular-date {
+        font-size: 0.8rem;
+        color: var(--light-text);
+        display: flex;
+        align-items: center;
+      }
+
+      .popular-date svg {
+        margin-right: 5px;
+        width: 12px;
+        height: 12px;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .tag-link {
+        padding: 6px 15px;
+        background-color: var(--light-accent);
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--light-text);
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .tag-link:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+      }
+
+      .newsletter-form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-control {
+        padding: 12px 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-bottom: 15px;
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-color);
+        font-size: 0.95rem;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      .btn {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 18px 35px;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+        text-align: center;
+        margin: 10px auto;
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        z-index: 1;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
+        transform: translateY(-2px);
+      }
+
+      /* CTA Section */
+      .cta {
+        padding: var(--section-padding);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      .cta::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        z-index: 0;
+      }
+
+      .cta h2 {
+        font-size: 2.8rem;
+        color: var(--text-color);
+        margin-bottom: 25px;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .cta p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 30px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cta .btn-lg {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+      }
+
+      /* Footer */
+      footer {
+        background-color: var(--dark-bg);
+        color: white;
+        padding: 80px 0 20px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B00' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      .footer-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+
+      .footer-logo-icon {
+        width: 105px;
+        height: 70px;
+        margin-right: 15px;
+      }
+
+      .footer-logo-text {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      .footer-logo-text span {
+        color: var(--primary-color);
+      }
+
+      .footer-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 50px;
+        text-align: left;
+      }
+
+      .footer-section {
+        flex: 1;
+        min-width: 250px;
+        margin-bottom: 30px;
+        padding-right: 30px;
+      }
+
+      .footer-section h3 {
+        margin-bottom: 25px;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 15px;
+      }
+
+      .footer-section h3::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background-color: var(--primary-color);
+      }
+
+      .footer-section p {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 20px;
+        line-height: 1.7;
+      }
+
+      .footer-section ul {
+        list-style: none;
+      }
+
+      .footer-section ul li {
+        margin-bottom: 15px;
+      }
+
+      .footer-section ul li a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+      }
+
+      .footer-section ul li a:hover {
+        color: var(--primary-color);
+        transform: translateX(5px);
+      }
+
+      .footer-section ul li a i {
+        margin-right: 10px;
+        color: var(--primary-color);
+      }
+
+      .social-links {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        justify-content: flex-start;
+      }
+
+      .social-link {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+      }
+
+      .social-link:hover {
+        background-color: var(--primary-color);
+        transform: translateY(-5px);
+      }
+
+      .copyright {
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+      }
+
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
+      .footer-links a {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .footer-links a:hover {
+        color: var(--primary-color);
+      }
+
+      /* Mobile Menu */
+      .mobile-menu-toggle {
+        display: none; /* Nasconde l'hamburger menu su desktop */
+        font-size: 1.8rem;
+        cursor: pointer;
+      }
+
+      .mobile-menu-toggle svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      @media (max-width: 768px) {
         .mobile-menu-toggle {
-            display: none; /* Nasconde l'hamburger menu su desktop */
-            font-size: 1.8rem;
-            cursor: pointer;
+          display: flex;
+          align-content: center;
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 5px;
+          color: var(--primary-color);
         }
+      }
 
-        .mobile-menu-toggle svg {
-            width: 1.5rem;
-            height: 1.5rem;
-        }
+      .mobile-menu-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: var(--secondary-color);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.4s ease;
+        padding: 60px 20px 20px;
+        overflow-y: auto;
+      }
 
-        @media (max-width: 768px) {
-            
-            .mobile-menu-toggle {
-                display: flex;
-                align-content: center;
-                font-size: 1.5rem;
-                cursor: pointer;
-                padding: 5px;
-                color: var(--primary-color);
-            }
-        }
-        
-        .mobile-menu-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: var(--secondary-color);
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.4s ease;
-            padding: 60px 20px 20px;
-            overflow-y: auto;
-        }
-        
-        .mobile-menu-container.active {
-            transform: translateX(0);
-        }
-        
+      .mobile-menu-container.active {
+        transform: translateX(0);
+      }
+
+      .mobile-menu-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mobile-menu-close:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      @media (max-width: 768px) {
         .mobile-menu-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: none;
+          border: none;
+          color: var(--text-color);
+          font-size: 1.8rem;
+          cursor: pointer;
+        }
+      }
+
+      .mobile-menu-items {
+        list-style: none;
+        padding: 0;
+        margin: 30px 0;
+      }
+
+      .mobile-menu-items li {
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 15px;
+      }
+
+      .mobile-menu-items li a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .mobile-menu-items li a:hover {
+        color: var(--primary-color);
+      }
+
+      .mobile-menu-items {
+        margin-bottom: 30px;
+      }
+
+      .mobile-menu-button {
+        margin-top: 30px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .blog-container {
+          grid-template-columns: 1fr 300px;
+          gap: 30px;
+        }
+      }
+
+      @media (max-width: 991px) {
+        .blog-container {
+          grid-template-columns: 1fr;
         }
 
-        .mobile-menu-close:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        .blog-sidebar {
+          order: -1;
+          margin-bottom: 40px;
         }
 
-        @media (max-width: 768px) {
-            .mobile-menu-close {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: none;
-                border: none;
-                color: var(--text-color);
-                font-size: 1.8rem;
-                cursor: pointer;
-            }
-        }
-        
-        .mobile-menu-items {
-            list-style: none;
-            padding: 0;
-            margin: 30px 0;
-        }
-        
-        .mobile-menu-items li {
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 15px;
-        }
-        
-        .mobile-menu-items li a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 0;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .blog-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
 
-        .mobile-menu-items li a:hover {
-            color: var(--primary-color);
+        .featured-post {
+          grid-template-columns: 1fr;
         }
 
-        .mobile-menu-items {
-            margin-bottom: 30px;
-        }
-        
-        .mobile-menu-button {
-            margin-top: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .blog-container {
-                grid-template-columns: 1fr 300px;
-                gap: 30px;
-            }
-        }
-        
-        @media (max-width: 991px) {
-            .blog-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .blog-sidebar {
-                order: -1;
-                margin-bottom: 40px;
-            }
-            
-            .blog-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .featured-post {
-                grid-template-columns: 1fr;
-            }
-            
-            nav ul {
-                display: none;
-            }
-            
-            .mobile-menu-container {
-                display: block;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            
-            .blog-hero h1 span {
-                font-size: 2rem;
-            }
-            
-            .blog-hero p {
-                font-size: 1.1rem;
-            }
-            
-            .blog-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .featured-post {
-                grid-column: span 1;
-            }
-            
-            .logo-icon {
-                width: 90px;
-                height: 60px;
-                margin-right: 10px;
-            }
-            
-            .logo-text {
-                font-size: 1.4rem;
-            }
-            
-            .cta h2 {
-                font-size: 2.2rem;
-            }
-            
-            .cta p {
-                font-size: 1rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            
-            .blog-hero h1 span {
-                font-size: 1.5rem;
-            }
-            
-            .featured-image {
-                height: 200px;
-            }
+        nav ul {
+          display: none;
         }
 
-        .footer-section ul li a svg {
-            margin-right: 10px;
-            color: var(--primary-color);
-            width: 1em;
-            height: 1em;
+        .mobile-menu-container {
+          display: block;
         }
-        
+      }
+
+      @media (max-width: 768px) {
+        .blog-hero h1 span {
+          font-size: 2rem;
+        }
+
+        .blog-hero p {
+          font-size: 1.1rem;
+        }
+
+        .blog-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .featured-post {
+          grid-column: span 1;
+        }
+
+        .logo-icon {
+          width: 90px;
+          height: 60px;
+          margin-right: 10px;
+        }
+
+        .logo-text {
+          font-size: 1.4rem;
+        }
+
+        .cta h2 {
+          font-size: 2.2rem;
+        }
+
+        .cta p {
+          font-size: 1rem;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .blog-hero h1 span {
+          font-size: 1.5rem;
+        }
+
+        .featured-image {
+          height: 200px;
+        }
+      }
+
+      .footer-section ul li a svg {
+        margin-right: 10px;
+        color: var(--primary-color);
+        width: 1em;
+        height: 1em;
+      }
+
+      .mobile-sidebar-toggle {
+        display: none;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      #mobile-sidebar-button {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--card-bg);
+        border: none;
+        cursor: pointer;
+      }
+
+      .mobile-sidebar-container {
+        display: none;
+        background-color: var(--secondary-color);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .mobile-sidebar-container.active {
+        display: block;
+      }
+
+      @media (max-width: 991px) {
+        .btn {
+          padding: 15px 25px;
+          font-size: 1rem;
+        }
+
         .mobile-sidebar-toggle {
-            display: none;
-            margin-bottom: 30px;
-            position: relative;
+          display: block;
         }
-        
-        #mobile-sidebar-button {
-            width: 100%;
-            text-align: center;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--card-bg);
-            border: none;
-            cursor: pointer;
+
+        .blog-sidebar {
+          display: none;
         }
-        
+
+        /* Miglioramenti card blog */
+        .featured-image {
+          height: 220px;
+        }
+
+        .featured-content {
+          padding: 20px;
+        }
+
+        .card-content {
+          padding: 20px;
+        }
+
+        .featured-title {
+          font-size: 1.4rem;
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+        }
+
+        .card-excerpt,
+        .featured-excerpt {
+          font-size: 0.85rem;
+          margin-bottom: 15px;
+        }
+
+        .blog-hero {
+          padding: 50px 0 40px;
+        }
+
+        .popular-post {
+          margin-bottom: 15px;
+          padding-bottom: 15px;
+        }
+
+        .popular-image {
+          width: 70px;
+          height: 70px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .blog-hero h1 {
+          font-size: 2.2rem;
+        }
+
+        .blog-hero h1 span {
+          font-size: 1.8rem !important;
+        }
+
+        .blog-hero p {
+          font-size: 1rem !important;
+        }
+
+        .blog-categories {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 25px;
+        }
+
+        .category-pill {
+          padding: 6px 12px;
+          font-size: 0.8rem;
+        }
+
+        .blog-layout {
+          padding: 40px 0;
+        }
+
+        .sidebar-title {
+          font-size: 1.3rem;
+          margin-bottom: 20px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .pagination-prev,
+        .pagination-next {
+          width: 50px;
+          font-size: 0.8rem;
+        }
+
+        .blog-hero h1 {
+          font-size: 1.8rem;
+        }
+
+        .blog-hero h1 span {
+          font-size: 1.4rem !important;
+        }
+
+        .blog-hero p {
+          font-size: 0.9rem !important;
+          margin-bottom: 15px !important;
+        }
+
+        .featured-image {
+          height: 180px;
+        }
+
+        .featured-content {
+          padding: 30px;
+          padding-top: 0px;
+        }
+
+        .card-content {
+          padding: 30px;
+          padding-top: 0px;
+        }
+
+        .featured-title {
+          font-size: 1.2rem;
+          margin-bottom: 10px;
+        }
+
+        .card-title {
+          font-size: 1.1rem;
+          margin-bottom: 10px;
+        }
+
+        .featured-meta,
+        .card-meta {
+          margin-bottom: 10px !important;
+        }
+
+        .pagination {
+          gap: 5px;
+        }
+      }
+
+      @media (max-width: 991px) {
         .mobile-sidebar-container {
-            display: none;
-            background-color: var(--secondary-color);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .mobile-sidebar-container.active {
-            display: block;
-        }
-        
-        @media (max-width: 991px) {
-
-            .btn {
-                padding: 15px 25px;
-                font-size: 1rem;
-            }
-
-            .mobile-sidebar-toggle {
-                display: block;
-            }
-            
-            .blog-sidebar {
-                display: none;
-            }
-            
-            /* Miglioramenti card blog */
-            .featured-image {
-                height: 220px;
-            }
-            
-            .featured-content {
-                padding: 20px;
-            }
-            
-            .card-content {
-                padding: 20px;
-            }
-            
-            .featured-title {
-                font-size: 1.4rem;
-            }
-            
-            .card-title {
-                font-size: 1.2rem;
-            }
-            
-            .card-excerpt, .featured-excerpt {
-                font-size: 0.85rem;
-                margin-bottom: 15px;
-            }
-            
-            .blog-hero {
-                padding: 50px 0 40px;
-            }
-            
-            .popular-post {
-                margin-bottom: 15px;
-                padding-bottom: 15px;
-            }
-            
-            .popular-image {
-                width: 70px;
-                height: 70px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .blog-hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .blog-hero h1 span {
-                font-size: 1.8rem !important;
-            }
-            
-            .blog-hero p {
-                font-size: 1rem !important;
-            }
-            
-            .blog-categories {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                margin-bottom: 25px;
-            }
-            
-            .category-pill {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
-            
-            .blog-layout {
-                padding: 40px 0;
-            }
-            
-            .sidebar-title {
-                font-size: 1.3rem;
-                margin-bottom: 20px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-
-            .pagination-prev, .pagination-next {
-                width: 50px;
-                font-size: 0.8rem;
-            }
-
-            .blog-hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .blog-hero h1 span {
-                font-size: 1.4rem !important;
-            }
-            
-            .blog-hero p {
-                font-size: 0.9rem !important;
-                margin-bottom: 15px !important;
-            }
-            
-            .featured-image {
-                height: 180px;
-            }
-            
-            .featured-content {
-                padding: 30px;
-                padding-top: 0px;
-            }
-            
-            .card-content {
-                padding: 30px;
-                padding-top: 0px;
-            }
-            
-            .featured-title {
-                font-size: 1.2rem;
-                margin-bottom: 10px;
-            }
-            
-            .card-title {
-                font-size: 1.1rem;
-                margin-bottom: 10px;
-            }
-            
-            .featured-meta, .card-meta {
-                margin-bottom: 10px !important;
-            }
-            
-            .pagination {
-                gap: 5px;
-            }
+          max-height: 70vh; /* Limita l'altezza e aggiungi scrolling */
+          overflow-y: auto;
         }
 
-        @media (max-width: 991px) {
-            
-            .mobile-sidebar-container {
-                max-height: 70vh; /* Limita l'altezza e aggiungi scrolling */
-                overflow-y: auto;
-            }
-            
-            .mobile-sidebar-container .sidebar-section {
-                margin-bottom: 20px;
-                padding: 20px;
-            }
+        .mobile-sidebar-container .sidebar-section {
+          margin-bottom: 20px;
+          padding: 20px;
         }
+      }
 
-        .blog-card, .featured-post {
-            position: relative;
-        }
+      .blog-card,
+      .featured-post {
+        position: relative;
+      }
 
-        .blog-card::after, .featured-post::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-            pointer-events: none; /* Permette ai click di passare attraverso */
-        }
+      .blog-card::after,
+      .featured-post::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        pointer-events: none; /* Permette ai click di passare attraverso */
+      }
 
-        .blog-card a, .blog-card button, .featured-post a, .featured-post button {
-            position: relative;
-            z-index: 2;
-        }
+      .blog-card a,
+      .blog-card button,
+      .featured-post a,
+      .featured-post button {
+        position: relative;
+        z-index: 2;
+      }
 
-        .mobile-menu-items li a svg {
-            color: var(--primary-color);
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
+      .mobile-menu-items li a svg {
+        color: var(--primary-color);
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+      }
 
-        .mobile-menu-items li a i {
-            color: var(--primary-color);
-            width: 24px;
-            text-align: center;
-        }
-
-        /* Cookie banner style */
-        .cookie-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--secondary-color);
-            color: #fff;
-            z-index: 1000;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            transform: translateY(100%);
-            transition: transform 0.4s ease;
-            font-family: 'Montserrat', sans-serif;
-            text-align: center;
-        }
-        
-        .cookie-banner.show {
-            transform: translateY(0);
-        }
-
-        .cookie-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .cookie-header {
-            margin-bottom: 15px;
-        }
-
-        .cookie-header h3 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            text-align: center;
-        }
-
-        .cookie-actions {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        
-        .cookie-actions button {
-            flex: 1;
-            padding: 14px 15px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            height: 48px; /* Altezza fissa per entrambi */
-            box-sizing: border-box; /* Assicura che padding e bordo siano inclusi nella dimensione */
-        }
-
-        .cookie-footer {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .cookie-footer a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .cookie-footer a:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            
-            .cookie-banner {
-                max-height: 80vh;
-                overflow-y: auto;
-            }
-            
-            .cookie-content {
-                padding: 15px;
-            }
-            
-            .cookie-header h3 {
-                font-size: 1.3rem;
-            }
-            
-            .cookie-actions {
-                flex-direction: column-reverse;
-                gap: 10px;
-            }
-            
-            .cookie-actions button {
-                width: 100%;
-                padding: 12px 10px;
-                font-size: 0.95rem;
-            }
-            
-            .cookie-footer {
-                flex-direction: row;
-                gap: 10px;
-                font-size: 0.85rem;
-                display: flex;
-                gap: 20px;
-                align-items: center;
-                justify-content: center;
-            }
-        }
-        
-        @media (max-width: 480px) {
-
-            .cookie-header h3 {
-                font-size: 1.2rem;
-            }
-            
-            .cookie-content p {
-                font-size: 0.9rem;
-            }
-            
-            .cookie-actions button {
-                padding: 10px 8px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Pulsante "Rifiuta tutti" */
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        @media (max-width: 768px) {
-            .btn-outline {
-                max-width: 300px;
-            }
-        }
-        
-        .btn-outline:hover {
-            background-color: rgba(255, 107, 0, 0.1);
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
-            transform: translateY(-3px);
-        }
-        
-        .btn-outline:active {
-            transform: translateY(0);
-        }
-        
-        /* Pulsante "Accetta tutti" */
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: #fff;
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .btn-primary {
-                max-width: 300px;
-            }
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-color);
-            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
-            transform: translateY(-3px);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
+      .mobile-menu-items li a i {
+        color: var(--primary-color);
+        width: 24px;
+        text-align: center;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- Pattern di sfondo stile Costruzione -->
     <div class="construction-pattern"></div>
 
     <header id="header">
-        <div class="container nav-container">
-            <a href="/" class="logo" title="Torna alla homepage">
-                <img src="logosito.webp" class="logo-icon" alt="Logo Costruzione Digitale">
-                <div class="logo-text">Costruzione <span>Digitale</span></div>
-            </a>
-            <nav>
-                <ul>
-                    <li><a href="/#about-oleg" title="Chi siamo">Chi siamo</a></li>
-                    <li><a href="/#services" title="I nostri servizi di marketing">Servizi</a></li>
-                    <li><a href="/blog" title="leggi il blog della nostra agenzia">Leggi il Blog</a></li>
-                    <li><a href="/contattaci" title="Contattaci per una consulenza">Contattaci</a></li>
-                </ul>
-                <div class="mobile-menu-toggle" id="mobile-menu-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                        <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
-                    </svg>
-                </div>
-            </nav>
-        </div>
+      <div class="container nav-container">
+        <a href="/" class="logo" title="Torna alla homepage">
+          <img
+            src="logosito.webp"
+            class="logo-icon"
+            alt="Logo Costruzione Digitale"
+          />
+          <div class="logo-text">Costruzione <span>Digitale</span></div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/#about-oleg" title="Chi siamo">Chi siamo</a></li>
+            <li>
+              <a href="/#services" title="I nostri servizi di marketing"
+                >Servizi</a
+              >
+            </li>
+            <li>
+              <a href="/blog" title="leggi il blog della nostra agenzia"
+                >Leggi il Blog</a
+              >
+            </li>
+            <li>
+              <a href="/contattaci" title="Contattaci per una consulenza"
+                >Contattaci</a
+              >
+            </li>
+          </ul>
+          <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 448 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+            >
+              <path
+                d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"
+              />
+            </svg>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <!-- Menu Mobile -->
     <div class="mobile-menu-container" id="mobile-menu">
-        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Chiudi menu mobile">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+      <button
+        class="mobile-menu-close"
+        id="mobile-menu-close"
+        aria-label="Chiudi menu mobile"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 384 512"
+          width="1em"
+          height="1em"
+          fill="currentColor"
+        >
+          <path
+            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
+          />
+        </svg>
+      </button>
+      <ul class="mobile-menu-items">
+        <li>
+          <a href="/" title="Torna alla homepage">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 576 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+            >
+              <path
+                d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"
+              />
             </svg>
-        </button>
-        <ul class="mobile-menu-items">
-            <li><a href="/" title="Torna alla homepage">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
-                </svg> Home</a>
-            </li>
-            <li><a href="/blog" title="leggi il blog della nostra agenzia">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/>
-                </svg> Leggi il blog</a>
-            </li>
-            <li><a href="/#about-oleg" title="Chi siamo">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/>
-                </svg> Chi siamo</a>
-            </li>
-            <li><a href="/#services" title="Scopri i nostri servizi di marketing">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40L176 96l0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L64 96C28.7 96 0 124.7 0 160l0 96 192 0 128 0 192 0 0-96c0-35.3-28.7-64-64-64l-64 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 288l-192 0 0 32c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-32L0 288 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-128z"/>
-                </svg> Servizi</a>
-            </li>
-        </ul>
-        <a href="/contattaci" class="btn mobile-menu-button" id="mobile-book-now" title="Prenota una consulenza gratuita">
-            <span>PRENOTA ORA</span>
-        </a>
+            Home</a
+          >
+        </li>
+        <li>
+          <a href="/blog" title="leggi il blog della nostra agenzia">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+            >
+              <path
+                d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"
+              />
+            </svg>
+            Leggi il blog</a
+          >
+        </li>
+        <li>
+          <a href="/#about-oleg" title="Chi siamo">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+            >
+              <path
+                d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"
+              />
+            </svg>
+            Chi siamo</a
+          >
+        </li>
+        <li>
+          <a href="/#services" title="Scopri i nostri servizi di marketing">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+            >
+              <path
+                d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40L176 96l0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L64 96C28.7 96 0 124.7 0 160l0 96 192 0 128 0 192 0 0-96c0-35.3-28.7-64-64-64l-64 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 288l-192 0 0 32c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-32L0 288 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-128z"
+              />
+            </svg>
+            Servizi</a
+          >
+        </li>
+      </ul>
+      <a
+        href="/contattaci"
+        class="btn mobile-menu-button"
+        id="mobile-book-now"
+        title="Prenota una consulenza gratuita"
+      >
+        <span>PRENOTA ORA</span>
+      </a>
     </div>
 
     <!-- Blog Hero Section -->
     <section class="blog-hero">
-        <div class="container">
-            <div class="blog-hero-content">
-                <h1>IL NOSTRO BLOG <span>Per la tua impresa edile</span></h1>
-                <p>Strategie, consigli e casi studio per <strong>acquisire clienti di valore</strong>, migliorare la tua presenza online e far crescere la tua azienda nel settore edile.</p>
-            </div>
+      <div class="container">
+        <div class="blog-hero-content">
+          <h1>IL NOSTRO BLOG <span>Per la tua impresa edile</span></h1>
+          <p>
+            Strategie, consigli e casi studio per
+            <strong>acquisire clienti di valore</strong>, migliorare la tua
+            presenza online e far crescere la tua azienda nel settore edile.
+          </p>
         </div>
+      </div>
     </section>
 
     <!-- Blog Content Section -->
     <section class="blog-layout">
-        <div class="container">
-            <!-- Breadcrumb -->
-            <div class="breadcrumb">
-                <div class="breadcrumb-item">
-                    <a href="/" title="Torna alla home">Home</a>
-                </div>
-                <div class="breadcrumb-divider">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="0.5em" height="0.5em" fill="currentColor">
-                        <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                    </svg>
-                </div>
-                <div class="breadcrumb-item active">Blog</div>
+      <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <div class="breadcrumb-item">
+            <a href="/" title="Torna alla home">Home</a>
+          </div>
+          <div class="breadcrumb-divider">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 320 512"
+              width="0.5em"
+              height="0.5em"
+              fill="currentColor"
+            >
+              <path
+                d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+              />
+            </svg>
+          </div>
+          <div class="breadcrumb-item active">Blog</div>
+        </div>
+
+        <!-- Mobile Sidebar Toggle - visibile solo su mobile -->
+        <div class="mobile-sidebar-toggle">
+          <button id="mobile-sidebar-button" class="category-pill">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              style="margin-right: 5px"
+            >
+              <path
+                d="M3.9 54.9C10.5 40.9 24.5 32 40 32H472c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9V448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6V320.9L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"
+              />
+            </svg>
+            Filtri & Ricerca
+          </button>
+          <div id="mobile-sidebar-container" class="mobile-sidebar-container">
+            <!-- La sidebar verrà inserita qui tramite JavaScript -->
+          </div>
+        </div>
+
+        <div class="blog-container">
+          <div class="blog-main">
+            <!-- Categories Filter -->
+            <div class="blog-categories">
+              <a
+                href="/blog"
+                class="category-pill active"
+                title="Tutti gli articoli"
+                >Tutti</a
+              >
+              <a
+                href="/blog?categoria=case-studies"
+                class="category-pill"
+                title="I nostri casi studio"
+                >Casi studio</a
+              >
+              <a
+                href="/blog?categoria=marketing"
+                class="category-pill"
+                title="Strategie di Marketing"
+                >Marketing</a
+              >
+              <a
+                href="/blog?categoria=seo"
+                class="category-pill"
+                title="Segreti SEO"
+                >SEO</a
+              >
             </div>
 
-            <!-- Mobile Sidebar Toggle - visibile solo su mobile -->
-            <div class="mobile-sidebar-toggle">
-                <button id="mobile-sidebar-button" class="category-pill">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" style="margin-right: 5px;">
-                        <path d="M3.9 54.9C10.5 40.9 24.5 32 40 32H472c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9V448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6V320.9L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"/>
-                    </svg>
-                    Filtri & Ricerca
-                </button>
-                <div id="mobile-sidebar-container" class="mobile-sidebar-container">
-                    <!-- La sidebar verrà inserita qui tramite JavaScript -->
+            <!-- Blog Grid -->
+            <div class="blog-grid">
+              <!-- Featured Post -->
+              <article
+                class="featured-post"
+                href="/blog/7-strategie-di-marketing-per-imprese-edili"
+              >
+                <div class="featured-image">
+                  <span class="featured-badge">In evidenza</span>
+                  <img
+                    src="/blog/images/strategiadimarketing.webp"
+                    alt="Strategie di marketing per imprese edili"
+                  />
                 </div>
+                <div class="featured-content">
+                  <div class="featured-meta">
+                    <span class="category">Strategie</span>
+                    <span class="date">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"
+                        />
+                      </svg>
+                      5 Aprile 2025
+                    </span>
+                  </div>
+                  <h2 class="featured-title">
+                    <a
+                      href="/blog/7-strategie-di-marketing-per-imprese-edili"
+                      title="articolo in evidenza"
+                      >7 Strategie di Marketing Efficaci per Imprese Edili nel
+                      2025: Guida Completa</a
+                    >
+                  </h2>
+                  <p class="featured-excerpt">
+                    Scopri le strategie di marketing più efficaci per far
+                    crescere la tua impresa edile, dai social media al content
+                    marketing, passando per SEO locale e campagne pubblicitarie
+                    mirate.
+                  </p>
+                  <a
+                    href="/blog/7-strategie-di-marketing-per-imprese-edili"
+                    title="articolo in evidenza"
+                    class="read-more"
+                  >
+                    Leggi l'articolo
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 448 512"
+                      width="1em"
+                      height="1em"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </article>
+
+              <!-- Regular Blog Posts -->
+              <article class="blog-card">
+                <div class="card-image">
+                  <img
+                    src="/blog/images/branding.webp"
+                    alt="Marketing per Imprese Edili: Perché investire ora nel tuo Brand"
+                  />
+                </div>
+                <div class="card-content">
+                  <div class="card-meta">
+                    <span class="category">Marketing</span>
+                    <span class="date">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"
+                        />
+                      </svg>
+                      14 Aprile 2025
+                    </span>
+                  </div>
+                  <h2 class="card-title">
+                    <a
+                      href="/blog/Perchè-investire-ora-nel-tuo-brand"
+                      title="Titolo del post"
+                      >Marketing per Imprese Edili: Perché investire ora nel tuo
+                      Brand</a
+                    >
+                  </h2>
+                  <p class="card-excerpt">
+                    Investi in Marketing anche nei momenti a rilento. Costruisci
+                    il tuo brand e una strategia a lungo termine!
+                  </p>
+                  <a
+                    href="/blog/Perchè-investire-ora-nel-tuo-brand"
+                    title="Descrizione del post"
+                    class="read-more"
+                  >
+                    Leggi l'articolo
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 448 512"
+                      width="1em"
+                      height="1em"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </article>
             </div>
 
-            <div class="blog-container">
-                <div class="blog-main">
-                    <!-- Categories Filter -->
-                    <div class="blog-categories">
-                        <a href="/blog" class="category-pill active" title="Tutti gli articoli">Tutti</a>
-                        <a href="/blog?categoria=case-studies" class="category-pill" title="I nostri casi studio">Casi studio</a>
-                        <a href="/blog?categoria=marketing" class="category-pill" title="Strategie di Marketing">Marketing</a>
-                        <a href="/blog?categoria=seo" class="category-pill" title="Segreti SEO">SEO</a>
-                    </div>
-
-                    <!-- Blog Grid -->
-                    <div class="blog-grid">
-                        <!-- Featured Post -->
-                        <article class="featured-post" href="/blog/7-strategie-di-marketing-per-imprese-edili">
-                            <div class="featured-image">
-                                <span class="featured-badge">In evidenza</span>
-                                <img src="/blog/images/strategiadimarketing.webp" alt="Strategie di marketing per imprese edili">
-                            </div>
-                            <div class="featured-content">
-                                <div class="featured-meta">
-                                    <span class="category">Strategie</span>
-                                    <span class="date">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                            <path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/>
-                                        </svg>
-                                        5 Aprile 2025
-                                    </span>
-                                </div>
-                                <h2 class="featured-title">
-                                    <a href="/blog/7-strategie-di-marketing-per-imprese-edili" title="articolo in evidenza">7 Strategie di Marketing Efficaci per Imprese Edili nel 2025: Guida Completa</a>
-                                </h2>
-                                <p class="featured-excerpt">Scopri le strategie di marketing più efficaci per far crescere la tua impresa edile, dai social media al content marketing, passando per SEO locale e campagne pubblicitarie mirate.</p>
-                                <a href="/blog/7-strategie-di-marketing-per-imprese-edili" title="articolo in evidenza" class="read-more">
-                                    Leggi l'articolo
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                        <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </article>
-
-                        <!-- Regular Blog Posts -->
-                        <article class="blog-card">
-                            <div class="card-image">
-                                <img src="/blog/images/branding.webp" alt="Marketing per Imprese Edili: Perché investire ora nel tuo Brand">
-                            </div>
-                            <div class="card-content">
-                                <div class="card-meta">
-                                    <span class="category">Marketing</span>
-                                    <span class="date">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                            <path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/>
-                                        </svg>
-                                        14 Aprile 2025
-                                    </span>
-                                </div>
-                                <h2 class="card-title">
-                                    <a href="/blog/Perchè-investire-ora-nel-tuo-brand" title="Titolo del post">Marketing per Imprese Edili: Perché investire ora nel tuo Brand</a>
-                                </h2>
-                                <p class="card-excerpt">Investi in Marketing anche nei momenti a rilento. Costruisci il tuo brand e una strategia a lungo termine!</p>
-                                <a href="/blog/Perchè-investire-ora-nel-tuo-brand" title="Descrizione del post" class="read-more">
-                                    Leggi l'articolo
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                        <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </article>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="pagination">
-                        <a href="#" class="pagination-link pagination-prev" aria-label="Pagina precedente" title="Pagina precedente">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/>
-                            </svg> Prev
-                        </a>
-                        <a href="#" class="pagination-link active" title="Prima pagina">1</a>
-                        <a href="#" class="pagination-link" title="Seconda pagina">2</a>
-                        <!-- <a href="#" class="pagination-link">3</a>
+            <!-- Pagination -->
+            <div class="pagination">
+              <a
+                href="#"
+                class="pagination-link pagination-prev"
+                aria-label="Pagina precedente"
+                title="Pagina precedente"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"
+                  />
+                </svg>
+                Prev
+              </a>
+              <a href="#" class="pagination-link active" title="Prima pagina"
+                >1</a
+              >
+              <a href="#" class="pagination-link" title="Seconda pagina">2</a>
+              <!-- <a href="#" class="pagination-link">3</a>
                         <span class="pagination-link">...</span>
                         <a href="#" class="pagination-link">8</a> -->
-                        <a href="#" class="pagination-link pagination-next" aria-label="Pagina successiva" title="Pagina successiva">
-                            Next <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                            </svg>
-                        </a>
+              <a
+                href="#"
+                class="pagination-link pagination-next"
+                aria-label="Pagina successiva"
+                title="Pagina successiva"
+              >
+                Next
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <aside class="blog-sidebar">
+            <!-- Search Widget -->
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">Cerca nel Blog</h3>
+              <form class="search-form" action="/blog/search" method="get">
+                <input
+                  type="text"
+                  class="search-input"
+                  name="q"
+                  placeholder="Cosa stai cercando?"
+                />
+                <button
+                  type="submit"
+                  class="search-button"
+                  aria-label="Cerca nel blog"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+                    />
+                  </svg>
+                </button>
+              </form>
+            </div>
+
+            <!-- Categories Widget -->
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">Categorie</h3>
+              <ul class="category-list">
+                <li>
+                  <a
+                    href="/blog?categoria=marketing"
+                    title="Categoria Marketing Digitale"
+                  >
+                    Marketing Digitale <span class="category-count">12</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/blog?categoria=strategie"
+                    title="Categoria Strategie di Crescita"
+                  >
+                    Strategie di Crescita <span class="category-count">8</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/blog?categoria=seo" title="Categoria SEO">
+                    SEO per Costruzioni <span class="category-count">10</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/blog?categoria=case-studies"
+                    title="Categoria Casi Studio"
+                  >
+                    Case Studies <span class="category-count">5</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Popular Posts Widget -->
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">Articoli Popolari</h3>
+              <div class="popular-posts">
+                <div class="popular-post">
+                  <div class="popular-image">
+                    <img
+                      src="logosito.webp"
+                      alt="Strategie di marketing per imprese edili"
+                    />
+                  </div>
+                  <div class="popular-content">
+                    <h4 class="popular-title">
+                      <a
+                        href="/blog/strategie-marketing-imprese-edili"
+                        title="Articolo in evidenza"
+                        >7 Strategie di Marketing Efficaci per Imprese Edili nel
+                        2025</a
+                      >
+                    </h4>
+                    <div class="popular-date">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"
+                        />
+                      </svg>
+                      5 Aprile 2025
                     </div>
+                  </div>
                 </div>
-
-                <aside class="blog-sidebar">
-                    <!-- Search Widget -->
-                    <div class="sidebar-section">
-                        <h3 class="sidebar-title">Cerca nel Blog</h3>
-                        <form class="search-form" action="/blog/search" method="get">
-                            <input type="text" class="search-input" name="q" placeholder="Cosa stai cercando?">
-                            <button type="submit" class="search-button" aria-label="Cerca nel blog">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
-                                </svg>
-                            </button>
-                        </form>
+                <div class="popular-post">
+                  <div class="popular-image">
+                    <img
+                      src="logosito.webp"
+                      alt="Social media marketing per il settore costruzioni"
+                    />
+                  </div>
+                  <div class="popular-content">
+                    <h4 class="popular-title">
+                      <a
+                        href="/blog/social-media-imprese-edili"
+                        title="Articolo in evindeza"
+                        >Social Media per Imprese Edili: La Guida Definitiva</a
+                      >
+                    </h4>
+                    <div class="popular-date">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"
+                        />
+                      </svg>
+                      20 Marzo 2025
                     </div>
-
-                    <!-- Categories Widget -->
-                    <div class="sidebar-section">
-                        <h3 class="sidebar-title">Categorie</h3>
-                        <ul class="category-list">
-                            <li>
-                                <a href="/blog?categoria=marketing" title="Categoria Marketing Digitale">
-                                    Marketing Digitale <span class="category-count">12</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/blog?categoria=strategie" title="Categoria Strategie di Crescita">
-                                    Strategie di Crescita <span class="category-count">8</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/blog?categoria=seo" title="Categoria SEO">
-                                    SEO per Costruzioni <span class="category-count">10</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/blog?categoria=case-studies" title="Categoria Casi Studio">
-                                    Case Studies <span class="category-count">5</span>
-                                </a>
-                            </li>
-                        </ul>
+                  </div>
+                </div>
+                <div class="popular-post">
+                  <div class="popular-image">
+                    <img src="logosito.webp" alt="casi studio impresa edile" />
+                  </div>
+                  <div class="popular-content">
+                    <h4 class="popular-title">
+                      <a href="/blog/case-study-edilizia-digitale"
+                        >casi studio: Aumento del Fatturato del 73% in 6 Mesi</a
+                      >
+                    </h4>
+                    <div class="popular-date">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"
+                        />
+                      </svg>
+                      28 Marzo 2025
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                    <!-- Popular Posts Widget -->
-                    <div class="sidebar-section">
-                        <h3 class="sidebar-title">Articoli Popolari</h3>
-                        <div class="popular-posts">
-                            <div class="popular-post">
-                                <div class="popular-image">
-                                    <img src="logosito.webp" alt="Strategie di marketing per imprese edili">
-                                </div>
-                                <div class="popular-content">
-                                    <h4 class="popular-title">
-                                        <a href="/blog/strategie-marketing-imprese-edili" title="Articolo in evidenza">7 Strategie di Marketing Efficaci per Imprese Edili nel 2025</a>
-                                    </h4>
-                                    <div class="popular-date">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                            <path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/>
-                                        </svg>
-                                        5 Aprile 2025
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="popular-post">
-                                <div class="popular-image">
-                                    <img src="logosito.webp" alt="Social media marketing per il settore costruzioni">
-                                </div>
-                                <div class="popular-content">
-                                    <h4 class="popular-title">
-                                        <a href="/blog/social-media-imprese-edili" title="Articolo in evindeza">Social Media per Imprese Edili: La Guida Definitiva</a>
-                                    </h4>
-                                    <div class="popular-date">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                            <path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/>
-                                        </svg>
-                                        20 Marzo 2025
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="popular-post">
-                                <div class="popular-image">
-                                    <img src="logosito.webp" alt="casi studio impresa edile">
-                                </div>
-                                <div class="popular-content">
-                                    <h4 class="popular-title">
-                                        <a href="/blog/case-study-edilizia-digitale" >casi studio: Aumento del Fatturato del 73% in 6 Mesi</a>
-                                    </h4>
-                                    <div class="popular-date">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                            <path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/>
-                                        </svg>
-                                        28 Marzo 2025
-                                    </div>
-                                </div>
-                            </div>
-                        </div> 
-                    </div> 
-
-                    <!-- Tag Cloud Widget -->
-                    <!-- <div class="sidebar-section">
+            <!-- Tag Cloud Widget -->
+            <!-- <div class="sidebar-section">
                         <h3 class="sidebar-title">Tag Popolari</h3>
                         <div class="tag-cloud">
                             <a href="/blog/tag/marketing-edilizia" class="tag-link">Marketing Edilizia</a>
@@ -1972,311 +2122,603 @@
                         </div>
                     </div> -->
 
-                    <!-- Newsletter Widget -->
-                    <div class="sidebar-section">
-                        <h3 class="sidebar-title">Newsletter</h3>
-                        <p style="margin-bottom: 20px;">Iscriviti per ricevere consigli, guide e strategie per far crescere la tua impresa edile.</p>
-                        <form class="newsletter-form">
-                            <input type="email" class="form-control" placeholder="La tua email" required>
-                            <button type="submit" class="btn">Iscriviti</button>
-                        </form>
-                    </div>
-                </aside>
+            <!-- Newsletter Widget -->
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">Newsletter</h3>
+              <p style="margin-bottom: 20px">
+                Iscriviti per ricevere consigli, guide e strategie per far
+                crescere la tua impresa edile.
+              </p>
+              <form class="newsletter-form">
+                <input
+                  type="email"
+                  class="form-control"
+                  placeholder="La tua email"
+                  required
+                />
+                <button type="submit" class="btn">Iscriviti</button>
+              </form>
             </div>
+          </aside>
         </div>
+      </div>
     </section>
 
     <!-- CTA Section -->
     <section class="cta">
-        <div class="container">
-            <h2>PRONTO A FAR CRESCERE LA TUA AZIENDA?</h2>
-            <p>Scopri come possiamo aiutarti ad attirare clienti di valore e aumentare il tuo fatturato con strategie di marketing su misura per il settore edile.</p>
-            <a href="/contattaci" class="btn btn-lg" title="Prenota una chimata gratuita">PRENOTA UNA CONSULENZA GRATUITA</a>
-        </div>
+      <div class="container">
+        <h2>PRONTO A FAR CRESCERE LA TUA AZIENDA?</h2>
+        <p>
+          Scopri come possiamo aiutarti ad attirare clienti di valore e
+          aumentare il tuo fatturato con strategie di marketing su misura per il
+          settore edile.
+        </p>
+        <a
+          href="/contattaci"
+          class="btn btn-lg"
+          title="Prenota una chimata gratuita"
+          >PRENOTA UNA CONSULENZA GRATUITA</a
+        >
+      </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-logo">
-                <img src="logosito.webp" class="footer-logo-icon" alt="Logo Costruzione Digitale">
-                <div class="footer-logo-text">Costruzione <span>Digitale</span></div>
-            </div>
-            
-            <div class="footer-content">
-                <div class="footer-section">
-                    <p>Trasformiamo la tua presenza online in risultati concreti e misurabili. Strategie personalizzate che generano crescita reale per la tua azienda.</p>
-                    <div class="social-links">
-                        <a href="https://www.facebook.com/profile.php?id=61574907752774#" class="social-link" aria-label="Facebook" title="Facebook">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/>
-                            </svg>
-                        </a>
-                        <a href="https://www.instagram.com/costruzionedigitale/" class="social-link" aria-label="Instagram" title="Instagram">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M224.1 141 c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Articoli Recenti</h3>
-                    <ul>
-                        <li>
-                            <a href="/blog/strategie-marketing-imprese-edili" title="Strategie marketing imprese edili">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                                </svg> Strategie di Marketing Efficaci
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/blog/seo-locale-imprese-edili" title="SEO locale imprese edili">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                                </svg> SEO Locale per Imprese Edili
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/blog/marketing-aziende-serramenti" title="Marketing aziende serramenti">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                                </svg> Marketing per Aziende di Serramenti
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contattaci</h3>
-                    <ul>
-                        <li>
-                            <a href="mailto:info@CostruzioneDigitale.it" title="Email">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/>
-                                </svg> info@costruzionedigitale.com
-                            </a>
-                        </li>
-                        <li>
-                            <a href="tel:+390212345678" title="Telefono">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>
-                                </svg> +39 02 1234 5678
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" title="indirizzo">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/>
-                                </svg> Roma, Italia
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <div class="footer-bottom">
-                    <div class="footer-links">
-                        <a href="/privacy-policy" title="Privacy Policy">Privacy Policy</a>
-                        <a href="/cookie-policy" title="Cookie Policy">Cookie Policy</a>
-                        <a href="/sitemap.xml" title="Sitemap">Sitemap</a>
-                    </div>
-                </div>
-                <p style="margin-top: 20px">&copy; Costruzione Digitale 2023-2025. Tutti i diritti riservati.</p>
-            </div>
+      <div class="container">
+        <div class="footer-logo">
+          <img
+            src="logosito.webp"
+            class="footer-logo-icon"
+            alt="Logo Costruzione Digitale"
+          />
+          <div class="footer-logo-text">Costruzione <span>Digitale</span></div>
         </div>
+
+        <div class="footer-content">
+          <div class="footer-section">
+            <p>
+              Trasformiamo la tua presenza online in risultati concreti e
+              misurabili. Strategie personalizzate che generano crescita reale
+              per la tua azienda.
+            </p>
+            <div class="social-links">
+              <a
+                href="https://www.facebook.com/profile.php?id=61574907752774#"
+                class="social-link"
+                aria-label="Facebook"
+                title="Facebook"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"
+                  />
+                </svg>
+              </a>
+              <a
+                href="https://www.instagram.com/costruzionedigitale/"
+                class="social-link"
+                aria-label="Instagram"
+                title="Instagram"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M224.1 141 c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h3>Articoli Recenti</h3>
+            <ul>
+              <li>
+                <a
+                  href="/blog/strategie-marketing-imprese-edili"
+                  title="Strategie marketing imprese edili"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 320 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                    />
+                  </svg>
+                  Strategie di Marketing Efficaci
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/blog/seo-locale-imprese-edili"
+                  title="SEO locale imprese edili"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 320 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                    />
+                  </svg>
+                  SEO Locale per Imprese Edili
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/blog/marketing-aziende-serramenti"
+                  title="Marketing aziende serramenti"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 320 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                    />
+                  </svg>
+                  Marketing per Aziende di Serramenti
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h3>Contattaci</h3>
+            <ul>
+              <li>
+                <a href="mailto:info@CostruzioneDigitale.it" title="Email">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"
+                    />
+                  </svg>
+                  info@costruzionedigitale.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+390212345678" title="Telefono">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"
+                    />
+                  </svg>
+                  +39 02 1234 5678
+                </a>
+              </li>
+              <li>
+                <a href="#" title="indirizzo">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 384 512"
+                    width="1em"
+                    height="1em"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"
+                    />
+                  </svg>
+                  Roma, Italia
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="copyright">
+          <div class="footer-bottom">
+            <div class="footer-links">
+              <a href="/privacy-policy" title="Privacy Policy"
+                >Privacy Policy</a
+              >
+              <a href="/cookie-policy" title="Cookie Policy">Cookie Policy</a>
+              <a href="/sitemap.xml" title="Sitemap">Sitemap</a>
+            </div>
+          </div>
+          <p style="margin-top: 20px">
+            &copy; Costruzione Digitale 2023-2025. Tutti i diritti riservati.
+          </p>
+        </div>
+      </div>
     </footer>
 
     <!-- Cookie Banner -->
+    <style>
+      /* Cookie consent banner style - Overlay Version */
+      .cookie-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        z-index: 9999;
+        font-family: Montserrat, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+      }
+
+      .cookie-banner.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .cookie-content {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: var(--light-accent);
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        border-top: 5px solid var(--primary-color);
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .cookie-banner.show .cookie-content {
+        transform: scale(1);
+      }
+
+      .cookie-header {
+        margin-bottom: 20px;
+      }
+
+      .cookie-header h3 {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin: 0 0 15px 0;
+      }
+
+      .cookie-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+      }
+
+      .cookie-actions button {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 140px;
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+      }
+
+      .btn-outline:hover {
+        background-color: rgba(255, 107, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: #fff;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-color);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
+      }
+
+      @media (max-width: 576px) {
+        .cookie-content {
+          max-width: 90%;
+          padding: 25px 20px;
+        }
+
+        .cookie-header h3 {
+          font-size: 1.3rem;
+        }
+
+        .cookie-actions {
+          flex-direction: column;
+        }
+
+        .cookie-actions button {
+          width: 100%;
+        }
+      }
+    </style>
+
+    <!-- ======= COOKIE BANNER - STRUTTURA HTML ======= -->
     <div class="cookie-banner" id="cookie-banner">
-        <div class="cookie-content">
-            <div class="cookie-header">
-                <h3>Informativa sui Cookie</h3>
-                <button class="mobile-menu-close" id="cookie-close" aria-label="Chiudi cookie banner">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"></path>
-                            </svg>
-                </button>
-            </div>
-            <p>
-                Utilizziamo i cookie per migliorare la tua esperienza sul nostro sito. 
-                I cookie essenziali sono necessari per il funzionamento del sito, mentre altri ci aiutano 
-                a migliorare i nostri servizi e l'esperienza utente. Puoi scegliere di accettare tutti i cookie 
-                o utilizzare solo quelli essenziali per la navigazione.
-            </p>
-            <div class="cookie-actions">
-                <button id="cookie-reject-all" class="btn-outline">Rifiuta tutti</button>
-                <button id="cookie-accept-all" class="btn btn-primary">Accetta tutti</button>
-            </div>
-            <div class="cookie-footer">
-                <a href="/privacy-policy" title="privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy" title="cookie-policy">Cookie Policy</a>
-            </div>
+      <div class="cookie-content">
+        <div class="cookie-header">
+          <h3>Informativa sui Cookie</h3>
         </div>
+        <p>
+          Utilizziamo i cookie per migliorare la tua esperienza sul nostro sito.
+          I cookie essenziali sono necessari per il funzionamento del sito,
+          mentre altri ci aiutano a migliorare i nostri servizi e l'esperienza
+          utente.
+        </p>
+        <div class="cookie-actions">
+          <button id="cookie-reject-all" class="btn-outline">
+            Solo Essenziali
+          </button>
+          <button id="cookie-accept-all" class="btn-primary">
+            Accetta Tutti
+          </button>
+        </div>
+      </div>
     </div>
+
+    <!-- Cookie Banner Script -->
+    <script>
+      // Gestione migliorata per dispositivi mobili
+      document.addEventListener("DOMContentLoaded", function () {
+        const acceptAllBtn = document.getElementById("cookie-accept-all");
+        const rejectAllBtn = document.getElementById("cookie-reject-all");
+
+        // Migliora la gestione dei click su dispositivi touch
+        function enhanceTouchButton(button) {
+          // Aggiungi eventi touch espliciti
+          button.addEventListener(
+            "touchstart",
+            function (e) {
+              // Previeni comportamenti predefiniti come lo zoom
+              e.preventDefault();
+
+              // Aggiungi classe attiva per feedback visivo
+              this.classList.add("touch-active");
+            },
+            { passive: false }
+          );
+
+          button.addEventListener(
+            "touchend",
+            function (e) {
+              // Previeni comportamenti predefiniti
+              e.preventDefault();
+
+              // Rimuovi classe attiva
+              this.classList.remove("touch-active");
+
+              // Esegui manualmente l'azione del click
+              this.click();
+            },
+            { passive: false }
+          );
+        }
+
+        // Applica miglioramenti ai pulsanti
+        if (acceptAllBtn) enhanceTouchButton(acceptAllBtn);
+        if (rejectAllBtn) enhanceTouchButton(rejectAllBtn);
+      });
+    </script>
 
     <!-- Schema.org per Blog -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Blog",
-      "name": "Blog - Costruzione Digitale",
-      "description": "Strategie, consigli e casi studio per acquisire clienti di valore, migliorare la tua presenza online e far crescere la tua azienda nel settore edile.",
-      "url": "https://costruzionedigitale.com/blog/",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Costruzione Digitale",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://costruzionedigitale.com/logosito.webp"
-        }
-      },
-      "blogPost": [
-        {
-          "@type": "BlogPosting",
-          "headline": "7 Strategie di Marketing efficaci per Imprese edili nel 2025: Guida completa",
-          "description": "Scopri le strategie di marketing più efficaci per far crescere la tua impresa edile, dai social media al content marketing, passando per SEO locale e campagne pubblicitarie mirate.",
-          "image": "https://costruzionedigitale.com/logosito.webp",
-          "datePublished": "2025-04-10",
-          "author": {
-            "@type": "Organization",
-            "name": "Costruzione Digitale"
-          },
-          "url": "https://costruzionedigitale.com/blog/7-strategie-di-marketing-per-imprese-edili"
-        }
-      ]
-    }
+      {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "Blog - Costruzione Digitale",
+        "description": "Strategie, consigli e casi studio per acquisire clienti di valore, migliorare la tua presenza online e far crescere la tua azienda nel settore edile.",
+        "url": "https://costruzionedigitale.com/blog/",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Costruzione Digitale",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://costruzionedigitale.com/logosito.webp"
+          }
+        },
+        "blogPost": [
+          {
+            "@type": "BlogPosting",
+            "headline": "7 Strategie di Marketing efficaci per Imprese edili nel 2025: Guida completa",
+            "description": "Scopri le strategie di marketing più efficaci per far crescere la tua impresa edile, dai social media al content marketing, passando per SEO locale e campagne pubblicitarie mirate.",
+            "image": "https://costruzionedigitale.com/logosito.webp",
+            "datePublished": "2025-04-10",
+            "author": {
+              "@type": "Organization",
+              "name": "Costruzione Digitale"
+            },
+            "url": "https://costruzionedigitale.com/blog/7-strategie-di-marketing-per-imprese-edili"
+          }
+        ]
+      }
     </script>
 
     <!-- Script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile Menu Toggle
-            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const mobileMenuClose = document.getElementById('mobile-menu-close');
-            // Mobile Sidebar Toggle
-            const blogSidebar = document.querySelector('.blog-sidebar');
-            const mobileSidebarContainer = document.getElementById('mobile-sidebar-container');
-            
-            if (blogSidebar && mobileSidebarContainer) {
-                // Clona il contenuto interno invece dell'intero elemento
-                const sidebarSections = blogSidebar.querySelectorAll('.sidebar-section');
-                sidebarSections.forEach(section => {
-                    const clonedSection = section.cloneNode(true);
-                    mobileSidebarContainer.appendChild(clonedSection);
-                });
+      document.addEventListener("DOMContentLoaded", function () {
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const mobileMenuClose = document.getElementById("mobile-menu-close");
+        // Mobile Sidebar Toggle
+        const blogSidebar = document.querySelector(".blog-sidebar");
+        const mobileSidebarContainer = document.getElementById(
+          "mobile-sidebar-container"
+        );
+
+        if (blogSidebar && mobileSidebarContainer) {
+          // Clona il contenuto interno invece dell'intero elemento
+          const sidebarSections =
+            blogSidebar.querySelectorAll(".sidebar-section");
+          sidebarSections.forEach((section) => {
+            const clonedSection = section.cloneNode(true);
+            mobileSidebarContainer.appendChild(clonedSection);
+          });
+        }
+
+        const mobileSidebarButton = document.getElementById(
+          "mobile-sidebar-button"
+        );
+        if (mobileSidebarButton && mobileSidebarContainer) {
+          mobileSidebarButton.addEventListener("click", function (event) {
+            event.stopPropagation(); // Previene che il click chiuda immediatamente
+            mobileSidebarContainer.classList.toggle("active");
+          });
+
+          // Chiudi sidebar quando si clicca altrove
+          document.addEventListener("click", function (event) {
+            if (
+              !mobileSidebarContainer.contains(event.target) &&
+              !mobileSidebarButton.contains(event.target) &&
+              mobileSidebarContainer.classList.contains("active")
+            ) {
+              mobileSidebarContainer.classList.remove("active");
             }
-            
-            const mobileSidebarButton = document.getElementById('mobile-sidebar-button');
-            if (mobileSidebarButton && mobileSidebarContainer) {
-                mobileSidebarButton.addEventListener('click', function(event) {
-                    event.stopPropagation(); // Previene che il click chiuda immediatamente
-                    mobileSidebarContainer.classList.toggle('active');
-                });
-                
-                // Chiudi sidebar quando si clicca altrove
-                document.addEventListener('click', function(event) {
-                    if (!mobileSidebarContainer.contains(event.target) && 
-                        !mobileSidebarButton.contains(event.target) && 
-                        mobileSidebarContainer.classList.contains('active')) {
-                        mobileSidebarContainer.classList.remove('active');
-                    }
-                });
-            }
-            
-            // Rendi le card del blog interamente cliccabili
-            const blogCards = document.querySelectorAll('.blog-card, .featured-post');
-            blogCards.forEach(card => {
-                const link = card.querySelector('h2 a');
-                if (link) {
-                    const url = link.getAttribute('href');
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', function(e) {
-                        // Se l'utente ha cliccato su un link o un bottone all'interno della card
-                        // non interrompiamo quell'azione
-                        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || 
-                            e.target.closest('a') || e.target.closest('button')) {
-                            return;
-                        }
-                        window.location.href = url;
-                    });
-                }
+          });
+        }
+
+        // Rendi le card del blog interamente cliccabili
+        const blogCards = document.querySelectorAll(
+          ".blog-card, .featured-post"
+        );
+        blogCards.forEach((card) => {
+          const link = card.querySelector("h2 a");
+          if (link) {
+            const url = link.getAttribute("href");
+            card.style.cursor = "pointer";
+            card.addEventListener("click", function (e) {
+              // Se l'utente ha cliccato su un link o un bottone all'interno della card
+              // non interrompiamo quell'azione
+              if (
+                e.target.tagName === "A" ||
+                e.target.tagName === "BUTTON" ||
+                e.target.closest("a") ||
+                e.target.closest("button")
+              ) {
+                return;
+              }
+              window.location.href = url;
             });
-            
-            mobileMenuToggle.addEventListener('click', function() {
-                mobileMenu.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-            
-            mobileMenuClose.addEventListener('click', function() {
-                mobileMenu.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-            
-            // Header scroll effect
-            const header = document.getElementById('header');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
-            });
-            
-            // Lazy loading per le immagini
-            if ('loading' in HTMLImageElement.prototype) {
-                const images = document.querySelectorAll('img[loading="lazy"]');
-                images.forEach(img => {
-                    img.src = img.dataset.src;
-                });
-            } else {
-                // Fallback per browser che non supportano lazy loading
-                const script = document.createElement('script');
-                script.src = '/js/lazysizes.min.js';
-                document.body.appendChild(script);
-            }
-            
-            // Newsletter Form Submission
-            const newsletterForm = document.querySelector('.newsletter-form');
-            if (newsletterForm) {
-                newsletterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const emailInput = this.querySelector('input[type="email"]');
-                    const email = emailInput.value;
-                    
-                    // Qui andrebbe l'AJAX call per sottomettere l'email
-                    console.log('Email sottomessa:', email);
-                    
-                    // Feedback all'utente
-                    alert('Grazie per l\'iscrizione! Riceverai presto le nostre novità.');
-                    
-                    // Reset form
-                    this.reset();
-                });
-            }
-            
-            // Categoria attiva
-            const categoryPills = document.querySelectorAll('.category-pill');
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeCategory = urlParams.get('categoria');
-            
-            categoryPills.forEach(pill => {
-                // Get search params directly from the href string
-                const hrefString = pill.getAttribute('href') || pill.href || '';
-                const queryString = hrefString.includes('?') ? hrefString.split('?')[1] : '';
-                const pillCategory = new URLSearchParams(queryString).get('categoria');
-                
-                if ((activeCategory === null && pill.classList.contains('active')) || 
-                    (activeCategory === pillCategory)) {
-                    pill.classList.add('active');
-                } else {
-                    pill.classList.remove('active');
-                }
-            });
+          }
         });
+
+        mobileMenuToggle.addEventListener("click", function () {
+          mobileMenu.classList.add("active");
+          document.body.style.overflow = "hidden";
+        });
+
+        mobileMenuClose.addEventListener("click", function () {
+          mobileMenu.classList.remove("active");
+          document.body.style.overflow = "";
+        });
+
+        // Header scroll effect
+        const header = document.getElementById("header");
+        window.addEventListener("scroll", function () {
+          if (window.scrollY > 50) {
+            header.classList.add("scrolled");
+          } else {
+            header.classList.remove("scrolled");
+          }
+        });
+
+        // Lazy loading per le immagini
+        if ("loading" in HTMLImageElement.prototype) {
+          const images = document.querySelectorAll('img[loading="lazy"]');
+          images.forEach((img) => {
+            img.src = img.dataset.src;
+          });
+        } else {
+          // Fallback per browser che non supportano lazy loading
+          const script = document.createElement("script");
+          script.src = "/js/lazysizes.min.js";
+          document.body.appendChild(script);
+        }
+
+        // Newsletter Form Submission
+        const newsletterForm = document.querySelector(".newsletter-form");
+        if (newsletterForm) {
+          newsletterForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const emailInput = this.querySelector('input[type="email"]');
+            const email = emailInput.value;
+
+            // Qui andrebbe l'AJAX call per sottomettere l'email
+            console.log("Email sottomessa:", email);
+
+            // Feedback all'utente
+            alert(
+              "Grazie per l'iscrizione! Riceverai presto le nostre novità."
+            );
+
+            // Reset form
+            this.reset();
+          });
+        }
+
+        // Categoria attiva
+        const categoryPills = document.querySelectorAll(".category-pill");
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeCategory = urlParams.get("categoria");
+
+        categoryPills.forEach((pill) => {
+          // Get search params directly from the href string
+          const hrefString = pill.getAttribute("href") || pill.href || "";
+          const queryString = hrefString.includes("?")
+            ? hrefString.split("?")[1]
+            : "";
+          const pillCategory = new URLSearchParams(queryString).get(
+            "categoria"
+          );
+
+          if (
+            (activeCategory === null && pill.classList.contains("active")) ||
+            activeCategory === pillCategory
+          ) {
+            pill.classList.add("active");
+          } else {
+            pill.classList.remove("active");
+          }
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
