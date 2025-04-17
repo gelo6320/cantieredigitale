@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-
     <script src="/js/cookie-consent-manager.js" defer></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prenota una Consulenza Gratuita | Costruzione Digitale</title>
     <meta name="description" content="Prenota una chiamata conoscitiva gratuita di 15 minuti con Costruzione Digitale. Scopri come possiamo aiutarti ad acquisire nuovi cantieri di alto-profilo per la tua azienda nel settore delle ristrutturazioni.">
+    
     <!-- Per tutte le pagine -->
     <meta name="robots" content="index, follow">
     <meta name="author" content="Costruzione Digitale">
@@ -27,8 +27,6 @@
     <meta name="twitter:image" content="https://costruzionedigitale.com/twitter-image.jpg">
 
     <!-- Favicon -->
-
-    <!-- Favicon standard -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     
@@ -44,20 +42,34 @@
 
     <link rel="canonical" href="https://costruzionedigitale.com/contattaci">
     <link rel="preload" href="logosito.webp" as="image" />
+    
     <style>
+        /* Custom CSS with modern styling */
         :root {
             --primary-color: #FF6B00; /* Arancione pronunciato */
+            --primary-light: #FF8C38; /* Arancione più chiaro */
+            --primary-dark: #CC5500; /* Arancione più scuro */
+            --primary-transparent: rgba(255, 107, 0, 0.1); /* Arancione trasparente */
             --secondary-color: #212121; /* Nero profondo */
-            --text-color: #FFFFFF; /* Testo bianco */
-            --accent-color: #FF8C38; /* Arancione più chiaro */
             --dark-bg: #151515; /* Sfondo nero più scuro */
             --light-accent: #333333; /* Grigio scuro */
+            --lighter-accent: #444444; /* Grigio meno scuro */
+            --text-color: #FFFFFF; /* Testo bianco */
+            --text-light: rgba(255, 255, 255, 0.8); /* Testo bianco semi-trasparente */
+            --text-muted: rgba(255, 255, 255, 0.6); /* Testo bianco più trasparente */
             --success-color: #27ae60; /* Verde per elementi positivi */
             --warning-color: #e67e22; /* Arancione per avvertimenti */
             --danger-color: #e74c3c; /* Rosso per errori */
-            --section-padding: 80px 0;
+            --border-radius-sm: 6px;
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            --transition-fast: 0.2s ease;
+            --transition: 0.3s ease;
+            --transition-slow: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
+        /* Reset e base */
         * {
             margin: 0;
             padding: 0;
@@ -68,10 +80,8 @@
         body {
             line-height: 1.6;
             color: var(--text-color);
-            position: relative;
             background-color: var(--secondary-color);
             overflow-x: hidden;
-            text-align: center;
         }
         
         .container {
@@ -82,35 +92,49 @@
             z-index: 1;
         }
         
-        /* Pattern di sfondo stile Costruzione */
-        .construction-pattern {
+        /* Background patterns */
+        .pattern-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(45deg, rgba(255,107,0,0.05) 25%, transparent 25%, transparent 50%, 
-                rgba(255,107,0,0.05) 50%, rgba(255,107,0,0.05) 75%, transparent 75%, transparent);
-            background-size: 100px 100px;
-            opacity: 0.3;
+                radial-gradient(circle at 10% 20%, rgba(255, 107, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(255, 107, 0, 0.05) 0%, transparent 50%);
+            background-size: 100% 100%;
+            opacity: 1;
             z-index: 0;
             pointer-events: none;
         }
         
+        .dot-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Header */
         header {
             background-color: var(--dark-bg);
             padding: 15px 0;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
             position: sticky;
             top: 0;
             z-index: 100;
-            transition: all 0.3s ease;
+            transition: all var(--transition);
         }
         
         header.scrolled {
             padding: 10px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
         
         .nav-container {
@@ -124,6 +148,11 @@
             align-items: center;
             text-decoration: none;
             color: var(--text-color);
+            transition: transform var(--transition-fast);
+        }
+        
+        .logo:hover {
+            transform: scale(1.02);
         }
         
         .logo-icon {
@@ -131,6 +160,11 @@
             margin-right: 20px;
             width: 120px;
             height: 80px;
+            transition: filter var(--transition);
+        }
+        
+        .logo:hover .logo-icon {
+            filter: drop-shadow(0 0 5px rgba(255, 107, 0, 0.5));
         }
         
         .logo-text {
@@ -163,7 +197,7 @@
             font-size: 0.9rem;
             letter-spacing: 0.5px;
             padding: 10px 0;
-            transition: all 0.3s ease;
+            transition: all var(--transition);
             position: relative;
         }
         
@@ -175,7 +209,7 @@
             width: 0;
             height: 2px;
             background-color: var(--primary-color);
-            transition: width 0.3s ease;
+            transition: width var(--transition-fast);
         }
         
         nav ul li a:hover::after {
@@ -186,76 +220,84 @@
             color: var(--primary-color);
         }
         
-        /* Hero Section */
-        .hero {
-            padding: 80px 0 100px;
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        
+        /* Main booking section */
+        .booking-hero {
+            min-height: calc(100vh - 110px);
+            padding: 60px 0;
             position: relative;
-            background-color: var(--secondary-color);
-            overflow: hidden;
-            text-align: center;
         }
         
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 45%;
-            height: 100%;
-            background-color: var(--primary-color);
-            clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
-            opacity: 0.1;
-            z-index: 0;
-        }
-        
-        .hero-content {
-            max-width: 900px;
-            margin: 0 auto 50px;
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
             position: relative;
             z-index: 2;
         }
         
-        .hero h1 {
-            font-size: 3.5rem;
+        .booking-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 520px;
+        }
+        
+        .booking-title {
+            font-size: 3.2rem;
+            font-weight: 900;
             margin-bottom: 25px;
-            color: var(--text-color);
             line-height: 1.2;
-            font-weight: 800;
-            position: relative;
-            text-transform: uppercase;
+            color: var(--text-color);
         }
         
-        .hero h1 span {
-            color: var(--primary-color);
+        .booking-title .highlight {
             display: block;
-            font-size: 4rem;
-        }
-        
-        .hero p {
-            font-size: 1.4rem;
-            margin-bottom: 30px;
-            max-width: 800px;
-            position: relative;
-            margin: 0 auto 40px;
-        }
-        
-        .hero p strong {
             color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        .guarantee-box {
-            margin: 30px auto;
-            padding: 30px;
-            border: 2px dashed var(--primary-color);
-            border-radius: 10px;
-            background-color: rgba(255, 107, 0, 0.1);
             position: relative;
-            max-width: 800px;
-            text-align: center;
         }
         
-        .guarantee-badge {
+        .booking-title .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            height: 12px;
+            width: 100%;
+            background-color: rgba(255, 107, 0, 0.15);
+            z-index: -1;
+        }
+        
+        .booking-description {
+            font-size: 1.15rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            max-width: 95%;
+        }
+        
+        .booking-description strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .promise-box {
+            background: linear-gradient(135deg, rgba(33, 33, 33, 0.8) 0%, rgba(21, 21, 21, 0.9) 100%);
+            border: 2px dashed rgba(255, 107, 0, 0.5);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            position: relative;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            margin-top: 30px;
+        }
+        
+        .promise-badge {
             position: absolute;
             top: -25px;
             left: 50%;
@@ -269,368 +311,617 @@
             align-items: center;
             justify-content: center;
             color: var(--primary-color);
-            font-size: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1;
         }
         
-        .guarantee-box h2 {
+        .promise-glow {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.3) 0%, rgba(255, 107, 0, 0) 70%);
+            top: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: blur(10px);
+            z-index: 0;
+        }
+        
+        .promise-title {
             color: var(--primary-color);
             margin-bottom: 15px;
             font-size: 1.4rem;
             text-transform: uppercase;
-        }
-        
-        .guarantee-box p {
-            color: var(--text-color);
-            font-size: 1.1rem;
-            margin-bottom: 0;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 18px 35px;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
+            font-weight: 800;
             letter-spacing: 1px;
-            transition: all 0.3s ease;
-            border: 2px solid var(--primary-color);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-            text-align: center;
-            margin: 10px auto;
         }
         
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.4s ease;
-            z-index: 1;
+        .promise-text {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 0;
+            line-height: 1.6;
         }
         
-        .btn:hover::before {
-            left: 100%;
-        }
-        
-        .btn:hover {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .btn span {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .btn-lg {
-            font-size: 1.3rem;
-            padding: 20px 40px;
-        }
-        
-        .booking-container {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 50px;
-        }
-        
-        .booking-step {
+        /* Booking Form Wrapper */
+        .booking-form-wrapper {
             background-color: var(--light-accent);
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            padding: 40px;
-            position: relative;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow);
             overflow: hidden;
-            max-width: 800px;
-            margin: 0 auto 30px;
-            text-align: left;
+            transition: all var(--transition);
+            height: fit-content;
         }
         
-        .booking-step::before {
+        .booking-form-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .booking-form-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            padding: 25px 30px 20px;
+            color: white;
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+        
+        .booking-form-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .booking-form-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .booking-steps {
+            display: flex;
+            margin-top: 20px;
+            justify-content: space-between;
+        }
+        
+        .booking-step-indicator {
+            flex: 1;
+            padding: 0 5px;
+            position: relative;
+        }
+        
+        .booking-step-indicator:not(:last-child)::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
         }
         
-        .booking-step-title {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            margin-right: 15px;
+            font-size: 0.9rem;
+            margin: 0 auto 8px;
+            transition: all var(--transition);
+        }
+        
+        .step-circle.active {
+            background-color: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .step-circle.completed {
+            background-color: white;
+            color: var(--success-color);
+        }
+        
+        .step-label {
+            font-size: 0.8rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .booking-form-body {
+            padding: 30px;
+        }
+        
+        /* Custom Calendar */
+        .calendar-container {
+            margin-bottom: 25px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-title {
             font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
         }
         
-        .booking-step h3 {
-            font-size: 1.6rem;
-            margin: 0;
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
-        /* Step visibility classes */
-        .step-hidden {
+        .calendar-btn {
+            background-color: var(--lighter-accent);
+            color: var(--text-color);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .calendar-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .calendar-month {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        
+        .calendar-day-header {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            transition: all var(--transition-fast);
+            background-color: var(--lighter-accent);
+        }
+        
+        .calendar-day:hover:not(.disabled):not(.selected) {
+            background-color: rgba(255, 107, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .calendar-day.selected {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.today:not(.selected) {
+            border: 2px solid var(--primary-color);
+        }
+        
+        .calendar-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background-color: var(--light-accent);
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+        
+        /* Time Slots */
+        .time-slots-container {
+            margin-top: 30px;
+        }
+        
+        .time-slots-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .time-slot {
+            background-color: var(--lighter-accent);
+            padding: 12px 5px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        
+        .time-slot:hover:not(.disabled) {
+            background-color: rgba(255, 107, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .time-slot.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        .time-slot.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Form Elements */
+        .booking-form {
             display: none;
         }
         
-        .step-active {
+        .booking-form.active {
             display: block;
-        }
-        
-        .step-completed .step-number {
-            background-color: var(--success-color);
-        }
-        
-        .step-completed .step-number::after {
-            content: '✓';
-        }
-        
-        .form-container {
-            background-color: var(--light-accent);
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-            max-width: 600px;
-            margin: 0 auto 50px;
-            text-align: left;
-        }
-        
-        .form-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
         }
         
         .form-group {
             margin-bottom: 25px;
-            position: relative;
         }
         
-        .form-group label {
+        .form-label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: var(--text-color);
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 15px 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: rgba(0,0,0,0.2);
+            padding: 14px 16px;
+            background-color: var(--lighter-accent);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-sm);
             color: var(--text-color);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
         }
         
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.3);
-            background-color: rgba(0,0,0,0.3);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
         }
         
         textarea.form-control {
-            min-height: 120px;
+            min-height: 100px;
             resize: vertical;
         }
         
-        .form-check {
+        .checkbox-container {
             display: flex;
             align-items: flex-start;
             margin-bottom: 20px;
         }
         
-        .form-check input {
-            margin-right: 10px;
-            margin-top: 5px;
+        .custom-checkbox {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
         }
         
-        .form-check label {
+        .custom-checkbox input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background-color: var(--lighter-accent);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all var(--transition-fast);
+        }
+        
+        .custom-checkbox input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+        }
+        
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .custom-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+        
+        .checkbox-label {
             font-size: 0.9rem;
-            color: rgba(255,255,255,0.8);
+            color: var(--text-light);
+            line-height: 1.4;
         }
         
-        .form-check a {
+        .checkbox-label a {
             color: var(--primary-color);
             text-decoration: none;
             font-weight: 600;
+            transition: all var(--transition-fast);
         }
         
-        .form-check a:hover {
+        .checkbox-label a:hover {
             text-decoration: underline;
         }
         
-        /* Calendario */
-        .calendar-container {
-            margin: 20px 0;
-        }
-        
-        #calendar {
-            background-color: var(--light-accent);
-            border-radius: 8px;
-            padding: 10px;
-        }
-        
-        /* Personalizzazione calendario */
-        .fc-theme-standard td, .fc-theme-standard th {
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .fc-theme-standard .fc-scrollgrid {
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .fc-col-header-cell-cushion {
-            color: var(--text-color);
-            font-weight: 600;
-            padding: 10px 4px;
-        }
-        
-        .fc-daygrid-day-number {
-            color: var(--text-color);
-            font-weight: 500;
-            padding: 8px;
-        }
-        
-        .fc .fc-button-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .fc .fc-button-primary:hover {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-        
-        .fc .fc-button-primary:disabled {
-            background-color: rgba(255, 107, 0, 0.5);
-            border-color: rgba(255, 107, 0, 0.5);
-        }
-        
-        .fc .fc-button-primary:not(:disabled).fc-button-active, 
-        .fc .fc-button-primary:not(:disabled):active {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-        
-        .fc .fc-toolbar-title {
-            color: var(--text-color);
-        }
-        
-        .fc-event {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        /* Time slots */
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 30px;
-        }
-        
-        .time-slot {
-            background-color: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--text-color);
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        .time-slot:hover {
-            background-color: rgba(255, 107, 0, 0.1);
-            border-color: var(--primary-color);
-        }
-        
-        .time-slot.selected {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .time-slot.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        
-        /* Riepilogo prenotazione */
+        /* Booking Summary */
         .booking-summary {
             background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             padding: 20px;
-            margin-top: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 25px;
+            border-left: 3px solid var(--primary-color);
         }
         
-        .booking-summary h4 {
-            font-size: 1.2rem;
+        .booking-summary-title {
+            font-size: 1.1rem;
+            font-weight: 700;
             margin-bottom: 15px;
             color: var(--primary-color);
         }
         
         .booking-detail {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         
         .booking-detail-label {
-            width: 120px;
+            width: 90px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .booking-detail-value {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        /* Navigation Buttons */
+        .booking-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .booking-nav.center {
+            justify-content: center;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            color: white;
+            box-shadow: 0 6px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: all 0.6s ease;
+            z-index: 0;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .btn-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Confirmation Message */
+        .confirmation-container {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(39, 174, 96, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: var(--success-color);
+            font-size: 2.5rem;
+        }
+        
+        .confirmation-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+        
+        .confirmation-message {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .confirmation-details {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            max-width: 450px;
+            margin: 30px auto;
+            text-align: left;
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .confirmation-contact {
+            margin-top: 30px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        
+        .confirmation-contact a {
+            color: var(--primary-color);
+            text-decoration: none;
             font-weight: 600;
         }
         
-        .booking-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
+        .confirmation-contact a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Loading Indicator */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error styles */
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .form-control.error {
+            border-color: var(--danger-color);
         }
         
         /* Footer */
         footer {
             background-color: var(--dark-bg);
-            color: white;
+            color: var(--text-color);
             padding: 80px 0 20px;
             position: relative;
             overflow: hidden;
-            text-align: center;
         }
         
         footer::before {
@@ -641,6 +932,8 @@
             width: 100%;
             height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B00' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            z-index: 0;
         }
         
         .footer-logo {
@@ -648,6 +941,7 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 30px;
+            position: relative;
         }
         
         .footer-logo-icon {
@@ -659,14 +953,7 @@
         .footer-logo-text {
             font-size: 2rem;
             font-weight: 700;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            
-            .footer-logo-text {
-                font-size: 1.4rem;
-            }
+            color: var(--text-color);
         }
         
         .footer-logo-text span {
@@ -679,6 +966,7 @@
             justify-content: space-between;
             margin-bottom: 50px;
             text-align: left;
+            position: relative;
         }
         
         .footer-section {
@@ -690,7 +978,7 @@
         
         .footer-section h3 {
             margin-bottom: 25px;
-            color: white;
+            color: var(--text-color);
             font-size: 1.3rem;
             font-weight: 600;
             position: relative;
@@ -708,7 +996,7 @@
         }
         
         .footer-section p {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
             margin-bottom: 20px;
             line-height: 1.7;
         }
@@ -722,7 +1010,7 @@
         }
         
         .footer-section ul li a {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
             text-decoration: none;
             transition: all 0.3s ease;
             display: flex;
@@ -734,7 +1022,7 @@
             transform: translateX(5px);
         }
         
-        .footer-section ul li a i {
+        .footer-section ul li a svg {
             margin-right: 10px;
             color: var(--primary-color);
         }
@@ -768,8 +1056,9 @@
             padding-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
             font-size: 0.9rem;
+            position: relative;
         }
         
         .footer-bottom {
@@ -778,6 +1067,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
+            position: relative;
         }
         
         .footer-links {
@@ -788,7 +1078,7 @@
         }
         
         .footer-links a {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 0.9rem;
@@ -798,1458 +1088,53 @@
             color: var(--primary-color);
         }
         
-        /* Responsive */
-        @media (max-width: 991px) {
-            .hero h1 {
-                font-size: 3rem;
-            }
-
-            .container {
-                padding: 0 15px;
-            }
-            
-            .hero h1 span {
-                font-size: 3.2rem;
-            }
-            
-            .time-slots {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero h1 span {
-                font-size: 2.7rem;
-            }
-            
-            .section-heading h2 {
-                font-size: 2.2rem;
-            }
-            
-            .time-slots {
-                grid-template-columns: 1fr;
-            }
-            
-            nav ul {
-                display: none;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-                font-size: 1.5rem;
-                color: var(--text-color);
-                cursor: pointer;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero h1 span {
-                font-size: 2.2rem;
-            }
-            
-            .hero p {
-                font-size: 1.1rem;
-            }
-            
-            .btn {
-                padding: 15px 25px;
-                font-size: 1rem;
-            }
-            
-            .section-heading h2 {
-                font-size: 1.8rem;
-            }
-            
-            .booking-step, .form-container {
-                padding: 20px;
-            }
-        }
-
-        .mobile-menu-toggle {
-            display: none;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            cursor: pointer;
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-menu-toggle {
-                display: block;
-            }
-
-            .footer-logo-icon {
-            width: 105px;
-            height: 70px;
-            margin-right: 20px;
-            }
-        }
-        
-        /* Loader */
-        .loader {
-            display: none;
-            width: 100%;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .loader-spinner {
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top: 5px solid var(--primary-color);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Messaggio di conferma */
-        .confirmation-message {
-            display: none;
-            background-color: var(--success-color);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .calendar-container {
-            margin: 40px 0;
-            max-width: 100%;
-            overflow: hidden;
-        }
-        
-        /* Container principale */
-        .fc {
-            background-color: var(--light-accent);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            color: var(--text-color);
-        }
-        
-        /* Barra degli strumenti */
-        .fc-header-toolbar {
-            display: flex !important;
-            flex-direction: row !important; /* Cambiato da column a row */
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 10px 20px !important;
-            margin-bottom: 15px !important;
-        }
-        
-        .fc-toolbar-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: var(--primary-color) !important;
-            text-transform: capitalize;
-            letter-spacing: 0.5px;
-            text-align: center;
-            margin: 0 !important;
-            flex-grow: 1;
-        }
-        
-        /* Pulsanti di navigazione */
-        .fc-button-group {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border-radius: 50px;
-            overflow: hidden;
-            display: flex !important;
-        }
-        
-        .fc-button {
-            background-color: var(--light-accent) !important;
-            border: none !important;
-            color: var(--text-color) !important;
-            font-weight: 600 !important;
-            padding: 12px 20px !important;
-            transition: all 0.3s ease !important;
-            text-transform: capitalize;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .fc-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
-            z-index: -1;
-        }
-        
-        .fc-button:hover::before {
-            left: 0;
-        }
-        
-        .fc-button:hover {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            transform: translateY(-2px);
-        }
-        
-        .fc-button-active {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-        }
-        
-        .fc-prev-button, .fc-next-button {
-            font-size: 1.2rem !important;
-            padding: 8px 16px !important;
-        }
-        
-        .fc-today-button {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            border-radius: 50px !important;
-            padding: 10px 20px !important;
-            opacity: 1 !important;
-            text-transform: capitalize;
-            font-weight: 600 !important;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3) !important;
-            margin-right: 10px !important;
-        }
-        
-        .fc-today-button:disabled {
-            opacity: 0.7 !important;
-            background-color: rgba(255, 107, 0, 0.5) !important;
-        }
-        
-        /* Intestazioni colonne (giorni della settimana) */
-        .fc-col-header {
-            margin-bottom: 15px;
-        }
-        
-        .fc-col-header-cell {
-            background-color: rgba(255, 107, 0, 0.15);
-            padding: 16px 0;
-            border-radius: 8px;
-            margin: 0 2px;
-        }
-        
-        .fc-col-header-cell-cushion {
-            color: var(--text-color);
-            font-weight: 700;
-            font-size: 1rem;
-            text-decoration: none !important;
-            text-transform: uppercase;
-            padding: 10px 5px;
-        }
-        
-        /* Griglia del calendario */
-        .fc-scrollgrid {
-            border: none !important;
-        }
-        
-        .fc-scrollgrid-section-header th {
-            border: none !important;
-        }
-        
-        .fc-scrollgrid-section-body td {
-            border: 1px solid rgba(255,255,255,0.08) !important;
-        }
-        
-        /* Celle dei giorni */
-        .fc-daygrid-day {
-            transition: all 0.2s ease;
-            position: relative;
-            height: 90px;
-            max-height: 90px;
-        }
-        
-        .fc-daygrid-day:hover {
-            background-color: rgba(255, 107, 0, 0.1);
-        }
-        
-        .fc-day-today {
-            background-color: rgba(255, 107, 0, 0.15) !important;
-            border-radius: 8px;
-        }
-        
-        /* Numeri dei giorni */
-        .fc-daygrid-day-top {
-            display: flex;
-            justify-content: center;
-            padding: 8px 0;
-        }
-        
-        .fc-daygrid-day-number {
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 5px !important;
-            width: 36px;
-            height: 36px;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            text-decoration: none !important;
-            border-radius: 50%;
-        }
-        
-        .fc-day-today .fc-daygrid-day-number {
-            background-color: var(--primary-color);
-            color: white !important;
-        }
-        
-        /* Styling dei giorni dei mesi precedenti e successivi */
-        .fc-day-other .fc-daygrid-day-top {
-            opacity: 1 !important;
-        }
-        
-        .fc-day-other .fc-daygrid-day-number {
-            color: rgba(255, 255, 255, 0.4) !important;
-            font-weight: 400;
-        }
-        
-        /* Giorni passati */
-        .fc-day-past {
-            opacity: 0.6;
-        }
-        
-        /* Gestione dello spazio vuoto nella griglia */
-        .fc-daygrid-day-events {
-            min-height: 0 !important;
-            padding: 0 !important;
-        }
-        
-        /* Miglioramento responsivo */
-        @media (max-width: 768px) {
-            .fc {
-                padding: 15px 10px;
-            }
-            
-            .fc-toolbar-title {
-                font-size: 1.2rem !important;
-            }
-            
-            .fc-button {
-                padding: 8px 15px !important;
-                font-size: 0.9rem !important;
-            }
-            
-            .fc-col-header-cell-cushion {
-                font-size: 0.9rem;
-                padding: 8px 2px;
-            }
-            
-            .fc-daygrid-day {
-                height: 70px;
-                max-height: 70px;
-            }
-            
-            .fc-daygrid-day-number {
-                font-size: 0.9rem;
-                width: 30px;
-                height: 30px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .fc {
-                padding: 10px 5px;
-            }
-            
-            .fc-toolbar-title {
-                font-size: 1.1rem !important;
-                order: 1;
-                width: 100%;
-                margin-bottom: 10px !important;
-            }
-            
-            .fc-header-toolbar {
-                flex-direction: column;
-            }
-            
-            .fc-toolbar-chunk {
-                display: none !important;
-            }
-            
-            .fc-col-header-cell-cushion {
-                font-size: 0.8rem;
-                padding: 5px 0;
-            }
-            
-            .fc-daygrid-day {
-                height: 50px;
-                max-height: 50px;
-            }
-            
-            .fc-daygrid-day-number {
-                font-size: 0.8rem;
-                width: 26px;
-                height: 26px;
-            }
-        }
-        
-        /* Transizione fluida per cambio di mese */
-        .fc-view-harness {
-            transition: height 0.3s ease;
-        }
-        
-        /* Miglioramento animazione al passaggio del mouse */
-        .fc-day:hover .fc-daygrid-day-number {
-            background-color: rgba(255, 107, 0, 0.3);
-            color: var(--text-color) !important;
-            transform: scale(1.1);
-        }
-        
-        .fc-day-today:hover .fc-daygrid-day-number {
-            background-color: var(--primary-color);
-            opacity: 0.9;
-        }
-        
-        /* Animazione per navigazione tra i mesi */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fc .fc-daygrid-body {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Aggiungi questi stili nella sezione <style> del tuo HTML, circa alla linea 683 dopo gli stili esistenti del calendario */
-
-        /* Stile per giorni disabilitati (date passate) */
-        .fc-day-disabled {
-            background-color: rgba(0, 0, 0, 0.1) !important;
-            opacity: 0.5 !important;
-            cursor: not-allowed !important;
-        }
-        
-        .fc-day-disabled .fc-daygrid-day-number {
-            color: rgba(255, 255, 255, 0.3) !important;
-            text-decoration: line-through !important;
-        }
-        
-        /* Miglioramenti alla responsività del calendario */
-        .fc {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 auto !important;
-        }
-        
-        .calendar-container {
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow: hidden !important;
-            padding: 0 !important;
-        }
-        
-        /* Migliorare l'adattamento delle celle in schermi piccoli */
-        @media (max-width: 768px) {
-            .fc-daygrid-day-number {
-                font-size: 0.8rem !important;
-                padding: 3px !important;
-                width: 24px !important;
-                height: 24px !important;
-            }
-            
-            .fc-col-header-cell-cushion {
-                font-size: 0.7rem !important;
-                padding: 3px 1px !important;
-            }
-            
-            .fc .fc-toolbar-title {
-                font-size: 1rem !important;
-            }
-        }
-        
-        /* Assicurati che la griglia del calendario si adatti allo spazio disponibile */
-        .fc .fc-view-harness {
-            width: 100% !important;
-            overflow: hidden !important;
-        }
-        
-        .fc .fc-daygrid-body {
-            width: 100% !important;
-        }
-        
-        .fc .fc-scroller {
-            overflow: hidden !important;
-        }
-        
-        .fc .fc-scrollgrid {
-            width: 100% !important;
-        }
-        
-        .fc .fc-scrollgrid-section-body table,
-        .fc .fc-scrollgrid-section-header table {
-            width: 100% !important;
-        }
-
-        /* Aggiungi questi stili CSS nella sezione <style> del tuo HTML */
-
-        /* Risolve il problema della visualizzazione limitata del calendario */
-        .fc .fc-scrollgrid-liquid {
-            height: auto !important;
-        }
-        
-        .fc .fc-daygrid-body {
-            height: auto !important;
-        }
-        
-        .fc-view-harness {
-            height: auto !important;
-            min-height: 600px !important;
-        }
-        
-        .fc-daygrid-body table {
-            height: 100% !important;
-        }
-        
-        .fc .fc-scroller-liquid-absolute {
-            position: relative !important;
-            top: auto !important;
-            right: auto !important;
-            bottom: auto !important;
-            left: auto !important;
-            overflow: visible !important;
-        }
-        
-        .fc-scrollgrid {
-            display: table !important;
-            table-layout: fixed !important;
-            width: 100% !important;
-        }
-        
-        .fc-daygrid-body {
-            width: 100% !important;
-            display: table !important;
-        }
-        
-        /* Assicura che tutte le righe del calendario siano visibili */
-        .fc-scrollgrid-sync-table {
-            width: 100% !important;
-            height: auto !important;
-        }
-        
-        .fc .fc-daygrid-body-balanced .fc-daygrid-day-events {
-            position: relative !important;
-        }
-        
-        /* Navigazione calendario personalizzata */
-        .calendar-navigation {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end; /* Allinea a destra */
-            margin: 0;
-            order: 2; /* Posiziona a destra */
-        }
-        
-        .fc-toolbar-title {
-            font-size: 1.8rem !important;
-            font-weight: 700 !important;
-            color: var(--primary-color) !important;
-            margin: 0 15px !important;
-            text-transform: capitalize;
-        }
-        
-        .calendar-nav-button {
-            background-color: rgba(255, 107, 0, 0.1);
-            color: var(--primary-color);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .calendar-nav-button:hover {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-        }
-        
-        /* Pulsante "Prenota per oggi" */
-        .today-button-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin: 20px 0;
-        }
-        
-        .btn-today {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .btn-today i {
-            font-size: 1.2rem;
-        }
-        
-        .btn-today:hover {
-            background-color: var(--accent-color);
-            transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(255, 107, 0, 0.5);
-        }
-        
-        /* Migliora l'aspetto della griglia dei giorni */
-        .fc-scrollgrid {
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2) !important;
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }
-        
-        .fc-theme-standard td, .fc-theme-standard th {
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        .fc-col-header-cell {
-            background-color: rgba(255, 107, 0, 0.15) !important;
-            padding: 15px 0 !important;
-        }
-        
-        .fc-col-header-cell-cushion {
-            text-transform: uppercase;
-            font-weight: 700 !important;
-            font-size: 0.9rem !important;
-            letter-spacing: 1px;
-            padding: 10px !important;
-        }
-        
-        .fc-daygrid-day {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
-            cursor: pointer;
-            height: 80px !important;
-        }
-        
-        .fc-daygrid-day:hover {
-            background-color: rgba(255, 107, 0, 0.1) !important;
-            transform: translateY(-3px);
-            z-index: 5;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-        }
-        
-        .fc-day-today {
-            background-color: rgba(255, 107, 0, 0.15) !important;
-            position: relative;
-        }
-        
-        .fc-day-today::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: var(--primary-color);
-        }
-        
-        .fc-daygrid-day-number {
-            font-size: 1.2rem !important;
-            font-weight: 600 !important;
-            transition: all 0.2s ease;
-            width: 36px !important;
-            height: 36px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 50% !important;
-            margin: 5px auto !important;
-        }
-        
-        .fc-day-today .fc-daygrid-day-number {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            box-shadow: 0 3px 10px rgba(255, 107, 0, 0.4);
-        }
-        
-        /* Miglioramenti responsivi */
-        @media (max-width: 768px) {
-            .fc-toolbar-title {
-                font-size: 1.4rem !important;
-            }
-            
-            .calendar-nav-button {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .btn-today {
-                font-size: 0.9rem;
-                padding: 10px 20px;
-                text-align: center;
-            }
-            
-            .fc-daygrid-day-number {
-                font-size: 1rem !important;
-                width: 30px !important;
-                height: 30px !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .fc-toolbar-title {
-                font-size: 1.2rem !important;
-            }
-            
-            .calendar-nav-button {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .btn-today {
-                font-size: 0.85rem;
-                padding: 8px 16px;
-                text-align: center;
-            }
-            
-            .fc-daygrid-day-number {
-                font-size: 0.9rem !important;
-                width: 26px !important;
-                height: 26px !important;
-            }
-            
-            .fc-col-header-cell-cushion {
-                font-size: 0.7rem !important;
-                padding: 5px !important;
-            }
-        }
-        
-        /* Nascondi header originale */
-        .fc-header-toolbar {
-            flex-direction: column !important;
-        }
-        
-        /* Correggi layout del calendario */
-        .fc .fc-toolbar.fc-header-toolbar {
-            margin-bottom: 0 !important;
-        }
-        
-        /* Stile per date selezionabili vs non selezionabili */
-        .fc-day-past {
-            opacity: 0.4 !important;
-            cursor: not-allowed !important;
-        }
-        
-        .fc-day-past:hover {
-            transform: none !important;
-            box-shadow: none !important;
-            background-color: transparent !important;
-        }
-
+        /* Mobile Menu */
         .mobile-menu-container {
             display: none;
-        }
-
-        /* Ottimizzazioni per la pagina di prenotazione su mobile */
-
-        /* Header mobile coerente con la home page */
-        @media (max-width: 768px) {
-            header {
-                padding: 10px 0;
-            }
-            
-            .logo-icon {
-                width: 90px;
-                height: 60px;
-                margin-right: 10px;
-            }
-            
-            .logo-text {
-                font-size: 1.4rem;
-            }
-            
-            /* Menu mobile */
-            .mobile-menu-toggle {
-                font-size: 1.8rem;
-                padding: 5px;
-                color: var(--primary-color);
-            }
-            
-            /* Mobile menu overlay */
-            .mobile-menu-container {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100vh;
-                background-color: var(--secondary-color);
-                z-index: 1000;
-                transform: translateX(100%);
-                transition: transform 0.4s ease;
-                padding: 60px 20px 20px;
-                overflow-y: auto;
-            }
-            
-            .mobile-menu-container.active {
-                transform: translateX(0);
-            }
-            
-            .mobile-menu-close {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: none;
-                border: none;
-                color: var(--text-color);
-                font-size: 1.8rem;
-                cursor: pointer;
-            }
-            
-            .mobile-menu-items {
-                list-style: none;
-                padding: 0;
-                margin: 30px 0;
-            }
-            
-            .mobile-menu-items li {
-                margin-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-                padding-bottom: 15px;
-            }
-            
-            .mobile-menu-items li a {
-                display: block;
-                font-size: 1.2rem;
-                color: var(--text-color);
-                text-decoration: none;
-                padding: 5px 0;
-                transition: color 0.3s ease;
-            }
-            
-            .mobile-menu-items li a:hover {
-                color: var(--primary-color);
-            }
-        }
-        
-        /* Miglioramenti generali alla sezione hero su mobile */
-        @media (max-width: 768px) {
-            .hero {
-                padding: 60px 0 80px;
-            }
-            
-            .hero h1 {
-                font-size: 2.2rem;
-                margin-bottom: 20px;
-            }
-            
-            .hero h1 span {
-                font-size: 2.4rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-                margin-bottom: 25px;
-            }
-            
-            .guarantee-box {
-                padding: 25px 15px;
-                margin: 25px auto;
-            }
-            
-            .guarantee-box h2 {
-                font-size: 1.2rem;
-            }
-            
-            .guarantee-box p {
-                font-size: 0.95rem;
-            }
-        }
-        
-        /* Miglioramenti ai passaggi di prenotazione su mobile */
-        @media (max-width: 768px) {
-            .booking-step {
-                padding: 25px 15px;
-                margin-bottom: 20px;
-            }
-            
-            .booking-step-title {
-                margin-bottom: 15px;
-            }
-            
-            .booking-step h3 {
-                font-size: 1.3rem;
-            }
-            
-            .step-number {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-            }
-            
-            /* Miglioramenti alla sezione calendario */
-            .calendar-container {
-                margin: 25px 0;
-            }
-            
-            #calendar {
-                padding: 10px 5px;
-            }
-            
-            .fc-toolbar-title {
-                font-size: 1.2rem !important;
-            }
-            
-            .calendar-nav-button {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .btn-today {
-                font-size: 0.9rem;
-                padding: 10px 20px;
-                width: 100%;
-                max-width: 250px;
-            }
-            
-            /* Miglioramenti agli slot temporali */
-            .time-slots {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                margin-top: 20px;
-            }
-            
-            .time-slot {
-                padding: 12px 8px;
-                font-size: 0.9rem;
-            }
-            
-            /* Miglioramenti al form di contatto */
-            .form-group {
-                margin-bottom: 20px;
-            }
-            
-            .form-group label {
-                font-size: 0.95rem;
-                margin-bottom: 8px;
-            }
-            
-            .form-control {
-                padding: 12px 15px;
-            }
-            
-            textarea.form-control {
-                min-height: 100px;
-            }
-            
-            .booking-summary {
-                padding: 15px;
-                margin-top: 15px;
-                margin-bottom: 25px;
-            }
-            
-            .booking-summary h4 {
-                font-size: 1.1rem;
-                margin-bottom: 12px;
-            }
-            
-            .booking-detail {
-                margin-bottom: 8px;
-                font-size: 0.95rem;
-            }
-            
-            .booking-detail-label {
-                width: 90px;
-            }
-            
-            /* Miglioramenti ai bottoni di azione */
-            .booking-actions {
-                flex-direction: column-reverse;
-                gap: 10px;
-            }
-            
-            .booking-actions .btn {
-                width: 100%;
-                margin: 0;
-                padding: 12px 20px;
-                font-size: 0.95rem;
-            }
-            
-            /* Miglioramenti al messaggio di conferma */
-            .confirmation-message {
-                padding: 25px 15px;
-            }
-        }
-        
-        /* Ulteriori ottimizzazioni per schermi molto piccoli */
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .hero h1 span {
-                font-size: 2.4rem;
-            }
-            
-            .booking-step h3 {
-                font-size: 1.2rem;
-            }
-            
-            /* Calendario ancora più compatto */
-            .fc-toolbar-title {
-                font-size: 1.1rem !important;
-            }
-            
-            .calendar-nav-button {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .fc-daygrid-day-number {
-                font-size: 0.8rem !important;
-                width: 24px !important;
-                height: 24px !important;
-            }
-            
-            /* Slot temporali in una colonna su schermi molto piccoli */
-            .time-slots {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Correzioni specifiche per il calendario */
-        @media (max-width: 768px) {
-            /* Assicurati che i giorni siano abbastanza grandi da essere cliccabili */
-            .fc-daygrid-day {
-                min-height: 50px !important;
-                height: auto !important;
-            }
-            
-            /* Mostra i controlli del calendario in modo più compatto */
-            .fc-header-toolbar {
-                margin-bottom: 0.5em !important;
-                padding: 5px !important;
-            }
-            
-            /* Rendi il calendario tutto visibile senza scrolling orizzontale */
-            .fc-scrollgrid-sync-table {
-                width: 100% !important;
-            }
-            
-            /* Aumenta area cliccabile per le date */
-            .fc-daygrid-day-top {
-                justify-content: center;
-                display: flex;
-                align-items: center;
-                height: 100%;
-            }
-            
-            /* Rendi più visibile la data di oggi */
-            .fc-day-today .fc-daygrid-day-number {
-                box-shadow: 0 2px 8px rgba(255, 107, 0, 0.5);
-                transform: scale(1.1);
-            }
-            
-            /* Miglioramenti tattili per gli elementi interattivi */
-            .time-slot, .btn, .calendar-nav-button, .fc-daygrid-day {
-                -webkit-tap-highlight-color: rgba(0,0,0,0);
-                touch-action: manipulation;
-            }
-            
-            /* Fissa l'altezza del contenitore calendario */
-            .fc-view-harness {
-                min-height: 0 !important;
-                height: auto !important;
-                max-height: fit-content !important;
-            }
-        }
-        
-        /* Miglioramenti di accessibilità e UX */
-        .time-slot.selected {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
-        }
-        
-        .btn:focus, .time-slot:focus, .form-control:focus {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-        
-        /* Animazione di caricamento più evidente */
-        .loader-spinner {
-            width: 50px;
-            height: 50px;
-            border-width: 6px;
-        }
-        
-        /* Indicazioni più chiare per i campi obbligatori */
-        .form-group label[for*="name"]::after,
-        .form-group label[for*="email"]::after,
-        .form-group label[for*="phone"]::after,
-        .form-check-label[for*="privacy-check"]::after {
-            content: " *";
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-        
-        /* Stile per rendere il calendario più intuitivo */
-        .fc-day-today {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .fc-day-today::after {
-            content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,107,0,0.2) 0%, rgba(255,107,0,0) 50%);
-            pointer-events: none;
+            height: 100vh;
+            background-color: var(--secondary-color);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.4s ease;
+            padding: 60px 20px 20px;
+            overflow-y: auto;
         }
         
-        /* Zoom sui form in focus per dispositivi mobili */
-        @media (max-width: 768px) {
-            .form-control:focus {
-                font-size: 16px; /* Previene lo zoom automatico su iOS */
-                transform: scale(1.02);
-                transition: transform 0.2s;
-            }
+        .mobile-menu-container.active {
+            transform: translateX(0);
         }
         
-        /* Aggiungi feedback tattile per gli elementi interattivi */
-        @media (hover: hover) {
-            .time-slot:hover:not(.disabled) {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
-            }
-        }
-        
-        /* Styling per feedback visivo sulla selezione */
-        .time-slot:active:not(.disabled) {
-            transform: scale(0.98);
-            box-shadow: 0 2px 5px rgba(255, 107, 0, 0.2);
-        }
-        
-        /* Stili per i messaggi di errore e feedback utente */
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            padding-left: 5px;
-            font-weight: 500;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .input-error {
-            border-color: #e74c3c !important;
-            background-color: rgba(231, 76, 60, 0.05) !important;
-            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
-        }
-        
-        /* Stile per il giorno selezionato nel calendario */
-        .fc-daygrid-day.selected-day {
-            background-color: rgba(255, 107, 0, 0.2) !important;
-            border: 2px solid var(--primary-color) !important;
-            border-radius: 8px !important;
-            box-shadow: 0 0 15px rgba(255, 107, 0, 0.3) !important;
-            transform: scale(1.02);
-            position: relative;
-            z-index: 5;
-        }
-        
-        .fc-daygrid-day.selected-day .fc-daygrid-day-number {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            transform: scale(1.1) !important;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        /* Animazioni migliorate */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        /* Applica le animazioni */
-        .booking-step.step-active {
-            animation: fadeIn 0.4s ease;
-        }
-        
-        .time-slot.selected {
-            animation: pulse 1.5s infinite;
-        }
-        
-        #selected-date, #summary-date, #summary-time {
-            animation: slideInRight 0.3s ease;
-        }
-        
-        .calendar-navigation-hint, .time-slot-hint, .form-instructions {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        /* Miglioramenti estetici per i pulsanti di navigazione */
-        .booking-actions .btn:not(:disabled) {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .booking-actions .btn:not(:disabled)::after {
-            content: '';
+        .mobile-menu-close {
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.5s ease;
-            z-index: 1;
-        }
-        
-        .booking-actions .btn:not(:disabled):hover::after {
-            left: 100%;
-        }
-        
-        /* Miglioramenti agli slot orari su mobile */
-        @media (max-width: 768px) {
-            .time-slots {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            
-            .time-slot {
-                padding: 12px 8px;
-                font-size: 0.95rem;
-                height: auto;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            /* Migliora la visibilità dello slot selezionato */
-            .time-slot.selected {
-                border-width: 2px;
-                box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .time-slots {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .time-slot {
-                font-size: 0.9rem;
-                padding: 10px 5px;
-            }
-        }
-        
-        /* Miglioramenti al calendario per dispositivi touch */
-        @media (max-width: 768px) {
-            .fc-daygrid-day {
-                cursor: pointer;
-                position: relative;
-            }
-            
-            .fc-daygrid-day:not(.fc-day-disabled):active {
-                background-color: rgba(255, 107, 0, 0.2);
-            }
-            
-            .fc-daygrid-day-number {
-                cursor: pointer;
-                font-weight: 600;
-            }
-            
-            /* Migliora la legibilità del titolo del calendario */
-            .fc-toolbar-title {
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            }
-            
-            /* Aumenta la dimensione dei controlli di navigazione */
-            .calendar-nav-button {
-                min-width: 40px;
-                min-height: 40px;
-            }
-        }
-        
-        /* Stili per riepilogo prenotazione */
-        .booking-summary {
-            border-left: 4px solid var(--primary-color);
-            background-color: rgba(255, 107, 0, 0.05);
-        }
-        
-        #summary-date, #summary-time, #selected-date {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        /* Migliora visibilità su mobile */
-        @media (max-width: 768px) {
-            .booking-summary h4 {
-                font-size: 1.2rem;
-                margin-bottom: 15px;
-            }
-            
-            .booking-detail {
-                margin-bottom: 10px;
-            }
-            
-            .booking-detail-label {
-                font-weight: 600;
-                color: rgba(255, 255, 255, 0.9);
-            }
-        }
-        
-        /* Stili per i diversi stati della prenotazione */
-        .step-completed .step-number {
-            background-color: var(--success-color);
-            transform: scale(1.1);
-            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
-        }
-        
-        .step-completed .step-number::after {
-            content: '✓';
-            position: absolute;
-            font-size: 1.2rem;
-        }
-        
-        /* Feedback utente per i pulsanti */
-        .btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
-        }
-        
-        /* Miglioramenti al messaggio di conferma */
-        .confirmation-message {
-            border-left: 4px solid var(--success-color);
-            background-color: rgba(39, 174, 96, 0.1);
-        }
-        
-        .confirmation-message h4 {
-            color: var(--success-color);
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-        }
-        
-        .confirmation-message p {
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        @media (max-width: 768px) {
-            .confirmation-message {
-                padding: 25px 15px;
-            }
-            
-            .confirmation-message h4 {
-                font-size: 1.2rem;
-            }
-            
-            .confirmation-message p {
-                font-size: 0.95rem;
-            }
-        }
-        
-        /* Miglioramenti di accessibilità */
-        .btn:focus, .time-slot:focus, .form-control:focus {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-        
-        .time-slot:focus-visible, .calendar-nav-button:focus-visible, .btn:focus-visible {
-            outline: 3px solid var(--primary-color);
-            outline-offset: 2px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        /* Miglioramenti al form per dispositivi mobili */
-        @media (max-width: 768px) {
-            input, select, textarea {
-                font-size: 16px !important; /* Previene lo zoom automatico su iOS */
-            }
-            
-            .form-group label {
-                margin-bottom: 8px;
-            }
-            
-            .form-control {
-                padding: 12px 15px;
-            }
-            
-            textarea.form-control {
-                min-height: 100px;
-            }
-            
-            .form-check {
-                margin-bottom: 15px;
-            }
-            
-            .form-check label {
-                font-size: 0.85rem;
-            }
-        }
-        
-        /* Miglioramento per mobile menu */
-        .mobile-menu-container {
-            z-index: 1001; /* Assicura che sia sopra tutto il resto */
-            overscroll-behavior: contain; /* Previene scroll dell'elemento sottostante */
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.8rem;
+            cursor: pointer;
         }
         
         .mobile-menu-items {
-            margin-bottom: 30px;
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+        
+        .mobile-menu-items li {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
         }
         
         .mobile-menu-items li a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -2258,10 +1143,15 @@
             font-weight: 600;
         }
         
-        .mobile-menu-items li a i {
+        .mobile-menu-items li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .mobile-menu-items li a svg {
             color: var(--primary-color);
             width: 24px;
-            text-align: center;
+            height: 24px;
+            margin-right: 10px;
         }
         
         .mobile-menu-button {
@@ -2272,128 +1162,14 @@
             align-items: center;
         }
         
-        .mobile-menu-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .mobile-menu-close:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Rimuovi il doppio tap delay su iOS */
-        a, button, input, .time-slot, .fc-daygrid-day {
-            touch-action: manipulation;
-        }
-        
-        /* Preferenze di riduzione del movimento */
-        @media (prefers-reduced-motion: reduce) {
-            *, ::before, ::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-        }
-        
-        /* Miglioramento per la versione stampata del documento */
-        @media print {
-            header, footer, .booking-step:not(.step-active), .booking-actions {
-                display: none !important;
-            }
-            
-            body {
-                background-color: white;
-                color: black;
-            }
-            
-            .booking-summary {
-                border: 1px solid #ccc;
-                padding: 20px;
-                margin: 20px 0;
-            }
-        }
-        
-        /* Stile globale per le icone SVG */
-        svg {
-            display: inline-block;
-            vertical-align: -0.125em;
-            overflow: visible;
-        }
-        
-        /* Stili specifici per dimensioni e allineamento */
-        .social-link svg {
-            width: 1em;
-            height: 1em;
-        }
-        
-        .benefit-icon svg {
-            width: 2.5rem;
-            height: 2.5rem;
-        }
-        
-        .footer-section ul li a svg {
-            margin-right: 10px;
-            color: var(--primary-color);
-            width: 1em;
-            height: 1em;
-        }
-        
-        .mobile-menu-items li a svg {
-            color: var(--primary-color);
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-        
-        /* Animazione per le frecce nei pulsanti */
-        .freedom-button svg {
-            margin-left: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .freedom-button:hover svg {
-            transform: translateX(5px);
-        }
-        
-        /* Fix per l'icona del menu hamburger */
-        .mobile-menu-toggle svg {
-            width: 1.5rem;
-            height: 1.5rem;
-        }
-        
-        /* Fix per l'icona nel bottone torna su */
-        .back-to-top svg {
-            width: 1.2rem;
-            height: 1.2rem;
-        }
-        
-        /* Fix per l'icona del servizio link */
-        .service-link svg {
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-        }
-        
-        .service-link:hover svg {
-            transform: translateX(5px);
-        }
-
-        /* Cookie banner style */
+        /* Cookie banner */
         .cookie-banner {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             background-color: var(--secondary-color);
-            color: #fff;
+            color: var(--text-color);
             z-index: 1000;
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
             transform: translateY(100%);
@@ -2405,24 +1181,24 @@
         .cookie-banner.show {
             transform: translateY(0);
         }
-
+        
         .cookie-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-
+        
         .cookie-header {
             margin-bottom: 15px;
         }
-
+        
         .cookie-header h3 {
             margin: 0;
             font-size: 1.5rem;
             color: var(--primary-color);
             text-align: center;
         }
-
+        
         .cookie-actions {
             display: flex;
             justify-content: space-between;
@@ -2432,20 +1208,6 @@
             align-items: center;
         }
         
-        .cookie-actions button {
-            flex: 1;
-            padding: 14px 15px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            height: 48px; /* Altezza fissa per entrambi */
-            box-sizing: border-box; /* Assicura che padding e bordo siano inclusi nella dimensione */
-        }
-
         .cookie-footer {
             display: flex;
             justify-content: center;
@@ -2465,8 +1227,152 @@
             color: var(--primary-color);
             text-decoration: underline;
         }
-
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        
+        .fade-in-left {
+            animation: fadeInLeft 0.8s ease-out forwards;
+        }
+        
+        .fade-in-right {
+            animation: fadeInRight 0.8s ease-out forwards;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1100px) {
+            .booking-container {
+                gap: 30px;
+            }
+            
+            .booking-title {
+                font-size: 2.8rem;
+            }
+            
+            .booking-description {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 991px) {
+            .booking-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .booking-content {
+                max-width: 100%;
+                text-align: center;
+            }
+            
+            .booking-title {
+                font-size: 2.6rem;
+            }
+            
+            .booking-description {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .booking-form-wrapper {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+        
         @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.8rem;
+                padding: 5px;
+                color: var(--primary-color);
+            }
+            
+            .logo-icon {
+                width: 90px;
+                height: 60px;
+                margin-right: 10px;
+            }
+            
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            
+            .booking-hero {
+                padding: 40px 0;
+            }
+            
+            .booking-title {
+                font-size: 2.2rem;
+            }
+            
+            .booking-description {
+                font-size: 1rem;
+            }
+            
+            .time-slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-section {
+                min-width: 100%;
+                padding-right: 0;
+            }
+            
+            .footer-logo-text {
+                font-size: 1.5rem;
+            }
             
             .cookie-banner {
                 max-height: 80vh;
@@ -2491,86 +1397,123 @@
                 padding: 12px 10px;
                 font-size: 0.95rem;
             }
-            
-            .cookie-footer {
-                flex-direction: row;
-                gap: 10px;
-                font-size: 0.85rem;
-                display: flex;
-                gap: 20px;
-                align-items: center;
-                justify-content: center;
-            }
         }
         
         @media (max-width: 480px) {
-
-            .cookie-header h3 {
+            .booking-title {
+                font-size: 1.8rem;
+            }
+            
+            .booking-title .highlight {
+                font-size: 2rem;
+            }
+            
+            .booking-description {
+                font-size: 0.95rem;
+            }
+            
+            .promise-title {
                 font-size: 1.2rem;
             }
             
-            .cookie-content p {
+            .promise-text {
                 font-size: 0.9rem;
             }
             
-            .cookie-actions button {
-                padding: 10px 8px;
+            .booking-form-header {
+                padding: 20px;
+            }
+            
+            .booking-form-title {
+                font-size: 1.3rem;
+            }
+            
+            .booking-form-body {
+                padding: 20px;
+            }
+            
+            .time-slots-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-day {
+                font-size: 0.85rem;
+            }
+            
+            .calendar-day-header {
+                font-size: 0.7rem;
+            }
+            
+            .step-circle {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+            }
+            
+            .step-label {
+                font-size: 0.7rem;
+            }
+            
+            .booking-nav {
+                flex-direction: column-reverse;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
                 font-size: 0.9rem;
             }
-        }
-
-        /* Pulsante "Rifiuta tutti" */
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        @media (max-width: 768px) {
-            .btn-outline {
-                max-width: 300px;
+            
+            .confirmation-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .confirmation-title {
+                font-size: 1.5rem;
+            }
+            
+            .confirmation-message {
+                font-size: 0.95rem;
+            }
+            
+            .footer-logo-icon {
+                width: 80px;
+                height: 53px;
+            }
+            
+            .footer-logo-text {
+                font-size: 1.3rem;
             }
         }
         
-        .btn-outline:hover {
-            background-color: rgba(255, 107, 0, 0.1);
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
-            transform: translateY(-3px);
-        }
-        
-        .btn-outline:active {
-            transform: translateY(0);
-        }
-        
-        /* Pulsante "Accetta tutti" */
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: #fff;
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .btn-primary {
-                max-width: 300px;
+        /* Print Styles */
+        @media print {
+            .booking-form-wrapper, nav, .mobile-menu-toggle, .cookie-banner {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white;
+                color: black;
+            }
+            
+            .booking-content {
+                max-width: 100%;
+            }
+            
+            .confirmation-details {
+                border: 1px solid #ccc;
             }
         }
-
-        .btn-primary:hover {
-            background-color: var(--accent-color);
-            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
-            transform: translateY(-3px);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
     </style>
 </head>
 <body>
-    <!-- Pattern di sfondo stile Costruzione -->
-    <div class="construction-pattern"></div>
+    <!-- Background patterns -->
+    <div class="pattern-bg"></div>
+    <div class="dot-pattern"></div>
     
     <header id="header">
         <div class="container nav-container">
@@ -2594,178 +1537,291 @@
         </div>
     </header>
     
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1 style="font-weight: 1000;">Prenota una <span>Chiamata Conoscitiva</span></h1>
-                <p>Scopri come <strong>Costruzione Digitale</strong> può aiutarti a costruire la tua presenza online. Seleziona una data e un orario per una chiamata gratuita di 30 minuti con un nostro esperto.</p>
-                
-                <div class="guarantee-box">
-                    <div class="guarantee-badge">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                            <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
-                        </svg>
-                    </div>
-                    <h2>La Nostra Promessa</h2>
-                    <p>Nessun impegno, nessuna pressione commerciale. Solo una conversazione sincera per capire le tue esigenze e fornirti consigli utili per il tuo progetto digitale.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-container" id="mobile-menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Chiudi menu mobile">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
+                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+            </svg>
+        </button>
+        <ul class="mobile-menu-items">
+            <li><a href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
+                    <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
+                </svg> Home</a>
+            </li>
+            <li><a href="/blog" title="leggi il blog della nostra agenzia">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                    <path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/>
+                </svg> Leggi il blog</a>
+            </li>
+            <li><a href="/#about-oleg" title="Chi siamo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                    <path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/>
+                </svg> Chi siamo</a>
+            </li>
+            <li><a href="/#services" title="I nostri servizi di marketing">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
+                    <path d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40L176 96l0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L64 96C28.7 96 0 124.7 0 160l0 96 192 0 128 0 192 0 0-96c0-35.3-28.7-64-64-64l-64 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 288l-192 0 0 32c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-32L0 288 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-128z"/>
+                </svg> Servizi</a>
+            </li>
+        </ul>
+        <a href="/contattaci" class="btn btn-primary mobile-menu-button" id="mobile-book-now" title="Prenota una consulenza gratuita">
+            <span class="btn-content">PRENOTA ORA</span>
+        </a>
+    </div>
     
-    <section class="booking-section">
+    <!-- Main Content -->
+    <section class="booking-hero">
         <div class="container">
             <div class="booking-container">
-                <!-- Step 1: Selezione data -->
-                <div id="step1" class="booking-step step-active">
-                    <div class="booking-step-title">
-                        <div class="step-number">1</div>
-                        <h3>Seleziona una data</h3>
-                    </div>
-                    <p>Scegli una data dal calendario per la tua chiamata conoscitiva.</p>
+                <!-- Left Column: Content -->
+                <div class="booking-content fade-in-left">
+                    <h1 class="booking-title">Prenota una <span class="highlight">Chiamata Conoscitiva</span></h1>
                     
-                    <div class="calendar-container">
-                        <div class="calendar-navigation-hint" style="text-align: center; margin-bottom: 15px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
-                            <i class="fas fa-info-circle"></i> Tocca una data per selezionarla
-                        </div>
-                        <div id="calendar"></div>
-                    </div>
-                    
-                    <div id="loader-calendar" class="loader">
-                        <div class="loader-spinner"></div>
-                        <p>Caricamento disponibilità...</p>
-                    </div>
-                </div>
-                
-                <!-- Step 2: Selezione orario -->
-                <div id="step2" class="booking-step step-hidden">
-                    <div class="booking-step-title">
-                        <div class="step-number">2</div>
-                        <h3>Seleziona un orario</h3>
-                    </div>
-                    <p>Scegli l'orario che preferisci tra quelli disponibili.</p>
-                    
-                    <div class="booking-detail">
-                        <div class="booking-detail-label">Data selezionata:</div>
-                        <div id="selected-date">--</div>
-                    </div>
-                    
-                    <p class="time-slot-hint" style="margin-top: 15px; margin-bottom: 10px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
-                        <i class="fas fa-clock"></i> Tocca un orario disponibile per selezionarlo
+                    <p class="booking-description">
+                        Scopri come <strong>Costruzione Digitale</strong> può aiutarti a costruire la tua presenza online. Seleziona una data e un orario per una chiamata gratuita di 30 minuti con un nostro esperto.
                     </p>
-                    <div class="time-slots" id="time-slots-container">
-                        <!-- Time slots generati dinamicamente -->
-                    </div>
                     
-                    <div class="booking-actions">
-                        <button class="btn btn-outline" id="backToStep1" style="margin-right: 20px;">
-                            <span><i class="fas fa-arrow-left"></i> Cambia data</span>
-                        </button>
-                        <button class="btn" id="confirmTimeSlot" disabled>
-                            <span>Conferma orario <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                    <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
-                                </svg></span>
-                        </button>
+                    <div class="promise-box fade-in delay-1">
+                        <div class="promise-glow"></div>
+                        <div class="promise-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="promise-title">La Nostra Promessa</h2>
+                        <p class="promise-text">Nessun impegno, nessuna pressione commerciale. Solo una conversazione sincera per capire le tue esigenze e fornirti consigli utili per il tuo progetto digitale.</p>
                     </div>
                 </div>
                 
-                <!-- Step 3: Compilazione form -->
-                <div id="step3" class="booking-step step-hidden">
-                    <div class="booking-step-title">
-                        <div class="step-number">3</div>
-                        <h3>Inserisci i tuoi dati</h3>
-                    </div>
-                    <p>Compila il modulo con i tuoi dati per confermare la prenotazione.</p>
-                    
-                    <div class="booking-summary">
-                        <h4>Riepilogo prenotazione</h4>
-                        <div class="booking-detail">
-                            <div class="booking-detail-label">Data:</div>
-                            <div id="summary-date">--</div>
-                        </div>
-                        <div class="booking-detail">
-                            <div class="booking-detail-label">Orario:</div>
-                            <div id="summary-time">--</div>
-                        </div>
-                    </div>
-                    
-                    <form id="contact-form" class="mt-4">
-                        <input type="hidden" id="booking-date" name="bookingDate">
-                        <input type="hidden" id="booking-time" name="bookingTime">
-                        <input type="hidden" id="booking-timestamp" name="bookingTimestamp">
+                <!-- Right Column: Booking Form -->
+                <div class="booking-form-wrapper fade-in-right">
+                    <div class="booking-form-header">
+                        <h2 class="booking-form-title">Prenota la tua consulenza gratuita</h2>
+                        <p class="booking-form-subtitle">Ci vogliono solo 2 minuti per prenotare</p>
                         
-                        <div class="form-group">
-                            <label for="name">Nome e Cognome</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="phone">Telefono</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Messaggio (opzionale)</label>
-                            <textarea class="form-control" id="message" name="message" rows="4" placeholder="Raccontaci brevemente del tuo progetto o di cosa vorresti parlare durante la chiamata..."></textarea>
-                        </div>
-                        
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="privacy-check" required>
-                            <label class="form-check-label" for="privacy-check">
-                                Ho letto e accetto la <a href="privacy-policy.html" target="_blank">Privacy Policy</a>
-                            </label>
-                        </div>
-                        
-                        <div class="booking-actions">
-                            <button type="button" class="btn btn-outline" id="backToStep2" style="margin-right: 20px;">
-                                <span><i class="fas fa-arrow-left"></i> Cambia orario</span>
-                            </button>
-                            <button type="submit" class="btn">
-                                <span>Conferma prenotazione <i class="fas fa-check"></i></span>
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div id="loader-form" class="loader">
-                        <div class="loader-spinner"></div>
-                        <p>Invio prenotazione in corso...</p>
-                    </div>
-                    
-                    <div id="confirmation-message" class="confirmation-message">
-                        <div class="confirmation-icon" style="font-size: 3rem; margin-bottom: 20px; color: #27ae60;">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <h4>Prenotazione Confermata!</h4>
-                        <p>Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo fornito con tutti i dettagli.</p>
-                        <p style="margin-top: 15px; font-weight: bold;">Ti contatteremo all'orario stabilito.</p>
-                        <div class="booking-summary" style="margin-top: 20px; text-align: left;">
-                            <h5 style="margin-bottom: 10px; color: #FF6B00;">Riepilogo prenotazione:</h5>
-                            <div class="booking-detail">
-                                <div class="booking-detail-label">Data:</div>
-                                <div id="confirmation-date">--</div>
+                        <div class="booking-steps">
+                            <div class="booking-step-indicator">
+                                <div class="step-circle active" id="step-circle-1">1</div>
+                                <div class="step-label">Data</div>
                             </div>
-                            <div class="booking-detail">
-                                <div class="booking-detail-label">Orario:</div>
-                                <div id="confirmation-time">--</div>
+                            <div class="booking-step-indicator">
+                                <div class="step-circle" id="step-circle-2">2</div>
+                                <div class="step-label">Orario</div>
+                            </div>
+                            <div class="booking-step-indicator">
+                                <div class="step-circle" id="step-circle-3">3</div>
+                                <div class="step-label">Dati</div>
                             </div>
                         </div>
-                        <p style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.8);">
-                            Per qualsiasi domanda o modifica alla prenotazione, contattaci a <a href="mailto:info@costruzionedigitale.com" style="color: #FF6B00;">info@costruzionedigitale.com</a>
-                        </p>
-                        <a href="/" class="btn" style="margin-top: 25px;">
-                            <span>Torna alla Home</span>
-                        </a>
+                    </div>
+                    
+                    <div class="booking-form-body">
+                        <!-- Step 1: Calendar -->
+                        <div class="booking-form active" id="booking-step-1">
+                            <div class="calendar-container">
+                                <div class="calendar-header">
+                                    <h3 class="calendar-title">Seleziona una data</h3>
+                                    <div class="calendar-nav">
+                                        <button class="calendar-btn" id="prev-month">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                                <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/>
+                                            </svg>
+                                        </button>
+                                        <div class="calendar-month" id="current-month">Aprile 2025</div>
+                                        <button class="calendar-btn" id="next-month">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
+                                                <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="calendar-grid" id="calendar-days-header">
+                                    <div class="calendar-day-header">Dom</div>
+                                    <div class="calendar-day-header">Lun</div>
+                                    <div class="calendar-day-header">Mar</div>
+                                    <div class="calendar-day-header">Mer</div>
+                                    <div class="calendar-day-header">Gio</div>
+                                    <div class="calendar-day-header">Ven</div>
+                                    <div class="calendar-day-header">Sab</div>
+                                </div>
+                                
+                                <div class="calendar-grid" id="calendar-days">
+                                    <!-- Days will be generated by JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="booking-nav">
+                                <div></div> <!-- Empty div for flexbox spacing -->
+                                <button class="btn btn-primary" id="continue-to-step-2" disabled>
+                                    <span class="btn-content">
+                                        Conferma data
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                            <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Time Slots -->
+                        <div class="booking-form" id="booking-step-2">
+                            <div class="calendar-header">
+                                <h3 class="calendar-title">Data selezionata</h3>
+                                <div class="calendar-month" id="selected-date-display"></div>
+                            </div>
+                            
+                            <div class="time-slots-container">
+                                <h3 class="time-slots-title">Seleziona un orario disponibile</h3>
+                                <div class="time-slots-grid" id="time-slots">
+                                    <!-- Time slots will be generated by JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="booking-nav">
+                                <button class="btn btn-outline" id="back-to-step-1">
+                                    <span class="btn-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                            <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+                                        </svg>
+                                        Cambia data
+                                    </span>
+                                </button>
+                                <button class="btn btn-primary" id="continue-to-step-3" disabled>
+                                    <span class="btn-content">
+                                        Conferma orario
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                            <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Contact Form -->
+                        <div class="booking-form" id="booking-step-3">
+                            <div class="booking-summary">
+                                <h3 class="booking-summary-title">Riepilogo prenotazione</h3>
+                                <div class="booking-detail">
+                                    <div class="booking-detail-label">Data:</div>
+                                    <div class="booking-detail-value" id="summary-date"></div>
+                                </div>
+                                <div class="booking-detail">
+                                    <div class="booking-detail-label">Orario:</div>
+                                    <div class="booking-detail-value" id="summary-time"></div>
+                                </div>
+                            </div>
+                            
+                            <form id="booking-contact-form">
+                                <input type="hidden" id="booking-date-input" name="bookingDate">
+                                <input type="hidden" id="booking-time-input" name="bookingTime">
+                                <input type="hidden" id="booking-timestamp-input" name="bookingTimestamp">
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="name">Nome e Cognome</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <div class="error-message" id="name-error">Inserisci il tuo nome e cognome</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <div class="error-message" id="email-error">Inserisci un indirizzo email valido</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="phone">Telefono</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    <div class="error-message" id="phone-error">Inserisci un numero di telefono valido</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="message">Messaggio (opzionale)</label>
+                                    <textarea class="form-control" id="message" name="message" rows="4" placeholder="Raccontaci brevemente del tuo progetto o di cosa vorresti parlare durante la chiamata..."></textarea>
+                                </div>
+                                
+                                <div class="checkbox-container">
+                                    <label class="custom-checkbox">
+                                        <input type="checkbox" id="privacy-check" required>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    <span class="checkbox-label">
+                                        Ho letto e accetto la <a href="privacy-policy.html" target="_blank">Privacy Policy</a>.
+                                        <div class="error-message" id="privacy-error">Devi accettare la Privacy Policy</div>
+                                    </span>
+                                </div>
+                                
+                                <div class="booking-nav">
+                                    <button type="button" class="btn btn-outline" id="back-to-step-2">
+                                        <span class="btn-content">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                                <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+                                            </svg>
+                                            Cambia orario
+                                        </span>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="confirm-booking">
+                                        <span class="btn-content">
+                                            Conferma prenotazione
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                                <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div class="loader" id="booking-loader">
+                            <div class="loader-spinner"></div>
+                            <p>Elaborazione in corso...</p>
+                        </div>
+                        
+                        <!-- Confirmation Message -->
+                        <div class="confirmation-container" id="confirmation-container">
+                            <div class="confirmation-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
+                                    <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="confirmation-title">Prenotazione Confermata!</h3>
+                            <p class="confirmation-message">Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo fornito con tutti i dettagli.</p>
+                            
+                            <div class="confirmation-details">
+                                <div class="booking-detail">
+                                    <div class="booking-detail-label">Data:</div>
+                                    <div class="booking-detail-value" id="confirmation-date"></div>
+                                </div>
+                                <div class="booking-detail">
+                                    <div class="booking-detail-label">Orario:</div>
+                                    <div class="booking-detail-value" id="confirmation-time"></div>
+                                </div>
+                            </div>
+                            
+                            <p class="confirmation-message">Ti contatteremo all'orario stabilito. Preparati a trasformare la tua presenza online!</p>
+                            
+                            <div class="confirmation-contact">
+                                Per qualsiasi domanda o modifica alla prenotazione, contattaci a <a href="mailto:info@costruzionedigitale.com">info@costruzionedigitale.com</a>
+                            </div>
+                            
+                            <div class="booking-nav center">
+                                <a href="/" class="btn btn-primary">
+                                    <span class="btn-content">
+                                        Torna alla Homepage
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
     
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-logo">
@@ -2787,28 +1843,18 @@
                                 <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
                             </svg>
                         </a>
-                        <!-- <a href="#" class="social-link" aria-label="LinkedIn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M100.3 448H7.4V148.9h92.9zM53.8 108.1C24.1 108.1 0 83.5 0 53.8a53.8 53.8 0 0 1 107.6 0c0 29.7-24.1 54.3-53.8 54.3zM447.9 448h-92.7V302.4c0-34.7-.7-79.2-48.3-79.2-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="social-link" aria-label="YouTube">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z"/>
-                            </svg>
-                        </a> -->
                     </div>
                 </div>
                 
                 <div class="footer-section">
                     <h3>Link Rapidi</h3>
                     <ul>
-                        <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="2em" height="2em" fill="#FF6B00">
+                        <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
                             <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                        </svg></i> Home</a></li>
-                        <li><a href="/contattaci"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="2em" height="2em" fill="#FF6B00">
+                        </svg> Home</a></li>
+                        <li><a href="/contattaci"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="currentColor">
                             <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
-                        </svg></i> Contattaci</a></li>
+                        </svg> Contattaci</a></li>
                     </ul>
                 </div>
                 
@@ -2846,40 +1892,7 @@
             </div>
         </div>
     </footer>
-
-    <div class="mobile-menu-container" id="mobile-menu">
-        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Chiudi menu mobile">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-            </svg>
-        </button>
-        <ul class="mobile-menu-items">
-            <li><a href="/">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
-                </svg> Home</a>
-            </li>
-            <li><a href="/blog" title="leggi il blog della nostra agenzia">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M96 96c0-35.3 28.7-64 64-64l288 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L80 480c-44.2 0-80-35.8-80-80L0 128c0-17.7 14.3-32 32-32s32 14.3 32 32l0 272c0 8.8 7.2 16 16 16s16-7.2 16-16L96 96zm64 24l0 80c0 13.3 10.7 24 24 24l112 0c13.3 0 24-10.7 24-24l0-80c0-13.3-10.7-24-24-24L184 96c-13.3 0-24 10.7-24 24zm208-8c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0c-8.8 0-16 7.2-16 16zM160 304c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16zm0 96c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-256 0c-8.8 0-16 7.2-16 16z"/>
-                </svg> Leggi il blog</a>
-            </li>
-            <li><a href="/#about-oleg">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/>
-                </svg> Chi siamo</a>
-            </li>
-            <li><a href="/#services">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                    <path d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40L176 96l0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L64 96C28.7 96 0 124.7 0 160l0 96 192 0 128 0 192 0 0-96c0-35.3-28.7-64-64-64l-64 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 288l-192 0 0 32c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-32L0 288 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-128z"/>
-                </svg> Servizi</a>
-            </li>
-        </ul>
-        <a href="/contattaci" class="btn mobile-menu-button" id="mobile-book-now">
-            <span>PRENOTA ORA</span>
-        </a>
-    </div>
-
+    
     <!-- Cookie Banner -->
     <div class="cookie-banner" id="cookie-banner">
         <div class="cookie-content">
@@ -2887,8 +1900,8 @@
                 <h3>Informativa sui Cookie</h3>
                 <button class="mobile-menu-close" id="cookie-close" aria-label="Chiudi cookie banner">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor">
-                                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"></path>
-                            </svg>
+                        <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+                    </svg>
                 </button>
             </div>
             <p>
@@ -2908,710 +1921,503 @@
         </div>
     </div>
     
-    <!-- Script FullCalendar -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/it.min.js"></script>
-    
-    <!-- Script personalizzato -->
+    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    // Elementi DOM
-        const step1El = document.getElementById('step1');
-        const step2El = document.getElementById('step2');
-        const step3El = document.getElementById('step3');
-        const calendarEl = document.getElementById('calendar');
-        const timeSlotsContainer = document.getElementById('time-slots-container');
-        const selectedDateEl = document.getElementById('selected-date');
-        const summaryDateEl = document.getElementById('summary-date');
-        const summaryTimeEl = document.getElementById('summary-time');
-        const confirmTimeSlotBtn = document.getElementById('confirmTimeSlot');
-        const backToStep1Btn = document.getElementById('backToStep1');
-        const backToStep2Btn = document.getElementById('backToStep2');
-        const bookingDateInput = document.getElementById('booking-date');
-        const bookingTimeInput = document.getElementById('booking-time');
-        const bookingTimestampInput = document.getElementById('booking-timestamp');
-        const contactForm = document.getElementById('contact-form');
-        const loaderCalendar = document.getElementById('loader-calendar');
-        const loaderForm = document.getElementById('loader-form');
-        const confirmationMessage = document.getElementById('confirmation-message');
-        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        const body = document.body;
-        
-        // Stato applicazione
-        let selectedDate = null;
-        let selectedTimeSlot = null;
-        let availableTimeSlots = [];
-        
-        // Inizializzazione del calendario
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'it',
-            headerToolbar: {
-                left: '', // Rimuovi i pulsanti a sinistra
-                center: 'title', // Lascia solo il titolo al centro
-                right: '' // Rimuovi i pulsanti a destra incluso "dayGridMonth"
-            },
-            selectable: true,
-            select: function(info) {
-                handleDateSelection(info.start);
-            },
-            dateClick: function(info) {
-                handleDateSelection(info.date);
-            },
-            fixedWeekCount: true,
-            showNonCurrentDates: true,
-            height: 'auto',
-            contentHeight: 'auto',
-            eventDidMount: function(info) {
-                // Personalizzazioni eventi
-            },
-            dayCellDidMount: function(info) {
-                // Disabilita date passate
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const cellDate = info.date;
-                
-                if (cellDate < today) {
-                    info.el.classList.add('fc-day-disabled');
-                }
-            }
-        });
-    
-        calendar.render();
-        
-        // Assicura che il calendario abbia la dimensione corretta
-        setTimeout(() => {
-            calendar.updateSize();
-        }, 100);
-        
-        // Aggiorna la dimensione del calendario quando la finestra cambia
-        window.addEventListener('resize', function() {
-            calendar.updateSize();
-        });
-    
-        // Crea pulsanti personalizzati per la navigazione
-        const calendarHeader = calendarEl.querySelector('.fc-header-toolbar');
-        const titleContainer = calendarEl.querySelector('.fc-toolbar-chunk:nth-child(2)');
-        
-        // Crea contenitore per frecce e titolo
-        const navigationContainer = document.createElement('div');
-        navigationContainer.className = 'calendar-navigation';
-        titleContainer.appendChild(navigationContainer);
-        
-        // Aggiungi freccia sinistra
-        const prevButton = document.createElement('button');
-        prevButton.className = 'calendar-nav-button prev-month';
-        prevButton.setAttribute('aria-label', 'Mese precedente');
-        prevButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="#FF6B00"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>';
-        prevButton.addEventListener('click', function() {
-            calendar.prev();
-        });
-        
-        // Aggiungi freccia destra
-        const nextButton = document.createElement('button');
-        nextButton.className = 'calendar-nav-button next-month';
-        nextButton.setAttribute('aria-label', 'Mese successivo');
-        nextButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="1em" height="1em" fill="#FF6B00"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>';
-        nextButton.addEventListener('click', function() {
-            calendar.next();
-        });
-        
-        // Personalizza il titolo
-        const customTitleElement = document.createElement('h2');
-        customTitleElement.className = 'fc-toolbar-title custom-title';
-        customTitleElement.textContent = calendar.view.title; // Imposta il titolo iniziale
-        
-        // Nasconde il titolo originale di FullCalendar con CSS
-        const style = document.createElement('style');
-        style.textContent = '.fc-toolbar-title:not(.custom-title) { display: none !important; }';
-        document.head.appendChild(style);
-        
-        // Aggiunge i pulsanti e il titolo personalizzato al container
-        navigationContainer.appendChild(prevButton);
-        navigationContainer.appendChild(customTitleElement);
-        navigationContainer.appendChild(nextButton);
-        
-        // Aggiorna il titolo personalizzato quando cambia la vista
-        calendar.on('datesSet', function(info) {
-            customTitleElement.textContent = calendar.view.title;
-        });
-        
-        // Aggiungi pulsante "Prenota per oggi"
-        const todayButtonContainer = document.createElement('div');
-        todayButtonContainer.className = 'today-button-container';
-        calendarHeader.appendChild(todayButtonContainer);
-        
-        const todayButton = document.createElement('button');
-        todayButton.className = 'btn-today';
-        todayButton.innerHTML = '<i class="fas fa-calendar-day"></i> Prenota per oggi';
-        todayButton.addEventListener('click', function() {
-            calendar.today();
-            handleDateSelection(new Date());
-        });
-        
-        todayButtonContainer.appendChild(todayButton);
-        
-        // Gestione del menu mobile
-        let mobileMenuContainer = document.querySelector('.mobile-menu-container');
-        
-        if (!mobileMenuContainer) {
-            // Crea il container per il menu mobile se non esiste
-            mobileMenuContainer = document.createElement('div');
-            mobileMenuContainer.className = 'mobile-menu-container';
-            mobileMenuContainer.id = 'mobile-menu';
+            // ===== DOM Elements =====
             
-            // Crea il pulsante di chiusura
-            const closeButton = document.createElement('button');
-            closeButton.className = 'mobile-menu-close';
-            closeButton.id = 'mobile-menu-close';
-            closeButton.innerHTML = '<i class="fas fa-times"></i>';
-            mobileMenuContainer.appendChild(closeButton);
+            // Header elements
+            const header = document.getElementById('header');
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
             
-            // Crea la lista di menu copiando quella desktop
-            const menuItems = document.createElement('ul');
-            menuItems.className = 'mobile-menu-items';
+            // Booking form steps
+            const step1 = document.getElementById('booking-step-1');
+            const step2 = document.getElementById('booking-step-2');
+            const step3 = document.getElementById('booking-step-3');
             
-            // Copia le voci di menu esistenti o crea menu base
-            const desktopMenuItems = document.querySelectorAll('nav ul li');
-            if (desktopMenuItems.length > 0) {
-                desktopMenuItems.forEach(item => {
-                    const mobileItem = item.cloneNode(true);
-                    menuItems.appendChild(mobileItem);
-                });
-            } else {
-                // Menu base se non ci sono voci nel menu desktop
-                menuItems.innerHTML = `
-                    <li><a href="/">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="1em" height="1em" fill="currentColor">
-                            <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
-                        </svg> Home</a>
-                    </li>
-                    
-                                        <li><a href="/#why-it-works">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                            <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
-                        </svg> Perché funziona</a>
-                    </li>
-                                        <li><a href="/#about-oleg">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                            <path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/>
-                        </svg> Chi siamo</a>
-                    </li>
-                                        <li><a href="/#services">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor">
-                            <path d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40L176 96l0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L64 96C28.7 96 0 124.7 0 160l0 96 192 0 128 0 192 0 0-96c0-35.3-28.7-64-64-64l-64 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 288l-192 0 0 32c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-32L0 288 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-128z"/>
-                        </svg> Servizi</a>
-                    </li>
-                `;
-            }
+            // Step indicators
+            const stepCircle1 = document.getElementById('step-circle-1');
+            const stepCircle2 = document.getElementById('step-circle-2');
+            const stepCircle3 = document.getElementById('step-circle-3');
             
-            mobileMenuContainer.appendChild(menuItems);
+            // Navigation buttons
+            const continueToStep2 = document.getElementById('continue-to-step-2');
+            const backToStep1 = document.getElementById('back-to-step-1');
+            const continueToStep3 = document.getElementById('continue-to-step-3');
+            const backToStep2 = document.getElementById('back-to-step-2');
             
-            // Aggiungi pulsante di contatto
-            const contactButton = document.createElement('a');
-            contactButton.href = "#";
-            contactButton.className = 'btn mobile-menu-button';
-            contactButton.id = 'mobile-book-now';
-            contactButton.innerHTML = '<span>PRENOTA ORA</span>';
-            contactButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                mobileMenuContainer.classList.remove('active');
-                body.style.overflow = '';
-                scrollToBookingSection();
-            });
+            // Calendar elements
+            const calendarDays = document.getElementById('calendar-days');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const currentMonthDisplay = document.getElementById('current-month');
             
-            mobileMenuContainer.appendChild(contactButton);
+            // Time slots
+            const timeSlotsContainer = document.getElementById('time-slots');
+            const selectedDateDisplay = document.getElementById('selected-date-display');
             
-            // Aggiungi il menu mobile al body
-            body.appendChild(mobileMenuContainer);
-        }
-        
-        // Gestisci la chiusura del menu mobile
-        const mobileMenuClose = document.getElementById('mobile-menu-close');
-        if (mobileMenuClose) {
-            mobileMenuClose.addEventListener('click', function() {
-                mobileMenuContainer.classList.remove('active');
-                body.style.overflow = '';
-            });
-        }
-        
-        // Gestisci i click sui link del menu mobile
-        const mobileLinks = mobileMenuContainer.querySelectorAll('a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                mobileMenuContainer.classList.remove('active');
-                body.style.overflow = '';
-            });
-        });
-        
-        // Gestisci il toggle del menu mobile
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function() {
-                mobileMenuContainer.classList.add('active');
-                body.style.overflow = 'hidden'; // Blocca lo scrolling
-            });
-        }
-        
-        // Funzione per scrollare alla sezione di prenotazione
-        function scrollToBookingSection() {
-            const bookingSection = document.querySelector('.booking-section');
-            if (bookingSection) {
-                bookingSection.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-        
-        // Applica miglioramenti specifici per mobile al calendario
-        if (window.innerWidth <= 768) {
-            enhanceCalendarForMobile();
-        }
-        
-        window.addEventListener('resize', function() {
-            if (window.innerWidth <= 768) {
-                enhanceCalendarForMobile();
-            }
-            calendar.updateSize();
-        });
-        
-        function enhanceCalendarForMobile() {
-            // Assicurati che il calendario sia completamente visibile
-            const fcViewHarness = document.querySelector('.fc-view-harness');
-            if (fcViewHarness) {
-                fcViewHarness.style.height = 'auto';
-                fcViewHarness.style.minHeight = '350px';
-            }
+            // Booking details displays
+            const summaryDate = document.getElementById('summary-date');
+            const summaryTime = document.getElementById('summary-time');
+            const confirmationDate = document.getElementById('confirmation-date');
+            const confirmationTime = document.getElementById('confirmation-time');
             
-            // Rendi le celle dei giorni più grandi per facilitare il click/tap
-            const dayGridCells = document.querySelectorAll('.fc-daygrid-day');
-            dayGridCells.forEach(cell => {
-                cell.style.minHeight = '45px';
-                
-                // Gestisci la visualizzazione delle date passate
-                const cellDate = new Date(cell.getAttribute('data-date'));
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                if (cellDate < today) {
-                    cell.classList.add('fc-day-disabled');
-                    cell.style.pointerEvents = 'none';
-                }
-            });
+            // Form elements
+            const bookingForm = document.getElementById('booking-contact-form');
+            const bookingDateInput = document.getElementById('booking-date-input');
+            const bookingTimeInput = document.getElementById('booking-time-input');
+            const bookingTimestampInput = document.getElementById('booking-timestamp-input');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const messageInput = document.getElementById('message');
+            const privacyCheck = document.getElementById('privacy-check');
             
-            // Migliora la responsività del calendario
-            const scroller = document.querySelector('.fc-scroller');
-            if (scroller) {
-                scroller.style.overflow = 'visible';
-            }
-        }
-        
-        // Funzione per gestire la selezione di una data
-        function handleDateSelection(date) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Loader and confirmation
+            const loader = document.getElementById('booking-loader');
+            const confirmationContainer = document.getElementById('confirmation-container');
             
-            if (date < today) {
-                alert('Non puoi selezionare una data passata');
-                return;
-            }
+            // ===== State variables =====
+            let currentDate = new Date();
+            let currentMonth = currentDate.getMonth();
+            let currentYear = currentDate.getFullYear();
+            let selectedDate = null;
+            let selectedTimeSlot = null;
             
-            // Rimuovi la classe selected-day da tutte le celle
-            document.querySelectorAll('.fc-daygrid-day').forEach(cell => {
-                cell.classList.remove('selected-day');
-            });
+            // ===== Event Listeners =====
             
-            // Aggiungi la classe selected-day alla cella selezionata
-            const selectedCell = document.querySelector(`.fc-daygrid-day[data-date="${date.toISOString().split('T')[0]}"]`);
-            if (selectedCell) {
-                selectedCell.classList.add('selected-day');
-            }
-            
-            // Salva la data selezionata
-            selectedDate = date;
-            
-            // Formatta la data per mostrarla all'utente
-            const formattedDate = formatDate(date);
-            selectedDateEl.textContent = formattedDate;
-            summaryDateEl.textContent = formattedDate;
-            
-            // Recupera gli slot orari disponibili
-            fetchAvailableTimeSlots(date);
-            
-            // Passa allo step 2
-            moveToStep(2);
-        }
-        
-        // Funzione per recuperare gli slot orari disponibili
-        function fetchAvailableTimeSlots(date) {
-            // Mostra il loader
-            timeSlotsContainer.innerHTML = '';
-            loaderCalendar.style.display = 'block';
-            
-            // Formatta la data per l'API (assicurati che sia nel formato corretto YYYY-MM-DD)
-            const formattedDate = formatDateForAPI(date);
-            
-            console.log('Fetching availability for date:', formattedDate);
-            
-            // Chiama l'API per verificare la disponibilità
-            fetch(`/api/booking/availability?date=${formattedDate}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    loaderCalendar.style.display = 'none';
-                    
-                    if (data.success && data.availability && Array.isArray(data.availability)) {
-                        // Usa i dati di disponibilità dall'API
-                        availableTimeSlots = data.availability;
-                        renderTimeSlots();
-                        console.log('Availability data loaded successfully');
-                    } else {
-                        console.warn('API returned success=false or invalid data format:', data);
-                        // Fallback con orari statici
-                        useStaticTimeSlots(date);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching availability:', error);
-                    loaderCalendar.style.display = 'none';
-                    
-                    // Fallback in caso di errore
-                    useStaticTimeSlots(date);
-                });
-        }
-        
-        // Funzione di supporto per formattare la data nel formato YYYY-MM-DD
-        function formatDateForAPI(date) {
-            const d = new Date(date);
-            let month = '' + (d.getMonth() + 1);
-            let day = '' + d.getDate();
-            const year = d.getFullYear();
-        
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-        
-            return [year, month, day].join('-');
-        }
-        
-        // Funzione per usare slot orari statici come fallback
-        function useStaticTimeSlots(date) {
-            console.warn('Using static time slots as fallback');
-            
-            const workHours = [9, 10, 11, 12, 14, 15, 16, 17];
-            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-            
-            // Rendi disponibili meno slot nei weekend
-            const bookedSlots = isWeekend ? [9, 10, 12, 16, 17] : [10, 15];
-            
-            availableTimeSlots = workHours.map(hour => ({
-                hour: hour,
-                formatted: `${hour}:00`,
-                available: !bookedSlots.includes(hour)
-            }));
-            
-            renderTimeSlots();
-        }
-        
-        // Funzione per visualizzare gli slot orari disponibili
-        function renderTimeSlots() {
-            timeSlotsContainer.innerHTML = '';
-            
-            availableTimeSlots.forEach(slot => {
-                const slotEl = document.createElement('div');
-                slotEl.className = `time-slot ${slot.available ? '' : 'disabled'}`;
-                slotEl.textContent = slot.formatted;
-                
-                // Aggiungi attributi di accessibilità
-                slotEl.setAttribute('role', 'button');
-                slotEl.setAttribute('aria-label', `Orario ${slot.formatted} ${slot.available ? 'disponibile' : 'non disponibile'}`);
-                
-                if (slot.available) {
-                    slotEl.tabIndex = 0; // Rendi l'elemento focusable
-                    
-                    slotEl.addEventListener('click', () => {
-                        selectTimeSlot(slotEl, slot);
-                    });
-                    
-                    // Supporto per tastiera (accessibilità)
-                    slotEl.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            selectTimeSlot(slotEl, slot);
-                        }
-                    });
+            // Header scroll effect
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
                 } else {
-                    slotEl.setAttribute('aria-disabled', 'true');
+                    header.classList.remove('scrolled');
                 }
+            });
+            
+            // Mobile menu
+            if (mobileMenuToggle && mobileMenu && mobileMenuClose) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
                 
-                timeSlotsContainer.appendChild(slotEl);
-            });
-        }
-        
-        // Funzione per selezionare uno slot orario
-        function selectTimeSlot(slotElement, slot) {
-            // Deseleziona tutti gli slot
-            document.querySelectorAll('.time-slot').forEach(el => {
-                el.classList.remove('selected');
-                el.setAttribute('aria-selected', 'false');
-            });
-            
-            // Seleziona questo slot
-            slotElement.classList.add('selected');
-            slotElement.setAttribute('aria-selected', 'true');
-            selectedTimeSlot = slot;
-            
-            // Aggiorna il riepilogo
-            summaryTimeEl.textContent = slot.formatted;
-            
-            // Abilita il pulsante di conferma
-            confirmTimeSlotBtn.disabled = false;
-            
-            // Animazione di feedback
-            if ('vibrate' in navigator && window.innerWidth <= 768) {
-                navigator.vibrate(50); // Feedback aptico leggero (solo su dispositivi mobili)
+                mobileMenuClose.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+                
+                // Close menu when clicking links
+                document.querySelectorAll('#mobile-menu a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
             }
-        }
-        
-        // Event listeners
-        confirmTimeSlotBtn.addEventListener('click', () => {
-            // Compila i campi nascosti del form
-            bookingDateInput.value = formatDate(selectedDate);
-            bookingTimeInput.value = selectedTimeSlot.formatted;
             
-            // Crea un timestamp per la prenotazione preservando il fuso orario
-            const bookingDate = new Date(selectedDate);
+            // Calendar navigation
+            prevMonthBtn.addEventListener('click', function() {
+                navigateMonth(-1);
+            });
             
-            // Imposta l'ora mantenendo il fuso orario locale (per Roma/Italia)
-            bookingDate.setHours(selectedTimeSlot.hour, 0, 0, 0);
+            nextMonthBtn.addEventListener('click', function() {
+                navigateMonth(1);
+            });
             
-            // Aggiungi un attributo data per debug
-            bookingDate.setAttribute = selectedTimeSlot.hour;
+            // Step navigation
+            continueToStep2.addEventListener('click', function() {
+                goToStep(2);
+                generateTimeSlots();
+            });
             
-            // Salva il timestamp come ISO String per coerenza
-            bookingTimestampInput.value = bookingDate.toISOString();
+            backToStep1.addEventListener('click', function() {
+                goToStep(1);
+            });
             
-            console.log('Orario prenotazione:', selectedTimeSlot.hour + ':00');
-            console.log('Timestamp salvato:', bookingTimestampInput.value);
-            
-            // Passa allo step 3
-            moveToStep(3);
-        });
-        
-        backToStep1Btn.addEventListener('click', () => {
-            moveToStep(1);
-        });
-        
-        backToStep2Btn.addEventListener('click', () => {
-            moveToStep(2);
-        });
-        
-        // Gestione del form di contatto
-        if (contactForm) {
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+            continueToStep3.addEventListener('click', function() {
+                goToStep(3);
                 
-                // Validazione client-side
-                const nameInput = document.getElementById('name');
-                const emailInput = document.getElementById('email');
-                const phoneInput = document.getElementById('phone');
-                const privacyCheck = document.getElementById('privacy-check');
+                // Update booking summary
+                summaryDate.textContent = formatDateLong(selectedDate);
+                summaryTime.textContent = selectedTimeSlot;
                 
-                // Verifica che i campi obbligatori siano compilati
-                let isValid = true;
+                // Update hidden inputs
+                bookingDateInput.value = formatDateISO(selectedDate);
+                bookingTimeInput.value = selectedTimeSlot;
                 
-                if (!nameInput.value.trim()) {
-                    showInputError(nameInput, 'Il nome è obbligatorio');
-                    isValid = false;
+                // Create timestamp
+                const [hours, minutes] = selectedTimeSlot.split(':');
+                const bookingDateTime = new Date(selectedDate);
+                bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                bookingTimestampInput.value = bookingDateTime.toISOString();
+            });
+            
+            backToStep2.addEventListener('click', function() {
+                goToStep(2);
+            });
+            
+            // Form submission
+            if (bookingForm) {
+                bookingForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (validateForm()) {
+                        submitBooking();
+                    }
+                });
+                
+                // Form field validation
+                nameInput.addEventListener('blur', function() {
+                    validateField(nameInput, 'name-error', 'Inserisci il tuo nome e cognome');
+                });
+                
+                emailInput.addEventListener('blur', function() {
+                    validateField(emailInput, 'email-error', 'Inserisci un indirizzo email valido', validateEmail);
+                });
+                
+                phoneInput.addEventListener('blur', function() {
+                    validateField(phoneInput, 'phone-error', 'Inserisci un numero di telefono valido');
+                });
+            }
+            
+            // Cookie Banner
+            const cookieBanner = document.getElementById('cookie-banner');
+            const cookieClose = document.getElementById('cookie-close');
+            const acceptAllCookies = document.getElementById('cookie-accept-all');
+            const rejectAllCookies = document.getElementById('cookie-reject-all');
+            
+            // Check if cookie consent is already stored
+            if (!localStorage.getItem('cookieConsent')) {
+                setTimeout(() => {
+                    cookieBanner.classList.add('show');
+                }, 1000);
+            }
+            
+            if (cookieClose) {
+                cookieClose.addEventListener('click', function() {
+                    cookieBanner.classList.remove('show');
+                });
+            }
+            
+            if (acceptAllCookies) {
+                acceptAllCookies.addEventListener('click', function() {
+                    localStorage.setItem('cookieConsent', 'accepted');
+                    cookieBanner.classList.remove('show');
+                });
+            }
+            
+            if (rejectAllCookies) {
+                rejectAllCookies.addEventListener('click', function() {
+                    localStorage.setItem('cookieConsent', 'rejected');
+                    cookieBanner.classList.remove('show');
+                });
+            }
+            
+            // ===== Initialize Calendar =====
+            renderCalendar();
+            
+            // ===== Functions =====
+            
+            // Navigation between steps
+            function goToStep(step) {
+                // Hide all steps
+                step1.style.display = 'none';
+                step2.style.display = 'none';
+                step3.style.display = 'none';
+                
+                // Reset step indicators
+                stepCircle1.classList.remove('active', 'completed');
+                stepCircle2.classList.remove('active', 'completed');
+                stepCircle3.classList.remove('active', 'completed');
+                
+                // Show the selected step
+                if (step === 1) {
+                    step1.style.display = 'block';
+                    stepCircle1.classList.add('active');
+                } else if (step === 2) {
+                    step2.style.display = 'block';
+                    stepCircle1.classList.add('completed');
+                    stepCircle2.classList.add('active');
+                } else if (step === 3) {
+                    step3.style.display = 'block';
+                    stepCircle1.classList.add('completed');
+                    stepCircle2.classList.add('completed');
+                    stepCircle3.classList.add('active');
+                }
+            }
+            
+            // Calendar functions
+            function renderCalendar() {
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+                
+                // Update month display
+                const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+                currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
+                // Clear previous days
+                calendarDays.innerHTML = '';
+                
+                // Add days from previous month
+                const daysFromPrevMonth = startingDayOfWeek;
+                const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+                
+                for (let i = daysFromPrevMonth; i > 0; i--) {
+                    const day = prevMonthLastDay - i + 1;
+                    const date = new Date(currentYear, currentMonth - 1, day);
+                    
+                    addDayToCalendar(day, date, 'other-month disabled');
                 }
                 
-                if (!emailInput.value.trim()) {
-                    showInputError(emailInput, 'L\'email è obbligatoria');
-                    isValid = false;
-                } else if (!isValidEmail(emailInput.value)) {
-                    showInputError(emailInput, 'Inserisci un indirizzo email valido');
-                    isValid = false;
+                // Add days from current month
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const date = new Date(currentYear, currentMonth, i);
+                    
+                    let classes = '';
+                    
+                    // Check if date is today
+                    if (date.getFullYear() === today.getFullYear() && 
+                        date.getMonth() === today.getMonth() && 
+                        date.getDate() === today.getDate()) {
+                        classes += ' today';
+                    }
+                    
+                    // Check if date is in the past
+                    if (date < today) {
+                        classes += ' disabled';
+                    }
+                    
+                    // Check if date is selected
+                    if (selectedDate && 
+                        date.getFullYear() === selectedDate.getFullYear() && 
+                        date.getMonth() === selectedDate.getMonth() && 
+                        date.getDate() === selectedDate.getDate()) {
+                        classes += ' selected';
+                    }
+                    
+                    addDayToCalendar(i, date, classes);
                 }
                 
-                if (!phoneInput.value.trim()) {
-                    showInputError(phoneInput, 'Il numero di telefono è obbligatorio');
-                    isValid = false;
+                // Add days from next month
+                const daysRequired = 42; // 6 rows of 7 days
+                const daysFromNextMonth = daysRequired - (daysFromPrevMonth + daysInMonth);
+                
+                for (let i = 1; i <= daysFromNextMonth; i++) {
+                    const date = new Date(currentYear, currentMonth + 1, i);
+                    
+                    addDayToCalendar(i, date, 'other-month');
+                }
+            }
+            
+            function addDayToCalendar(day, date, additionalClasses) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day');
+                
+                if (additionalClasses) {
+                    additionalClasses.split(' ').forEach(cls => {
+                        if (cls) dayElement.classList.add(cls);
+                    });
                 }
                 
-                if (!privacyCheck.checked) {
-                    showInputError(privacyCheck, 'Devi accettare la Privacy Policy');
-                    isValid = false;
+                dayElement.textContent = day;
+                dayElement.setAttribute('data-date', formatDateISO(date));
+                
+                // Add click event for selectable dates
+                if (!dayElement.classList.contains('disabled')) {
+                    dayElement.addEventListener('click', function() {
+                        selectDate(date, dayElement);
+                    });
                 }
                 
-                if (!isValid) {
-                    return; // Non procedere con l'invio se ci sono errori
+                calendarDays.appendChild(dayElement);
+            }
+            
+            function navigateMonth(increment) {
+                currentMonth += increment;
+                
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
                 }
                 
-                // Mostra il loader
-                loaderForm.style.display = 'block';
+                renderCalendar();
+            }
+            
+            function selectDate(date, element) {
+                // Remove selected class from previously selected date
+                const prevSelected = document.querySelector('.calendar-day.selected');
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
+                }
                 
-                // Raccogli i dati del form
-                const formData = {
-                  name: nameInput.value,
-                  email: emailInput.value,
-                  phone: phoneInput.value,
-                  message: document.getElementById('message').value,
-                  bookingDate: bookingDateInput.value,
-                  bookingTime: bookingTimeInput.value,
-                  bookingTimestamp: bookingTimestampInput.value,
-                  source: 'booking-form'
-                };
+                // Add selected class to current selection
+                element.classList.add('selected');
                 
-                // Invia la prenotazione al server
-                fetch('/api/submit-booking', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(formData)
-                })
+                // Store selected date
+                selectedDate = date;
+                
+                // Enable the continue button
+                continueToStep2.disabled = false;
+            }
+            
+            // Time slots functions
+            function fetchAvailableTimeSlots(date) {
+              const formattedDate = formatDateForAPI(date);
+              
+              fetch(`/api/booking/availability?date=${formattedDate}`)
                 .then(response => response.json())
                 .then(data => {
-                  // Aggiorna il riepilogo nel messaggio di conferma
-                  document.getElementById('confirmation-date').textContent = bookingDateInput.value;
-                  document.getElementById('confirmation-time').textContent = bookingTimeInput.value;
-                  loaderForm.style.display = 'none';
-                  
-                  if (data.success) {
-                    // Nascondi il form
-                    contactForm.style.display = 'none';
-                    
-                    // Se l'invio è riuscito e Meta Pixel è attivo, traccia l'evento con lo stesso eventId
-                    if (window.fbq && typeof window.fbq === 'function' && window._metaPixelEnabled) {
-                      window.fbq('track', 'Lead', {}, {eventID: data.eventId + '_lead'});
-                      window.fbq('track', 'Schedule', {}, {eventID: data.eventId + '_schedule'});
-                      console.log('Eventi Lead e Schedule tracciati con eventID:', data.eventId);
-                    }
-                    
-                    // Mostra il messaggio di conferma
-                    confirmationMessage.style.display = 'block';
-                    
-                    // Aggiungi informazioni sull'email al messaggio di conferma
-                    const confirmationText = confirmationMessage.querySelector('p');
-                    if (confirmationText) {
-                      confirmationText.innerHTML = `Grazie per aver prenotato una chiamata con noi. Abbiamo inviato un'email di conferma all'indirizzo <strong>${emailInput.value}</strong> con tutti i dettagli.`;
-                    }
-                    
-                    // Scroll verso il messaggio
-                    confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+                  if (data.success && data.availability) {
+                    // Utilizza la disponibilità effettiva dal server
+                    renderTimeSlots(data.availability);
                   } else {
-                    alert('Si è verificato un errore durante l\'invio. Riprova più tardi.');
+                    // Gestione errori
                   }
                 })
                 .catch(error => {
-                  console.error('Errore durante la prenotazione:', error);
-                  loaderForm.style.display = 'none';
-                  alert('Si è verificato un errore di rete. Riprova più tardi.');
+                  console.error('Error fetching availability:', error);
                 });
-              });
-            
-            // Aggiungi gestione degli eventi per la rimozione degli errori
-            const formInputs = contactForm.querySelectorAll('input, textarea');
-            formInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearInputError(input);
-                });
-                
-                input.addEventListener('focus', function() {
-                    clearInputError(input);
-                });
-            });
-        }
-        
-        // Funzioni di utilità
-        function moveToStep(step) {
-            // Nascondi tutti gli step
-            [step1El, step2El, step3El].forEach(el => {
-                el.classList.remove('step-active');
-                el.classList.add('step-hidden');
-            });
-            
-            // Mostra lo step richiesto
-            switch (step) {
-                case 1:
-                    step1El.classList.remove('step-hidden');
-                    step1El.classList.add('step-active');
-                    break;
-                case 2:
-                    step2El.classList.remove('step-hidden');
-                    step2El.classList.add('step-active');
-                    break;
-                case 3:
-                    step3El.classList.remove('step-hidden');
-                    step3El.classList.add('step-active');
-                    break;
             }
-            
-            // Scroll verso l'inizio della sezione
-            window.scrollTo({
-                top: document.querySelector('.booking-section').offsetTop - 80,
-                behavior: 'smooth'
-            });
-        }
-        
-        function formatDate(date) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('it-IT', options);
-        }
-        
-        function isValidEmail(email) {
-            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return re.test(String(email).toLowerCase());
-        }
-        
-        function showInputError(inputElement, errorMessage) {
-            // Aggiungi la classe di errore
-            inputElement.classList.add('input-error');
-            
-            // Rimuovi eventuali messaggi di errore precedenti
-            const existingError = inputElement.parentNode.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Crea il messaggio di errore
-            const errorElement = document.createElement('div');
-            errorElement.className = 'error-message';
-            errorElement.textContent = errorMessage;
-            
-            // Aggiungi il messaggio dopo l'input
-            if (inputElement.type === 'checkbox') {
-                // Per i checkbox, aggiungi l'errore dopo la label
-                const label = inputElement.parentNode.querySelector('label');
-                if (label) {
-                    label.parentNode.insertBefore(errorElement, label.nextSibling);
-                } else {
-                    inputElement.parentNode.appendChild(errorElement);
+                        
+            function selectTimeSlot(time, element) {
+                // Remove selected class from previously selected time slot
+                const prevSelected = document.querySelector('.time-slot.selected');
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
                 }
-            } else {
-                // Per gli altri input, aggiungi dopo l'input
-                inputElement.parentNode.appendChild(errorElement);
+                
+                // Add selected class to current selection
+                element.classList.add('selected');
+                
+                // Store selected time slot
+                selectedTimeSlot = time;
+                
+                // Enable the continue button
+                continueToStep3.disabled = false;
             }
             
-            // Scroll al primo campo con errore se necessario
-            if (document.querySelector('.input-error') && window.innerWidth <= 768) {
-                setTimeout(() => {
-                    inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+            // Form validation functions
+            function validateForm() {
+                let valid = true;
+                
+                if (!validateField(nameInput, 'name-error', 'Inserisci il tuo nome e cognome')) {
+                    valid = false;
+                }
+                
+                if (!validateField(emailInput, 'email-error', 'Inserisci un indirizzo email valido', validateEmail)) {
+                    valid = false;
+                }
+                
+                if (!validateField(phoneInput, 'phone-error', 'Inserisci un numero di telefono valido')) {
+                    valid = false;
+                }
+                
+                if (!privacyCheck.checked) {
+                    document.getElementById('privacy-error').style.display = 'block';
+                    valid = false;
+                } else {
+                    document.getElementById('privacy-error').style.display = 'none';
+                }
+                
+                return valid;
             }
-        }
-        
-        function clearInputError(inputElement) {
-            // Rimuovi la classe di errore
-            inputElement.classList.remove('input-error');
             
-            // Rimuovi il messaggio di errore
-            const errorElement = inputElement.parentNode.querySelector('.error-message');
-            if (errorElement) {
-                errorElement.remove();
+            function validateField(input, errorId, errorMessage, customValidation) {
+                const errorElement = document.getElementById(errorId);
+                let valid = true;
+                
+                if (!input.value.trim()) {
+                    input.classList.add('error');
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block';
+                    valid = false;
+                } else if (customValidation && !customValidation(input.value.trim())) {
+                    input.classList.add('error');
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block';
+                    valid = false;
+                } else {
+                    input.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+                
+                return valid;
             }
-        }
-    });
+            
+            function validateEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(email.toLowerCase());
+            }
+            
+            function submitBooking() {
+              // Mostra loader
+              step3.style.display = 'none';
+              loader.style.display = 'block';
+              
+              // Raccogli i dati del form
+              const formData = {
+                name: nameInput.value,
+                email: emailInput.value,
+                phone: phoneInput.value,
+                message: messageInput.value,
+                bookingDate: bookingDateInput.value,
+                bookingTime: bookingTimeInput.value,
+                bookingTimestamp: bookingTimestampInput.value
+              };
+              
+              // Invia i dati al server
+              fetch('/api/submit-booking', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+              })
+              .then(response => response.json())
+              .then(data => {
+                loader.style.display = 'none';
+                if (data.success) {
+                  confirmationContainer.style.display = 'block';
+                } else {
+                  // Gestione errori
+                }
+              })
+              .catch(error => {
+                console.error('Error submitting booking:', error);
+                loader.style.display = 'none';
+                // Mostra messaggio di errore
+              });
+            }
+            
+            // Utility functions
+            function formatDateLong(date) {
+                if (!date) return '';
+                
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('it-IT', options).replace(/^\w/, c => c.toUpperCase());
+            }
+            
+            function formatDateISO(date) {
+                if (!date) return '';
+                
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                
+                return `${year}-${month}-${day}`;
+            }
+        });
     </script>
 </body>
 </html>
