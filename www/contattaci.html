@@ -2396,7 +2396,7 @@
                 selectedTimeSlot = timeValue;
                 
                 // Aggiorna il riepilogo
-                summaryTimeEl.textContent = typeof timeValue === 'object' 
+                summaryTime.textContent = typeof timeValue === 'object' 
                     ? (timeValue.formatted || timeValue.time || `${timeValue.hour}:00`) 
                     : timeValue;
                 
