@@ -357,11 +357,11 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
       hashedUserData.fbc = `fb.1.${timestamp}.${userData.fbclid}`;
     }
     
-    // Payload completo
-    const customData = {
+    // Crea l'oggetto customData arricchito
+    const enrichedCustomData = {
       lead_event_source: "CRM Dashboard",
       event_source: "crm",
-      ...customData  // Attenzione: qui stai usando lo stesso nome della costante
+      ...customData
     };
     
     // Poi crea il payload base
@@ -372,7 +372,7 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
         event_id: eventId,
         action_source: "system_generated",
         user_data: hashedUserData,
-        custom_data: customData  // Qui aggiungi il custom_data base
+        custom_data: enrichedCustomData  // Usa il nuovo oggetto arricchito
       }],
       access_token: accessToken,
       partner_agent: 'costruzionedigitale-nodejs-crm'
