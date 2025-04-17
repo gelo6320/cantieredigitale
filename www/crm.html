@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.10.1/main.min.js"></script>
   <title>CRM Dashboard - Costruzione Digitale</title>
   <!-- Caricamento Vue.js -->
   <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
@@ -2121,6 +2124,413 @@
       gap: 10px;
       justify-content: center;
     }
+
+    /* ===== STILE CALENDARIO ===== */
+    .fc {
+      --fc-border-color: rgba(255, 255, 255, 0.1);
+      --fc-button-bg-color: var(--light-accent);
+      --fc-button-border-color: var(--border-color);
+      --fc-button-hover-bg-color: var(--primary-color);
+      --fc-button-hover-border-color: var(--primary-color);
+      --fc-button-active-bg-color: var(--primary-color);
+      --fc-button-active-border-color: var(--primary-color);
+      --fc-event-bg-color: var(--primary-color);
+      --fc-event-border-color: var(--primary-color);
+      --fc-today-bg-color: rgba(255, 107, 0, 0.1);
+      --fc-neutral-bg-color: var(--light-accent);
+      --fc-list-event-hover-bg-color: rgba(255, 107, 0, 0.1);
+      height: 700px;
+    }
+    
+    .fc .fc-toolbar-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    .fc .fc-button {
+      padding: 0.5rem 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border-radius: var(--border-radius);
+    }
+    
+    .fc .fc-button:focus {
+      box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.3);
+    }
+    
+    .fc .fc-button-primary:not(:disabled):active, 
+    .fc .fc-button-primary:not(:disabled).fc-button-active {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .fc .fc-button-primary:disabled {
+      background-color: rgba(255, 107, 0, 0.4);
+      border-color: rgba(255, 107, 0, 0.4);
+    }
+    
+    .fc-theme-standard th {
+      padding: 12px 0;
+      background-color: rgba(0, 0, 0, 0.2);
+      font-weight: 600;
+      color: var(--primary-color);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .fc-theme-standard td {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .fc-col-header-cell-cushion,
+    .fc-daygrid-day-number {
+      color: var(--text-color);
+      text-decoration: none !important;
+      padding: 6px 8px;
+      font-weight: 500;
+    }
+    
+    .fc-daygrid-day-number {
+      font-size: 0.9rem;
+    }
+    
+    .fc-daygrid-event {
+      white-space: nowrap;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: 500;
+      padding: 3px 8px;
+      margin-bottom: 2px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .fc-daygrid-event:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .fc-h-event {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .fc-theme-standard .fc-scrollgrid {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .fc-day-today {
+      background-color: rgba(255, 107, 0, 0.05) !important;
+    }
+    
+    .fc-popover {
+      background-color: var(--light-accent);
+      border-color: rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .fc-popover .fc-popover-header {
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+      font-weight: 600;
+      padding: 8px 10px;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: var(--border-radius);
+    }
+    
+    .fc-popover .fc-popover-body {
+      padding: 8px;
+    }
+    
+    .fc-list-day-cushion {
+      background-color: rgba(0, 0, 0, 0.2) !important;
+      padding: 10px 15px !important;
+    }
+    
+    .fc-list-event:hover td {
+      background-color: rgba(255, 107, 0, 0.1) !important;
+    }
+    
+    .fc-list-event-title,
+    .fc-list-event-time {
+      color: var(--text-color) !important;
+      font-size: 0.9rem;
+      padding: 8px 15px !important;
+    }
+    
+    .fc-timegrid-slot {
+      height: 45px !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .fc-timegrid-axis {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .fc-timegrid-event {
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    .fc-timegrid-event .fc-event-main {
+      padding: 4px 6px;
+    }
+    
+    .fc-timegrid-event .fc-event-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    
+    .fc-timegrid-event .fc-event-time {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+    
+    /* Stile per vista "week" */
+    .fc-timeGridWeek-view .fc-col-header-cell {
+      font-size: 0.85rem;
+    }
+    
+    .calendar-mobile .fc-toolbar-title {
+      font-size: 1.2rem;
+    }
+    
+    .fc-view-harness {
+      min-height: 400px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: var(--border-radius);
+    }
+    
+    /* Stile per eventi con stati diversi */
+    .event-confirmed {
+      background-color: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+    }
+    
+    .event-pending {
+      background-color: var(--warning-color) !important;
+      border-color: var(--warning-color) !important;
+    }
+    
+    .event-completed {
+      background-color: var(--success-color) !important;
+      border-color: var(--success-color) !important;
+    }
+    
+    .event-cancelled {
+      background-color: var(--danger-color) !important;
+      border-color: var(--danger-color) !important;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    
+    /* Stile per la legenda */
+    .calendar-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    
+    /* Stile per la lista appuntamenti */
+    .appointment-list {
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-color) rgba(0, 0, 0, 0.2);
+    }
+    
+    .appointment-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .appointment-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    
+    .appointment-list::-webkit-scrollbar-thumb {
+      background-color: var(--primary-color);
+      border-radius: 3px;
+    }
+    
+    .appointment-list-item {
+      padding: 12px;
+      border-radius: var(--border-radius);
+      margin-bottom: 8px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-left: 3px solid var(--primary-color);
+      transition: all 0.2s ease;
+    }
+    
+    .appointment-list-item:hover {
+      background-color: rgba(0, 0, 0, 0.25);
+      transform: translateX(2px);
+    }
+    
+    .appointment-list-item .title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+      color: var(--text-color);
+    }
+    
+    .appointment-list-item .time {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .appointment-list-item .description {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .appointment-list-item .actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+    }
+    
+    /* Vista orizzontale per mobile */
+    .hours-timeline {
+      display: flex;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .hour-column {
+      flex: 0 0 90px;
+      min-width: 90px;
+      padding: 8px;
+      text-align: center;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      scroll-snap-align: start;
+    }
+    
+    .hour-column .hour-header {
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
+    }
+    
+    .hour-column .empty-slot {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+      padding: 8px 0;
+    }
+    
+    .hour-column .event-pill {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 0.7rem;
+      margin-bottom: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Modifiche responsive */
+    @media (max-width: 767.98px) {
+      .fc {
+        font-size: 0.85rem;
+        height: auto;
+      }
+      
+      .fc-header-toolbar {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 1rem !important;
+      }
+      
+      .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      
+      .fc-toolbar-chunk:first-child {
+        order: 2;
+      }
+      
+      .fc-toolbar-chunk:nth-child(2) {
+        order: 1;
+      }
+      
+      .fc-toolbar-chunk:last-child {
+        order: 3;
+      }
+      
+      .fc .fc-toolbar.fc-header-toolbar {
+        margin-bottom: 0.5em;
+      }
+      
+      .fc .fc-toolbar-title {
+        font-size: 1.2rem;
+      }
+      
+      .fc .fc-button {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+      }
+      
+      .fc-view-harness {
+        min-height: 300px;
+      }
+      
+      .fc-col-header-cell-cushion {
+        padding: 4px;
+      }
+      
+      .fc-daygrid-day-number {
+        padding: 4px;
+      }
+      
+      /* Miglioramenti per vista mobile orizzontale */
+      .hour-column {
+        flex: 0 0 80px;
+        min-width: 80px;
+      }
+    }
+    
+    /* Animazioni per eventi */
+    @keyframes eventPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    
+    .fc-event.new-event {
+      animation: eventPulse 1.5s ease infinite;
+    }
   </style>
 </head>
 <body>
@@ -2172,6 +2582,12 @@
                 <a class="nav-link" :class="{ 'active': activeTab === 'bookings' }" href="#" 
                     @click.prevent="selectTab('bookings')">
                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="1em" height="1em" fill="currentColor"><path d="M0 48V487.7C0 501.1 10.9 512 24.3 512c5 0 9.9-1.5 14-4.4L192 400 345.7 507.6c4.1 2.9 9 4.4 14 4.4c13.4 0 24.3-10.9 24.3-24.3V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48z"/></svg> Prenotazioni
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'calendar' }" href="#" 
+                   @click.prevent="selectTab('calendar')">
+                   <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336z"/></svg> Calendario
                 </a>
               </li>
               <li class="nav-item">
@@ -2794,6 +3210,123 @@
                           </tr>
                         </tbody>
                       </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Calendario -->
+        <div v-if="activeTab === 'calendar'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Calendario Appuntamenti</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button @click="loadCalendarEvents()" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+              <button class="btn btn-sm btn-primary" @click="openNewAppointmentModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor" class="me-1">
+                  <path d="M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"/>
+                </svg>
+                <span>Nuovo</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-9 col-md-8">
+              <div class="card fade-in">
+                <div class="card-body p-0">
+                  <div id="calendar" ref="calendarEl" style="font-size: 0.85rem;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-3 mt-md-0">
+              <div class="card fade-in mb-3">
+                <div class="card-header">
+                  <h5 class="m-0">Appuntamenti del giorno</h5>
+                </div>
+                <div class="card-body p-0">
+                  <div v-if="selectedDateEvents.length === 0" class="p-3 text-center">
+                    <p class="text-muted">Nessun appuntamento per questa data</p>
+                  </div>
+                  <ul class="list-group list-group-flush" v-else>
+                    <li v-for="event in selectedDateEvents" :key="event.id" class="list-group-item" 
+                        :class="{'bg-light-accent': true}"
+                        style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" style="font-size: 0.9rem;">{{ event.title }}</span>
+                        <div>
+                          <button class="btn btn-sm btn-outline-primary me-1" @click="editAppointment(event)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger" @click="deleteAppointment(event)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <p class="mb-1" style="font-size: 0.8rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="0.9em" height="0.9em" fill="currentColor" class="me-1">
+                          <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
+                        </svg>
+                        {{ formatEventTime(event) }}
+                      </p>
+                      <p v-if="event.description" class="mb-0 text-muted" style="font-size: 0.8rem;">
+                        {{ event.description }}
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="card fade-in">
+                <div class="card-header">
+                  <h5 class="m-0">Legenda</h5>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="badge me-2" style="background-color: var(--primary-color); width: 20px; height: 20px;"></span>
+                    <span style="font-size: 0.85rem;">Prenotazione confermata</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="badge me-2" style="background-color: var(--warning-color); width: 20px; height: 20px;"></span>
+                    <span style="font-size: 0.85rem;">In attesa di conferma</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="badge me-2" style="background-color: var(--success-color); width: 20px; height: 20px;"></span>
+                    <span style="font-size: 0.85rem;">Completato</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <span class="badge me-2" style="background-color: var(--danger-color); width: 20px; height: 20px;"></span>
+                    <span style="font-size: 0.85rem;">Cancellato</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Vista mobile calendario (orizzontale) -->
+          <div class="d-block d-md-none mt-3">
+            <div class="card fade-in">
+              <div class="card-header">
+                <h5 class="m-0">Orari giornalieri</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="d-flex overflow-auto" style="scroll-snap-type: x mandatory;">
+                  <div v-for="hour in dailyHours" :key="hour" class="flex-shrink-0 text-center p-2" 
+                      style="min-width: 90px; scroll-snap-align: start; border-right: 1px solid rgba(255,255,255,0.1);">
+                    <div class="fw-bold mb-2" style="font-size: 0.9rem;">{{ hour }}:00</div>
+                    <div v-if="getEventsForHour(hour).length === 0" class="text-muted" style="font-size: 0.8rem;">
+                      Libero
+                    </div>
+                    <div v-for="event in getEventsForHour(hour)" :key="event.id" 
+                        class="p-1 mb-1 rounded" 
+                        :style="{backgroundColor: event.backgroundColor, color: '#fff', fontSize: '0.75rem'}"
+                        @click="editAppointment(event)">
+                      {{ event.title }}
                     </div>
                   </div>
                 </div>
@@ -3733,7 +4266,439 @@
           const toast = new bootstrap.Toast(toastEl);
           toast.show();
         };
+
+        const calendarEl = ref(null);
+        const calendarInstance = ref(null);
+        const calendarEvents = ref([]);
+        const selectedDate = ref(new Date());
+        const selectedDateEvents = ref([]);
+        const currentAppointment = ref({
+          title: '',
+          date: '',
+          time: '09:00',
+          duration: '60',
+          status: 'pending',
+          clientId: '',
+          description: ''
+        });
+        const editingAppointment = ref(false);
+        const isSavingAppointment = ref(false);
+        const clients = ref([]);
+        const dailyHours = ref([9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
         
+        // Metodi da aggiungere
+        const initCalendar = () => {
+          if (calendarInstance.value) {
+            calendarInstance.value.destroy();
+          }
+          
+          if (!calendarEl.value) return;
+          
+          const calendar = new FullCalendar.Calendar(calendarEl.value, {
+            initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
+            headerToolbar: {
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            locale: 'it',
+            businessHours: {
+              daysOfWeek: [1, 2, 3, 4, 5], // Lunedì - Venerdì
+              startTime: '09:00',
+              endTime: '18:00',
+            },
+            selectable: true,
+            editable: true,
+            droppable: true,
+            events: calendarEvents.value,
+            eventClick: (info) => {
+              editAppointment(info.event);
+            },
+            dateClick: (info) => {
+              selectedDate.value = new Date(info.date);
+              updateSelectedDateEvents();
+            },
+            eventDrop: (info) => {
+              handleEventDrop(info.event);
+            },
+            windowResize: (view) => {
+              if (window.innerWidth < 768) {
+                calendar.changeView('listWeek');
+              } else {
+                calendar.changeView('dayGridMonth');
+              }
+            }
+          });
+          
+          calendar.render();
+          calendarInstance.value = calendar;
+        };
+        
+        const loadCalendarEvents = async () => {
+          try {
+            isLoading.value = true;
+            // In una implementazione reale, caricare gli eventi dal server
+            // Per esempio: const response = await axios.get('/api/appointments');
+            
+            // Usiamo dati di esempio
+            const exampleEvents = [
+              {
+                id: '1',
+                title: 'Consulenza Sig. Rossi',
+                start: new Date(new Date().setHours(10, 0, 0, 0)),
+                end: new Date(new Date().setHours(11, 0, 0, 0)),
+                backgroundColor: '#FF6B00',
+                borderColor: '#FF6B00',
+                status: 'confirmed',
+                description: 'Consulenza per ristrutturazione casa',
+                clientId: '12345'
+              },
+              {
+                id: '2',
+                title: 'Sopralluogo Bianchi',
+                start: new Date(new Date().setHours(14, 0, 0, 0)),
+                end: new Date(new Date().setHours(16, 0, 0, 0)),
+                backgroundColor: '#e67e22',
+                borderColor: '#e67e22',
+                status: 'pending',
+                description: 'Sopralluogo per preventivo',
+                clientId: '67890'
+              },
+              {
+                id: '3',
+                title: 'Meeting fornitori',
+                start: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(11, 0, 0, 0),
+                end: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(12, 30, 0, 0),
+                backgroundColor: '#3498db',
+                borderColor: '#3498db',
+                status: 'confirmed',
+                description: 'Incontro con fornitori materiali',
+                clientId: ''
+              }
+            ];
+            
+            calendarEvents.value = exampleEvents;
+            
+            // Aggiorna calendario
+            if (calendarInstance.value) {
+              calendarInstance.value.removeAllEvents();
+              calendarInstance.value.addEventSource(calendarEvents.value);
+            } else {
+              initCalendar();
+            }
+            
+            // Aggiorna eventi del giorno selezionato
+            updateSelectedDateEvents();
+            
+          } catch (error) {
+            showToast('Errore', `Impossibile caricare gli appuntamenti: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore caricamento appuntamenti:', error);
+          } finally {
+            isLoading.value = false;
+          }
+        };
+        
+        const loadClients = async () => {
+          try {
+            // In una implementazione reale, caricare i clienti dal server
+            // Per esempio: const response = await axios.get('/api/clients');
+            
+            // Usiamo dati di esempio
+            clients.value = [
+              { _id: '12345', name: 'Mario Rossi', email: 'mario.rossi@example.com' },
+              { _id: '67890', name: 'Giuseppe Bianchi', email: 'giuseppe.bianchi@example.com' },
+              { _id: '24680', name: 'Anna Verdi', email: 'anna.verdi@example.com' }
+            ];
+          } catch (error) {
+            console.error('Errore caricamento clienti:', error);
+          }
+        };
+        
+        const updateSelectedDateEvents = () => {
+          if (!selectedDate.value) return;
+          
+          const startDate = new Date(selectedDate.value);
+          startDate.setHours(0, 0, 0, 0);
+          
+          const endDate = new Date(selectedDate.value);
+          endDate.setHours(23, 59, 59, 999);
+          
+          selectedDateEvents.value = calendarEvents.value.filter(event => {
+            const eventStart = new Date(event.start);
+            return eventStart >= startDate && eventStart <= endDate;
+          });
+        };
+        
+        const formatEventTime = (event) => {
+          const start = new Date(event.start);
+          const end = new Date(event.end);
+          
+          const formatTime = (date) => {
+            return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+          };
+          
+          return `${formatTime(start)} - ${formatTime(end)}`;
+        };
+        
+        const getEventsForHour = (hour) => {
+          if (!selectedDate.value) return [];
+          
+          const startTime = new Date(selectedDate.value);
+          startTime.setHours(hour, 0, 0, 0);
+          
+          const endTime = new Date(selectedDate.value);
+          endTime.setHours(hour, 59, 59, 999);
+          
+          return calendarEvents.value.filter(event => {
+            const eventStart = new Date(event.start);
+            const eventEnd = new Date(event.end);
+            
+            // Evento che inizia o finisce in quest'ora o copre quest'ora
+            return (eventStart >= startTime && eventStart <= endTime) || 
+                   (eventEnd >= startTime && eventEnd <= endTime) ||
+                   (eventStart <= startTime && eventEnd >= endTime);
+          });
+        };
+        
+        const openNewAppointmentModal = () => {
+          editingAppointment.value = false;
+          
+          // Inizializza con data e ora correnti
+          const now = new Date();
+          const dateStr = now.toISOString().split('T')[0];
+          const hours = now.getHours().toString().padStart(2, '0');
+          const minutes = Math.ceil(now.getMinutes() / 15) * 15;
+          const timeStr = `${hours}:${minutes === 60 ? '00' : minutes.toString().padStart(2, '0')}`;
+          
+          currentAppointment.value = {
+            title: '',
+            date: dateStr,
+            time: timeStr,
+            duration: '60',
+            status: 'pending',
+            clientId: '',
+            description: ''
+          };
+          
+          const modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+          modal.show();
+        };
+        
+        const editAppointment = (event) => {
+          editingAppointment.value = true;
+          
+          const start = new Date(event.start || event._instance.range.start);
+          const dateStr = start.toISOString().split('T')[0];
+          const timeStr = start.toTimeString().substring(0, 5);
+          
+          // Calcola durata
+          const end = new Date(event.end || event._instance.range.end);
+          const durationMinutes = Math.round((end - start) / 60000); // millisecondi a minuti
+          
+          currentAppointment.value = {
+            id: event.id,
+            title: event.title,
+            date: dateStr,
+            time: timeStr,
+            duration: durationMinutes.toString(),
+            status: event.status || event.extendedProps?.status || 'pending',
+            clientId: event.clientId || event.extendedProps?.clientId || '',
+            description: event.description || event.extendedProps?.description || ''
+          };
+          
+          const modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+          modal.show();
+        };
+        
+        const saveAppointment = async () => {
+          try {
+            isSavingAppointment.value = true;
+            
+            const { title, date, time, duration, status, clientId, description } = currentAppointment.value;
+            
+            // Valida i campi richiesti
+            if (!title || !date || !time) {
+              showToast('Errore', 'Compila tutti i campi obbligatori', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+              return;
+            }
+            
+            // Crea oggetti Date per inizio e fine
+            const start = new Date(`${date}T${time}`);
+            const end = new Date(start.getTime() + parseInt(duration) * 60000);
+            
+            // Determina il colore in base allo stato
+            let backgroundColor;
+            switch (status) {
+              case 'pending': backgroundColor = '#e67e22'; break;
+              case 'confirmed': backgroundColor = '#FF6B00'; break;
+              case 'completed': backgroundColor = '#27ae60'; break;
+              case 'cancelled': backgroundColor = '#e74c3c'; break;
+              default: backgroundColor = '#FF6B00';
+            }
+            
+            const eventData = {
+              title,
+              start,
+              end,
+              backgroundColor,
+              borderColor: backgroundColor,
+              status,
+              clientId,
+              description
+            };
+            
+            if (editingAppointment.value && currentAppointment.value.id) {
+              // Aggiorna evento esistente
+              eventData.id = currentAppointment.value.id;
+              
+              // In una implementazione reale, inviare al server
+              // await axios.put(`/api/appointments/${eventData.id}`, eventData);
+              
+              // Aggiorna evento nel calendario
+              const existingEvent = calendarInstance.value.getEventById(eventData.id);
+              if (existingEvent) {
+                existingEvent.setProp('title', eventData.title);
+                existingEvent.setProp('backgroundColor', eventData.backgroundColor);
+                existingEvent.setProp('borderColor', eventData.borderColor);
+                existingEvent.setStart(eventData.start);
+                existingEvent.setEnd(eventData.end);
+                existingEvent.setExtendedProp('status', eventData.status);
+                existingEvent.setExtendedProp('clientId', eventData.clientId);
+                existingEvent.setExtendedProp('description', eventData.description);
+              }
+              
+              // Aggiorna array locale
+              const index = calendarEvents.value.findIndex(e => e.id === eventData.id);
+              if (index !== -1) {
+                calendarEvents.value[index] = {...calendarEvents.value[index], ...eventData};
+              }
+              
+              showToast('Successo', 'Appuntamento aggiornato', 'bg-success', 'bi bi-check-circle-fill me-2');
+            } else {
+              // Nuovo evento
+              eventData.id = Date.now().toString(); // ID temporaneo
+              
+              // In una implementazione reale, inviare al server
+              // const response = await axios.post('/api/appointments', eventData);
+              // eventData.id = response.data.id;
+              
+              // Aggiungi al calendario
+              calendarInstance.value.addEvent(eventData);
+              
+              // Aggiungi all'array locale
+              calendarEvents.value.push(eventData);
+              
+              showToast('Successo', 'Appuntamento creato', 'bg-success', 'bi bi-check-circle-fill me-2');
+            }
+            
+            // Aggiorna eventi del giorno selezionato
+            updateSelectedDateEvents();
+            
+            // Chiudi modale
+            const modal = bootstrap.Modal.getInstance(document.getElementById('appointmentModal'));
+            modal.hide();
+            
+          } catch (error) {
+            showToast('Errore', `Impossibile salvare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore salvataggio appuntamento:', error);
+          } finally {
+            isSavingAppointment.value = false;
+          }
+        };
+        
+        const deleteAppointment = async (event) => {
+          if (!confirm('Sei sicuro di voler eliminare questo appuntamento?')) return;
+          
+          try {
+            isLoading.value = true;
+            
+            // In una implementazione reale, inviare al server
+            // await axios.delete(`/api/appointments/${event.id}`);
+            
+            // Rimuovi dal calendario
+            const calendarEvent = calendarInstance.value.getEventById(event.id);
+            if (calendarEvent) {
+              calendarEvent.remove();
+            }
+            
+            // Rimuovi dall'array locale
+            const index = calendarEvents.value.findIndex(e => e.id === event.id);
+            if (index !== -1) {
+              calendarEvents.value.splice(index, 1);
+            }
+            
+            // Aggiorna eventi del giorno selezionato
+            updateSelectedDateEvents();
+            
+            showToast('Successo', 'Appuntamento eliminato', 'bg-success', 'bi bi-check-circle-fill me-2');
+          } catch (error) {
+            showToast('Errore', `Impossibile eliminare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore eliminazione appuntamento:', error);
+          } finally {
+            isLoading.value = false;
+          }
+        };
+        
+        const handleEventDrop = async (event) => {
+          try {
+            // In una implementazione reale, inviare al server
+            // await axios.put(`/api/appointments/${event.id}`, {
+            //   start: event.start,
+            //   end: event.end
+            // });
+            
+            // Aggiorna array locale
+            const index = calendarEvents.value.findIndex(e => e.id === event.id);
+            if (index !== -1) {
+              calendarEvents.value[index].start = event.start;
+              calendarEvents.value[index].end = event.end;
+            }
+            
+            // Aggiorna eventi del giorno selezionato
+            updateSelectedDateEvents();
+            
+            showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
+          } catch (error) {
+            showToast('Errore', `Impossibile spostare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+            console.error('Errore spostamento appuntamento:', error);
+            
+            // Rollback: ricarica calendario
+            loadCalendarEvents();
+          }
+        };
+        
+        // Funzione per gestire la visualizzazione ottimizzata su mobile
+        const updateCalendarView = () => {
+          if (!calendarInstance.value) return;
+          
+          if (window.innerWidth < 768) {
+            calendarInstance.value.changeView('listWeek');
+            // Aggiungi classe per ottimizzare stile su mobile
+            calendarEl.value.classList.add('calendar-mobile');
+          } else {
+            calendarInstance.value.changeView('dayGridMonth');
+            calendarEl.value.classList.remove('calendar-mobile');
+          }
+        };
+        
+        // Aggiungi questa sezione per reagire al cambio della data selezionata
+        watch(selectedDate, () => {
+          updateSelectedDateEvents();
+        });
+        
+        // Aggiungi questo nel metodo onMounted
+        onMounted(() => {
+          // Codice esistente...
+          
+          // Aggiungi listener per il ridimensionamento della finestra
+          window.addEventListener('resize', () => {
+            handleResize();
+            if (activeTab.value === 'calendar' && calendarInstance.value) {
+              updateCalendarView();
+            }
+          });
+        });
+
         // Debounce per la ricerca
         let searchTimeout;
         const debounceSearch = () => {
@@ -3774,12 +4739,25 @@
             loadRecentEvents();
           } else if (newTab === 'facebookLeads') {
             loadFacebookLeads();
+          } else if (newTab === 'calendar') {
+            // Carica clienti solo se non sono stati caricati
+            if (clients.value.length === 0) {
+              loadClients();
+            }
+            
+            // Carica eventi e inizializza calendario
+            loadCalendarEvents();
+            
+            // Imposta timer per rendere il calendario dopo che il DOM è aggiornato
+            setTimeout(() => {
+              initCalendar();
+            }, 100);
           }
         });
         
         // Al montaggio dell'app
         onMounted(() => {
-              window.addEventListener('resize', handleResize);
+          window.addEventListener('resize', handleResize);
           handleResize();
           
           // Carica i dati iniziali
@@ -3789,13 +4767,24 @@
           loadRecentEvents();
           loadSettings();
           
+          // Rimuovi loadCalendarEvents() da qui
+          // loadCalendarEvents();
+          
+          // Aggiungi invece listener per il ridimensionamento che gestisce anche il calendario
+          window.addEventListener('resize', () => {
+            handleResize();
+            if (activeTab.value === 'calendar' && calendarInstance.value) {
+              updateCalendarView();
+            }
+          });
+          
           // Inizializza popovers
           const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
           popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl);
           });
         });
-        
+
         return {
           // Stato
           activeTab,
@@ -3839,7 +4828,7 @@
           toastMessage,
           toastClass,
           toastIconClass,
-
+        
           facebookLeads,
           facebookLeadsPagination, 
           facebookLeadsFilter,
@@ -3875,10 +4864,32 @@
           showToast,
           debounceSearch,
           logout,
-          sidebarVisible,
-          toggleSidebar,
           closeSidebar,
-          isMobile
+          isMobile,
+          
+          // Calendario (aggiungi queste righe)
+          calendarEl,
+          calendarInstance,
+          calendarEvents,
+          selectedDate,
+          selectedDateEvents,
+          currentAppointment,
+          editingAppointment,
+          isSavingAppointment,
+          clients,
+          dailyHours,
+          initCalendar,
+          loadCalendarEvents,
+          loadClients,
+          updateSelectedDateEvents,
+          formatEventTime,
+          getEventsForHour,
+          openNewAppointmentModal,
+          editAppointment,
+          saveAppointment,
+          deleteAppointment,
+          handleEventDrop,
+          updateCalendarView
         };
       }
     });
@@ -3940,5 +4951,78 @@
       setThemeColors();
     });
   </script>
+
+  <!-- Modale nuovo/modifica appuntamento -->
+  <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="appointmentModalLabel">{{ editingAppointment ? 'Modifica' : 'Nuovo' }} Appuntamento</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="saveAppointment">
+            <div class="mb-3">
+              <label for="appointmentTitle" class="form-label">Titolo</label>
+              <input type="text" class="form-control" id="appointmentTitle" v-model="currentAppointment.title" required>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="appointmentDate" class="form-label">Data</label>
+                <input type="date" class="form-control" id="appointmentDate" v-model="currentAppointment.date" required>
+              </div>
+              <div class="col-md-6">
+                <label for="appointmentTime" class="form-label">Ora</label>
+                <input type="time" class="form-control" id="appointmentTime" v-model="currentAppointment.time" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="appointmentDuration" class="form-label">Durata (minuti)</label>
+              <select class="form-select" id="appointmentDuration" v-model="currentAppointment.duration">
+                <option value="30">30 minuti</option>
+                <option value="60">1 ora</option>
+                <option value="90">1 ora e 30 minuti</option>
+                <option value="120">2 ore</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="appointmentStatus" class="form-label">Stato</label>
+              <select class="form-select" id="appointmentStatus" v-model="currentAppointment.status">
+                <option value="pending">In attesa</option>
+                <option value="confirmed">Confermato</option>
+                <option value="completed">Completato</option>
+                <option value="cancelled">Cancellato</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="appointmentClient" class="form-label">Cliente</label>
+              <select class="form-select" id="appointmentClient" v-model="currentAppointment.clientId">
+                <option value="" disabled>Seleziona un cliente</option>
+                <option v-for="client in clients" :key="client._id" :value="client._id">
+                  {{ client.name }} ({{ client.email }})
+                </option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="appointmentDescription" class="form-label">Note</label>
+              <textarea class="form-control" id="appointmentDescription" rows="3" v-model="currentAppointment.description"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button type="button" class="btn btn-primary" @click="saveAppointment" :disabled="isSavingAppointment">
+            <span v-if="isSavingAppointment" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            {{ editingAppointment ? 'Aggiorna' : 'Salva' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

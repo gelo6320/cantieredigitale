@@ -67,6 +67,7 @@
             --transition-fast: 0.2s ease;
             --transition: 0.3s ease;
             --transition-slow: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --accent-color: #ff8c38;
         }
         
         /* Reset e base */
@@ -219,19 +220,18 @@
         nav ul li a:hover {
             color: var(--primary-color);
         }
-        
-        @media (max-width: 768px) {
-            .mobile-menu-toggle {
-              font-size: 1.8rem;
-              padding: 5px;
-              color: var(--primary-color);
-              display: flex;
-              align-content: center;
-            }
-        }
 
         .mobile-menu-toggle {
             display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+              display: block;
+              font-size: 1.5rem;
+              color: var(--primary-color);
+              cursor: pointer;
+            }
         }
         
         svg {
