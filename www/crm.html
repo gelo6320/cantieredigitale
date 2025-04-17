@@ -3552,9 +3552,9 @@
           if (currentLeadType.value === 'form') {
             endpoint = `https://api.costruzionedigitale.com/api/leads/forms/${currentLead.value._id}/update`;
           } else if (currentLeadType.value === 'booking') {
-            endpoint = `https://api.costruzionedigitale.com//api/leads/bookings/${currentLead.value._id}/update`;
+            endpoint = `https://api.costruzionedigitale.com/api/leads/bookings/${currentLead.value._id}/update`;
           } else if (currentLeadType.value === 'facebook') {
-            endpoint = `https://api.costruzionedigitale.com//api/leads/facebook/${currentLead.value._id}/update`;
+            endpoint = `https://api.costruzionedigitale.com/api/leads/facebook/${currentLead.value._id}/update`;
           }         
           
           const response = await axios.post(endpoint, payload);
