@@ -2285,21 +2285,44 @@
             
             // Time slots functions
             function fetchAvailableTimeSlots(date) {
-              const formattedDate = formatDateForAPI(date);
-              
-              fetch(`/api/booking/availability?date=${formattedDate}`)
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success && data.availability) {
-                    // Utilizza la disponibilità effettiva dal server
-                    renderTimeSlots(data.availability);
-                  } else {
-                    // Gestione errori
-                  }
-                })
-                .catch(error => {
-                  console.error('Error fetching availability:', error);
-                });
+                // Mostra il loader
+                timeSlotsContainer.innerHTML = '';
+                loaderCalendar.style.display = 'block';
+                
+                // Formatta la data per l'API (assicurati che sia nel formato corretto YYYY-MM-DD)
+                const formattedDate = formatDateForAPI(date);
+                
+                console.log('Fetching availability for date:', formattedDate);
+                
+                // Chiama l'API per verificare la disponibilità
+                fetch(`/api/booking/availability?date=${formattedDate}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loaderCalendar.style.display = 'none';
+                        
+                        if (data.success && data.availability && Array.isArray(data.availability)) {
+                            // Usa i dati di disponibilità dall'API
+                            availableTimeSlots = data.availability;
+                            renderTimeSlots();
+                            console.log('Availability data loaded successfully');
+                        } else {
+                            console.warn('API returned success=false or invalid data format:', data);
+                            // Fallback con orari statici
+                            useStaticTimeSlots(date);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching availability:', error);
+                        loaderCalendar.style.display = 'none';
+                        
+                        // Fallback in caso di errore
+                        useStaticTimeSlots(date);
+                    });
             }
                         
             function selectTimeSlot(time, element) {
