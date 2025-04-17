@@ -2273,16 +2273,25 @@
             }
             
             // Time slots functions
-            function fetchAvailableTimeSlots(date) {
+            function fetchAvailableTimeSlots() {
                 // Mostra il loader
                 timeSlotsContainer.innerHTML = '';
                 
-                // Formatta la data per l'API (assicurati che sia nel formato corretto YYYY-MM-DD)
-                const formattedDate = formatDateForAPI(date);
+                // Aggiorna la visualizzazione della data selezionata
+                selectedDateDisplay.textContent = formatDateLong(selectedDate);
+                
+                // Formatta la data per l'API
+                const formattedDate = formatDateForAPI(selectedDate);
                 
                 console.log('Fetching availability for date:', formattedDate);
                 
-                // Chiama l'API per verificare la disponibilità
+                // Verifica che abbiamo una data valida prima di chiamare l'API
+                if (!formattedDate) {
+                    console.error('Data non valida per la richiesta API');
+                    return;
+                }
+                
+                // Chiamata API reale per ottenere gli slot di tempo disponibili
                 fetch(`https://api.costruzionedigitale.com/api/booking/availability?date=${formattedDate}`)
                     .then(response => {
                         if (!response.ok) {
@@ -2291,24 +2300,61 @@
                         return response.json();
                     })
                     .then(data => {
-                        
                         if (data.success && data.availability && Array.isArray(data.availability)) {
                             // Usa i dati di disponibilità dall'API
-                            availableTimeSlots = data.availability;
-                            renderTimeSlots();
+                            const availableTimeSlots = data.availability;
+                            renderTimeSlots(availableTimeSlots);
                             console.log('Availability data loaded successfully');
                         } else {
                             console.warn('API returned success=false or invalid data format:', data);
-                            // Fallback con orari statici
+                            // In caso di errore nel formato dei dati, mostra un messaggio appropriato
+                            timeSlotsContainer.innerHTML = '<p class="no-slots-message">Nessun orario disponibile per questa data. Prova a selezionare un\'altra data.</p>';
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching availability:', error);
+                        // In caso di errore della richiesta, mostra un messaggio di errore
+                        timeSlotsContainer.innerHTML = '<p class="error-message">Si è verificato un errore nel caricamento degli orari disponibili. Riprova più tardi.</p>';
                     });
             }
-
+            
+            // Funzione per visualizzare gli slot orari disponibili
+            function renderTimeSlots(availableSlots) {
+                timeSlotsContainer.innerHTML = '';
+                
+                if (!availableSlots || availableSlots.length === 0) {
+                    timeSlotsContainer.innerHTML = '<p class="no-slots-message">Nessun orario disponibile per questa data. Prova a selezionare un\'altra data.</p>';
+                    return;
+                }
+                
+                availableSlots.forEach(time => {
+                    const timeSlotElement = document.createElement('div');
+                    timeSlotElement.classList.add('time-slot');
+                    timeSlotElement.textContent = time;
+                    
+                    timeSlotElement.addEventListener('click', function() {
+                        selectTimeSlot(time, timeSlotElement);
+                    });
+                    
+                    timeSlotsContainer.appendChild(timeSlotElement);
+                });
+            }
+            
+            // Funzione di supporto per formattare la data per l'API
             function formatDateForAPI(date) {
+                if (!date) {
+                    console.error('Data non definita in formatDateForAPI');
+                    return '';
+                }
+                
                 const d = new Date(date);
+                
+                // Verifica che la data sia valida
+                if (isNaN(d.getTime())) {
+                    console.error('Data non valida in formatDateForAPI:', date);
+                    return '';
+                }
+                
                 let month = '' + (d.getMonth() + 1);
                 let day = '' + d.getDate();
                 const year = d.getFullYear();
@@ -2317,6 +2363,21 @@
                 if (day.length < 2) day = '0' + day;
             
                 return [year, month, day].join('-');
+            }
+            
+            // Funzione per formattare la data in formato lungo
+            function formatDateLong(date) {
+                if (!date) return '';
+                
+                const d = new Date(date);
+                
+                // Verifica che la data sia valida
+                if (isNaN(d.getTime())) {
+                    return '';
+                }
+                
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return d.toLocaleDateString('it-IT', options).replace(/^\w/, c => c.toUpperCase());
             }
                         
             function selectTimeSlot(time, element) {
