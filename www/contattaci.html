@@ -2271,18 +2271,6 @@
                 // Enable the continue button
                 continueToStep2.disabled = false;
             }
-
-            function formatDateForAPI(date) {
-                const d = new Date(date);
-                let month = '' + (d.getMonth() + 1);
-                let day = '' + d.getDate();
-                const year = d.getFullYear();
-            
-                if (month.length < 2) month = '0' + month;
-                if (day.length < 2) day = '0' + day;
-            
-                return [year, month, day].join('-');
-            }
             
             // Time slots functions
             function fetchAvailableTimeSlots(date) {
@@ -2317,6 +2305,18 @@
                     .catch(error => {
                         console.error('Error fetching availability:', error);
                     });
+            }
+
+            function formatDateForAPI(date) {
+                const d = new Date(date);
+                let month = '' + (d.getMonth() + 1);
+                let day = '' + d.getDate();
+                const year = d.getFullYear();
+            
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+            
+                return [year, month, day].join('-');
             }
                         
             function selectTimeSlot(time, element) {
