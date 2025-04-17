@@ -220,14 +220,16 @@
             color: var(--primary-color);
         }
         
-        .mobile-menu-toggle {
-          font-size: 1.8rem;
-          padding: 5px;
-          color: var(--primary-color);
-          display: flex;
-          align-content: center;
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+              font-size: 1.8rem;
+              padding: 5px;
+              color: var(--primary-color);
+              display: flex;
+              align-content: center;
+            }
         }
-
+        
         svg {
             display: inline-block;
             vertical-align: -0.125em;
