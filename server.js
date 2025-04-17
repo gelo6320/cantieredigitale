@@ -400,7 +400,7 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
     
     // Invia l'evento
     const response = await axios.post(
-      `https://graph.facebook.com/v17.0/${metaPixelId}/events`,
+      `https://graph.facebook.com/v22.0/1543790469631614/events?access_token=EAAd7rpHujUkBO3iESqN0hqKg15uiHeDZCIffdtbJIYuzTBVAfq0qMLM6dO70WmZCGE4XmL9kPZAX2S0VbTkIA0ORxypfSnrDK1nALetbLRu0nrEyyfOU7mkQ3Joy1YISlIlEdr9qbjc9YOR6DfS3zKkUf4Vhu9HhTKYta5ZAZCPnEZAbgF8CPvAeVHPS2nggZDZD`,
       payload
     );
     
@@ -806,7 +806,7 @@ app.use(async (req, res, next) => {
       
       // Invia l'evento PageView alla CAPI
       await axios.post(
-        `https://graph.facebook.com/v17.0/1543790469631614/events`,
+        `https://graph.facebook.com/v22.0/1543790469631614/events?access_token=EAAd7rpHujUkBO3iESqN0hqKg15uiHeDZCIffdtbJIYuzTBVAfq0qMLM6dO70WmZCGE4XmL9kPZAX2S0VbTkIA0ORxypfSnrDK1nALetbLRu0nrEyyfOU7mkQ3Joy1YISlIlEdr9qbjc9YOR6DfS3zKkUf4Vhu9HhTKYta5ZAZCPnEZAbgF8CPvAeVHPS2nggZDZD`,
         payload
       );
     } catch (error) {
@@ -1358,7 +1358,7 @@ async function retrieveLeadDetails(leadId, formId) {
   try {
     // Assicurati di avere un token d'accesso con i permessi necessari
     const response = await axios.get(
-      `https://graph.facebook.com/v17.0/${leadId}?access_token=${process.env.FACEBOOK_ACCESS_TOKEN}`
+      `https://graph.facebook.com/v22.0/1543790469631614/events?access_token=EAAd7rpHujUkBO3iESqN0hqKg15uiHeDZCIffdtbJIYuzTBVAfq0qMLM6dO70WmZCGE4XmL9kPZAX2S0VbTkIA0ORxypfSnrDK1nALetbLRu0nrEyyfOU7mkQ3Joy1YISlIlEdr9qbjc9YOR6DfS3zKkUf4Vhu9HhTKYta5ZAZCPnEZAbgF8CPvAeVHPS2nggZDZD`
     );
     
     const leadDetails = response.data;
