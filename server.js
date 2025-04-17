@@ -309,6 +309,10 @@ async function getUserConfig(username) {
 
 // Funzione per inviare eventi a Facebook
 async function sendFacebookConversionEvent(eventName, userData, customData = {}, req) {
+
+  console.log('EventName:', eventName);
+  console.log('CustomData ricevuto:', JSON.stringify(customData));
+  
   try {
     // Usa direttamente le configurazioni dalla sessione
     let accessToken = process.env.FACEBOOK_ACCESS_TOKEN || process.env.ACCESS_TOKEN;
@@ -388,6 +392,8 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
         content_name: customData.content_name || 'Servizio',
       };
     }
+
+    console.log('Payload finale per Facebook:', JSON.stringify(payload));
     
     // Invia l'evento
     const response = await axios.post(
