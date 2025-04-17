@@ -2943,6 +2943,14 @@
                 Il lead ha un fbclid associato
               </label>
             </div>
+
+            <div class="mb-3" v-if="eventName === 'Purchase'">
+              <label for="purchaseValue" class="form-label">Valore dell'acquisto</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="purchaseValue" v-model="purchaseValue" placeholder="0.00" step="0.01">
+                <span class="input-group-text">€</span>
+              </div>
+            </div>
             
             <div class="mb-3" v-if="hasFbclid">
               <label for="fbclid" class="form-label">Facebook Click ID (fbclid)</label>
@@ -3112,6 +3120,8 @@
   
   const app = createApp({
     setup() {
+
+      const purchaseValue = ref('');
 
       const sidebarVisible = ref(false);
       const isMobile = ref(window.innerWidth < 768);
@@ -3545,6 +3555,16 @@
           // Se è stato specificato un fbclid, aggiungilo
           if (hasFbclid.value && fbclid.value) {
             payload.fbclid = fbclid.value;
+          }
+
+          if (eventName.value === 'Purchase' && purchaseValue.value) {
+            payload.eventMetadata = {
+              ...payload.eventMetadata,
+              value: parseFloat(purchaseValue.value),
+              currency: 'EUR',
+              content_type: 'product',
+              content_name: 'Servizio di consulenza'
+            };
           }
           
           // Effettua la richiesta in base al tipo di lead

@@ -358,6 +358,13 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
     }
     
     // Payload completo
+    const customData = {
+      lead_event_source: "CRM Dashboard",
+      event_source: "crm",
+      ...customData  // Attenzione: qui stai usando lo stesso nome della costante
+    };
+    
+    // Poi crea il payload base
     const payload = {
       data: [{
         event_name: eventName,
@@ -365,15 +372,22 @@ async function sendFacebookConversionEvent(eventName, userData, customData = {},
         event_id: eventId,
         action_source: "system_generated",
         user_data: hashedUserData,
-        custom_data: {
-          lead_event_source: "CRM Dashboard",
-          event_source: "crm",
-          ...customData
-        }
+        custom_data: customData  // Qui aggiungi il custom_data base
       }],
       access_token: accessToken,
       partner_agent: 'costruzionedigitale-nodejs-crm'
     };
+    
+    // Dopo aver creato il payload, puoi modificare i custom_data per gli acquisti
+    if (eventName === 'Purchase' && customData.value) {
+      payload.data[0].custom_data = {
+        ...payload.data[0].custom_data,
+        value: customData.value,
+        currency: customData.currency || 'EUR',
+        content_type: customData.content_type || 'product',
+        content_name: customData.content_name || 'Servizio',
+      };
+    }
     
     // Invia l'evento
     const response = await axios.post(
