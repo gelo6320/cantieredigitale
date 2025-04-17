@@ -2074,10 +2074,18 @@
       .navbar {
         padding-right: 20px;
       }
-      
-      .mainmobile {
-        padding-left: 10px;
+    }
+
+    .main {
+      padding-right: 20px;
+      padding-top: 30px;
+      padding-left: 30px;
+    }
+
+    @media (max-width: 991.98px) {
+      .main {
         padding-right: 10px;
+        padding-left: 10px;
       }
     }
     
@@ -2466,7 +2474,7 @@
       }
       
       .fc-header-toolbar {
-        flex-direction: column;
+        padding: 20px 20px;
         gap: 10px;
         margin-bottom: 1rem !important;
       }
@@ -2503,7 +2511,7 @@
       }
       
       .fc-view-harness {
-        min-height: 300px;
+        min-height: 600px;
       }
       
       .fc-col-header-cell-cushion {
@@ -2619,7 +2627,7 @@
         </nav>
   
         <!-- Contenuto principale -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mainmobile" style="padding-right: 20px;padding-top: 30px;padding-left: 30px;">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main">
           <!-- Dashboard principale -->
           <div v-if="activeTab === 'dashboard'">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
