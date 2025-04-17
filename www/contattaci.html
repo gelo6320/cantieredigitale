@@ -2377,8 +2377,8 @@
                 });
                 
                 // Disabilita il pulsante di conferma finché un orario non viene selezionato
-                if (confirmTimeSlotBtn) {
-                    confirmTimeSlotBtn.disabled = true;
+                if (continueToStep3) {
+                    continueToStep3.disabled = true;
                 }
             }
             
@@ -2401,8 +2401,8 @@
                     : timeValue;
                 
                 // Abilita il pulsante di conferma
-                if (confirmTimeSlotBtn) {
-                    confirmTimeSlotBtn.disabled = false;
+                if (continueToStep3) {
+                    continueToStep3.disabled = false;
                 }
             }
             
