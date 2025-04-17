@@ -3557,7 +3557,7 @@
             endpoint = `https://api.costruzionedigitale.com/api/leads/facebook/${currentLead.value._id}/update`;
           }         
           
-          const response = await axios.post(endpoint, payload);
+          const response = await axios.post(endpoint, payload, { withCredentials: true });
           
           // Chiudi il modale
           const modal = bootstrap.Modal.getInstance(document.getElementById('leadModal'));
