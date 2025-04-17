@@ -2060,39 +2060,6 @@
                 });
             }
             
-            // Cookie Banner
-            const cookieBanner = document.getElementById('cookie-banner');
-            const cookieClose = document.getElementById('cookie-close');
-            const acceptAllCookies = document.getElementById('cookie-accept-all');
-            const rejectAllCookies = document.getElementById('cookie-reject-all');
-            
-            // Check if cookie consent is already stored
-            if (!localStorage.getItem('cookieConsent')) {
-                setTimeout(() => {
-                    cookieBanner.classList.add('show');
-                }, 1000);
-            }
-            
-            if (cookieClose) {
-                cookieClose.addEventListener('click', function() {
-                    cookieBanner.classList.remove('show');
-                });
-            }
-            
-            if (acceptAllCookies) {
-                acceptAllCookies.addEventListener('click', function() {
-                    localStorage.setItem('cookieConsent', 'accepted');
-                    cookieBanner.classList.remove('show');
-                });
-            }
-            
-            if (rejectAllCookies) {
-                rejectAllCookies.addEventListener('click', function() {
-                    localStorage.setItem('cookieConsent', 'rejected');
-                    cookieBanner.classList.remove('show');
-                });
-            }
-            
             // ===== Initialize Calendar =====
             renderCalendar();
             
@@ -2539,7 +2506,7 @@
         });
     </script>
 
-<script>
+    <script>
     // Gestione migliorata per dispositivi mobili
     document.addEventListener('DOMContentLoaded', function() {
         const acceptAllBtn = document.getElementById('cookie-accept-all');
