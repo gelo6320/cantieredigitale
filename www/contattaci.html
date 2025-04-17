@@ -2538,5 +2538,40 @@
             }
         });
     </script>
+
+<script>
+    // Gestione migliorata per dispositivi mobili
+    document.addEventListener('DOMContentLoaded', function() {
+        const acceptAllBtn = document.getElementById('cookie-accept-all');
+        const rejectAllBtn = document.getElementById('cookie-reject-all');
+        
+        // Migliora la gestione dei click su dispositivi touch
+        function enhanceTouchButton(button) {
+            // Aggiungi eventi touch espliciti
+            button.addEventListener('touchstart', function(e) {
+                // Previeni comportamenti predefiniti come lo zoom
+                e.preventDefault();
+                
+                // Aggiungi classe attiva per feedback visivo
+                this.classList.add('touch-active');
+            }, { passive: false });
+            
+            button.addEventListener('touchend', function(e) {
+                // Previeni comportamenti predefiniti
+                e.preventDefault();
+                
+                // Rimuovi classe attiva
+                this.classList.remove('touch-active');
+                
+                // Esegui manualmente l'azione del click
+                this.click();
+            }, { passive: false });
+        }
+        
+        // Applica miglioramenti ai pulsanti
+        if (acceptAllBtn) enhanceTouchButton(acceptAllBtn);
+        if (rejectAllBtn) enhanceTouchButton(rejectAllBtn);
+    });
+    </script>
 </body>
 </html>
