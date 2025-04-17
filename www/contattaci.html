@@ -1974,25 +1974,29 @@
                 }
             });
             
-            // Mobile menu
+            // Mobile Menu Toggle
+    
             if (mobileMenuToggle && mobileMenu && mobileMenuClose) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+              mobileMenuToggle.addEventListener("click", function (e) {
+                e.preventDefault(); // Previeni comportamento predefinito
+                mobileMenu.classList.add("active");
+                document.body.style.overflow = "hidden";
+              });
+    
+              mobileMenuClose.addEventListener("click", function (e) {
+                e.preventDefault(); // Previeni comportamento predefinito
+                mobileMenu.classList.remove("active");
+                document.body.style.overflow = "";
+              });
+    
+              // Chiudi il menu quando viene cliccato un link
+              document.querySelectorAll("#mobile-menu a").forEach((link) => {
+                link.addEventListener("click", function (e) {
+                  // Non prevenire il comportamento predefinito qui
+                  mobileMenu.classList.remove("active");
+                  document.body.style.overflow = "";
                 });
-                
-                mobileMenuClose.addEventListener('click', function() {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-                
-                // Close menu when clicking links
-                document.querySelectorAll('#mobile-menu a').forEach(link => {
-                    link.addEventListener('click', function() {
-                        mobileMenu.classList.remove('active');
-                        document.body.style.overflow = '';
-                    });
-                });
+              });
             }
             
             // Calendar navigation
