@@ -2327,17 +2327,83 @@
                     return;
                 }
                 
-                availableSlots.forEach(time => {
+                availableSlots.forEach(slot => {
                     const timeSlotElement = document.createElement('div');
                     timeSlotElement.classList.add('time-slot');
-                    timeSlotElement.textContent = time;
                     
-                    timeSlotElement.addEventListener('click', function() {
-                        selectTimeSlot(time, timeSlotElement);
-                    });
+                    // Gestisci sia il caso in cui slot è un oggetto che il caso in cui è una stringa
+                    let timeText = '';
+                    let timeValue = '';
+                    
+                    if (typeof slot === 'object' && slot !== null) {
+                        // Controlla se l'oggetto ha la proprietà 'formatted' o 'time' o 'hour'
+                        if (slot.formatted) {
+                            timeText = slot.formatted;
+                            timeValue = slot.formatted;
+                        } else if (slot.time) {
+                            timeText = slot.time;
+                            timeValue = slot.time;
+                        } else if (slot.hour !== undefined) {
+                            // Se abbiamo solo l'ora, formattiamola come "HH:00"
+                            timeText = `${slot.hour}:00`;
+                            timeValue = timeText;
+                        } else {
+                            // Se non riusciamo a interpretare l'oggetto, mostriamo un formato predefinito
+                            console.warn('Formato slot non riconosciuto:', slot);
+                            timeText = 'Orario disponibile';
+                            timeValue = JSON.stringify(slot);
+                        }
+                        
+                        // Se l'oggetto ha una proprietà 'available', usala
+                        if (slot.available === false) {
+                            timeSlotElement.classList.add('disabled');
+                        }
+                    } else {
+                        // Se è una stringa, usala direttamente
+                        timeText = slot;
+                        timeValue = slot;
+                    }
+                    
+                    timeSlotElement.textContent = timeText;
+                    
+                    // Aggiungi l'evento click solo se lo slot non è disabilitato
+                    if (!timeSlotElement.classList.contains('disabled')) {
+                        timeSlotElement.addEventListener('click', function() {
+                            selectTimeSlot(timeValue, timeSlotElement);
+                        });
+                    }
                     
                     timeSlotsContainer.appendChild(timeSlotElement);
                 });
+                
+                // Disabilita il pulsante di conferma finché un orario non viene selezionato
+                if (confirmTimeSlotBtn) {
+                    confirmTimeSlotBtn.disabled = true;
+                }
+            }
+            
+            // Funzione per selezionare uno slot orario
+            function selectTimeSlot(timeValue, slotElement) {
+                // Deseleziona tutti gli slot
+                document.querySelectorAll('.time-slot').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Seleziona questo slot
+                slotElement.classList.add('selected');
+                
+                // Aggiorna la variabile di stato
+                selectedTimeSlot = timeValue;
+                
+                // Aggiorna il riepilogo
+                summaryTimeEl.textContent = typeof timeValue === 'object' 
+                    ? (timeValue.formatted || timeValue.time || `${timeValue.hour}:00`) 
+                    : timeValue;
+                
+                // Abilita il pulsante di conferma
+                if (confirmTimeSlotBtn) {
+                    confirmTimeSlotBtn.disabled = false;
+                }
             }
             
             // Funzione di supporto per formattare la data per l'API
@@ -2378,23 +2444,6 @@
                 
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return d.toLocaleDateString('it-IT', options).replace(/^\w/, c => c.toUpperCase());
-            }
-                        
-            function selectTimeSlot(time, element) {
-                // Remove selected class from previously selected time slot
-                const prevSelected = document.querySelector('.time-slot.selected');
-                if (prevSelected) {
-                    prevSelected.classList.remove('selected');
-                }
-                
-                // Add selected class to current selection
-                element.classList.add('selected');
-                
-                // Store selected time slot
-                selectedTimeSlot = time;
-                
-                // Enable the continue button
-                continueToStep3.disabled = false;
             }
             
             // Form validation functions
