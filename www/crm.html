@@ -3553,18 +3553,18 @@
           };
 
           // Dopo aver creato il payload di base
-          if (eventName.value === 'Purchase') {
+          if (eventName === 'Purchase') {
             // Validazione: verifica che sia stato inserito un valore
-            if (!purchaseValue.value || isNaN(parseFloat(purchaseValue.value))) {
+            if (!purchaseValue || isNaN(parseFloat(purchaseValue))) {
               showToast('Attenzione', 'Per gli eventi di acquisto è necessario specificare un valore', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
               return;
             }
-          
+            
             // Aggiungi il valore al payload
             payload.eventMetadata = {
               ...payload.eventMetadata,
-              note: eventNote.value,
-              value: parseFloat(purchaseValue.value),
+              note: eventNote,
+              value: parseFloat(purchaseValue),
               currency: 'EUR',
               content_type: 'product',
               content_name: 'Servizio di consulenza'
