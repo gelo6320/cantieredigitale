@@ -480,7 +480,7 @@ async function sendBookingConfirmationEmail(booking) {
     // Opzioni per l'email di notifica all'amministratore
     const adminMailOptions = {
       from: `"Sistema di Prenotazioni" <${process.env.EMAIL_FROM || 'info@costruzionedigitale.com'}>`,
-      to: process.env.ADMIN_EMAIL || 'admin@costruzionedigitale.com',
+      to: process.env.ADMIN_EMAIL || 'olegbolonniy@gmail.com',
       subject: `Nuova prenotazione: ${booking.name} - ${formattedDate} ${booking.bookingTime}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">

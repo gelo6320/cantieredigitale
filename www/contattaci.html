@@ -2527,6 +2527,10 @@
               .then(data => {
                 loader.style.display = 'none';
                 if (data.success) {
+                  // Aggiorna i dettagli di conferma
+                  document.getElementById('confirmation-date').textContent = formatDateLong(selectedDate);
+                  document.getElementById('confirmation-time').textContent = selectedTimeSlot;
+                  
                   confirmationContainer.style.display = 'block';
                 } else {
                   // Gestione errori
