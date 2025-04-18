@@ -1395,6 +1395,159 @@ async function retrieveLeadDetails(leadId, formId) {
 
 // ===== ROUTE API DASHBOARD =====
 
+// API per la gestione degli appuntamenti
+app.get('/api/appointments', checkApiAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    
+    // Filtri
+    let filter = {};
+    if (req.query.date) {
+      const startDate = new Date(req.query.date);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+      
+      filter.start = {
+        $gte: startDate,
+        $lt: endDate
+      };
+    }
+    
+    // Esempio di risposta, in produzione qui avresti la vera query dal database
+    const appointments = [
+      {
+        id: '1',
+        title: 'Consulenza Sig. Rossi',
+        start: new Date(new Date().setHours(10, 0, 0, 0)),
+        end: new Date(new Date().setHours(11, 0, 0, 0)),
+        backgroundColor: '#FF6B00',
+        borderColor: '#FF6B00',
+        status: 'confirmed',
+        description: 'Consulenza per ristrutturazione casa',
+        clientId: '12345'
+      },
+      {
+        id: '2',
+        title: 'Sopralluogo Bianchi',
+        start: new Date(new Date().setHours(14, 0, 0, 0)),
+        end: new Date(new Date().setHours(16, 0, 0, 0)),
+        backgroundColor: '#e67e22',
+        borderColor: '#e67e22',
+        status: 'pending',
+        description: 'Sopralluogo per preventivo',
+        clientId: '67890'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Errore nel recupero appuntamenti:', error);
+    res.status(500).json({ success: false, message: 'Errore nel recupero appuntamenti', error: error.message });
+  }
+});
+
+// API per creare un nuovo appuntamento
+app.post('/api/appointments', checkApiAuth, async (req, res) => {
+  try {
+    const { title, date, time, duration, status, clientId, description } = req.body;
+    
+    if (!title || !date || !time) {
+      return res.status(400).json({ success: false, message: 'Titolo, data e ora sono richiesti' });
+    }
+    
+    // Crea oggetti Date per inizio e fine
+    const start = new Date(`${date}T${time}`);
+    const end = new Date(start.getTime() + parseInt(duration || 60) * 60000);
+    
+    // In produzione salveresti nel DB, qui simuliamo
+    const newAppointment = {
+      id: Date.now().toString(),
+      title,
+      start,
+      end,
+      backgroundColor: getStatusColor(status),
+      borderColor: getStatusColor(status),
+      status: status || 'pending',
+      clientId: clientId || '',
+      description: description || ''
+    };
+    
+    res.status(201).json({
+      success: true,
+      data: newAppointment,
+      message: 'Appuntamento creato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nella creazione appuntamento:', error);
+    res.status(500).json({ success: false, message: 'Errore nella creazione appuntamento', error: error.message });
+  }
+});
+
+// API per aggiornare un appuntamento
+app.put('/api/appointments/:id', checkApiAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, date, time, duration, status, clientId, description, start, end } = req.body;
+    
+    // Simuliamo l'aggiornamento
+    const updatedAppointment = {
+      id,
+      title: title || 'Appuntamento aggiornato',
+      start: start || (date && time ? new Date(`${date}T${time}`) : new Date()),
+      end: end || (date && time && duration ? new Date(new Date(`${date}T${time}`).getTime() + parseInt(duration) * 60000) : new Date()),
+      backgroundColor: getStatusColor(status),
+      borderColor: getStatusColor(status),
+      status: status || 'pending',
+      clientId: clientId || '',
+      description: description || ''
+    };
+    
+    res.json({
+      success: true,
+      data: updatedAppointment,
+      message: 'Appuntamento aggiornato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento appuntamento:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento appuntamento', error: error.message });
+  }
+});
+
+// API per eliminare un appuntamento
+app.delete('/api/appointments/:id', checkApiAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Simuliamo l'eliminazione
+    res.json({
+      success: true,
+      data: { id },
+      message: 'Appuntamento eliminato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nell\'eliminazione appuntamento:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'eliminazione appuntamento', error: error.message });
+  }
+});
+
+// Funzione helper per ottenere colore in base allo stato
+function getStatusColor(status) {
+  switch (status) {
+    case 'pending': return '#e67e22';
+    case 'confirmed': return '#FF6B00';
+    case 'completed': return '#27ae60';
+    case 'cancelled': return '#e74c3c';
+    default: return '#FF6B00';
+  }
+}
+
 // Inizializza sessione dashboard
 app.get('/api/dashboard/init-session', (req, res) => {
   if (!req.session || !req.session.isAuthenticated) {

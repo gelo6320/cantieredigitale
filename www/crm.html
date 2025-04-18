@@ -3029,6 +3029,31 @@
       user-select: none;
       -webkit-touch-callout: none;
     }
+
+    /* Nasconde qualsiasi modal che potrebbe apparire inaspettatamente */
+    .modal:not(.show) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+    
+    /* Regola le dimensioni del modal su dispositivi mobili */
+    @media (max-width: 767.98px) {
+      .modal-dialog {
+        max-width: 90%;
+        margin: 10px auto;
+      }
+      
+      .modal-body {
+        padding: 15px 10px;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      
+      .modal-header, .modal-footer {
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -4940,8 +4965,8 @@
           }
         };
         
-        // Gestore fine touch (circa riga 2450)
-        const handleTouchEnd = (e) => {
+        // Gestore fine touch
+        const handleTouchEnd = async (e) => {
           // Cancella sempre il timer di long press
           clearTimeout(touchState.value.longPressTimer);
           
@@ -4954,83 +4979,109 @@
             cell.classList.remove('event-drop-highlight', 'snap-target');
           });
           
-          // Gestione del drag & drop di un evento
-          if (touchState.value.isDragging && touchState.value.draggedEvent && touchState.value.currentDropHour) {
-            const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.draggedEvent.id}"]`);
-            if (eventElement) {
-              eventElement.classList.remove('event-dragging');
-              
-              // Calcola nuova ora di inizio
-              const originalStart = new Date(touchState.value.draggedEvent.start);
-              const originalHour = originalStart.getHours();
-              
-              // Se l'ora è cambiata, aggiorna l'evento
-              if (originalHour !== touchState.value.currentDropHour) {
-                const newStart = new Date(originalStart);
-                newStart.setHours(touchState.value.currentDropHour);
+          try {
+            // Gestione del drag & drop di un evento
+            if (touchState.value.isDragging && touchState.value.draggedEvent && touchState.value.currentDropHour) {
+              const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.draggedEvent.id}"]`);
+              if (eventElement) {
+                eventElement.classList.remove('event-dragging');
                 
-                // Calcola nuova ora di fine
-                const duration = parseInt(touchState.value.draggedEvent.duration) || 60;
-                const newEnd = new Date(newStart.getTime() + duration * 60000);
+                // Calcola nuova ora di inizio
+                const originalStart = new Date(touchState.value.draggedEvent.start);
+                const originalHour = originalStart.getHours();
                 
-                // Aggiorna l'evento
-                handleEventDrop(touchState.value.draggedEvent.id, newStart, newEnd);
-                
-                // Feedback visivo dell'aggiornamento
-                showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
-              }
-            }
-          }
-          
-          // Gestione del resize di un evento
-          if (touchState.value.isResizing && touchState.value.resizingEvent) {
-            const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.resizingEvent.id}"]`);
-            if (eventElement) {
-              eventElement.classList.remove('event-dragging');
-              
-              // Calcola la nuova durata in base all'altezza finale
-              const heightPx = parseFloat(eventElement.style.height);
-              const newDuration = Math.round(heightPx / 60 * 60); // 60px per ora, converte in minuti
-              
-              // Aggiorna l'evento solo se la durata è cambiata
-              if (newDuration !== parseInt(touchState.value.resizingEvent.duration)) {
-                const newStart = new Date(touchState.value.resizingEvent.start);
-                const newEnd = new Date(newStart.getTime() + newDuration * 60000);
-                
-                // Trova e aggiorna l'evento
-                const eventIndex = calendarEvents.value.findIndex(e => e.id === touchState.value.resizingEvent.id);
-                if (eventIndex !== -1) {
-                  // Aggiorna localmente
-                  calendarEvents.value[eventIndex].end = newEnd;
-                  calendarEvents.value[eventIndex].duration = newDuration.toString();
+                // Se l'ora è cambiata, aggiorna l'evento
+                if (originalHour !== touchState.value.currentDropHour) {
+                  const newStart = new Date(originalStart);
+                  newStart.setHours(touchState.value.currentDropHour);
                   
-                  // Comunicazione con il server
+                  // Calcola nuova ora di fine mantenendo la durata
+                  const duration = parseInt(touchState.value.draggedEvent.duration) || 60;
+                  const newEnd = new Date(newStart.getTime() + duration * 60000);
+                  
                   try {
-                    // Chiamata API reale
-                    axios.put(`https://api.costruzionedigitale.com/api/appointments/${touchState.value.resizingEvent.id}`, {
-                      end: newEnd,
-                      duration: newDuration
-                    }, { withCredentials: true })
-                    .then(() => {
-                      showToast('Successo', 'Durata appuntamento modificata', 'bg-success', 'bi bi-check-circle-fill me-2');
-                    })
-                    .catch((error) => {
-                      console.error('Errore durante l\'aggiornamento della durata:', error);
-                      showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
-                    });
+                    // Invia al server l'aggiornamento
+                    await axios.put(
+                      `https://api.costruzionedigitale.com/api/appointments/${touchState.value.draggedEvent.id}`, 
+                      {
+                        start: newStart,
+                        end: newEnd
+                      },
+                      { withCredentials: true }
+                    );
+                    
+                    // Aggiorna localmente dopo il successo
+                    const index = calendarEvents.value.findIndex(e => e.id === touchState.value.draggedEvent.id);
+                    if (index !== -1) {
+                      calendarEvents.value[index].start = newStart;
+                      calendarEvents.value[index].end = newEnd;
+                    }
+                    
+                    // Aggiorna la vista
+                    document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
+                    renderCalendarEvents();
+                    updateSelectedDateEvents();
+                    
+                    // Feedback visivo dell'aggiornamento
+                    showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
                   } catch (error) {
-                    console.error('Errore durante la comunicazione con il server:', error);
-                    showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+                    console.error('Errore durante l\'aggiornamento dell\'evento:', error);
+                    showToast('Errore', 'Impossibile aggiornare l\'appuntamento', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
                   }
-                  
-                  // Fondamentale: pulire e ricreare tutti gli eventi del calendario
-                  // Questo risolve il problema dell'evento vecchio che rimane
-                  document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
-                  renderCalendarEvents();
-                  updateSelectedDateEvents();
                 }
               }
             }
+            
+            // Gestione del resize di un evento
+            if (touchState.value.isResizing && touchState.value.resizingEvent) {
+              const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.resizingEvent.id}"]`);
+              if (eventElement) {
+                eventElement.classList.remove('event-dragging');
+                
+                // Calcola la nuova durata in base all'altezza finale
+                const heightPx = parseFloat(eventElement.style.height);
+                const newDuration = Math.round(heightPx / 60 * 60); // 60px per ora, converte in minuti
+                
+                // Aggiorna l'evento solo se la durata è cambiata
+                if (newDuration !== parseInt(touchState.value.resizingEvent.duration)) {
+                  const newStart = new Date(touchState.value.resizingEvent.start);
+                  const newEnd = new Date(newStart.getTime() + newDuration * 60000);
+                  
+                  try {
+                    // Invia al server
+                    await axios.put(
+                      `https://api.costruzionedigitale.com/api/appointments/${touchState.value.resizingEvent.id}`, 
+                      {
+                        start: newStart,
+                        end: newEnd,
+                        duration: newDuration
+                      },
+                      { withCredentials: true }
+                    );
+                    
+                    // Aggiorna localmente
+                    const index = calendarEvents.value.findIndex(e => e.id === touchState.value.resizingEvent.id);
+                    if (index !== -1) {
+                      calendarEvents.value[index].end = newEnd;
+                      calendarEvents.value[index].duration = newDuration.toString();
+                    }
+                    
+                    // Aggiorna la vista
+                    document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
+                    renderCalendarEvents();
+                    updateSelectedDateEvents();
+                    
+                    // Feedback visivo
+                    showToast('Successo', 'Durata appuntamento modificata', 'bg-success', 'bi bi-check-circle-fill me-2');
+                  } catch (error) {
+                    console.error('Errore durante l\'aggiornamento della durata:', error);
+                    showToast('Errore', 'Impossibile aggiornare la durata', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Errore nella gestione degli eventi touch:', error);
           }
           
           // Reset dello stato
@@ -6013,27 +6064,20 @@
               description
             };
             
+            let response;
+            
             if (editingAppointment.value && currentAppointment.value.id) {
               // Aggiorna evento esistente
               eventData.id = currentAppointment.value.id;
               
-              // In una implementazione reale, inviare al server
-              // await axios.put(`/api/appointments/${eventData.id}`, eventData);
+              // Invia al server
+              response = await axios.put(
+                `https://api.costruzionedigitale.com/api/appointments/${eventData.id}`, 
+                eventData,
+                { withCredentials: true }
+              );
               
               // Aggiorna evento nel calendario
-              const existingEvent = calendarInstance.value.getEventById(eventData.id);
-              if (existingEvent) {
-                existingEvent.setProp('title', eventData.title);
-                existingEvent.setProp('backgroundColor', eventData.backgroundColor);
-                existingEvent.setProp('borderColor', eventData.borderColor);
-                existingEvent.setStart(eventData.start);
-                existingEvent.setEnd(eventData.end);
-                existingEvent.setExtendedProp('status', eventData.status);
-                existingEvent.setExtendedProp('clientId', eventData.clientId);
-                existingEvent.setExtendedProp('description', eventData.description);
-              }
-              
-              // Aggiorna array locale
               const index = calendarEvents.value.findIndex(e => e.id === eventData.id);
               if (index !== -1) {
                 calendarEvents.value[index] = {...calendarEvents.value[index], ...eventData};
@@ -6042,14 +6086,15 @@
               showToast('Successo', 'Appuntamento aggiornato', 'bg-success', 'bi bi-check-circle-fill me-2');
             } else {
               // Nuovo evento
-              eventData.id = Date.now().toString(); // ID temporaneo
+              // Invia al server
+              response = await axios.post(
+                'https://api.costruzionedigitale.com/api/appointments', 
+                eventData,
+                { withCredentials: true }
+              );
               
-              // In una implementazione reale, inviare al server
-              // const response = await axios.post('/api/appointments', eventData);
-              // eventData.id = response.data.id;
-              
-              // Aggiungi al calendario
-              calendarInstance.value.addEvent(eventData);
+              // Usa l'ID restituito dal server
+              eventData.id = response.data.data.id || Date.now().toString();
               
               // Aggiungi all'array locale
               calendarEvents.value.push(eventData);
@@ -6060,9 +6105,18 @@
             // Aggiorna eventi del giorno selezionato
             updateSelectedDateEvents();
             
+            // Aggiorna la vista del calendario
+            if (calendarInstance.value) {
+              // Rimuovi tutti gli eventi dalle celle
+              document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
+              
+              // Ricrea la vista
+              calendarInstance.value.updateView();
+            }
+            
             // Chiudi modale
             const modal = bootstrap.Modal.getInstance(document.getElementById('appointmentModal'));
-            modal.hide();
+            if (modal) modal.hide();
             
           } catch (error) {
             showToast('Errore', `Impossibile salvare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
@@ -6078,14 +6132,11 @@
           try {
             isLoading.value = true;
             
-            // In una implementazione reale, inviare al server
-            // await axios.delete(`/api/appointments/${event.id}`);
-            
-            // Rimuovi dal calendario
-            const calendarEvent = calendarInstance.value.getEventById(event.id);
-            if (calendarEvent) {
-              calendarEvent.remove();
-            }
+            // Invia al server
+            await axios.delete(
+              `https://api.costruzionedigitale.com/api/appointments/${event.id}`,
+              { withCredentials: true }
+            );
             
             // Rimuovi dall'array locale
             const index = calendarEvents.value.findIndex(e => e.id === event.id);
@@ -6095,6 +6146,15 @@
             
             // Aggiorna eventi del giorno selezionato
             updateSelectedDateEvents();
+            
+            // Aggiorna la vista del calendario
+            if (calendarInstance.value) {
+              // Rimuovi tutti gli eventi dalle celle
+              document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
+              
+              // Ricrea la vista
+              calendarInstance.value.updateView();
+            }
             
             showToast('Successo', 'Appuntamento eliminato', 'bg-success', 'bi bi-check-circle-fill me-2');
           } catch (error) {
@@ -6434,10 +6494,13 @@
 
   <!-- Modale nuovo/modifica appuntamento -->
   <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="appointmentModalLabel">{{ editingAppointment ? 'Modifica' : 'Nuovo' }} Appuntamento</h5>
+          <h5 class="modal-title" id="appointmentModalLabel">
+            <span v-if="editingAppointment">Modifica Appuntamento</span>
+            <span v-else>Nuovo Appuntamento</span>
+          </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
         </div>
         <div class="modal-body">
@@ -6481,7 +6544,7 @@
             <div class="mb-3">
               <label for="appointmentClient" class="form-label">Cliente</label>
               <select class="form-select" id="appointmentClient" v-model="currentAppointment.clientId">
-                <option value="" disabled>Seleziona un cliente</option>
+                <option value="">Seleziona un cliente</option>
                 <option v-for="client in clients" :key="client._id" :value="client._id">
                   {{ client.name }} ({{ client.email }})
                 </option>
@@ -6498,7 +6561,8 @@
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
           <button type="button" class="btn btn-primary" @click="saveAppointment" :disabled="isSavingAppointment">
             <span v-if="isSavingAppointment" class="spinner-border spinner-border-sm me-2" role="status"></span>
-            {{ editingAppointment ? 'Aggiorna' : 'Salva' }}
+            <span v-if="editingAppointment">Aggiorna</span>
+            <span v-else>Salva</span>
           </button>
         </div>
       </div>
