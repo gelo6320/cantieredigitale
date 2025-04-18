@@ -3054,6 +3054,242 @@
         padding: 10px;
       }
     }
+
+    /* ===== SALES FUNNEL STYLES ===== */
+    .funnel-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+    
+    .funnel-columns {
+      display: flex;
+      min-height: calc(100vh - 160px);
+      width: max-content;
+    }
+    
+    .funnel-column {
+      flex: 0 0 250px;
+      margin-right: 10px;
+      display: flex;
+      flex-direction: column;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    .funnel-stats-column {
+      flex: 0 0 280px;
+      margin-right: 0;
+      display: flex;
+      flex-direction: column;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    .funnel-header {
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    
+    .funnel-count {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .funnel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      min-height: 200px;
+    }
+    
+    .funnel-card {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      cursor: grab;
+      border-left: 3px solid var(--primary-color);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .funnel-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .funnel-card-header {
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .funnel-card-body {
+      padding: 8px 10px;
+    }
+    
+    .lead-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    
+    .lead-details {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .lead-value {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--primary-color);
+      margin: 3px 0;
+    }
+    
+    .lead-service {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-style: italic;
+    }
+    
+    .funnel-empty {
+      text-align: center;
+      padding: 20px 0;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    
+    .funnel-stats-section {
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .funnel-stats-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 5px;
+    }
+    
+    .funnel-chart-container {
+      height: 150px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    
+    .funnel-stats-info {
+      text-align: center;
+    }
+    
+    .stats-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+    
+    .stats-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 4px 0;
+      border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-number {
+      font-weight: 600;
+    }
+    
+    /* Stile quando il lead viene trascinato */
+    .funnel-card.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+    
+    /* Evidenzia la colonna durante il dragging */
+    .funnel-body.drag-over {
+      background-color: rgba(255, 107, 0, 0.1);
+      box-shadow: inset 0 0 0 2px var(--primary-color);
+    }
+    
+    /* Responsive per sales funnel */
+    @media (max-width: 991.98px) {
+      .funnel-columns {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      
+      .funnel-column, .funnel-stats-column {
+        flex: 0 0 220px;
+      }
+    }
+    
+    @media (max-width: 767.98px) {
+      .funnel-container {
+        margin: 0 -10px;
+      }
+      
+      .funnel-column, .funnel-stats-column {
+        flex: 0 0 180px;
+        margin-right: 8px;
+      }
+      
+      .funnel-header {
+        padding: 8px 10px;
+      }
+      
+      .funnel-header h6 {
+        font-size: 0.75rem;
+      }
+      
+      .funnel-body {
+        padding: 6px;
+      }
+      
+      .lead-name {
+        font-size: 0.75rem;
+      }
+      
+      .funnel-card-header, .funnel-card-body {
+        padding: 6px 8px;
+      }
+      
+      .funnel-chart-container {
+        height: 120px;
+      }
+    }
+    
+    .bg-accent {
+      background-color: #c97300 !important;
+    }
+
   </style>
 </head>
 <body>
@@ -3117,6 +3353,14 @@
                 <a class="nav-link" :class="{ 'active': activeTab === 'events' }" href="#" 
                    @click.prevent="selectTab('events')">
                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor"><path d="M352 224c53 0 96-43 96-96s-43-96-96-96s-96 43-96 96c0 4 .2 8 .7 11.9l-94.1 47C145.4 170.2 121.9 160 96 160c-53 0-96 43-96 96s43 96 96 96c25.9 0 49.4-10.2 66.6-26.9l94.1 47c-.5 3.9-.7 7.8-.7 11.9c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-25.9 0-49.4 10.2-66.6 26.9l-94.1-47c.5-3.9 .7-7.8 .7-11.9s-.2-8-.7-11.9l94.1-47C302.6 213.8 326.1 224 352 224z"/></svg> Eventi Facebook
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ 'active': activeTab === 'salesFunnel' }" href="#" 
+                   @click.prevent="selectTab('salesFunnel')">
+                   <svg class="icon" fill="currentcolor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+                    <path d="M296 136l0-48 48 0 0 48-48 0zM288 32c-26.5 0-48 21.5-48 48l0 4L121.6 84C111.2 62.7 89.3 48 64 48C28.7 48 0 76.7 0 112s28.7 64 64 64c25.3 0 47.2-14.7 57.6-36l66.9 0c-58.9 39.6-98.9 105-104 180L80 320c-26.5 0-48 21.5-48 48l0 64c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-64c0-26.5-21.5-48-48-48l-3.3 0c5.9-67 48.5-123.4 107.5-149.1c8.6 12.7 23.2 21.1 39.8 21.1l64 0c16.6 0 31.1-8.4 39.8-21.1c59 25.7 101.6 82.1 107.5 149.1l-3.3 0c-26.5 0-48 21.5-48 48l0 64c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-64c0-26.5-21.5-48-48-48l-4.5 0c-5-75-45.1-140.4-104-180l66.9 0c10.4 21.3 32.3 36 57.6 36c35.3 0 64-28.7 64-64s-28.7-64-64-64c-25.3 0-47.2 14.7-57.6 36L400 84l0-4c0-26.5-21.5-48-48-48l-64 0zM88 376l48 0 0 48-48 0 0-48zm416 48l0-48 48 0 0 48-48 0z"/>
+                  </svg> Sales Funnel
                 </a>
               </li>
               <li class="nav-item">
@@ -3756,6 +4000,301 @@
             </div>
           </div>
         </div>
+
+        <!-- Sales Funnel -->
+        <div v-if="activeTab === 'salesFunnel'">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Sales Funnel</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button @click="loadFunnelData()" class="btn btn-sm btn-outline-secondary">
+                  <svg width="10px" height="10px" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <path d="M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"/>
+                  </svg> <span class="d-none d-sm-inline">Aggiorna</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="funnel-container">
+            <div class="funnel-columns">
+              <!-- Nuovo -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-secondary">
+                  <h6 class="m-0">Nuovo</h6>
+                  <div class="funnel-count">{{ funnelData.new.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'new')">
+                  <div v-for="lead in funnelData.new" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'new')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.new.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Contattato -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-info">
+                  <h6 class="m-0">Contattato</h6>
+                  <div class="funnel-count">{{ funnelData.contacted.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'contacted')">
+                  <div v-for="lead in funnelData.contacted" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'contacted')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.contacted.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Qualificato -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-primary">
+                  <h6 class="m-0">Qualificato</h6>
+                  <div class="funnel-count">{{ funnelData.qualified.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'qualified')">
+                  <div v-for="lead in funnelData.qualified" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'qualified')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.qualified.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Opportunità -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-warning">
+                  <h6 class="m-0">Opportunità</h6>
+                  <div class="funnel-count">{{ funnelData.opportunity.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'opportunity')">
+                  <div v-for="lead in funnelData.opportunity" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'opportunity')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.opportunity.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Preventivo -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-accent">
+                  <h6 class="m-0">Preventivo</h6>
+                  <div class="funnel-count">{{ funnelData.proposal.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'proposal')">
+                  <div v-for="lead in funnelData.proposal" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'proposal')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.proposal.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Chiuso -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-success">
+                  <h6 class="m-0">Chiuso</h6>
+                  <div class="funnel-count">{{ funnelData.customer.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'customer')">
+                  <div v-for="lead in funnelData.customer" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'customer')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.customer.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Perso -->
+              <div class="funnel-column">
+                <div class="funnel-header bg-danger">
+                  <h6 class="m-0">Perso</h6>
+                  <div class="funnel-count">{{ funnelData.lost.length }}</div>
+                </div>
+                <div class="funnel-body" @dragover.prevent @drop="onDrop($event, 'lost')">
+                  <div v-for="lead in funnelData.lost" :key="lead._id" 
+                       class="funnel-card" draggable="true" 
+                       @dragstart="onDragStart($event, lead, 'lost')">
+                    <div class="funnel-card-header">
+                      <span class="lead-name">{{ lead.name }}</span>
+                      <button class="btn btn-sm text-white p-0" @click="editLeadValue(lead)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="funnel-card-body">
+                      <div class="lead-details">
+                        <small>{{ formatDate(lead.createdAt) }}</small>
+                        <div v-if="lead.value" class="lead-value">€{{ formatMoney(lead.value) }}</div>
+                        <small class="lead-service">{{ lead.service || 'Non specificato' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="funnelData.lost.length === 0" class="funnel-empty">
+                    Nessun lead
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Statistiche -->
+              <div class="funnel-stats-column">
+                <div class="funnel-header bg-dark">
+                  <h6 class="m-0">Statistiche</h6>
+                </div>
+                <div class="funnel-body">
+                  <div class="funnel-stats-section">
+                    <h6 class="funnel-stats-title">Tasso conversione</h6>
+                    <div class="funnel-chart-container">
+                      <canvas id="conversionChart"></canvas>
+                    </div>
+                    <div class="funnel-stats-info">
+                      <div class="stats-value">{{ funnelStats.conversionRate }}%</div>
+                      <div class="stats-label">Tasso medio</div>
+                    </div>
+                  </div>
+                  
+                  <div class="funnel-stats-section">
+                    <h6 class="funnel-stats-title">Valore totale</h6>
+                    <div class="funnel-stats-value">
+                      <div class="stats-row">
+                        <div class="stats-label">Potenziale:</div>
+                        <div class="stats-number">€{{ formatMoney(funnelStats.potentialValue) }}</div>
+                      </div>
+                      <div class="stats-row">
+                        <div class="stats-label">Realizzato:</div>
+                        <div class="stats-number">€{{ formatMoney(funnelStats.realizedValue) }}</div>
+                      </div>
+                      <div class="stats-row">
+                        <div class="stats-label">Perso:</div>
+                        <div class="stats-number">€{{ formatMoney(funnelStats.lostValue) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="funnel-stats-section">
+                    <h6 class="funnel-stats-title">Servizi più venduti</h6>
+                    <div class="funnel-chart-container">
+                      <canvas id="servicesChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Calendario -->
         <div v-if="activeTab === 'calendar'">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -4183,7 +4722,54 @@
   </div>
 </div>
 
+<!-- Modale modifica valore lead -->
+<div class="modal fade" id="leadValueModal" tabindex="-1" aria-labelledby="leadValueModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="leadValueModalLabel">Modifica dati lead</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <form @submit.prevent="saveLeadValue">
+          <div v-if="currentFunnelLead" class="mb-3">
+            <p class="mb-1"><strong>{{ currentFunnelLead.name }}</strong></p>
+            <p class="text-muted mb-3" style="font-size: 0.8rem;">{{ currentFunnelLead.email }}</p>
+            
+            <div class="mb-3">
+              <label for="leadValue" class="form-label">Valore stimato (€)</label>
+              <input type="number" class="form-control" id="leadValue" v-model="newLeadValue" min="0" step="100" placeholder="0">
+              <div class="form-text text-light opacity-75">Valore stimato del progetto</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="leadService" class="form-label">Tipo di servizio</label>
+              <select class="form-select" id="leadService" v-model="newLeadService">
+                <option value="">Seleziona un servizio</option>
+                <option v-for="service in leadServiceOptions" :key="service" :value="service">
+                  {{ service }}
+                </option>
+              </select>
+              <div class="form-text text-light opacity-75">Categoria di lavoro richiesto</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-primary" @click="saveLeadValue" :disabled="isLoading">
+          <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          Salva
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- JavaScript principale -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
   // Inizializzazione Vue.js
   const { createApp, ref, computed, onMounted, watch } = Vue;
@@ -4756,6 +5342,542 @@
           facebookLeadsFilter.value = status;
           facebookLeadsPagination.value.page = 1;
           loadFacebookLeads();
+        };
+
+        // Dati Sales Funnel
+        const funnelData = ref({
+          new: [],
+          contacted: [],
+          qualified: [],
+          opportunity: [],
+          proposal: [],
+          customer: [],
+          lost: []
+        });
+        
+        const funnelStats = ref({
+          totalLeads: 0,
+          conversionRate: 0,
+          potentialValue: 0,
+          realizedValue: 0,
+          lostValue: 0,
+          serviceDistribution: {}
+        });
+        
+        // Modale per modifica valore lead
+        const currentFunnelLead = ref(null);
+        const editLeadModal = ref(null);
+        const newLeadValue = ref('');
+        const leadServiceOptions = ref([
+          'Ristrutturazione completa',
+          'Ristrutturazione bagno',
+          'Ristrutturazione cucina',
+          'Rifacimento tetto',
+          'Impianto elettrico',
+          'Impianto idraulico',
+          'Cappotto termico',
+          'Infissi e serramenti',
+          'Rifacimento pavimenti',
+          'Ampliamento casa'
+        ]);
+        const newLeadService = ref('');
+        
+        // Charts instances
+        let conversionChart = null;
+        let servicesChart = null;
+        
+        // Funzione per formato denaro
+        const formatMoney = (value) => {
+          if (!value) return '0';
+          return parseFloat(value).toLocaleString('it-IT', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          });
+        };
+        
+        // Carica dati funnel
+        const loadFunnelData = async () => {
+          try {
+            isLoading.value = true;
+            
+            // Categoria "Nuovo"
+            const newLeads = [
+              ...(forms.value || []).filter(form => form.status === 'new'),
+              ...(bookings.value || []).filter(booking => booking.status === 'new' || booking.status === 'pending'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'new')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Contattato"
+            const contactedLeads = [
+              ...(forms.value || []).filter(form => form.status === 'contacted'),
+              ...(bookings.value || []).filter(booking => booking.status === 'contacted'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'contacted')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Qualificato"
+            const qualifiedLeads = [
+              ...(forms.value || []).filter(form => form.status === 'qualified'),
+              ...(bookings.value || []).filter(booking => booking.status === 'qualified'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'qualified')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Opportunità"
+            const opportunityLeads = [
+              ...(forms.value || []).filter(form => form.status === 'opportunity'),
+              ...(bookings.value || []).filter(booking => booking.status === 'opportunity'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'opportunity')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Preventivo"
+            const proposalLeads = [
+              ...(forms.value || []).filter(form => form.status === 'proposal'),
+              ...(bookings.value || []).filter(booking => booking.status === 'proposal'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'proposal')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Cliente"
+            const customerLeads = [
+              ...(forms.value || []).filter(form => form.status === 'customer'),
+              ...(bookings.value || []).filter(booking => booking.status === 'customer' || booking.status === 'completed'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'customer')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Categoria "Perso"
+            const lostLeads = [
+              ...(forms.value || []).filter(form => form.status === 'lost'),
+              ...(bookings.value || []).filter(booking => booking.status === 'lost' || booking.status === 'cancelled'),
+              ...(facebookLeads.value || []).filter(lead => lead.status === 'lost')
+            ].map(lead => ({
+              ...lead,
+              type: lead.bookingTime ? 'booking' : (lead.formId ? 'facebook' : 'form'),
+              value: lead.value || '',
+              service: lead.service || ''
+            }));
+            
+            // Aggiorna i dati
+            funnelData.value = {
+              new: newLeads,
+              contacted: contactedLeads,
+              qualified: qualifiedLeads,
+              opportunity: opportunityLeads,
+              proposal: proposalLeads,
+              customer: customerLeads,
+              lost: lostLeads
+            };
+            
+            // Calcolo statistiche
+            calculateFunnelStats();
+            
+            // Inizializza o aggiorna i grafici
+            initCharts();
+            
+          } catch (error) {
+            console.error('Errore caricamento dati funnel:', error);
+            showToast('Errore', 'Impossibile caricare i dati del funnel di vendita', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          } finally {
+            isLoading.value = false;
+          }
+        };
+        
+        // Calcola le statistiche del funnel
+        const calculateFunnelStats = () => {
+          // Totale lead
+          const allLeads = [
+            ...funnelData.value.new,
+            ...funnelData.value.contacted,
+            ...funnelData.value.qualified,
+            ...funnelData.value.opportunity,
+            ...funnelData.value.proposal,
+            ...funnelData.value.customer,
+            ...funnelData.value.lost
+          ];
+          
+          funnelStats.value.totalLeads = allLeads.length;
+          
+          // Tasso di conversione (clienti / totale lead esclusi quelli nelle fasi iniziali)
+          const leadsInPipeline = funnelData.value.contacted.length + 
+                                  funnelData.value.qualified.length + 
+                                  funnelData.value.opportunity.length + 
+                                  funnelData.value.proposal.length + 
+                                  funnelData.value.customer.length + 
+                                  funnelData.value.lost.length;
+          
+          if (leadsInPipeline > 0) {
+            funnelStats.value.conversionRate = Math.round((funnelData.value.customer.length / leadsInPipeline) * 100);
+          } else {
+            funnelStats.value.conversionRate = 0;
+          }
+          
+          // Valore potenziale (tutti i lead in pipeline con valore)
+          funnelStats.value.potentialValue = allLeads.reduce((total, lead) => {
+            return total + (parseFloat(lead.value) || 0);
+          }, 0);
+          
+          // Valore realizzato (clienti con valore)
+          funnelStats.value.realizedValue = funnelData.value.customer.reduce((total, lead) => {
+            return total + (parseFloat(lead.value) || 0);
+          }, 0);
+          
+          // Valore perso (lead persi con valore)
+          funnelStats.value.lostValue = funnelData.value.lost.reduce((total, lead) => {
+            return total + (parseFloat(lead.value) || 0);
+          }, 0);
+          
+          // Distribuzione per servizio
+          const serviceDistribution = {};
+          
+          // Considera solo clienti acquisiti
+          funnelData.value.customer.forEach(lead => {
+            if (lead.service) {
+              if (!serviceDistribution[lead.service]) {
+                serviceDistribution[lead.service] = 0;
+              }
+              serviceDistribution[lead.service]++;
+            }
+          });
+          
+          funnelStats.value.serviceDistribution = serviceDistribution;
+        };
+        
+        // Inizializza i grafici
+        const initCharts = () => {
+          // Distruggi i grafici esistenti per evitare perdite di memoria
+          if (conversionChart) {
+            conversionChart.destroy();
+          }
+          
+          if (servicesChart) {
+            servicesChart.destroy();
+          }
+          
+          // Grafico tasso di conversione
+          const conversionCtx = document.getElementById('conversionChart');
+          if (conversionCtx) {
+            const wonRate = funnelStats.value.conversionRate;
+            const lostRate = 100 - wonRate;
+            
+            conversionChart = new Chart(conversionCtx, {
+              type: 'doughnut',
+              data: {
+                labels: ['Acquisiti', 'Persi'],
+                datasets: [{
+                  data: [wonRate, lostRate],
+                  backgroundColor: [
+                    '#27ae60',
+                    '#e74c3c'
+                  ],
+                  borderWidth: 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      font: {
+                        size: 10
+                      },
+                      boxWidth: 12
+                    }
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(tooltipItem) {
+                        return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                      }
+                    }
+                  }
+                },
+                cutout: '70%'
+              }
+            });
+          }
+          
+          // Grafico servizi
+          const servicesCtx = document.getElementById('servicesChart');
+          if (servicesCtx) {
+            const serviceDistribution = funnelStats.value.serviceDistribution;
+            const labels = Object.keys(serviceDistribution);
+            const data = Object.values(serviceDistribution);
+            
+            // Colori per ogni servizio
+            const colors = [
+              '#FF6B00', '#3498db', '#e67e22', '#27ae60',
+              '#9b59b6', '#f1c40f', '#e74c3c', '#1abc9c',
+              '#34495e', '#2ecc71'
+            ];
+            
+            servicesChart = new Chart(servicesCtx, {
+              type: 'pie',
+              data: {
+                labels: labels.length > 0 ? labels : ['Nessun dato'],
+                datasets: [{
+                  data: data.length > 0 ? data : [1],
+                  backgroundColor: data.length > 0 
+                    ? labels.map((_, i) => colors[i % colors.length]) 
+                    : ['rgba(0, 0, 0, 0.2)'],
+                  borderWidth: 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      font: {
+                        size: 9
+                      },
+                      boxWidth: 10
+                    }
+                  }
+                }
+              }
+            });
+          }
+        };
+        
+        // Drag and drop
+        const onDragStart = (event, lead, sourceColumn) => {
+          // Salva i dati del lead e la colonna di origine
+          event.dataTransfer.setData('text/plain', JSON.stringify({
+            lead: lead,
+            sourceColumn: sourceColumn
+          }));
+          
+          // Aggiunge la classe per lo stile durante il trascinamento
+          event.target.classList.add('dragging');
+        };
+        
+        const onDrop = async (event, targetColumn) => {
+          event.preventDefault();
+          
+          // Rimuove la classe di highlight da tutte le colonne
+          document.querySelectorAll('.funnel-body').forEach(column => {
+            column.classList.remove('drag-over');
+          });
+          
+          // Ottiene i dati del lead trascinato
+          const data = JSON.parse(event.dataTransfer.getData('text/plain'));
+          const draggedLead = data.lead;
+          const sourceColumn = data.sourceColumn;
+          
+          // Se il lead è stato trascinato nella stessa colonna, non fare nulla
+          if (sourceColumn === targetColumn) {
+            return;
+          }
+          
+          try {
+            // Cambia lo stato del lead
+            const newStatus = targetColumn;
+            const leadType = draggedLead.type;
+            const leadId = draggedLead._id;
+            
+            // Prepara i dati per l'aggiornamento
+            const eventName = getEventNameForStatus(targetColumn);
+            const payload = {
+              newStatus,
+              eventName,
+              eventMetadata: {
+                note: `Stato aggiornato tramite funnel di vendita`
+              }
+            };
+            
+            if (draggedLead.value) {
+              payload.value = parseFloat(draggedLead.value);
+            }
+            
+            // Seleziona l'endpoint in base al tipo di lead
+            let endpoint;
+            if (leadType === 'form') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/forms/${leadId}/update`;
+            } else if (leadType === 'booking') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/bookings/${leadId}/update`;
+            } else if (leadType === 'facebook') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/facebook/${leadId}/update`;
+            }
+            
+            // Invia la richiesta di aggiornamento
+            if (endpoint) {
+              const response = await axios.post(endpoint, payload, { withCredentials: true });
+              
+              // Aggiorna il funnel localmente
+              // Rimuovi il lead dalla colonna di origine
+              funnelData.value[sourceColumn] = funnelData.value[sourceColumn].filter(
+                lead => lead._id !== draggedLead._id
+              );
+              
+              // Aggiungi il lead alla colonna di destinazione
+              funnelData.value[targetColumn].push({
+                ...draggedLead,
+                status: newStatus
+              });
+              
+              // Ricalcola le statistiche
+              calculateFunnelStats();
+              
+              // Aggiorna i grafici
+              initCharts();
+              
+              // Mostra notifica
+              if (response.data.facebookResult && response.data.facebookResult.success) {
+                showToast('Successo', `Lead spostato e evento "${eventName}" inviato a Facebook`, 'bg-success', 'bi bi-check-circle-fill me-2');
+              } else {
+                showToast('Avviso', `Lead spostato ma invio a Facebook fallito`, 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+              }
+            }
+          } catch (error) {
+            console.error('Errore durante lo spostamento del lead:', error);
+            showToast('Errore', 'Impossibile aggiornare lo stato del lead', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          }
+        };
+        
+        // Evidenzia colonna durante drag over
+        const onDragOver = (event, targetColumn) => {
+          event.preventDefault();
+          
+          // Aggiunge evidenziazione solo alla colonna target
+          document.querySelectorAll('.funnel-body').forEach(column => {
+            column.classList.remove('drag-over');
+          });
+          
+          event.currentTarget.classList.add('drag-over');
+        };
+        
+        // Rimuovi evidenziazione al drag leave
+        const onDragLeave = (event) => {
+          event.currentTarget.classList.remove('drag-over');
+        };
+        
+        // Rimuovi stile dal lead quando termina il drag
+        const onDragEnd = (event) => {
+          event.target.classList.remove('dragging');
+          
+          // Rimuovi evidenziazione da tutte le colonne
+          document.querySelectorAll('.funnel-body').forEach(column => {
+            column.classList.remove('drag-over');
+          });
+        };
+        
+        // Ottieni il nome dell'evento da inviare a Facebook in base allo stato
+        const getEventNameForStatus = (status) => {
+          switch(status) {
+            case 'contacted': return 'Contact';
+            case 'qualified': return 'QualifiedLead';
+            case 'opportunity': return 'Opportunity';
+            case 'proposal': return 'ProposalSent';
+            case 'customer': return 'Purchase';
+            case 'lost': return 'Lost';
+            default: return 'CustomEvent';
+          }
+        };
+        
+        // Modifica valore e servizio di un lead
+        const editLeadValue = (lead) => {
+          currentFunnelLead.value = lead;
+          newLeadValue.value = lead.value ? lead.value.toString() : '';
+          newLeadService.value = lead.service || '';
+          
+          // Mostra modale
+          const modal = new bootstrap.Modal(document.getElementById('leadValueModal'));
+          modal.show();
+        };
+        
+        // Salva il valore e il servizio del lead
+        const saveLeadValue = async () => {
+          if (!currentFunnelLead.value) return;
+          
+          try {
+            isLoading.value = true;
+            
+            const leadType = currentFunnelLead.value.type;
+            const leadId = currentFunnelLead.value._id;
+            const leadColumn = currentFunnelLead.value.status;
+            
+            // Prepara i dati per l'aggiornamento
+            const payload = {
+              value: newLeadValue.value ? parseFloat(newLeadValue.value) : null,
+              service: newLeadService.value
+            };
+            
+            // Seleziona l'endpoint in base al tipo di lead
+            let endpoint;
+            if (leadType === 'form') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/forms/${leadId}/update-metadata`;
+            } else if (leadType === 'booking') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/bookings/${leadId}/update-metadata`;
+            } else if (leadType === 'facebook') {
+              endpoint = `https://api.costruzionedigitale.com/api/leads/facebook/${leadId}/update-metadata`;
+            }
+            
+            // Invia la richiesta di aggiornamento
+            if (endpoint) {
+              await axios.post(endpoint, payload, { withCredentials: true });
+              
+              // Aggiorna il lead nel funnel localmente
+              const leadIndex = funnelData.value[leadColumn].findIndex(
+                lead => lead._id === leadId
+              );
+              
+              if (leadIndex !== -1) {
+                funnelData.value[leadColumn][leadIndex].value = newLeadValue.value;
+                funnelData.value[leadColumn][leadIndex].service = newLeadService.value;
+              }
+              
+              // Ricalcola le statistiche
+              calculateFunnelStats();
+              
+              // Aggiorna i grafici
+              initCharts();
+              
+              // Chiudi modale
+              const modal = bootstrap.Modal.getInstance(document.getElementById('leadValueModal'));
+              modal.hide();
+              
+              // Mostra notifica
+              showToast('Successo', 'Dati del lead aggiornati', 'bg-success', 'bi bi-check-circle-fill me-2');
+            }
+          } catch (error) {
+            console.error('Errore durante l\'aggiornamento del lead:', error);
+            showToast('Errore', 'Impossibile aggiornare i dati del lead', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
+          } finally {
+            isLoading.value = false;
+          }
         };
         
         const viewLeadDetails = (lead) => {
@@ -6277,6 +7399,14 @@
             if (clients.value.length === 0) {
               loadClients();
             }
+            else if (newTab === 'salesFunnel') {
+              loadForms();
+              loadBookings();
+              loadFacebookLeads();
+              setTimeout(() => {
+                loadFunnelData();
+              }, 500);
+            }
             
             // Carica eventi e inizializza calendario
             loadCalendarEvents();
@@ -6334,7 +7464,24 @@
           selectTab,
           passwordVisible,
           windowSize,
-          
+
+          // Funnel di vendita
+          funnelData,
+          funnelStats,
+          currentFunnelLead,
+          newLeadValue,
+          newLeadService,
+          leadServiceOptions,
+          formatMoney,
+          loadFunnelData,
+          onDragStart,
+          onDragOver,
+          onDragLeave,
+          onDragEnd,
+          onDrop,
+          editLeadValue,
+          saveLeadValue,
+                    
           // Dati
           forms,
           formsPagination,

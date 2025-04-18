@@ -619,6 +619,11 @@ function formatSource(source) {
     case 'popup-form': return 'Form Popup';
     case 'contatti-form': return 'Form Contatti';
     case 'booking-form': return 'Prenotazione Chiamata';
+    case 'facebook-ad': return 'Facebook Ads';
+    case 'instagram-ad': return 'Instagram Ads';
+    case 'google-ads': return 'Google Ads';
+    case 'referral': return 'Passaparola';
+    case 'old-client': return 'Cliente Precedente';
     default: return source || 'Sconosciuto';
   }
 }
