@@ -4328,11 +4328,13 @@
               handleEventDrop(info.event);
             },
             windowResize: (view) => {
+              /* 
               if (window.innerWidth < 768) {
                 calendar.changeView('listWeek');
               } else {
                 calendar.changeView('dayGridMonth');
               }
+              */
             }
           });
           
@@ -4676,18 +4678,11 @@
         const updateCalendarView = () => {
           if (!calendarInstance.value) return;
           
-          console.log("updateCalendarView chiamata", {
-            innerWidth: window.innerWidth,
-            currentView: calendarInstance.value.view.type,
-            isMobile: window.innerWidth < 768
-          });
-          
-          if (window.innerWidth < 768) {
-            console.log("Cambiando vista a listWeek");
+          // Cambia vista solo se necessario
+          if (window.innerWidth < 768 && calendarInstance.value.view.type !== 'listWeek') {
             calendarInstance.value.changeView('listWeek');
             calendarEl.value.classList.add('calendar-mobile');
-          } else {
-            console.log("Cambiando vista a dayGridMonth");
+          } else if (window.innerWidth >= 768 && calendarInstance.value.view.type !== 'dayGridMonth') {
             calendarInstance.value.changeView('dayGridMonth');
             calendarEl.value.classList.remove('calendar-mobile');
           }
@@ -4766,18 +4761,19 @@
           loadRecentEvents();
           loadSettings();
 
-          let prevWidth = window.innerWidth;
+          // Aggiungi questa variabile all'inizio della tua sezione setup
+          const lastWidth = ref(window.innerWidth);
           
+          // Sostituisci gli event listener resize con questo
           window.addEventListener('resize', () => {
-            console.log("Event resize triggered", {
-              innerWidth: window.innerWidth,
-              innerHeight: window.innerHeight
-            });
-            
-            handleResize();
-            if (activeTab.value === 'calendar' && calendarInstance.value) {
-              console.log("Chiamando updateCalendarView da resize");
-              updateCalendarView();
+            // Verifica se la larghezza è cambiata, ignorando i cambiamenti di altezza
+            if (lastWidth.value !== window.innerWidth) {
+              lastWidth.value = window.innerWidth;
+              handleResize();
+              
+              if (activeTab.value === 'calendar' && calendarInstance.value) {
+                updateCalendarView();
+              }
             }
           });
           
