@@ -7399,14 +7399,6 @@
             if (clients.value.length === 0) {
               loadClients();
             }
-            else if (newTab === 'salesFunnel') {
-              loadForms();
-              loadBookings();
-              loadFacebookLeads();
-              setTimeout(() => {
-                loadFunnelData();
-              }, 500);
-            }
             
             // Carica eventi e inizializza calendario
             loadCalendarEvents();
@@ -7415,6 +7407,13 @@
             setTimeout(() => {
               initCalendar();
             }, 100);
+          } else if (newTab === 'salesFunnel') {
+            loadForms();
+            loadBookings();
+            loadFacebookLeads();
+            setTimeout(() => {
+              loadFunnelData();
+            }, 500);
           }
         });
         
