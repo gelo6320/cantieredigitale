@@ -2537,6 +2537,20 @@
     .fc-event.new-event {
       animation: eventPulse 1.5s ease infinite;
     }
+
+    .day-header-selectable:hover {
+      background-color: rgba(255, 107, 0, 0.2) !important;
+      color: var(--primary-color) !important;
+    }
+    
+    .fc .fc-col-header-cell.day-selected {
+      background-color: rgba(255, 107, 0, 0.3) !important;
+    }
+    
+    .fc .fc-col-header-cell.day-selected .fc-col-header-cell-cushion {
+      color: var(--primary-color) !important;
+      font-weight: 700 !important;
+    }
   </style>
 </head>
 <body>
@@ -3224,22 +3238,17 @@
           </div>
         </div>
         <!-- Calendario -->
-        <div v-if="activeTab === 'calendar'">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Calendario Appuntamenti</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-              <div class="btn-group me-2">
-                <button @click="loadCalendarEvents()" class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Aggiorna</span>
-                </button>
-              </div>
-              <button class="btn btn-sm btn-primary" @click="openNewAppointmentModal()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor" class="me-1">
-                  <path d="M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"/>
-                </svg>
-                <span>Nuovo</span>
-              </button>
-            </div>
+        <div class="card fade-in mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Appuntamenti del giorno</h5>
+            <button v-if="calendarInstance && calendarInstance.view && calendarInstance.view.type === 'timeGridDay'" 
+                    class="btn btn-sm btn-outline-primary" 
+                    @click="backToWeekView">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" class="me-1">
+                <path d="M192 96v64h248c4.4 0 8 3.6 8 8v240c0 4.4-3.6 8-8 8H72c-4.4 0-8-3.6-8-8V168c0-4.4 3.6-8 8-8h80V96H72c-39.7 0-72 32.3-72 72v240c0 39.7 32.3 72 72 72h368c39.7 0 72-32.3 72-72V168c0-39.7-32.3-72-72-72H192z"/>
+              </svg>
+              Settimana
+            </button>
           </div>
           
           <div class="row">
@@ -4305,7 +4314,7 @@
             headerToolbar: {
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,timeGridWeek,listWeek'
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
             },
             locale: 'it',
             businessHours: {
@@ -4321,20 +4330,51 @@
               editAppointment(info.event);
             },
             dateClick: (info) => {
+              // Aggiorna la data selezionata
               selectedDate.value = new Date(info.date);
               updateSelectedDateEvents();
+              
+              // Se siamo in vista settimanale, passa alla vista giornaliera del giorno selezionato
+              if (calendar.view.type === 'timeGridWeek') {
+                calendar.changeView('timeGridDay', info.date);
+              }
             },
             eventDrop: (info) => {
               handleEventDrop(info.event);
             },
-            windowResize: (view) => {
-              /* 
-              if (window.innerWidth < 768) {
-                calendar.changeView('listWeek');
-              } else {
-                calendar.changeView('dayGridMonth');
+            datesSet: (info) => {
+              // Aggiorna la data selezionata quando cambia la vista
+              if (info.view.type === 'timeGridDay') {
+                selectedDate.value = new Date(info.start);
+                updateSelectedDateEvents();
               }
-              */
+            },
+            windowResize: () => {
+              if (lastWidth.value !== window.innerWidth) {
+                lastWidth.value = window.innerWidth;
+                if (window.innerWidth < 768) {
+                  calendar.changeView('listWeek');
+                }
+              }
+            },
+            // Aggiungi personalizzazione per i pulsanti dei giorni della settimana
+            viewDidMount: (arg) => {
+              if (arg.view.type === 'timeGridWeek') {
+                // Aggiungi stile e comportamento ai pulsanti del giorno
+                setTimeout(() => {
+                  const dayHeaders = document.querySelectorAll('.fc-col-header-cell');
+                  dayHeaders.forEach(header => {
+                    header.style.cursor = 'pointer';
+                    header.classList.add('day-header-selectable');
+                    
+                    // Rimuovi event listener esistenti prima di aggiungerne uno nuovo
+                    header.removeEventListener('click', dayHeaderClickHandler);
+                    
+                    // Aggiungi event listener per il click
+                    header.addEventListener('click', dayHeaderClickHandler);
+                  });
+                }, 100);
+              }
             }
           });
           
@@ -4342,6 +4382,21 @@
           calendarInstance.value = calendar;
         };
         
+        const dayHeaderClickHandler = (event) => {
+          // Ottieni la data dal testo del giorno della settimana
+          const headerText = event.currentTarget.getAttribute('data-date');
+          if (headerText) {
+            // Imposta la data selezionata
+            selectedDate.value = new Date(headerText);
+            updateSelectedDateEvents();
+            
+            // Passa alla vista giornaliera
+            if (calendarInstance.value) {
+              calendarInstance.value.changeView('timeGridDay', headerText);
+            }
+          }
+        };
+
         const loadCalendarEvents = async () => {
           try {
             isLoading.value = true;
@@ -4435,6 +4490,26 @@
             const eventStart = new Date(event.start);
             return eventStart >= startDate && eventStart <= endDate;
           });
+          
+          // Evidenzia il giorno selezionato nella vista settimanale
+          setTimeout(() => {
+            if (calendarInstance.value && calendarInstance.value.view.type === 'timeGridWeek') {
+              const dayHeaders = document.querySelectorAll('.fc-col-header-cell');
+              dayHeaders.forEach(header => {
+                const headerDate = header.getAttribute('data-date');
+                if (headerDate) {
+                  const headerDateObj = new Date(headerDate);
+                  const isSelected = headerDateObj.toDateString() === selectedDate.value.toDateString();
+                  
+                  if (isSelected) {
+                    header.classList.add('day-selected');
+                  } else {
+                    header.classList.remove('day-selected');
+                  }
+                }
+              });
+            }
+          }, 100);
         };
         
         const formatEventTime = (event) => {
@@ -4644,6 +4719,12 @@
             console.error('Errore eliminazione appuntamento:', error);
           } finally {
             isLoading.value = false;
+          }
+        };
+
+        const backToWeekView = () => {
+          if (calendarInstance.value) {
+            calendarInstance.value.changeView('timeGridWeek', selectedDate.value);
           }
         };
         
@@ -4888,7 +4969,8 @@
           saveAppointment,
           deleteAppointment,
           handleEventDrop,
-          updateCalendarView
+          updateCalendarView,
+          backToWeekView,
         };
       }
     });
