@@ -1760,7 +1760,8 @@
     
     .row, .dl-horizontal {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      gap: 20px;
     }
     
     dl.row {
@@ -3037,7 +3038,7 @@
               <h1 class="h2">Dashboard</h1>
             </div>
             
-            <div class="row dashboard-row">
+            <div class="row dashboard-row" style="padding-right: 40px;">
               <div class="col-md-4 col-sm-6 mb-4">
                 <div class="card stats-card border-primary fade-in">
                   <div class="card-body">
