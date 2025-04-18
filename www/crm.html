@@ -2855,65 +2855,6 @@
       position: relative;
     }
     
-    /* Vista settimanale */
-    .calendar-week-view {
-      display: grid;
-      grid-template-columns: 50px repeat(7, 1fr);
-      height: 100%;
-      overflow-y: auto;
-    }
-    
-    .week-header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-    
-    .week-day-header {
-      padding: 8px 0;
-      text-align: center;
-      font-size: 0.75rem;
-      border-left: 1px solid rgba(255, 255, 255, 0.05);
-      cursor: pointer;
-    }
-    
-    .week-day-name {
-      font-weight: 600;
-    }
-    
-    .week-day-number {
-      opacity: 0.7;
-    }
-    
-    .week-today-header {
-      background-color: rgba(255, 107, 0, 0.1);
-    }
-    
-    .week-selected-header {
-      background-color: rgba(255, 107, 0, 0.2);
-    }
-    
-    .week-time-grid {
-      display: grid;
-      grid-template-columns: 50px repeat(7, 1fr);
-      grid-auto-rows: 60px;
-    }
-    
-    .week-time-label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-    
-    .week-time-slot {
-      border-left: 1px solid rgba(255, 255, 255, 0.05);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-    }
-    
     /* Vista Lista */
     .calendar-list-view {
       padding: 15px;
@@ -4156,7 +4097,6 @@
               <div class="calendar-title">{{ formatMonthTitle(selectedDate) }}</div>
               <div class="calendar-view-controls">
                 <button @click="changeCalendarView('month')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'month'}">Mese</button>
-                <button @click="changeCalendarView('week')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'week'}">Settimana</button>
                 <button @click="changeCalendarView('day')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'day'}">Giorno</button>
                 <button @click="changeCalendarView('list')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'list'}">Lista</button>
               </div>
@@ -5043,70 +4983,6 @@
         </div>
       </div>
       `;
-
-      // Template per la vista settimanale con composizione strutturata (continua)
-      const weekViewTemplate = `
-      <div class="calendar-week-view">
-        <!-- Intestazione con giorni -->
-        <div class="week-header">
-          <!-- Cella angolo vuota -->
-          <div class="week-corner-cell"></div>
-          
-          <!-- Intestazioni giorni -->
-          <div v-for="day in weekDays" 
-               :key="day.date"
-               class="week-day-header"
-               :class="{ 
-                 'week-today-header': day.isToday,
-                 'week-selected-header': day.isSelected 
-               }"
-               :data-date="day.date"
-               @click="selectDateAndView(day.dateObj, 'day')">
-            <div class="week-day-name">{{ day.name }}</div>
-            <div class="week-day-number">{{ day.number }}</div>
-          </div>
-        </div>
-        
-        <!-- Griglia oraria -->
-        <div class="week-time-grid">
-          <!-- Colonna orari -->
-          <template v-for="hour in dailyHours">
-            <!-- Etichetta ora -->
-            <div class="week-time-label">{{ hour }}:00</div>
-            
-            <!-- Slot per ogni giorno della settimana -->
-            <template v-for="day in weekDays">
-              <div class="week-time-slot"
-                   :data-hour="hour"
-                   :data-date="day.date"
-                   @dragover.prevent
-                   @drop="handleEventDrop($event, day.dateObj, hour)">
-                
-                <!-- Eventi che iniziano in questo slot -->
-                <div v-for="event in getEventsForDayAndHour(day.dateObj, hour)"
-                     class="week-time-event"
-                     :class="'event-status-' + event.status"
-                     :style="{
-                       position: 'absolute',
-                       top: '2px',
-                       left: '2px', 
-                       right: '2px',
-                       height: calculateEventHeight(event),
-                       backgroundColor: getEventColor(event.status),
-                       zIndex: 10
-                     }"
-                     draggable="true"
-                     @dragstart="handleEventDragStart($event, event)"
-                     @click="editAppointment(event)">
-                  <div class="event-time">{{ formatTime(new Date(event.start)) }}</div>
-                  <div class="event-title">{{ event.title }}</div>
-                </div>
-              </div>
-            </template>
-          </template>
-        </div>
-      </div>
-      `;
       
       // Template per la vista giornaliera con composizione strutturata
       const dayViewTemplate = `
@@ -5239,35 +5115,6 @@
       const formatTime = (date) => {
         return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       };
-
-      
-      // Calcolo dei giorni per la vista settimanale
-      const calculateWeekDays = () => {
-        const firstDayOfWeek = new Date(selectedDate.value);
-        const day = selectedDate.value.getDay();
-        firstDayOfWeek.setDate(firstDayOfWeek.getDate() - day);
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const days = [];
-        
-        for (let i = 0; i < 7; i++) {
-          const dayDate = new Date(firstDayOfWeek);
-          dayDate.setDate(dayDate.getDate() + i);
-          
-          days.push({
-            name: dayDate.toLocaleDateString('it-IT', { weekday: 'short' }),
-            number: dayDate.getDate(),
-            isToday: dayDate.toDateString() === today.toDateString(),
-            isSelected: dayDate.toDateString() === selectedDate.value.toDateString(),
-            date: dayDate.toISOString().split('T')[0],
-            dateObj: new Date(dayDate)
-          });
-        }
-        
-        return days;
-      };
       
       // Raggruppa eventi per data per la vista lista
       const groupEventsByDate = () => {
@@ -5294,31 +5141,6 @@
         
         // Converte in array e ordina per data
         return Object.values(eventsByDate).sort((a, b) => a.date - b.date);
-      };
-      
-      // Ottieni eventi per giorno e ora specifici
-      const getEventsForDayAndHour = (date, hour) => {
-        const dateStr = date.toISOString().split('T')[0];
-        
-        const startTime = new Date(date);
-        startTime.setHours(hour, 0, 0, 0);
-        
-        const endTime = new Date(date);
-        endTime.setHours(hour, 59, 59, 999);
-        
-        return calendarEvents.value.filter(event => {
-          const eventStart = new Date(event.start);
-          const eventDate = eventStart.toISOString().split('T')[0];
-          
-          if (eventDate !== dateStr) return false;
-          
-          const eventEnd = new Date(event.end);
-          
-          // Evento che inizia in quest'ora o copre quest'ora
-          return (eventStart >= startTime && eventStart <= endTime) || 
-                 (eventEnd >= startTime && eventEnd <= endTime) ||
-                 (eventStart <= startTime && eventEnd >= endTime);
-        });
       };
       
       // Calcola altezza dell'evento in base alla durata
@@ -5368,7 +5190,6 @@
       
       // Funzioni computate da aggiungere al componente Vue
       const monthCells = computed(() => calculateMonthCells());
-      const weekDays = computed(() => calculateWeekDays());
       const groupedEvents = computed(() => groupEventsByDate());
       
       const loadEvents = async () => {
@@ -6586,8 +6407,6 @@
           // Crea la vista del calendario in base alla vista selezionata
           if (calendarView.value === 'month') {
             createMonthView();
-          } else if (calendarView.value === 'week') {
-            createWeekView();
           } else if (calendarView.value === 'day') {
             createDayView();
           } else if (calendarView.value === 'list') {
@@ -6685,100 +6504,6 @@
           
           monthView.appendChild(daysGrid);
           calendarEl.value.appendChild(monthView);
-        };
-        
-        // Funzione per creare la vista settimanale
-        const createWeekView = () => {
-          const weekView = document.createElement('div');
-          weekView.className = 'calendar-week-view';
-          
-          // Calcola il primo giorno della settimana (domenica)
-          const firstDayOfWeek = new Date(selectedDate.value);
-          const day = selectedDate.value.getDay();
-          firstDayOfWeek.setDate(firstDayOfWeek.getDate() - day);
-          
-          // Intestazione
-          const weekHeader = document.createElement('div');
-          weekHeader.className = 'week-header';
-          
-          // Cella vuota nell'angolo
-          const cornerCell = document.createElement('div');
-          cornerCell.className = 'week-corner-cell';
-          weekHeader.appendChild(cornerCell);
-          
-          // Giorno corrente per confronto
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          // Celle intestazione per ogni giorno
-          for (let i = 0; i < 7; i++) {
-            const dayDate = new Date(firstDayOfWeek);
-            dayDate.setDate(dayDate.getDate() + i);
-            
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'week-day-header';
-            
-            // Controlla se è oggi o il giorno selezionato
-            if (dayDate.toDateString() === today.toDateString()) {
-              dayHeader.classList.add('week-today-header');
-            }
-            
-            if (dayDate.toDateString() === selectedDate.value.toDateString()) {
-              dayHeader.classList.add('week-selected-header');
-            }
-            
-            // Formatta intestazione giorno
-            const dayName = dayDate.toLocaleDateString('it-IT', { weekday: 'short' });
-            const dayNum = dayDate.getDate();
-            
-            dayHeader.innerHTML = `
-              <div class="week-day-name">${dayName}</div>
-              <div class="week-day-number">${dayNum}</div>
-            `;
-            
-            // Attributo data
-            dayHeader.setAttribute('data-date', dayDate.toISOString().split('T')[0]);
-            
-            // Click sul giorno per selezionarlo
-            dayHeader.addEventListener('click', () => {
-              selectedDate.value = new Date(dayDate);
-              updateSelectedDateEvents();
-              changeCalendarView('day');
-            });
-            
-            weekHeader.appendChild(dayHeader);
-          }
-          
-          weekView.appendChild(weekHeader);
-          
-          // Griglia degli orari
-          const timeGrid = document.createElement('div');
-          timeGrid.className = 'week-time-grid';
-          
-          // Genera le righe per ogni ora
-          for (let hour = 8; hour < 20; hour++) {
-            // Etichetta dell'ora
-            const timeLabel = document.createElement('div');
-            timeLabel.className = 'week-time-label';
-            timeLabel.textContent = `${hour}:00`;
-            timeGrid.appendChild(timeLabel);
-            
-            // Celle per ogni giorno della settimana
-            for (let day = 0; day < 7; day++) {
-              const dayDate = new Date(firstDayOfWeek);
-              dayDate.setDate(dayDate.getDate() + day);
-              
-              const timeSlot = document.createElement('div');
-              timeSlot.className = 'week-time-slot';
-              timeSlot.setAttribute('data-hour', hour);
-              timeSlot.setAttribute('data-date', dayDate.toISOString().split('T')[0]);
-              
-              timeGrid.appendChild(timeSlot);
-            }
-          }
-          
-          weekView.appendChild(timeGrid);
-          calendarEl.value.appendChild(weekView);
         };
         
         // Funzione per creare la vista giornaliera
@@ -7300,8 +7025,6 @@
         const renderCalendarEvents = () => {
           if (calendarView.value === 'month') {
             renderMonthViewEvents();
-          } else if (calendarView.value === 'week') {
-            renderWeekViewEvents();
           } else if (calendarView.value === 'day') {
             renderDayViewEvents();
           }
@@ -7357,55 +7080,6 @@
               moreIndicator.textContent = `+${events.length - 3}`;
               dayEvents.appendChild(moreIndicator);
             }
-          });
-        };
-        
-        // Renderizza eventi nella vista settimanale
-        const renderWeekViewEvents = () => {
-          calendarEvents.value.forEach(event => {
-            const startDate = new Date(event.start);
-            const dateKey = startDate.toISOString().split('T')[0];
-            const hour = startDate.getHours();
-            
-            // Trova la cella corrispondente
-            const timeSlot = calendarEl.value.querySelector(`.week-time-slot[data-date="${dateKey}"][data-hour="${hour}"]`);
-            if (!timeSlot) return;
-            
-            // Calcola durata dell'evento
-            const endTime = new Date(event.end);
-            const durationHours = (endTime - startDate) / (1000 * 60 * 60);
-            
-            // Crea elemento dell'evento
-            const eventEl = document.createElement('div');
-            eventEl.className = `week-event event-status-${event.status}`;
-            eventEl.style.position = 'absolute';
-            eventEl.style.left = '2px';
-            eventEl.style.right = '2px';
-            eventEl.style.top = '2px';
-            eventEl.style.height = `calc(${durationHours * 100}% - 4px)`;
-            eventEl.style.backgroundColor = getEventColor(event.status);
-            eventEl.style.borderRadius = '3px';
-            eventEl.style.padding = '4px';
-            eventEl.style.fontSize = '0.75rem';
-            eventEl.style.overflow = 'hidden';
-            eventEl.style.cursor = 'pointer';
-            eventEl.style.zIndex = '10';
-            
-            // Formatta ora
-            const formattedTime = formatTime(startDate);
-            
-            eventEl.innerHTML = `
-              <div style="font-size: 0.7rem; opacity: 0.7;">${formattedTime}</div>
-              <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${event.title}</div>
-            `;
-            
-            // Click per modificare l'evento
-            eventEl.addEventListener('click', () => {
-              editAppointment(event);
-            });
-            
-            timeSlot.style.position = 'relative';
-            timeSlot.appendChild(eventEl);
           });
         };
         
@@ -7479,13 +7153,6 @@
             eventSlot.style.position = 'relative';
             eventSlot.appendChild(eventEl);
           });
-        };
-        
-        // Funzione per tornare alla vista settimanale
-        const backToWeekView = () => {
-          if (calendarInstance.value) {
-            calendarInstance.value.changeView('week', selectedDate.value);
-          }
         };
         
         const dayHeaderClickHandler = (event) => {
@@ -8119,20 +7786,15 @@
           editAppointment,
           saveAppointment,
           deleteAppointment,
-          handleEventDrop,
           updateCalendarView,
-          backToWeekView,
 
           // Nuove proprietà computate
           monthCells,
-          weekDays,
           groupedEvents,
           
           // Nuove funzioni helper
           calculateMonthCells,
-          calculateWeekDays,
           groupEventsByDate,
-          getEventsForDayAndHour,
           calculateEventHeight,
           formatDateHeader,
           formatDateForAttribute,
@@ -8142,12 +7804,10 @@
           initCalendar,
           changeCalendarView,
           createMonthView,
-          createWeekView,
           createDayView,
           createListView,
           renderCalendarEvents,
           renderMonthViewEvents,
-          renderWeekViewEvents,
           renderDayViewEvents,
           navigateCalendar,
           formatMonthTitle,
@@ -8158,18 +7818,14 @@
           handleEventDrop,
           updateSelectedDateEvents,
           formatEventTime,
-          getEventsForHour,
 
           // Nuove proprietà computate
           monthCells,
-          weekDays,
           groupedEvents,
           
           // Nuove funzioni helper
           calculateMonthCells,
-          calculateWeekDays,
           groupEventsByDate,
-          getEventsForDayAndHour,
           calculateEventHeight,
           formatDateHeader,
           formatDateForAttribute,
@@ -8221,18 +7877,6 @@
           this.style.backgroundColor = '';
         });
       });
-      
-      // Esegui al caricamento e al resize
-      checkAndFixOverflow();
-      window.addEventListener('resize', checkAndFixOverflow);
-      
-      // Supporto per tema dark
-      function setThemeColors() {
-        // Il tema è già dark per default, ma qui puoi aggiungere logica per temi alternativi
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-      
-      setThemeColors();
     });
   </script>
 </body>
