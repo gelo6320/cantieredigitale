@@ -2132,929 +2132,6 @@
       justify-content: center;
     }
 
-    /* ===== STILE CALENDARIO ===== */
-    .fc {
-      --fc-border-color: rgba(255, 255, 255, 0.1);
-      --fc-button-bg-color: var(--light-accent);
-      --fc-button-border-color: var(--border-color);
-      --fc-button-hover-bg-color: var(--primary-color);
-      --fc-button-hover-border-color: var(--primary-color);
-      --fc-button-active-bg-color: var(--primary-color);
-      --fc-button-active-border-color: var(--primary-color);
-      --fc-event-bg-color: var(--primary-color);
-      --fc-event-border-color: var(--primary-color);
-      --fc-today-bg-color: rgba(255, 107, 0, 0.1);
-      --fc-neutral-bg-color: var(--light-accent);
-      --fc-list-event-hover-bg-color: rgba(255, 107, 0, 0.1);
-      height: 700px;
-    }
-    
-    .fc .fc-toolbar-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-color);
-    }
-    
-    .fc .fc-button {
-      padding: 0.5rem 0.8rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      border-radius: var(--border-radius);
-    }
-    
-    .fc .fc-button:focus {
-      box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.3);
-    }
-    
-    .fc .fc-button-primary:not(:disabled):active, 
-    .fc .fc-button-primary:not(:disabled).fc-button-active {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    .fc .fc-button-primary:disabled {
-      background-color: rgba(255, 107, 0, 0.4);
-      border-color: rgba(255, 107, 0, 0.4);
-    }
-    
-    .fc-theme-standard th {
-      padding: 12px 0;
-      background-color: rgba(0, 0, 0, 0.2);
-      font-weight: 600;
-      color: var(--primary-color);
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
-    }
-    
-    .fc-theme-standard td {
-      border-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    .fc-col-header-cell-cushion,
-    .fc-daygrid-day-number {
-      color: var(--text-color);
-      text-decoration: none !important;
-      padding: 6px 8px;
-      font-weight: 500;
-    }
-    
-    .fc-daygrid-day-number {
-      font-size: 0.9rem;
-    }
-    
-    .fc-daygrid-event {
-      white-space: nowrap;
-      border-radius: 4px;
-      font-size: 0.8em;
-      font-weight: 500;
-      padding: 3px 8px;
-      margin-bottom: 2px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    
-    .fc-daygrid-event:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    }
-    
-    .fc-h-event {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    .fc-theme-standard .fc-scrollgrid {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .fc-day-today {
-      background-color: rgba(255, 107, 0, 0.05) !important;
-    }
-    
-    .fc-popover {
-      background-color: var(--light-accent);
-      border-color: rgba(255, 255, 255, 0.1);
-      border-radius: var(--border-radius);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    .fc-popover .fc-popover-header {
-      background-color: rgba(0, 0, 0, 0.2);
-      color: var(--text-color);
-      font-weight: 600;
-      padding: 8px 10px;
-      border-top-left-radius: var(--border-radius);
-      border-top-right-radius: var(--border-radius);
-    }
-    
-    .fc-popover .fc-popover-body {
-      padding: 8px;
-    }
-    
-    .fc-list-day-cushion {
-      background-color: rgba(0, 0, 0, 0.2) !important;
-      padding: 10px 15px !important;
-    }
-    
-    .fc-list-event:hover td {
-      background-color: rgba(255, 107, 0, 0.1) !important;
-    }
-    
-    .fc-list-event-title,
-    .fc-list-event-time {
-      color: var(--text-color) !important;
-      font-size: 0.9rem;
-      padding: 8px 15px !important;
-    }
-    
-    .fc-timegrid-slot {
-      height: 45px !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .fc-timegrid-axis {
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    
-    .fc-timegrid-event {
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
-    
-    .fc-timegrid-event .fc-event-main {
-      padding: 4px 6px;
-    }
-    
-    .fc-timegrid-event .fc-event-title {
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    
-    .fc-timegrid-event .fc-event-time {
-      font-size: 0.75rem;
-      opacity: 0.9;
-    }
-    
-    /* Stile per vista "week" */
-    .fc-timeGridWeek-view .fc-col-header-cell {
-      font-size: 0.85rem;
-    }
-    
-    .calendar-mobile .fc-toolbar-title {
-      font-size: 1.2rem;
-    }
-    
-    .fc-view-harness {
-      min-height: 400px;
-      background-color: rgba(0, 0, 0, 0.15);
-      border-radius: var(--border-radius);
-    }
-    
-    /* Stile per eventi con stati diversi */
-    .event-confirmed {
-      background-color: var(--primary-color) !important;
-      border-color: var(--primary-color) !important;
-    }
-    
-    .event-pending {
-      background-color: var(--warning-color) !important;
-      border-color: var(--warning-color) !important;
-    }
-    
-    .event-completed {
-      background-color: var(--success-color) !important;
-      border-color: var(--success-color) !important;
-    }
-    
-    .event-cancelled {
-      background-color: var(--danger-color) !important;
-      border-color: var(--danger-color) !important;
-      text-decoration: line-through;
-      opacity: 0.7;
-    }
-    
-    /* Stile per la legenda */
-    .calendar-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-    }
-    
-    .legend-color {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-    }
-    
-    /* Stile per la lista appuntamenti */
-    .appointment-list {
-      max-height: 300px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--primary-color) rgba(0, 0, 0, 0.2);
-    }
-    
-    .appointment-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .appointment-list::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 3px;
-    }
-    
-    .appointment-list::-webkit-scrollbar-thumb {
-      background-color: var(--primary-color);
-      border-radius: 3px;
-    }
-    
-    .appointment-list-item {
-      padding: 12px;
-      border-radius: var(--border-radius);
-      margin-bottom: 8px;
-      background-color: rgba(0, 0, 0, 0.15);
-      border-left: 3px solid var(--primary-color);
-      transition: all 0.2s ease;
-    }
-    
-    .appointment-list-item:hover {
-      background-color: rgba(0, 0, 0, 0.25);
-      transform: translateX(2px);
-    }
-    
-    .appointment-list-item .title {
-      font-weight: 600;
-      margin-bottom: 4px;
-      font-size: 0.95rem;
-      color: var(--text-color);
-    }
-    
-    .appointment-list-item .time {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    
-    .appointment-list-item .description {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-    
-    .appointment-list-item .actions {
-      display: flex;
-      gap: 5px;
-      margin-top: 8px;
-    }
-    
-    /* Vista orizzontale per mobile */
-    .hours-timeline {
-      display: flex;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    .hour-column {
-      flex: 0 0 90px;
-      min-width: 90px;
-      padding: 8px;
-      text-align: center;
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-      scroll-snap-align: start;
-    }
-    
-    .hour-column .hour-header {
-      font-weight: 600;
-      font-size: 0.9rem;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 8px;
-    }
-    
-    .hour-column .empty-slot {
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.8rem;
-      padding: 8px 0;
-    }
-    
-    .hour-column .event-pill {
-      background-color: var(--primary-color);
-      color: #fff;
-      border-radius: 4px;
-      padding: 4px 6px;
-      font-size: 0.7rem;
-      margin-bottom: 5px;
-      cursor: pointer;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
-    }
-    
-    /* Modifiche responsive */
-    @media (max-width: 767.98px) {
-      .fc {
-        font-size: 0.85rem;
-        height: auto;
-      }
-      
-      .fc-header-toolbar {
-        padding: 20px 20px;
-        gap: 10px;
-        margin-bottom: 1rem !important;
-      }
-      
-      .fc-toolbar-chunk {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-      }
-      
-      .fc-toolbar-chunk:first-child {
-        order: 2;
-      }
-      
-      .fc-toolbar-chunk:nth-child(2) {
-        order: 1;
-      }
-      
-      .fc-toolbar-chunk:last-child {
-        order: 3;
-      }
-      
-      .fc .fc-toolbar.fc-header-toolbar {
-        margin-bottom: 0.5em;
-        padding: 20px;
-      }
-      
-      .fc .fc-toolbar-title {
-        font-size: 1.2rem;
-      }
-      
-      .fc .fc-button {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
-      }
-      
-      .fc-view-harness {
-        min-height: 600px;
-      }
-      
-      .fc-col-header-cell-cushion {
-        padding: 4px;
-      }
-      
-      .fc-daygrid-day-number {
-        padding: 4px;
-      }
-      
-      /* Miglioramenti per vista mobile orizzontale */
-      .hour-column {
-        flex: 0 0 80px;
-        min-width: 80px;
-      }
-    }
-    
-    /* Animazioni per eventi */
-    @keyframes eventPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-      100% { transform: scale(1); }
-    }
-    
-    .fc-event.new-event {
-      animation: eventPulse 1.5s ease infinite;
-    }
-
-    .day-header-selectable:hover {
-      background-color: rgba(255, 107, 0, 0.2) !important;
-      color: var(--primary-color) !important;
-    }
-    
-    .fc .fc-col-header-cell.day-selected {
-      background-color: rgba(255, 107, 0, 0.3) !important;
-    }
-    
-    .fc .fc-col-header-cell.day-selected .fc-col-header-cell-cushion {
-      color: var(--primary-color) !important;
-      font-weight: 700 !important;
-    }
-
-    /* Stile calendario personalizzato */
-    .calendar-month-grid {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
-      height: 700px;
-      background-color: var(--light-accent);
-      overflow: hidden;
-    }
-    
-    .calendar-days-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      background-color: rgba(0, 0, 0, 0.2);
-      padding: 10px 0;
-    }
-    
-    .calendar-day-name {
-      text-align: center;
-      font-weight: 600;
-      color: var(--primary-color);
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
-    }
-    
-    .calendar-month-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      height: 100%;
-    }
-    
-    .calendar-day {
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 5px;
-      min-height: 100px;
-      position: relative;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    
-    .calendar-day:hover {
-      background-color: rgba(255, 107, 0, 0.05);
-    }
-    
-    .calendar-other-month {
-      opacity: 0.4;
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-    
-    .calendar-today {
-      background-color: rgba(255, 107, 0, 0.1);
-    }
-    
-    .calendar-selected {
-      background-color: rgba(255, 107, 0, 0.2);
-    }
-    
-    .calendar-day-label {
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    
-    .calendar-day-events {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      overflow: hidden;
-    }
-    
-    .calendar-event {
-      padding: 2px 4px;
-      border-radius: 3px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      color: white;
-      transition: transform 0.15s ease;
-    }
-    
-    .calendar-event:hover {
-      transform: translateY(-1px);
-    }
-    
-    .calendar-more-events {
-      font-size: 0.75rem;
-      text-align: center;
-      color: var(--text-color);
-      opacity: 0.7;
-      cursor: pointer;
-    }
-    
-    /* Vista settimanale */
-    .calendar-week-grid {
-      display: flex;
-      flex-direction: column;
-      height: 700px;
-      background-color: var(--light-accent);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-    }
-    
-    .calendar-week-header {
-      display: flex;
-      flex-direction: row;
-      height: 100%;
-    }
-    
-    .calendar-time-column {
-      width: 70px;
-      flex-shrink: 0;
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-    
-    .calendar-time-header {
-      height: 50px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .calendar-time-cell {
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 5px;
-      font-size: 0.85rem;
-      color: var(--text-color);
-    }
-    
-    .calendar-day-column {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .calendar-day-header {
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    
-    .calendar-day-header:hover {
-      background-color: rgba(255, 107, 0, 0.2);
-      color: var(--primary-color);
-    }
-    
-    .calendar-day-number {
-      margin-left: 5px;
-      font-weight: 700;
-    }
-    
-    .calendar-hour-cell {
-      height: 60px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-    }
-    
-    .calendar-week-event {
-      position: absolute;
-      left: 2px;
-      right: 2px;
-      min-height: 20px;
-      border-radius: 3px;
-      padding: 2px 4px;
-      color: white;
-      font-size: 0.75rem;
-      overflow: hidden;
-      cursor: pointer;
-      z-index: 10;
-    }
-    
-    .calendar-event-time {
-      font-size: 0.7rem;
-      opacity: 0.9;
-    }
-    
-    .calendar-event-title {
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    /* Vista giornaliera */
-    .calendar-day-grid {
-      display: flex;
-      flex-direction: column;
-      height: 700px;
-      background-color: var(--light-accent);
-      overflow: hidden;
-    }
-    
-    /* Vista giornaliera (continuazione) */
-    .calendar-single-day-header {
-      padding: 15px;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
-    }
-    
-    .calendar-hours-grid {
-      flex: 1;
-      overflow-y: auto;
-    }
-    
-    .calendar-hour-row {
-      display: flex;
-      height: 60px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .calendar-time-label {
-      width: 70px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(0, 0, 0, 0.2);
-      font-size: 0.85rem;
-      color: var(--text-color);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .calendar-events-cell {
-      flex: 1;
-      position: relative;
-    }
-    
-    .calendar-day-event {
-      position: absolute;
-      left: 5px;
-      right: 5px;
-      min-height: 30px;
-      border-radius: 4px;
-      padding: 5px 8px;
-      color: white;
-      cursor: pointer;
-      z-index: 10;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
-    
-    .calendar-event-description {
-      font-size: 0.75rem;
-      opacity: 0.8;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    /* Stile per i pulsanti e header del calendario */
-    .calendar-header {
-      margin: 20px 20px 0px;
-      background-color: rgba(0, 0, 0, 0.2);
-      padding: 15px;
-      margin-bottom: 1px;
-    }
-    
-    .calendar-title {
-      font-weight: 600;
-      color: var(--text-color);
-    }
-    
-    /* Responsive */
-    @media (max-width: 767.98px) {
-      .calendar-month-grid, .calendar-week-grid, .calendar-day-grid {
-        height: auto;
-        min-height: 500px;
-      }
-      
-      .calendar-header {
-        flex-direction: column;
-        gap: 10px;
-        margin: 0px;
-      }
-      
-      .calendar-day-name {
-        font-size: 0.75rem;
-      }
-      
-      .calendar-day {
-        min-height: 80px;
-      }
-      
-      .calendar-time-column, .calendar-time-label {
-        width: 50px;
-      }
-      
-      .calendar-week-event, .calendar-day-event {
-        font-size: 0.7rem;
-      }
-    }
-
-    /* Stile per vista lista */
-    .calendar-list-view {
-      display: flex;
-      flex-direction: column;
-      height: 700px;
-      background-color: var(--light-accent);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      overflow-y: auto;
-      padding: 20px;
-    }
-    
-    .calendar-list-header {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    .calendar-list-empty {
-      text-align: center;
-      padding: 30px;
-      color: rgba(255, 255, 255, 0.5);
-    }
-    
-    .calendar-list-date-header {
-      margin: 25px 0 10px 0;
-    }
-    
-    .calendar-list-date-header h6 {
-      color: var(--primary-color);
-      font-weight: 600;
-      margin-bottom: 5px;
-      text-transform: capitalize;
-    }
-    
-    .calendar-list-date-line {
-      height: 1px;
-      background-color: rgba(255, 255, 255, 0.1);
-      margin-top: 5px;
-    }
-    
-    .calendar-list-event {
-      padding: 12px 15px;
-      margin: 8px 0;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: var(--border-radius);
-      border-left: 4px solid var(--primary-color);
-      cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-    
-    .calendar-list-event:hover {
-      transform: translateX(5px);
-      background-color: rgba(0, 0, 0, 0.3);
-    }
-    
-    .calendar-list-event-time {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 5px;
-    }
-    
-    .calendar-list-event-title {
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: var(--text-color);
-    }
-    
-    .calendar-list-event-description {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .calendar-container {
-      padding: 0px 20px;
-    }
-    
-    @media (max-width: 767.98px) {
-      .calendar-list-view {
-        height: auto;
-        max-height: 500px;
-      }
-
-      .calendar-container {
-        padding: 0px;
-      }
-    }
-
-    .list-group-item {
-      padding: 10px;
-    }
-
-    .calendar-sidebar {
-      padding-right: 40px;
-    }
-
-    @media (max-width: 767.98px) {
-      .calendar-sidebar {
-        display: none;
-      }
-    }
-
-    @media (max-width: 767.98px) {
-      .mobile-calendar {
-        width: calc(100% + 20px);
-        margin-left: -10px;
-      }
-    }
-
-    /* Stili per interazione touch sul calendario */
-    .touch-feedback {
-      background-color: rgba(255, 107, 0, 0.15);
-      border: 2px dashed var(--primary-color);
-      border-radius: var(--border-radius);
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-    
-    .event-dragging {
-      opacity: 0.8;
-      transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      z-index: 1000;
-      transition: all 0.2s ease;
-    }
-    
-    .event-resize-handle {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 8px;
-      background-color: rgba(255, 255, 255, 0.3);
-      border-radius: 0 0 var(--border-radius) var(--border-radius);
-      cursor: ns-resize;
-    }
-    
-    .event-drop-highlight {
-      background-color: rgba(255, 107, 0, 0.2);
-      animation: fade-pulse 1s infinite alternate;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); }
-    }
-    
-    @keyframes fade-pulse {
-      from { background-color: rgba(255, 107, 0, 0.1); }
-      to { background-color: rgba(255, 107, 0, 0.3); }
-    }
-    
-    /* Aggiungere sistema di snap per l'allineamento */
-    .calendar-hour-cell.snap-target {
-      background-color: rgba(255, 107, 0, 0.15);
-      transition: background-color 0.2s ease;
-    }
-
-    /* Previeni selezione testo durante interazioni touch */
-    .calendar-day-grid,
-    .calendar-month-grid,
-    .calendar-week-grid,
-    .calendar-events-cell,
-    .calendar-day-event,
-    .calendar-hour-row,
-    .calendar-time-label {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    /* Nasconde qualsiasi modal che potrebbe apparire inaspettatamente */
-    .modal:not(.show) {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-    }
-    
-    /* Regola le dimensioni del modal su dispositivi mobili */
-    @media (max-width: 767.98px) {
-      .modal-dialog {
-        max-width: 90%;
-        margin: 10px auto;
-      }
-      
-      .modal-body {
-        padding: 15px 10px;
-        max-height: 80vh;
-        overflow-y: auto;
-      }
-      
-      .modal-header, .modal-footer {
-        padding: 10px;
-      }
-    }
-
     /* ===== SALES FUNNEL STYLES ===== */
     .funnel-container {
       display: flex;
@@ -3320,6 +2397,732 @@
       color: var(--primary-color);
       margin-top: 20px;
       font-weight: 600;
+    }
+
+    .custom-calendar-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: calc(100vh - 200px);
+      min-height: 500px;
+      margin-top: 20px;
+      color: var(--text-color);
+      background-color: transparent;
+    }
+    
+    .custom-calendar-header {
+      margin-bottom: 15px;
+    }
+    
+    .calendar-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.15);
+      padding: 10px 15px;
+    }
+    
+    .calendar-nav-buttons, .calendar-view-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .calendar-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .cal-btn {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    
+    .cal-btn:hover {
+      background-color: rgba(255, 107, 0, 0.15);
+    }
+    
+    .cal-btn-active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .cal-btn-today {
+      white-space: nowrap;
+    }
+    
+    .cal-btn-add {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .cal-btn-add:hover {
+      background-color: var(--accent-color);
+    }
+    
+    /* Layout principale del calendario */
+    .custom-calendar-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 15px;
+      height: 100%;
+    }
+    
+    .custom-calendar-grid {
+      flex: 1;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
+    }
+    
+    /* Sidebar con eventi del giorno */
+    .custom-calendar-sidebar {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+    }
+    
+    .sidebar-date {
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    
+    .sidebar-date h6 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    
+    .sidebar-events {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    
+    .no-events {
+      display: flex;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      font-size: 0.85rem;
+    }
+    
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .event-item {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      position: relative;
+      border-left: 3px solid var(--primary-color);
+      transition: all 0.2s ease;
+    }
+    
+    .event-item:hover {
+      transform: translateX(3px);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .event-time {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 4px;
+    }
+    
+    .event-title {
+      font-weight: 600;
+      margin-bottom: 3px;
+      padding-right: 50px; /* Spazio per i pulsanti di azione */
+    }
+    
+    .event-desc {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .event-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+    }
+    
+    .event-action-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+    
+    .event-action-btn:hover {
+      opacity: 1;
+    }
+    
+    .edit-btn:hover {
+      background-color: var(--info-color);
+    }
+    
+    .delete-btn:hover {
+      background-color: var(--danger-color);
+    }
+    
+    /* Stati degli eventi */
+    .event-status-confirmed {
+      border-left-color: var(--primary-color);
+    }
+    
+    .event-status-pending {
+      border-left-color: var(--warning-color);
+    }
+    
+    .event-status-completed {
+      border-left-color: var(--success-color);
+    }
+    
+    .event-status-cancelled {
+      border-left-color: var(--danger-color);
+      opacity: 0.7;
+    }
+    
+    /* Legenda */
+    .sidebar-legend {
+      padding: 10px 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .sidebar-legend h6 {
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+    
+    .legend-items {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .status-confirmed {
+      background-color: var(--primary-color);
+    }
+    
+    .status-pending {
+      background-color: var(--warning-color);
+    }
+    
+    .status-completed {
+      background-color: var(--success-color);
+    }
+    
+    .status-cancelled {
+      background-color: var(--danger-color);
+    }
+    
+    /* Timeline mobile */
+    .custom-calendar-mobile {
+      margin-top: 15px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .mobile-day-timeline {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px;
+    }
+    
+    .timeline-hours {
+      display: flex;
+      gap: 3px;
+      min-width: 100%;
+    }
+    
+    .timeline-hour {
+      flex: 0 0 85px;
+      min-width: 85px;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0 5px;
+      scroll-snap-align: start;
+    }
+    
+    .hour-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 0;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 5px;
+    }
+    
+    .hour-slots {
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    
+    .empty-slot {
+      font-size: 0.7rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      padding: 5px 0;
+    }
+    
+    .event-pill {
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 0.7rem;
+      padding: 3px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    
+    .event-pill.event-status-pending {
+      background-color: var(--warning-color);
+    }
+    
+    .event-pill.event-status-completed {
+      background-color: var(--success-color);
+    }
+    
+    .event-pill.event-status-cancelled {
+      background-color: var(--danger-color);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    
+    /* Layout per viste specifiche del calendario */
+    
+    /* Vista mensile */
+    .calendar-month-view {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100%;
+    }
+    
+    .month-days-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .month-day-name {
+      padding: 8px;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+    }
+    
+    .month-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      height: 100%;
+    }
+    
+    .month-day-cell {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .day-number {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .day-events {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.7rem;
+    }
+    
+    .day-event {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .other-month {
+      opacity: 0.3;
+    }
+    
+    .today-cell {
+      background-color: rgba(255, 107, 0, 0.1);
+    }
+    
+    .selected-cell {
+      background-color: rgba(255, 107, 0, 0.2);
+    }
+    
+    /* Vista giornaliera */
+    .calendar-day-view {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      height: 100%;
+      overflow-y: auto;
+    }
+    
+    .day-time-column {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .day-time-slot {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    
+    .day-events-column {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .day-event-slot {
+      height: 60px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+    
+    /* Vista settimanale */
+    .calendar-week-view {
+      display: grid;
+      grid-template-columns: 50px repeat(7, 1fr);
+      height: 100%;
+      overflow-y: auto;
+    }
+    
+    .week-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .week-day-header {
+      padding: 8px 0;
+      text-align: center;
+      font-size: 0.75rem;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+    
+    .week-day-name {
+      font-weight: 600;
+    }
+    
+    .week-day-number {
+      opacity: 0.7;
+    }
+    
+    .week-today-header {
+      background-color: rgba(255, 107, 0, 0.1);
+    }
+    
+    .week-selected-header {
+      background-color: rgba(255, 107, 0, 0.2);
+    }
+    
+    .week-time-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(7, 1fr);
+      grid-auto-rows: 60px;
+    }
+    
+    .week-time-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .week-time-slot {
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+    
+    /* Vista Lista */
+    .calendar-list-view {
+      padding: 15px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    
+    .list-date-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 5px 0;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .list-date-header:first-child {
+      margin-top: 0;
+    }
+    
+    .list-event-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      background-color: rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s ease;
+    }
+    
+    .list-event-item:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .list-event-time {
+      width: 80px;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+    
+    .list-event-details {
+      flex: 1;
+    }
+    
+    .list-event-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+    }
+    
+    .list-event-description {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+    
+    /* Responsive */
+    @media (max-width: 991.98px) {
+      .custom-calendar-layout {
+        flex-direction: column;
+      }
+      
+      .custom-calendar-sidebar {
+        width: 100%;
+        max-height: 300px;
+      }
+      
+      .calendar-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .calendar-nav-buttons, .calendar-view-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .cal-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+      
+      .calendar-title {
+        width: 100%;
+        text-align: center;
+        padding: 5px 0;
+      }
+    }
+    
+    @media (max-width: 767.98px) {
+      .custom-calendar-container {
+        height: auto;
+        min-height: auto;
+      }
+      
+      .month-days-header {
+        font-size: 0.7rem;
+      }
+      
+      .day-number {
+        font-size: 0.7rem;
+      }
+      
+      .day-event {
+        font-size: 0.65rem;
+        padding: 1px 3px;
+      }
+    }
+    
+    @media (max-width: 575.98px) {
+      .custom-calendar-header {
+        margin-bottom: 10px;
+      }
+      
+      .calendar-controls {
+        padding: 8px;
+      }
+      
+      .cal-btn {
+        padding: 4px 6px;
+        font-size: 0.75rem;
+      }
+      
+      .calendar-view-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+      }
+      
+      .month-day-name {
+        padding: 5px 2px;
+        font-size: 0.65rem;
+      }
+      
+      .month-day-cell {
+        padding: 2px;
+      }
+      
+      .day-events {
+        max-height: 40px;
+      }
+    }
+
+    .custom-appointment-modal {
+      background-color: var(--light-accent);
+      border: none;
+      border-radius: var(--border-radius-lg);
+    }
+    
+    .custom-appointment-modal .modal-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .custom-appointment-modal .modal-footer {
+      border-top-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.1);
+      justify-content: space-between;
+    }
+    
+    .appointment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .form-row.three-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .form-group {
+      flex: 1;
+    }
+    
+    .form-label {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    
+    .form-control, .form-select {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      font-size: 0.9rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-color: var(--primary-color);
+      color: var(--text-color);
+      box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+    }
+    
+    .spacer {
+      flex-grow: 1;
+    }
+    
+    @media (max-width: 767.98px) {
+      .form-row, .form-row.three-columns {
+        flex-direction: column;
+        grid-template-columns: 1fr;
+      }
     }
 
   </style>
@@ -4333,112 +4136,118 @@
             </div>
           </div>
         </div>
-        <!-- Calendario -->
-        <div v-if="activeTab === 'calendar'">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Calendario</h1>
-          </div>
-          
-          <div class="mobile-calendar card fade-in mb-3">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="m-0">Appuntamenti del giorno</h5>
-            <button class="btn btn-sm btn-outline-primary" @click="openNewAppointmentModal">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="1em" height="1em" fill="currentColor" class="me-1">
-                <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
-              </svg>
-              Nuovo
-            </button>
-          </div>
-          
-          <div class="row">
-            <div class="col-lg-9 col-md-8">
-              <div class="fade-in">
-                <div class="card-body p-0">
-                  <div id="calendar" ref="calendarEl" style="font-size: 0.85rem;"></div>
-                </div>
+        <!-- Sezione Calendario ridisegnata -->
+        <div v-if="activeTab === 'calendar'" class="custom-calendar-container">
+          <div class="custom-calendar-header">
+            <div class="calendar-controls">
+              <div class="calendar-nav-buttons">
+                <button @click="navigateCalendar('prev')" class="cal-btn cal-btn-nav">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                  </svg>
+                </button>
+                <button @click="navigateCalendar('today')" class="cal-btn cal-btn-nav cal-btn-today">Oggi</button>
+                <button @click="navigateCalendar('next')" class="cal-btn cal-btn-nav">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
               </div>
+              <div class="calendar-title">{{ formatMonthTitle(selectedDate) }}</div>
+              <div class="calendar-view-controls">
+                <button @click="changeCalendarView('month')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'month'}">Mese</button>
+                <button @click="changeCalendarView('week')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'week'}">Settimana</button>
+                <button @click="changeCalendarView('day')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'day'}">Giorno</button>
+                <button @click="changeCalendarView('list')" class="cal-btn cal-btn-view" :class="{'cal-btn-active': calendarView === 'list'}">Lista</button>
+              </div>
+              <button @click="openNewAppointmentModal" class="cal-btn cal-btn-add">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                <span class="d-none d-sm-inline">Nuovo</span>
+              </button>
             </div>
-            <div class="col-lg-3 col-md-4 mt-3 mt-md-0 calendar-sidebar">
-              <div class="card fade-in mb-3">
-                <div class="card-header">
-                  <h5 class="m-0">Appuntamenti del giorno</h5>
+          </div>
+        
+          <div class="custom-calendar-layout">
+            <!-- Griglia Principale del Calendario -->
+            <div class="custom-calendar-grid" ref="calendarEl">
+              <!-- Il contenuto del calendario verrà popolato dinamicamente -->
+              <!-- Placeholder per le viste: Mese, Settimana, Giorno -->
+            </div>
+        
+            <!-- Sidebar con appuntamenti del giorno selezionato -->
+            <div class="custom-calendar-sidebar">
+              <div class="sidebar-date">
+                <h6>{{ formatSelectedDate(selectedDate) }}</h6>
+              </div>
+              
+              <div class="sidebar-events">
+                <div v-if="selectedDateEvents.length === 0" class="no-events">
+                  <p>Nessun appuntamento in questa data</p>
                 </div>
-                <div class="card-body p-0">
-                  <div v-if="selectedDateEvents.length === 0" class="p-3 text-center">
-                    <p class="text-muted">Nessun appuntamento per questa data</p>
-                  </div>
-                  <ul class="list-group list-group-flush" v-else>
-                    <li v-for="event in selectedDateEvents" :key="event.id" class="list-group-item" 
-                        :class="{'bg-light-accent': true}"
-                        style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold" style="font-size: 0.9rem;">{{ event.title }}</span>
-                        <div style="display: flex;">
-                          <button class="btn btn-sm btn-outline-primary me-1" @click="editAppointment(event)">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-danger" @click="deleteAppointment(event)">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <p class="mb-1" style="font-size: 0.8rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="0.9em" height="0.9em" fill="currentColor" class="me-1">
-                          <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
+                <div v-else class="event-list">
+                  <div v-for="event in selectedDateEvents" :key="event.id" 
+                       class="event-item" 
+                       :class="'event-status-' + event.status"
+                       @click="editAppointment(event)">
+                    <div class="event-time">{{ formatEventTime(event) }}</div>
+                    <div class="event-title">{{ event.title }}</div>
+                    <div v-if="event.description" class="event-desc">{{ event.description }}</div>
+                    <div class="event-actions">
+                      <button class="event-action-btn edit-btn" @click.stop="editAppointment(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                         </svg>
-                        {{ formatEventTime(event) }}
-                      </p>
-                      <p v-if="event.description" class="mb-0 text-muted" style="font-size: 0.8rem;">
-                        {{ event.description }}
-                      </p>
-                    </li>
-                  </ul>
+                      </button>
+                      <button class="event-action-btn delete-btn" @click.stop="deleteAppointment(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <div class="card fade-in">
-                <div class="card-header">
-                  <h5 class="m-0">Legenda</h5>
-                </div>
-                <div class="card-body">
-                  <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="background-color: var(--primary-color); width: 20px; height: 20px;"></span>
-                    <span style="font-size: 0.85rem;">Prenotazione confermata</span>
+              <div class="sidebar-legend">
+                <h6>Legenda</h6>
+                <div class="legend-items">
+                  <div class="legend-item">
+                    <span class="legend-color status-confirmed"></span>
+                    <span class="legend-text">Confermato</span>
                   </div>
-                  <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="background-color: var(--warning-color); width: 20px; height: 20px;"></span>
-                    <span style="font-size: 0.85rem;">In attesa di conferma</span>
+                  <div class="legend-item">
+                    <span class="legend-color status-pending"></span>
+                    <span class="legend-text">In attesa</span>
                   </div>
-                  <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="background-color: var(--success-color); width: 20px; height: 20px;"></span>
-                    <span style="font-size: 0.85rem;">Completato</span>
+                  <div class="legend-item">
+                    <span class="legend-color status-completed"></span>
+                    <span class="legend-text">Completato</span>
                   </div>
-                  <div class="d-flex align-items-center">
-                    <span class="badge me-2" style="background-color: var(--danger-color); width: 20px; height: 20px;"></span>
-                    <span style="font-size: 0.85rem;">Cancellato</span>
+                  <div class="legend-item">
+                    <span class="legend-color status-cancelled"></span>
+                    <span class="legend-text">Cancellato</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          <!-- Vista mobile calendario (orizzontale) -->
-          <div class="d-block d-md-none mt-3">
-            <div class="card fade-in">
-              <div class="card-header">
-                <h5 class="m-0">Orari giornalieri</h5>
-              </div>
-              <div class="card-body p-0">
-                <div class="d-flex overflow-auto" style="scroll-snap-type: x mandatory;">
-                  <div v-for="hour in dailyHours" :key="hour" class="flex-shrink-0 text-center p-2" 
-                      style="min-width: 90px; scroll-snap-align: start; border-right: 1px solid rgba(255,255,255,0.1);">
-                    <div class="fw-bold mb-2" style="font-size: 0.9rem;">{{ hour }}:00</div>
-                    <div v-if="getEventsForHour(hour).length === 0" class="text-muted" style="font-size: 0.8rem;">
+        
+          <!-- Vista Mobile per Orari Giornalieri (Timeline orizzontale) -->
+          <div class="custom-calendar-mobile d-block d-lg-none">
+            <div class="mobile-day-timeline">
+              <div class="timeline-hours">
+                <div v-for="hour in dailyHours" :key="hour" class="timeline-hour">
+                  <div class="hour-label">{{ hour }}:00</div>
+                  <div class="hour-slots">
+                    <div v-if="getEventsForHour(hour).length === 0" class="empty-slot">
                       Libero
                     </div>
-                    <div v-for="event in getEventsForHour(hour)" :key="event.id" 
-                        class="p-1 mb-1 rounded" 
-                        :style="{backgroundColor: event.backgroundColor, color: '#fff', fontSize: '0.75rem'}"
+                    <div v-for="event in getEventsForHour(hour)" 
+                        :key="event.id" 
+                        :class="['event-pill', 'event-status-' + event.status]"
                         @click="editAppointment(event)">
                       {{ event.title }}
                     </div>
@@ -4617,6 +4426,106 @@
           <button type="button" class="btn btn-primary" @click="updateLeadStatus" :disabled="isUpdating">
             <span v-if="isUpdating" class="spinner-border spinner-border-sm me-2" role="status"></span>
             Aggiorna e invia evento
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nuovo design per il modale appuntamenti -->
+  <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content custom-appointment-modal">
+        <div class="modal-header">
+          <h5 class="modal-title" id="appointmentModalLabel">
+            <span v-if="editingAppointment">Modifica Appuntamento</span>
+            <span v-else>Nuovo Appuntamento</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="saveAppointment" class="appointment-form">
+            <div class="form-group">
+              <label for="appointmentTitle" class="form-label">Titolo</label>
+              <input type="text" class="form-control" id="appointmentTitle" v-model="currentAppointment.title" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="appointmentDate" class="form-label">Data</label>
+                <input type="date" class="form-control" id="appointmentDate" v-model="currentAppointment.date" required>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="appointmentTime" class="form-label">Ora</label>
+                <input type="time" class="form-control" id="appointmentTime" v-model="currentAppointment.time" required>
+              </div>
+            </div>
+            
+            <div class="form-row three-columns">
+              <div class="form-group">
+                <label for="appointmentDuration" class="form-label">Durata</label>
+                <select class="form-select" id="appointmentDuration" v-model="currentAppointment.duration">
+                  <option value="30">30 minuti</option>
+                  <option value="60">1 ora</option>
+                  <option value="90">1 ora e 30 min</option>
+                  <option value="120">2 ore</option>
+                  <option value="180">3 ore</option>
+                  <option value="240">4 ore</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="appointmentStatus" class="form-label">Stato</label>
+                <select class="form-select" id="appointmentStatus" v-model="currentAppointment.status">
+                  <option value="pending">In attesa</option>
+                  <option value="confirmed">Confermato</option>
+                  <option value="completed">Completato</option>
+                  <option value="cancelled">Cancellato</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="appointmentLocation" class="form-label">Luogo</label>
+                <select class="form-select" id="appointmentLocation" v-model="currentAppointment.location">
+                  <option value="">Seleziona</option>
+                  <option value="office">Ufficio</option>
+                  <option value="client">Cliente</option>
+                  <option value="remote">Remoto</option>
+                  <option value="site">Cantiere</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="appointmentClient" class="form-label">Cliente</label>
+              <select class="form-select" id="appointmentClient" v-model="currentAppointment.clientId">
+                <option value="">Seleziona un cliente</option>
+                <option v-for="client in clients" :key="client._id" :value="client._id">
+                  {{ client.name }}
+                </option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="appointmentDescription" class="form-label">Note</label>
+              <textarea class="form-control" id="appointmentDescription" rows="3" v-model="currentAppointment.description"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button v-if="editingAppointment" type="button" class="btn btn-outline-danger" @click="deleteAppointment(currentAppointment)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+              <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+            <span class="ms-1">Elimina</span>
+          </button>
+          <div class="spacer"></div>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button type="button" class="btn btn-primary" @click="saveAppointment" :disabled="isSavingAppointment">
+            <span v-if="isSavingAppointment" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <span v-if="editingAppointment">Aggiorna</span>
+            <span v-else>Salva</span>
           </button>
         </div>
       </div>
@@ -4816,6 +4725,8 @@
     setup() {
 
       const purchaseValue = ref('');
+
+      const calendarView = ref('day'); // Viste possibili: 'month', 'week', 'day', 'list'
 
       const sidebarVisible = ref(false);
       const isMobile = ref(window.innerWidth < 768);
@@ -5084,6 +4995,381 @@
           isLoading.value = false;
         }
       };
+
+      // Implementazioni template per le diverse viste del calendario
+      // Queste funzioni creano la struttura HTML con Vue.js
+      
+      // Template per la vista mensile con composizione strutturata
+      const monthViewTemplate = `
+      <div class="calendar-month-view">
+        <!-- Intestazione giorni settimana -->
+        <div class="month-days-header">
+          <div v-for="day in ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab']" 
+               class="month-day-name">{{ day }}</div>
+        </div>
+        
+        <!-- Griglia giorni -->
+        <div class="month-days-grid">
+          <div v-for="(cell, index) in monthCells" 
+               :key="index" 
+               class="month-day-cell"
+               :class="{ 
+                 'other-month': !cell.isCurrentMonth, 
+                 'today-cell': cell.isToday,
+                 'selected-cell': cell.isSelected 
+               }"
+               :data-date="cell.date"
+               @click="selectDate(cell.dateObj)">
+            
+            <!-- Numero del giorno -->
+            <div class="day-number">{{ cell.dayNumber }}</div>
+            
+            <!-- Eventi del giorno (limitati a 3) -->
+            <div class="day-events">
+              <div v-for="(event, eventIndex) in cell.events.slice(0, 3)" 
+                   :key="'event-' + event.id"
+                   class="day-event"
+                   :class="'event-status-' + event.status"
+                   @click.stop="editAppointment(event)">
+                {{ event.title }}
+              </div>
+              
+              <!-- Indicatore "più eventi" -->
+              <div v-if="cell.events.length > 3" class="day-more-events">
+                +{{ cell.events.length - 3 }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+
+      // Template per la vista settimanale con composizione strutturata (continua)
+      const weekViewTemplate = `
+      <div class="calendar-week-view">
+        <!-- Intestazione con giorni -->
+        <div class="week-header">
+          <!-- Cella angolo vuota -->
+          <div class="week-corner-cell"></div>
+          
+          <!-- Intestazioni giorni -->
+          <div v-for="day in weekDays" 
+               :key="day.date"
+               class="week-day-header"
+               :class="{ 
+                 'week-today-header': day.isToday,
+                 'week-selected-header': day.isSelected 
+               }"
+               :data-date="day.date"
+               @click="selectDateAndView(day.dateObj, 'day')">
+            <div class="week-day-name">{{ day.name }}</div>
+            <div class="week-day-number">{{ day.number }}</div>
+          </div>
+        </div>
+        
+        <!-- Griglia oraria -->
+        <div class="week-time-grid">
+          <!-- Colonna orari -->
+          <template v-for="hour in dailyHours">
+            <!-- Etichetta ora -->
+            <div class="week-time-label">{{ hour }}:00</div>
+            
+            <!-- Slot per ogni giorno della settimana -->
+            <template v-for="day in weekDays">
+              <div class="week-time-slot"
+                   :data-hour="hour"
+                   :data-date="day.date"
+                   @dragover.prevent
+                   @drop="handleEventDrop($event, day.dateObj, hour)">
+                
+                <!-- Eventi che iniziano in questo slot -->
+                <div v-for="event in getEventsForDayAndHour(day.dateObj, hour)"
+                     class="week-time-event"
+                     :class="'event-status-' + event.status"
+                     :style="{
+                       position: 'absolute',
+                       top: '2px',
+                       left: '2px', 
+                       right: '2px',
+                       height: calculateEventHeight(event),
+                       backgroundColor: getEventColor(event.status),
+                       zIndex: 10
+                     }"
+                     draggable="true"
+                     @dragstart="handleEventDragStart($event, event)"
+                     @click="editAppointment(event)">
+                  <div class="event-time">{{ formatTime(new Date(event.start)) }}</div>
+                  <div class="event-title">{{ event.title }}</div>
+                </div>
+              </div>
+            </template>
+          </template>
+        </div>
+      </div>
+      `;
+      
+      // Template per la vista giornaliera con composizione strutturata
+      const dayViewTemplate = `
+      <div class="calendar-day-view">
+        <!-- Colonna orari -->
+        <div class="day-time-column">
+          <div v-for="hour in dailyHours" 
+               :key="hour"
+               class="day-time-slot">
+            {{ hour }}:00
+          </div>
+        </div>
+        
+        <!-- Colonna eventi -->
+        <div class="day-events-column">
+          <div v-for="hour in dailyHours"
+               :key="hour"
+               class="day-event-slot"
+               :data-hour="hour"
+               :data-date="formatDateForAttribute(selectedDate)"
+               @dragover.prevent
+               @drop="handleEventDrop($event, selectedDate, hour)">
+            
+            <!-- Eventi che iniziano in questo slot -->
+            <div v-for="event in getEventsForHour(hour)"
+                 :key="event.id"
+                 class="day-slot-event"
+                 :class="'event-status-' + event.status"
+                 :style="{
+                   position: 'absolute',
+                   top: '0',
+                   left: '0', 
+                   right: '0',
+                   height: calculateEventHeight(event),
+                   backgroundColor: getEventColor(event.status),
+                   zIndex: 10
+                 }"
+                 :data-event-id="event.id"
+                 draggable="true"
+                 @dragstart="handleEventDragStart($event, event)"
+                 @click="editAppointment(event)">
+              <div class="event-time">{{ formatEventTime(event) }}</div>
+              <div class="event-title">{{ event.title }}</div>
+              <div v-if="event.description" class="event-description">{{ event.description }}</div>
+              <div class="event-resize-handle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+      
+      // Template per la vista lista con composizione strutturata
+      const listViewTemplate = `
+      <div class="calendar-list-view">
+        <!-- Messaggio se non ci sono eventi -->
+        <div v-if="groupedEvents.length === 0" class="list-empty-message">
+          Nessun appuntamento programmato
+        </div>
+        
+        <!-- Eventi raggruppati per data -->
+        <template v-for="(group, index) in groupedEvents" :key="index">
+          <!-- Intestazione data -->
+          <div class="list-date-header">
+            {{ formatDateHeader(group.date) }}
+          </div>
+          
+          <!-- Eventi del giorno -->
+          <div v-for="event in group.events"
+               :key="event.id"
+               class="list-event-item"
+               :class="'event-status-' + event.status"
+               @click="editAppointment(event)">
+            <div class="list-event-time">{{ formatEventTime(event) }}</div>
+            <div class="list-event-details">
+              <div class="list-event-title">{{ event.title }}</div>
+              <div v-if="event.description" class="list-event-description">{{ event.description }}</div>
+            </div>
+          </div>
+        </template>
+      </div>
+      `;
+      
+      // Funzioni di supporto e calcolo per i template
+      
+      // Calcolo delle celle per la vista mensile
+      const calculateMonthCells = () => {
+        const year = selectedDate.value.getFullYear();
+        const month = selectedDate.value.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        const firstDayOfWeek = firstDay.getDay();
+        const daysInMonth = lastDay.getDate();
+        const totalDays = 42; // 6 righe di 7 giorni
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const cells = [];
+        
+        for (let i = 0; i < totalDays; i++) {
+          const dayOffset = i - firstDayOfWeek;
+          const dayDate = new Date(year, month, dayOffset + 1);
+          const isCurrentMonth = dayDate.getMonth() === month;
+          
+          // Formatta la data per l'attributo data-date
+          const dateStr = dayDate.toISOString().split('T')[0];
+          
+          // Ottieni eventi per questo giorno
+          const dayEvents = calendarEvents.value.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate.toISOString().split('T')[0] === dateStr;
+          });
+          
+          cells.push({
+            dayNumber: dayDate.getDate(),
+            isCurrentMonth,
+            isToday: dayDate.toDateString() === today.toDateString(),
+            isSelected: dayDate.toDateString() === selectedDate.value.toDateString(),
+            date: dateStr,
+            dateObj: new Date(dayDate),
+            events: dayEvents
+          });
+        }
+        
+        return cells;
+      };
+
+      // Funzione per formattare l'ora
+      const formatTime = (date) => {
+        return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      };
+
+      
+      // Calcolo dei giorni per la vista settimanale
+      const calculateWeekDays = () => {
+        const firstDayOfWeek = new Date(selectedDate.value);
+        const day = selectedDate.value.getDay();
+        firstDayOfWeek.setDate(firstDayOfWeek.getDate() - day);
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const days = [];
+        
+        for (let i = 0; i < 7; i++) {
+          const dayDate = new Date(firstDayOfWeek);
+          dayDate.setDate(dayDate.getDate() + i);
+          
+          days.push({
+            name: dayDate.toLocaleDateString('it-IT', { weekday: 'short' }),
+            number: dayDate.getDate(),
+            isToday: dayDate.toDateString() === today.toDateString(),
+            isSelected: dayDate.toDateString() === selectedDate.value.toDateString(),
+            date: dayDate.toISOString().split('T')[0],
+            dateObj: new Date(dayDate)
+          });
+        }
+        
+        return days;
+      };
+      
+      // Raggruppa eventi per data per la vista lista
+      const groupEventsByDate = () => {
+        // Ordina gli eventi per data
+        const sortedEvents = [...calendarEvents.value].sort((a, b) => 
+          new Date(a.start) - new Date(b.start)
+        );
+        
+        // Raggruppa per data
+        const eventsByDate = {};
+        sortedEvents.forEach(event => {
+          const date = new Date(event.start);
+          const dateKey = date.toISOString().split('T')[0];
+          
+          if (!eventsByDate[dateKey]) {
+            eventsByDate[dateKey] = {
+              date: new Date(date),
+              events: []
+            };
+          }
+          
+          eventsByDate[dateKey].events.push(event);
+        });
+        
+        // Converte in array e ordina per data
+        return Object.values(eventsByDate).sort((a, b) => a.date - b.date);
+      };
+      
+      // Ottieni eventi per giorno e ora specifici
+      const getEventsForDayAndHour = (date, hour) => {
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const startTime = new Date(date);
+        startTime.setHours(hour, 0, 0, 0);
+        
+        const endTime = new Date(date);
+        endTime.setHours(hour, 59, 59, 999);
+        
+        return calendarEvents.value.filter(event => {
+          const eventStart = new Date(event.start);
+          const eventDate = eventStart.toISOString().split('T')[0];
+          
+          if (eventDate !== dateStr) return false;
+          
+          const eventEnd = new Date(event.end);
+          
+          // Evento che inizia in quest'ora o copre quest'ora
+          return (eventStart >= startTime && eventStart <= endTime) || 
+                 (eventEnd >= startTime && eventEnd <= endTime) ||
+                 (eventStart <= startTime && eventEnd >= endTime);
+        });
+      };
+      
+      // Calcola altezza dell'evento in base alla durata
+      const calculateEventHeight = (event) => {
+        const start = new Date(event.start);
+        const end = new Date(event.end);
+        
+        // Calcola durata in minuti
+        const durationMinutes = (end - start) / (1000 * 60);
+        
+        // Ogni ora è alta 60px, quindi 1 minuto = 1px
+        return `${durationMinutes}px`;
+      };
+      
+      // Formatta data per intestazione nella vista lista
+      const formatDateHeader = (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (date.toDateString() === today.toDateString()) {
+          return 'Oggi';
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+          return 'Domani';
+        } else {
+          return date.toLocaleDateString('it-IT', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long' 
+          });
+        }
+      };
+      
+      // Formatta data per attributo data-date
+      const formatDateForAttribute = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+      
+      // Seleziona data e cambia vista
+      const selectDateAndView = (date, view) => {
+        selectedDate.value = date;
+        updateSelectedDateEvents();
+        changeCalendarView(view);
+      };
+      
+      // Funzioni computate da aggiungere al componente Vue
+      const monthCells = computed(() => calculateMonthCells());
+      const weekDays = computed(() => calculateWeekDays());
+      const groupedEvents = computed(() => groupEventsByDate());
       
       const loadEvents = async () => {
         try {
@@ -6297,11 +6583,242 @@
           // Pulisci eventuali contenuti esistenti
           calendarEl.value.innerHTML = '';
           
-          // Crea la struttura del calendario personalizzato
-          createCustomCalendar();
+          // Crea la vista del calendario in base alla vista selezionata
+          if (calendarView.value === 'month') {
+            createMonthView();
+          } else if (calendarView.value === 'week') {
+            createWeekView();
+          } else if (calendarView.value === 'day') {
+            createDayView();
+          } else if (calendarView.value === 'list') {
+            createListView();
+          }
           
           // Renderizza gli eventi
           renderCalendarEvents();
+        };
+
+        // Funzione per creare la vista mensile
+        const createMonthView = () => {
+          const monthView = document.createElement('div');
+          monthView.className = 'calendar-month-view';
+          
+          // Intestazione giorni della settimana
+          const daysHeader = document.createElement('div');
+          daysHeader.className = 'month-days-header';
+          
+          const dayNames = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+          dayNames.forEach(dayName => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'month-day-name';
+            dayHeader.textContent = dayName;
+            daysHeader.appendChild(dayHeader);
+          });
+          
+          monthView.appendChild(daysHeader);
+          
+          // Griglia dei giorni
+          const daysGrid = document.createElement('div');
+          daysGrid.className = 'month-days-grid';
+          
+          // Calcola il primo e l'ultimo giorno del mese
+          const year = selectedDate.value.getFullYear();
+          const month = selectedDate.value.getMonth();
+          const firstDay = new Date(year, month, 1);
+          const lastDay = new Date(year, month + 1, 0);
+          
+          // Calcola il numero di giorni da mostrare
+          const firstDayOfWeek = firstDay.getDay();
+          const daysInMonth = lastDay.getDate();
+          const totalDays = 42; // 6 righe di 7 giorni ciascuna
+          
+          // Giorno corrente per confronto
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          // Genera le celle dei giorni
+          for (let i = 0; i < totalDays; i++) {
+            const dayCell = document.createElement('div');
+            dayCell.className = 'month-day-cell';
+            
+            const dayOffset = i - firstDayOfWeek;
+            const dayDate = new Date(year, month, dayOffset + 1);
+            const isCurrentMonth = dayDate.getMonth() === month;
+            
+            if (!isCurrentMonth) {
+              dayCell.classList.add('other-month');
+            }
+            
+            // Giorno corrente
+            if (dayDate.toDateString() === today.toDateString()) {
+              dayCell.classList.add('today-cell');
+            }
+            
+            // Giorno selezionato
+            if (dayDate.toDateString() === selectedDate.value.toDateString()) {
+              dayCell.classList.add('selected-cell');
+            }
+            
+            // Numero del giorno
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = dayDate.getDate();
+            dayCell.appendChild(dayNumber);
+            
+            // Contenitore per gli eventi
+            const dayEvents = document.createElement('div');
+            dayEvents.className = 'day-events';
+            dayCell.appendChild(dayEvents);
+            
+            // Data dell'evento come attributo
+            dayCell.setAttribute('data-date', dayDate.toISOString().split('T')[0]);
+            
+            // Click sul giorno per selezionarlo
+            dayCell.addEventListener('click', () => {
+              selectedDate.value = new Date(dayDate);
+              updateSelectedDateEvents();
+              initCalendar();
+            });
+            
+            daysGrid.appendChild(dayCell);
+          }
+          
+          monthView.appendChild(daysGrid);
+          calendarEl.value.appendChild(monthView);
+        };
+        
+        // Funzione per creare la vista settimanale
+        const createWeekView = () => {
+          const weekView = document.createElement('div');
+          weekView.className = 'calendar-week-view';
+          
+          // Calcola il primo giorno della settimana (domenica)
+          const firstDayOfWeek = new Date(selectedDate.value);
+          const day = selectedDate.value.getDay();
+          firstDayOfWeek.setDate(firstDayOfWeek.getDate() - day);
+          
+          // Intestazione
+          const weekHeader = document.createElement('div');
+          weekHeader.className = 'week-header';
+          
+          // Cella vuota nell'angolo
+          const cornerCell = document.createElement('div');
+          cornerCell.className = 'week-corner-cell';
+          weekHeader.appendChild(cornerCell);
+          
+          // Giorno corrente per confronto
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          // Celle intestazione per ogni giorno
+          for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(firstDayOfWeek);
+            dayDate.setDate(dayDate.getDate() + i);
+            
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'week-day-header';
+            
+            // Controlla se è oggi o il giorno selezionato
+            if (dayDate.toDateString() === today.toDateString()) {
+              dayHeader.classList.add('week-today-header');
+            }
+            
+            if (dayDate.toDateString() === selectedDate.value.toDateString()) {
+              dayHeader.classList.add('week-selected-header');
+            }
+            
+            // Formatta intestazione giorno
+            const dayName = dayDate.toLocaleDateString('it-IT', { weekday: 'short' });
+            const dayNum = dayDate.getDate();
+            
+            dayHeader.innerHTML = `
+              <div class="week-day-name">${dayName}</div>
+              <div class="week-day-number">${dayNum}</div>
+            `;
+            
+            // Attributo data
+            dayHeader.setAttribute('data-date', dayDate.toISOString().split('T')[0]);
+            
+            // Click sul giorno per selezionarlo
+            dayHeader.addEventListener('click', () => {
+              selectedDate.value = new Date(dayDate);
+              updateSelectedDateEvents();
+              changeCalendarView('day');
+            });
+            
+            weekHeader.appendChild(dayHeader);
+          }
+          
+          weekView.appendChild(weekHeader);
+          
+          // Griglia degli orari
+          const timeGrid = document.createElement('div');
+          timeGrid.className = 'week-time-grid';
+          
+          // Genera le righe per ogni ora
+          for (let hour = 8; hour < 20; hour++) {
+            // Etichetta dell'ora
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'week-time-label';
+            timeLabel.textContent = `${hour}:00`;
+            timeGrid.appendChild(timeLabel);
+            
+            // Celle per ogni giorno della settimana
+            for (let day = 0; day < 7; day++) {
+              const dayDate = new Date(firstDayOfWeek);
+              dayDate.setDate(dayDate.getDate() + day);
+              
+              const timeSlot = document.createElement('div');
+              timeSlot.className = 'week-time-slot';
+              timeSlot.setAttribute('data-hour', hour);
+              timeSlot.setAttribute('data-date', dayDate.toISOString().split('T')[0]);
+              
+              timeGrid.appendChild(timeSlot);
+            }
+          }
+          
+          weekView.appendChild(timeGrid);
+          calendarEl.value.appendChild(weekView);
+        };
+        
+        // Funzione per creare la vista giornaliera
+        const createDayView = () => {
+          const dayView = document.createElement('div');
+          dayView.className = 'calendar-day-view';
+          
+          // Colonna delle ore
+          const timeColumn = document.createElement('div');
+          timeColumn.className = 'day-time-column';
+          
+          // Colonna degli eventi
+          const eventsColumn = document.createElement('div');
+          eventsColumn.className = 'day-events-column';
+          
+          // Genera righe per ogni ora
+          for (let hour = 8; hour < 20; hour++) {
+            // Etichetta dell'ora
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'day-time-slot';
+            timeSlot.textContent = `${hour}:00`;
+            timeColumn.appendChild(timeSlot);
+            
+            // Slot per gli eventi
+            const eventSlot = document.createElement('div');
+            eventSlot.className = 'day-event-slot';
+            eventSlot.setAttribute('data-hour', hour);
+            eventSlot.setAttribute('data-date', selectedDate.value.toISOString().split('T')[0]);
+            
+            // Aggiungi i listener per il drag & drop e touch
+            eventSlot.addEventListener('touchstart', (e) => handleTouchStart(e, eventSlot, selectedDate.value, hour));
+            eventSlot.addEventListener('dragover', (e) => e.preventDefault());
+            eventSlot.addEventListener('drop', (e) => handleEventDrop(e, selectedDate.value, hour));
+            
+            eventsColumn.appendChild(eventSlot);
+          }
+          
+          dayView.appendChild(timeColumn);
+          dayView.appendChild(eventsColumn);
+          calendarEl.value.appendChild(dayView);
         };
         
         // Aggiungi questa funzione per creare la struttura del calendario
@@ -6411,45 +6928,20 @@
           };
         };
 
-        const createListView = (date) => {
-          const list = document.createElement('div');
-          list.className = 'calendar-list-view';
+        const createListView = () => {
+          const listView = document.createElement('div');
+          listView.className = 'calendar-list-view';
           
-          // Filtra eventi per rilevanza (ad esempio, prossimi 30 giorni)
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
+          // Ordina gli eventi per data
+          const sortedEvents = [...calendarEvents.value].sort((a, b) => 
+            new Date(a.start) - new Date(b.start)
+          );
           
-          const thirtyDaysLater = new Date(today);
-          thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-          
-          // Filtra e ordina gli eventi
-          const relevantEvents = calendarEvents.value
-            .filter(event => {
-              const eventDate = new Date(event.start);
-              return eventDate >= today && eventDate <= thirtyDaysLater;
-            })
-            .sort((a, b) => new Date(a.start) - new Date(b.start));
-          
-          // Crea intestazione della lista
-          const listHeader = document.createElement('div');
-          listHeader.className = 'calendar-list-header';
-          listHeader.innerHTML = `<h5>Prossimi appuntamenti (${relevantEvents.length})</h5>`;
-          list.appendChild(listHeader);
-          
-          // Se non ci sono eventi, mostra un messaggio
-          if (relevantEvents.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'calendar-list-empty';
-            emptyMessage.textContent = 'Nessun appuntamento programmato nei prossimi 30 giorni';
-            list.appendChild(emptyMessage);
-            return list;
-          }
-          
-          // Raggruppa eventi per data
+          // Raggruppa gli eventi per data
           const eventsByDate = {};
-          relevantEvents.forEach(event => {
-            const eventDate = new Date(event.start);
-            const dateKey = eventDate.toISOString().split('T')[0];
+          sortedEvents.forEach(event => {
+            const date = new Date(event.start);
+            const dateKey = date.toISOString().split('T')[0];
             
             if (!eventsByDate[dateKey]) {
               eventsByDate[dateKey] = [];
@@ -6458,62 +6950,75 @@
             eventsByDate[dateKey].push(event);
           });
           
-          // Crea elenco eventi per data
-          Object.keys(eventsByDate).sort().forEach(dateKey => {
-            const dateObj = new Date(dateKey);
-            const dateHeader = document.createElement('div');
-            dateHeader.className = 'calendar-list-date-header';
-            
-            // Formatta la data
-            const isToday = dateObj.toDateString() === new Date().toDateString();
-            const formattedDate = dateObj.toLocaleDateString('it-IT', { 
-              weekday: 'long', 
-              day: 'numeric', 
-              month: 'long' 
-            });
-            
-            dateHeader.innerHTML = `
-              <h6>${isToday ? 'Oggi' : formattedDate}</h6>
-              <div class="calendar-list-date-line"></div>
-            `;
-            
-            list.appendChild(dateHeader);
-            
-            // Aggiungi eventi del giorno
-            const eventsForDay = eventsByDate[dateKey];
-            eventsForDay.forEach(event => {
-              const eventItem = document.createElement('div');
-              eventItem.className = 'calendar-list-event';
-              eventItem.style.borderLeftColor = event.backgroundColor;
+          // Se non ci sono eventi, mostra messaggio
+          if (Object.keys(eventsByDate).length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'list-empty-message';
+            emptyMessage.textContent = 'Nessun appuntamento programmato';
+            listView.appendChild(emptyMessage);
+          } else {
+            // Genera sezioni per ogni data
+            Object.keys(eventsByDate).sort().forEach(dateKey => {
+              const date = new Date(dateKey);
               
-              const startTime = new Date(event.start);
-              const endTime = new Date(event.end);
+              // Intestazione data
+              const dateHeader = document.createElement('div');
+              dateHeader.className = 'list-date-header';
               
-              const formatTime = (date) => {
-                return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-              };
+              // Controlla se è oggi
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const isToday = date.toDateString() === today.toDateString();
               
-              eventItem.innerHTML = `
-                <div class="calendar-list-event-time">${formatTime(startTime)} - ${formatTime(endTime)}</div>
-                <div class="calendar-list-event-title">${event.title}</div>
-                <div class="calendar-list-event-description">${event.description || ''}</div>
-              `;
+              // Formatta data
+              const formattedDate = isToday ? 
+                'Oggi' : 
+                date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
               
-              // Aggiungi event listener per modificare l'evento
-              eventItem.addEventListener('click', () => {
-                editAppointment(event);
+              dateHeader.textContent = formattedDate;
+              listView.appendChild(dateHeader);
+              
+              // Aggiungi eventi per questa data
+              eventsByDate[dateKey].forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = `list-event-item event-status-${event.status}`;
+                
+                // Formatta ora
+                const startTime = new Date(event.start);
+                const endTime = new Date(event.end);
+                const formattedTime = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+                
+                // Struttura dell'evento
+                eventItem.innerHTML = `
+                  <div class="list-event-time">${formattedTime}</div>
+                  <div class="list-event-details">
+                    <div class="list-event-title">${event.title}</div>
+                    ${event.description ? `<div class="list-event-description">${event.description}</div>` : ''}
+                  </div>
+                `;
+                
+                // Click sull'evento per modificarlo
+                eventItem.addEventListener('click', () => {
+                  editAppointment(event);
+                });
+                
+                listView.appendChild(eventItem);
               });
-              
-              list.appendChild(eventItem);
             });
-          });
+          }
           
-          return list;
+          calendarEl.value.appendChild(listView);
         };
         
-        // Aggiungi le funzioni di supporto al calendario
+        // Funzione per formattare il titolo del mese
         const formatMonthTitle = (date) => {
           const options = { month: 'long', year: 'numeric' };
+          return date.toLocaleDateString('it-IT', options);
+        };
+
+        // Funzione per formattare la data selezionata
+        const formatSelectedDate = (date) => {
+          const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
           return date.toLocaleDateString('it-IT', options);
         };
         
@@ -6750,54 +7255,57 @@
           return grid;
         };
         
+        // Funzione per navigare nel calendario
         const navigateCalendar = (direction) => {
-          const currentDate = new Date(selectedDate.value);
+          const date = new Date(selectedDate.value);
           
           if (direction === 'prev') {
-            if (calendarInstance.value.view.type === 'month') {
-              currentDate.setMonth(currentDate.getMonth() - 1);
-            } else if (calendarInstance.value.view.type === 'day') {
-              currentDate.setDate(currentDate.getDate() - 1);
-            } else if (calendarInstance.value.view.type === 'list') {
-              currentDate.setDate(currentDate.getDate() - 30); // Vai indietro di 30 giorni
+            if (calendarView.value === 'month') {
+              date.setMonth(date.getMonth() - 1);
+            } else if (calendarView.value === 'week') {
+              date.setDate(date.getDate() - 7);
+            } else if (calendarView.value === 'day') {
+              date.setDate(date.getDate() - 1);
+            } else if (calendarView.value === 'list') {
+              date.setDate(date.getDate() - 30);
             }
           } else if (direction === 'next') {
-            if (calendarInstance.value.view.type === 'month') {
-              currentDate.setMonth(currentDate.getMonth() + 1);
-            } else if (calendarInstance.value.view.type === 'day') {
-              currentDate.setDate(currentDate.getDate() + 1);
-            } else if (calendarInstance.value.view.type === 'list') {
-              currentDate.setDate(currentDate.getDate() + 30); // Vai avanti di 30 giorni
+            if (calendarView.value === 'month') {
+              date.setMonth(date.getMonth() + 1);
+            } else if (calendarView.value === 'week') {
+              date.setDate(date.getDate() + 7);
+            } else if (calendarView.value === 'day') {
+              date.setDate(date.getDate() + 1);
+            } else if (calendarView.value === 'list') {
+              date.setDate(date.getDate() + 30);
             }
           } else if (direction === 'today') {
-            currentDate.setTime(new Date().getTime());
+            const today = new Date();
+            date.setTime(today.getTime());
           }
           
-          selectedDate.value = currentDate;
-          calendarInstance.value.updateTitle();
-          calendarInstance.value.updateView();
+          selectedDate.value = date;
           updateSelectedDateEvents();
+          initCalendar();
         };
         
         // Cambia la vista del calendario
         const changeCalendarView = (viewType) => {
-          calendarInstance.value.changeView(viewType, selectedDate.value);
+          calendarView.value = viewType;
+          initCalendar();
+          updateSelectedDateEvents();
         };
         
+        // Funzione per renderizzare gli eventi nelle viste
         const renderCalendarEvents = () => {
-          if (!calendarInstance.value) return;
-          
-          // Rimuovi tutti gli eventi esistenti prima di renderizzarli nuovamente
-          const eventElements = document.querySelectorAll('.calendar-day-event, .calendar-event, .calendar-week-event');
-          eventElements.forEach(el => el.remove());
-          
-          // Renderizza gli eventi in base alla vista corrente
-          if (calendarInstance.value.view.type === 'month') {
+          if (calendarView.value === 'month') {
             renderMonthViewEvents();
-          } else if (calendarInstance.value.view.type === 'day') {
+          } else if (calendarView.value === 'week') {
+            renderWeekViewEvents();
+          } else if (calendarView.value === 'day') {
             renderDayViewEvents();
           }
-          // La vista lista non necessita di renderizzazione addizionale perché è già popolata
+          // La vista lista genera già gli eventi durante la creazione
         };
 
         // Renderizza eventi nella vista mensile
@@ -6818,36 +7326,36 @@
           
           // Aggiungi eventi alle celle dei giorni
           Object.keys(eventsByDate).forEach(dateKey => {
-            const dayCell = calendarEl.value.querySelector(`.calendar-day[data-date="${dateKey}"]`);
+            const dayCell = calendarEl.value.querySelector(`.month-day-cell[data-date="${dateKey}"]`);
             if (!dayCell) return;
             
-            const eventsContainer = dayCell.querySelector('.calendar-day-events');
-            if (!eventsContainer) return;
+            const dayEvents = dayCell.querySelector('.day-events');
+            if (!dayEvents) return;
             
-            // Limita a massimo 3 eventi visibili
+            // Limita a massimo 3 eventi per cella
             const events = eventsByDate[dateKey];
             const visibleEvents = events.slice(0, 3);
             
             visibleEvents.forEach(event => {
-              const eventElement = document.createElement('div');
-              eventElement.className = 'calendar-event';
-              eventElement.style.backgroundColor = event.backgroundColor;
-              eventElement.style.borderColor = event.borderColor;
-              eventElement.textContent = event.title;
-              eventElement.addEventListener('click', (e) => {
-                e.stopPropagation();
+              const eventEl = document.createElement('div');
+              eventEl.className = `day-event event-status-${event.status}`;
+              eventEl.textContent = event.title;
+              
+              // Click per modificare l'evento
+              eventEl.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita che il click sul giorno si attivi
                 editAppointment(event);
               });
               
-              eventsContainer.appendChild(eventElement);
+              dayEvents.appendChild(eventEl);
             });
             
-            // Se ci sono altri eventi, mostra un indicatore "+X altri"
+            // Indicatore "più eventi"
             if (events.length > 3) {
               const moreIndicator = document.createElement('div');
-              moreIndicator.className = 'calendar-more-events';
-              moreIndicator.textContent = `+${events.length - 3} altri`;
-              eventsContainer.appendChild(moreIndicator);
+              moreIndicator.className = 'day-more-events';
+              moreIndicator.textContent = `+${events.length - 3}`;
+              dayEvents.appendChild(moreIndicator);
             }
           });
         };
@@ -6856,42 +7364,48 @@
         const renderWeekViewEvents = () => {
           calendarEvents.value.forEach(event => {
             const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
-            
-            // Cerca la cella del giorno corrispondente
             const dateKey = startDate.toISOString().split('T')[0];
-            const startHour = startDate.getHours();
+            const hour = startDate.getHours();
             
-            const dayColumn = calendarEl.value.querySelector(`.calendar-day-column[data-date="${dateKey}"]`);
-            if (!dayColumn) return;
+            // Trova la cella corrispondente
+            const timeSlot = calendarEl.value.querySelector(`.week-time-slot[data-date="${dateKey}"][data-hour="${hour}"]`);
+            if (!timeSlot) return;
             
-            // Cerca la cella dell'ora corrispondente
-            const hourCell = dayColumn.querySelector(`.calendar-hour-cell[data-hour="${startHour}"]`);
-            if (!hourCell) return;
+            // Calcola durata dell'evento
+            const endTime = new Date(event.end);
+            const durationHours = (endTime - startDate) / (1000 * 60 * 60);
             
-            // Crea l'elemento dell'evento
-            const eventElement = document.createElement('div');
-            eventElement.className = 'calendar-week-event';
-            eventElement.style.backgroundColor = event.backgroundColor;
-            eventElement.style.borderColor = event.borderColor;
+            // Crea elemento dell'evento
+            const eventEl = document.createElement('div');
+            eventEl.className = `week-event event-status-${event.status}`;
+            eventEl.style.position = 'absolute';
+            eventEl.style.left = '2px';
+            eventEl.style.right = '2px';
+            eventEl.style.top = '2px';
+            eventEl.style.height = `calc(${durationHours * 100}% - 4px)`;
+            eventEl.style.backgroundColor = getEventColor(event.status);
+            eventEl.style.borderRadius = '3px';
+            eventEl.style.padding = '4px';
+            eventEl.style.fontSize = '0.75rem';
+            eventEl.style.overflow = 'hidden';
+            eventEl.style.cursor = 'pointer';
+            eventEl.style.zIndex = '10';
             
-            // Calcola l'altezza in base alla durata
-            const durationMinutes = (endDate - startDate) / 60000; // In minuti
-            const heightPercentage = (durationMinutes / 60) * 100;
-            eventElement.style.height = `${heightPercentage}%`;
+            // Formatta ora
+            const formattedTime = formatTime(startDate);
             
-            // Aggiungi contenuto
-            eventElement.innerHTML = `
-              <div class="calendar-event-time">${startDate.getHours()}:${startDate.getMinutes().toString().padStart(2, '0')}</div>
-              <div class="calendar-event-title">${event.title}</div>
+            eventEl.innerHTML = `
+              <div style="font-size: 0.7rem; opacity: 0.7;">${formattedTime}</div>
+              <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${event.title}</div>
             `;
             
-            // Aggiungi click handler
-            eventElement.addEventListener('click', () => {
+            // Click per modificare l'evento
+            eventEl.addEventListener('click', () => {
               editAppointment(event);
             });
             
-            hourCell.appendChild(eventElement);
+            timeSlot.style.position = 'relative';
+            timeSlot.appendChild(eventEl);
           });
         };
         
@@ -6905,74 +7419,65 @@
             return eventDate.toISOString().split('T')[0] === dateKey;
           });
           
-          // Ordina eventi per ora di inizio
+          // Ordina per ora di inizio
           dayEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
           
-          // Aggiungi gestori touch a tutte le celle
-          const allEventCells = calendarEl.value.querySelectorAll('.calendar-events-cell');
-          allEventCells.forEach(cell => {
-            const hour = parseInt(cell.getAttribute('data-hour'));
-            
-            // Rimuovi event listener precedenti per evitare duplicazioni
-            cell.removeEventListener('touchstart', cell._touchStartHandler);
-            cell.removeEventListener('touchmove', cell._touchMoveHandler);
-            cell.removeEventListener('touchend', cell._touchEndHandler);
-            
-            // Salva riferimenti ai gestori per poterli rimuovere in futuro
-            cell._touchStartHandler = (e) => handleTouchStart(e, cell, dateKey, hour);
-            cell._touchMoveHandler = handleTouchMove;
-            cell._touchEndHandler = handleTouchEnd;
-            
-            // Aggiungi i gestori
-            cell.addEventListener('touchstart', cell._touchStartHandler, { passive: false });
-            cell.addEventListener('touchmove', cell._touchMoveHandler, { passive: false });
-            cell.addEventListener('touchend', cell._touchEndHandler);
-          });
-          
-          // Renderizza ogni evento nella cella appropriata
+          // Renderizza ogni evento nella cella corrispondente
           dayEvents.forEach(event => {
-            const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
-            const startHour = startDate.getHours();
+            const startTime = new Date(event.start);
+            const hour = startTime.getHours();
             
-            // Cerca la cella dell'ora corrispondente
-            const eventCell = calendarEl.value.querySelector(`.calendar-events-cell[data-hour="${startHour}"][data-date="${dateKey}"]`);
-            if (!eventCell) return;
+            // Trova lo slot corrispondente
+            const eventSlot = calendarEl.value.querySelector(`.day-event-slot[data-hour="${hour}"]`);
+            if (!eventSlot) return;
             
-            // Crea l'elemento dell'evento
-            const eventElement = document.createElement('div');
-            eventElement.className = 'calendar-day-event';
-            eventElement.setAttribute('data-event-id', event.id);
-            eventElement.style.backgroundColor = event.backgroundColor;
-            eventElement.style.borderColor = event.borderColor;
+            // Calcola durata dell'evento
+            const endTime = new Date(event.end);
+            const durationHours = (endTime - startTime) / (1000 * 60 * 60);
             
-            // Calcola l'altezza in base alla durata
-            const durationMinutes = (endDate - startDate) / 60000; // In minuti
-            const heightPercentage = (durationMinutes / 60) * 100;
-            eventElement.style.height = `${heightPercentage}%`;
+            // Crea elemento dell'evento
+            const eventEl = document.createElement('div');
+            eventEl.className = `day-slot-event event-status-${event.status}`;
+            eventEl.style.position = 'absolute';
+            eventEl.style.left = '0';
+            eventEl.style.right = '0';
+            eventEl.style.top = '0';
+            eventEl.style.height = `${durationHours * 100}%`;
+            eventEl.style.backgroundColor = getEventColor(event.status);
+            eventEl.style.borderRadius = '4px';
+            eventEl.style.padding = '8px';
+            eventEl.style.overflow = 'hidden';
+            eventEl.style.cursor = 'pointer';
+            eventEl.style.zIndex = '10';
             
-            // Formatta l'ora di inizio e fine
-            const formatTime = (date) => {
-              return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-            };
+            // Aggiungi attributo ID per riferimento
+            eventEl.setAttribute('data-event-id', event.id);
             
-            // Aggiungi contenuto
-            eventElement.innerHTML = `
-              <div class="calendar-event-time">${formatTime(startDate)} - ${formatTime(endDate)}</div>
-              <div class="calendar-event-title">${event.title}</div>
-              <div class="calendar-event-description">${event.description || ''}</div>
-              <div class="event-resize-handle"></div>
+            // Formatta ora
+            const formattedStart = formatTime(startTime);
+            const formattedEnd = formatTime(endTime);
+            
+            eventEl.innerHTML = `
+              <div style="font-size: 0.8rem; opacity: 0.8;">${formattedStart} - ${formattedEnd}</div>
+              <div style="font-weight: 600; margin: 4px 0;">${event.title}</div>
+              <div style="font-size: 0.8rem; opacity: 0.7;">${event.description || ''}</div>
+              <div class="event-resize-handle" style="position: absolute; bottom: 0; left: 0; right: 0; height: 5px; cursor: ns-resize;"></div>
             `;
             
-            // Aggiungi click handler
-            eventElement.addEventListener('click', (e) => {
-              // Evita che il click sul handle di resize apra la modale
+            // Click per modificare l'evento
+            eventEl.addEventListener('click', (e) => {
+              // Non attivare su click sul handle di resize
               if (!e.target.closest('.event-resize-handle')) {
                 editAppointment(event);
               }
             });
             
-            eventCell.appendChild(eventElement);
+            // Aggiungi gestori touch e drag
+            eventEl.setAttribute('draggable', 'true');
+            eventEl.addEventListener('dragstart', (e) => handleEventDragStart(e, event));
+            
+            eventSlot.style.position = 'relative';
+            eventSlot.appendChild(eventEl);
           });
         };
         
@@ -7078,6 +7583,7 @@
           }
         };
         
+        // Funzione per aggiornare la lista degli eventi del giorno selezionato
         const updateSelectedDateEvents = () => {
           if (!selectedDate.value) return;
           
@@ -7092,36 +7598,37 @@
             return eventStart >= startDate && eventStart <= endDate;
           });
           
-          // Se il calendario è inizializzato e siamo in vista settimanale, evidenzia il giorno selezionato
-          if (calendarInstance.value && calendarInstance.value.view.type === 'week') {
-            const dayHeaders = calendarEl.value.querySelectorAll('.calendar-day-header');
-            dayHeaders.forEach(header => {
-              const headerDate = header.parentElement.getAttribute('data-date');
-              if (headerDate) {
-                const headerDateObj = new Date(headerDate);
-                const isSelected = headerDateObj.toDateString() === selectedDate.value.toDateString();
-                
-                if (isSelected) {
-                  header.classList.add('day-selected');
-                } else {
-                  header.classList.remove('day-selected');
-                }
-              }
-            });
-          }
+          // Ordina per ora di inizio
+          selectedDateEvents.value.sort((a, b) => new Date(a.start) - new Date(b.start));
         };
         
         const formatEventTime = (event) => {
           const start = new Date(event.start);
           const end = new Date(event.end);
-          
-          const formatTime = (date) => {
-            return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-          };
-          
           return `${formatTime(start)} - ${formatTime(end)}`;
         };
+
+        // Funzione per ottenere il colore in base allo stato
+        const getEventColor = (status) => {
+          switch (status) {
+            case 'confirmed': return 'var(--primary-color)';
+            case 'pending': return 'var(--warning-color)';
+            case 'completed': return 'var(--success-color)';
+            case 'cancelled': return 'var(--danger-color)';
+            default: return 'var(--primary-color)';
+          }
+        };
         
+        // Gestisce l'inizio del trascinamento di un evento
+        const handleEventDragStart = (e, event) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            eventId: event.id,
+            originalDate: event.start
+          }));
+          
+          e.target.classList.add('dragging');
+        };
+
         const getEventsForHour = (hour) => {
           if (!selectedDate.value) return [];
           
@@ -7135,7 +7642,7 @@
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
             
-            // Evento che inizia o finisce in quest'ora o copre quest'ora
+            // Evento che inizia in quest'ora, o copre quest'ora
             return (eventStart >= startTime && eventStart <= endTime) || 
                    (eventEnd >= startTime && eventEnd <= endTime) ||
                    (eventStart <= startTime && eventEnd >= endTime);
@@ -7333,54 +7840,46 @@
           }
         };
         
-        const handleEventDrop = async (eventId, newStart, newEnd) => {
+        // Gestisce il rilascio di un evento su uno slot
+        const handleEventDrop = (e, date, hour) => {
+          e.preventDefault();
+          
           try {
-            // Trova l'evento nell'array
-            const eventIndex = calendarEvents.value.findIndex(e => e.id === eventId);
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const { eventId, originalDate } = data;
+            
+            // Trova l'evento
+            const eventIndex = calendarEvents.value.findIndex(event => event.id === eventId);
             if (eventIndex === -1) return;
             
-            // Aggiorna le date
-            calendarEvents.value[eventIndex].start = newStart;
-            calendarEvents.value[eventIndex].end = newEnd;
+            const event = calendarEvents.value[eventIndex];
             
-            // In una implementazione reale, inviare al server
-            try {
-              // Qui dovrebbe esserci la chiamata API reale
-              await axios.put(`https://api.costruzionedigitale.com/api/appointments/${eventId}`, {
-                start: newStart,
-                end: newEnd
-              }, { withCredentials: true });
-              
-              showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
-            } catch (error) {
-              console.error('Errore durante l\'aggiornamento dell\'appuntamento sul server:', error);
-              showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
-            }
+            // Calcola nuove date
+            const original = new Date(originalDate);
+            const newDate = new Date(date);
+            newDate.setHours(hour, 0, 0, 0);
             
-            // Fondamentale: pulire e ricreare tutti gli eventi del calendario
-            // Questo risolve il problema dell'evento vecchio che rimane
-            if (calendarInstance.value) {
-              // Rimuovi tutti gli eventi dalle celle
-              document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
-              
-              // Ricrea la vista
-              calendarInstance.value.updateView();
-            } else {
-              // Fallback: ricarica completamente il calendario
-              loadCalendarEvents();
-            }
+            // Calcola differenza di tempo
+            const timeDiff = newDate.getTime() - original.getTime();
             
-            // Aggiorna eventi del giorno selezionato
-            updateSelectedDateEvents();
+            // Aggiorna date di inizio e fine
+            const newStart = new Date(event.start);
+            newStart.setTime(newStart.getTime() + timeDiff);
+            
+            const newEnd = new Date(event.end);
+            newEnd.setTime(newEnd.getTime() + timeDiff);
+            
+            // Aggiorna evento
+            handleEventDrop(eventId, newStart, newEnd);
+            
+            // Rimuovi classe di trascinamento
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
             
           } catch (error) {
-            showToast('Errore', `Impossibile spostare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
-            console.error('Errore spostamento appuntamento:', error);
-            
-            // Rollback: ricarica calendario
-            loadCalendarEvents();
+            console.error('Errore nel drop dell\'evento:', error);
           }
         };
+
         
         const updateCalendarView = () => {
           if (!calendarInstance.value) return;
@@ -7611,7 +8110,6 @@
           isSavingAppointment,
           clients,
           dailyHours,
-          initCalendar,
           loadCalendarEvents,
           loadClients,
           updateSelectedDateEvents,
@@ -7624,6 +8122,58 @@
           handleEventDrop,
           updateCalendarView,
           backToWeekView,
+
+          // Nuove proprietà computate
+          monthCells,
+          weekDays,
+          groupedEvents,
+          
+          // Nuove funzioni helper
+          calculateMonthCells,
+          calculateWeekDays,
+          groupEventsByDate,
+          getEventsForDayAndHour,
+          calculateEventHeight,
+          formatDateHeader,
+          formatDateForAttribute,
+          selectDateAndView,
+
+          calendarView,
+          initCalendar,
+          changeCalendarView,
+          createMonthView,
+          createWeekView,
+          createDayView,
+          createListView,
+          renderCalendarEvents,
+          renderMonthViewEvents,
+          renderWeekViewEvents,
+          renderDayViewEvents,
+          navigateCalendar,
+          formatMonthTitle,
+          formatSelectedDate,
+          formatTime,
+          getEventColor,
+          handleEventDragStart,
+          handleEventDrop,
+          updateSelectedDateEvents,
+          formatEventTime,
+          getEventsForHour,
+
+          // Nuove proprietà computate
+          monthCells,
+          weekDays,
+          groupedEvents,
+          
+          // Nuove funzioni helper
+          calculateMonthCells,
+          calculateWeekDays,
+          groupEventsByDate,
+          getEventsForDayAndHour,
+          calculateEventHeight,
+          formatDateHeader,
+          formatDateForAttribute,
+          selectDateAndView
         };
       }
     });
@@ -7685,82 +8235,5 @@
       setThemeColors();
     });
   </script>
-
-  <!-- Modale nuovo/modifica appuntamento -->
-  <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="appointmentModalLabel">
-            <span v-if="editingAppointment">Modifica Appuntamento</span>
-            <span v-else>Nuovo Appuntamento</span>
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveAppointment">
-            <div class="mb-3">
-              <label for="appointmentTitle" class="form-label">Titolo</label>
-              <input type="text" class="form-control" id="appointmentTitle" v-model="currentAppointment.title" required>
-            </div>
-            
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0">
-                <label for="appointmentDate" class="form-label">Data</label>
-                <input type="date" class="form-control" id="appointmentDate" v-model="currentAppointment.date" required>
-              </div>
-              <div class="col-md-6">
-                <label for="appointmentTime" class="form-label">Ora</label>
-                <input type="time" class="form-control" id="appointmentTime" v-model="currentAppointment.time" required>
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="appointmentDuration" class="form-label">Durata (minuti)</label>
-              <select class="form-select" id="appointmentDuration" v-model="currentAppointment.duration">
-                <option value="30">30 minuti</option>
-                <option value="60">1 ora</option>
-                <option value="90">1 ora e 30 minuti</option>
-                <option value="120">2 ore</option>
-              </select>
-            </div>
-            
-            <div class="mb-3">
-              <label for="appointmentStatus" class="form-label">Stato</label>
-              <select class="form-select" id="appointmentStatus" v-model="currentAppointment.status">
-                <option value="pending">In attesa</option>
-                <option value="confirmed">Confermato</option>
-                <option value="completed">Completato</option>
-                <option value="cancelled">Cancellato</option>
-              </select>
-            </div>
-            
-            <div class="mb-3">
-              <label for="appointmentClient" class="form-label">Cliente</label>
-              <select class="form-select" id="appointmentClient" v-model="currentAppointment.clientId">
-                <option value="">Seleziona un cliente</option>
-                <option v-for="client in clients" :key="client._id" :value="client._id">
-                  {{ client.name }} ({{ client.email }})
-                </option>
-              </select>
-            </div>
-            
-            <div class="mb-3">
-              <label for="appointmentDescription" class="form-label">Note</label>
-              <textarea class="form-control" id="appointmentDescription" rows="3" v-model="currentAppointment.description"></textarea>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
-          <button type="button" class="btn btn-primary" @click="saveAppointment" :disabled="isSavingAppointment">
-            <span v-if="isSavingAppointment" class="spinner-border spinner-border-sm me-2" role="status"></span>
-            <span v-if="editingAppointment">Aggiorna</span>
-            <span v-else>Salva</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
