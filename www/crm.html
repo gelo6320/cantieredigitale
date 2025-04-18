@@ -3290,10 +3290,49 @@
       background-color: #c97300 !important;
     }
 
+    /* Stile per l'overlay di caricamento */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(33, 33, 33, 0.9);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .loading-logo {
+      width: 80px;
+      height: 120px;
+      animation: logoSpin 2s infinite ease-in-out;
+    }
+    
+    @keyframes logoSpin {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    .loading-text {
+      color: var(--primary-color);
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
   </style>
 </head>
 <body>
   <div id="app">
+
+    <div v-if="showLoading" class="loading-overlay">
+      <img src="logosito.webp" class="loading-logo" alt="Caricamento...">
+      <div class="loading-text">Caricamento dati in corso...</div>
+    </div>
+
     <!-- Pattern di sfondo stile Costruzione -->
     <div style="color: #151515;"></div>
 
@@ -5396,8 +5435,12 @@
         };
         
         // Carica dati funnel
+        const showLoading = ref(false);
+
+        // Modifica la funzione loadFunnelData così
         const loadFunnelData = async () => {
           try {
+            showLoading.value = true;
             isLoading.value = true;
             
             // Categoria "Nuovo"
@@ -5506,6 +5549,10 @@
             showToast('Errore', 'Impossibile caricare i dati del funnel di vendita', 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
           } finally {
             isLoading.value = false;
+            // Nascondi l'overlay di caricamento dopo un breve ritardo per assicurarti che tutto sia renderizzato
+            setTimeout(() => {
+              showLoading.value = false;
+            }, 300);
           }
         };
         
@@ -7408,6 +7455,7 @@
               initCalendar();
             }, 100);
           } else if (newTab === 'salesFunnel') {
+            showLoading.value = true;
             loadForms();
             loadBookings();
             loadFacebookLeads();
@@ -7463,6 +7511,7 @@
           selectTab,
           passwordVisible,
           windowSize,
+          showLoading,
 
           // Funnel di vendita
           funnelData,
