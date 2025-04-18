@@ -3014,6 +3014,21 @@
       background-color: rgba(255, 107, 0, 0.15);
       transition: background-color 0.2s ease;
     }
+
+    /* Previeni selezione testo durante interazioni touch */
+    .calendar-day-grid,
+    .calendar-month-grid,
+    .calendar-week-grid,
+    .calendar-events-cell,
+    .calendar-day-event,
+    .calendar-hour-row,
+    .calendar-time-label {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
   </style>
 </head>
 <body>
