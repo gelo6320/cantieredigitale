@@ -4677,32 +4677,19 @@
         const updateCalendarView = () => {
           if (!calendarInstance.value) return;
           
-          if (window.innerWidth < 768) {
+          // Modifica: controlla solo al PRIMO caricamento o cambio di dimensione reale, non durante lo scroll
+          if (window.innerWidth < 768 && calendarInstance.value.view.type !== 'listWeek') {
             calendarInstance.value.changeView('listWeek');
-            // Aggiungi classe per ottimizzare stile su mobile
             calendarEl.value.classList.add('calendar-mobile');
-          } else {
+          } else if (window.innerWidth >= 768 && calendarInstance.value.view.type !== 'dayGridMonth') {
             calendarInstance.value.changeView('dayGridMonth');
             calendarEl.value.classList.remove('calendar-mobile');
           }
-        };
+        }
         
         // Aggiungi questa sezione per reagire al cambio della data selezionata
         watch(selectedDate, () => {
           updateSelectedDateEvents();
-        });
-        
-        // Aggiungi questo nel metodo onMounted
-        onMounted(() => {
-          // Codice esistente...
-          
-          // Aggiungi listener per il ridimensionamento della finestra
-          window.addEventListener('resize', () => {
-            handleResize();
-            if (activeTab.value === 'calendar' && calendarInstance.value) {
-              updateCalendarView();
-            }
-          });
         });
 
         // Debounce per la ricerca
@@ -4772,15 +4759,16 @@
           loadEvents();
           loadRecentEvents();
           loadSettings();
+
+          let prevWidth = window.innerWidth;
           
-          // Rimuovi loadCalendarEvents() da qui
-          // loadCalendarEvents();
-          
-          // Aggiungi invece listener per il ridimensionamento che gestisce anche il calendario
           window.addEventListener('resize', () => {
-            handleResize();
-            if (activeTab.value === 'calendar' && calendarInstance.value) {
-              updateCalendarView();
+            if (prevWidth !== window.innerWidth) {
+              handleResize();
+              prevWidth = window.innerWidth;
+              if (activeTab.value === 'calendar' && calendarInstance.value) {
+                updateCalendarView();
+              }
             }
           });
           
