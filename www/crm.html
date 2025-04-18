@@ -4989,13 +4989,28 @@
                   calendarEvents.value[eventIndex].end = newEnd;
                   calendarEvents.value[eventIndex].duration = newDuration.toString();
                   
-                  // In un'implementazione reale, inviare al server
-                  // await axios.put(`/api/appointments/${eventId}`, { end: newEnd, duration: newDuration });
+                  // Comunicazione con il server
+                  try {
+                    // Chiamata API reale
+                    axios.put(`https://api.costruzionedigitale.com/api/appointments/${touchState.value.resizingEvent.id}`, {
+                      end: newEnd,
+                      duration: newDuration
+                    }, { withCredentials: true })
+                    .then(() => {
+                      showToast('Successo', 'Durata appuntamento modificata', 'bg-success', 'bi bi-check-circle-fill me-2');
+                    })
+                    .catch((error) => {
+                      console.error('Errore durante l\'aggiornamento della durata:', error);
+                      showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+                    });
+                  } catch (error) {
+                    console.error('Errore durante la comunicazione con il server:', error);
+                    showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+                  }
                   
-                  // Feedback visivo
-                  showToast('Successo', 'Durata appuntamento modificata', 'bg-success', 'bi bi-check-circle-fill me-2');
-                  
-                  // Aggiorna la vista del calendario
+                  // Fondamentale: pulire e ricreare tutti gli eventi del calendario
+                  // Questo risolve il problema dell'evento vecchio che rimane
+                  document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
                   renderCalendarEvents();
                   updateSelectedDateEvents();
                 }
@@ -5538,8 +5553,8 @@
         const renderCalendarEvents = () => {
           if (!calendarInstance.value) return;
           
-          // Rimuovi tutti gli eventi esistenti
-          const eventElements = calendarEl.value.querySelectorAll('.calendar-event');
+          // Rimuovi tutti gli eventi esistenti prima di renderizzarli nuovamente
+          const eventElements = document.querySelectorAll('.calendar-day-event, .calendar-event, .calendar-week-event');
           eventElements.forEach(el => el.remove());
           
           // Renderizza gli eventi in base alla vista corrente
@@ -6086,18 +6101,35 @@
             calendarEvents.value[eventIndex].end = newEnd;
             
             // In una implementazione reale, inviare al server
-            // await axios.put(`/api/appointments/${eventId}`, {
-            //   start: newStart,
-            //   end: newEnd
-            // });
+            try {
+              // Qui dovrebbe esserci la chiamata API reale
+              await axios.put(`https://api.costruzionedigitale.com/api/appointments/${eventId}`, {
+                start: newStart,
+                end: newEnd
+              }, { withCredentials: true });
+              
+              showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
+            } catch (error) {
+              console.error('Errore durante l\'aggiornamento dell\'appuntamento sul server:', error);
+              showToast('Errore', 'Modifiche salvate solo localmente', 'bg-warning', 'bi bi-exclamation-triangle-fill me-2');
+            }
             
-            // Aggiorna la vista del calendario
-            renderCalendarEvents();
+            // Fondamentale: pulire e ricreare tutti gli eventi del calendario
+            // Questo risolve il problema dell'evento vecchio che rimane
+            if (calendarInstance.value) {
+              // Rimuovi tutti gli eventi dalle celle
+              document.querySelectorAll('.calendar-day-event').forEach(el => el.remove());
+              
+              // Ricrea la vista
+              calendarInstance.value.updateView();
+            } else {
+              // Fallback: ricarica completamente il calendario
+              loadCalendarEvents();
+            }
             
             // Aggiorna eventi del giorno selezionato
             updateSelectedDateEvents();
             
-            showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
           } catch (error) {
             showToast('Errore', `Impossibile spostare l'appuntamento: ${error.message}`, 'bg-danger', 'bi bi-exclamation-triangle-fill me-2');
             console.error('Errore spostamento appuntamento:', error);
