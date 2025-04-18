@@ -1736,7 +1736,6 @@
     
     dl, ol, ul {
       margin-top: 0;
-      margin-bottom: 1rem;
     }
     
     .dl-horizontal {
@@ -2556,7 +2555,6 @@
       gap: 10px;
       height: 700px;
       background-color: var(--light-accent);
-      border-radius: var(--border-radius);
       overflow: hidden;
     }
     
@@ -2750,7 +2748,6 @@
       flex-direction: column;
       height: 700px;
       background-color: var(--light-accent);
-      border-radius: var(--border-radius);
       overflow: hidden;
     }
     
@@ -2814,6 +2811,7 @@
     
     /* Stile per i pulsanti e header del calendario */
     .calendar-header {
+      margin: 20px 20px 0px;
       background-color: rgba(0, 0, 0, 0.2);
       padding: 15px;
       border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
@@ -2931,6 +2929,18 @@
         height: auto;
         max-height: 500px;
       }
+    }
+
+    .calendar-container {
+      padding: 0px 20px;
+    }
+
+    .list-group-item {
+      padding: 10px;
+    }
+
+    .calendar-sidebar {
+      padding-right: 20px;
     }
   </style>
 </head>
@@ -3637,13 +3647,13 @@
           
           <div class="row">
             <div class="col-lg-9 col-md-8">
-              <div class="card fade-in">
+              <div class="fade-in">
                 <div class="card-body p-0">
                   <div id="calendar" ref="calendarEl" style="font-size: 0.85rem;"></div>
                 </div>
               </div>
             </div>
-            <div class="col-lg-3 col-md-4 mt-3 mt-md-0">
+            <div class="col-lg-3 col-md-4 mt-3 mt-md-0 calendar-sidebar">
               <div class="card fade-in mb-3">
                 <div class="card-header">
                   <h5 class="m-0">Appuntamenti del giorno</h5>
@@ -3658,7 +3668,7 @@
                         style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);">
                       <div class="d-flex justify-content-between align-items-center">
                         <span class="fw-bold" style="font-size: 0.9rem;">{{ event.title }}</span>
-                        <div>
+                        <div style="display: flex;">
                           <button class="btn btn-sm btn-outline-primary me-1" @click="editAppointment(event)">
                             <i class="bi bi-pencil"></i>
                           </button>
@@ -4703,7 +4713,7 @@
         const createCustomCalendar = () => {
           // Crea l'intestazione del calendario
           const header = document.createElement('div');
-          header.className = 'calendar-header d-flex justify-content-between align-items-center mb-3';
+          header.className = 'calendar-header d-flex justify-content-between align-items-center';
           
           // Pulsanti di navigazione
           const navButtons = document.createElement('div');
