@@ -2965,6 +2965,55 @@
         margin-left: -10px;
       }
     }
+
+    /* Stili per interazione touch sul calendario */
+    .touch-feedback {
+      background-color: rgba(255, 107, 0, 0.15);
+      border: 2px dashed var(--primary-color);
+      border-radius: var(--border-radius);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .event-dragging {
+      opacity: 0.8;
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transition: all 0.2s ease;
+    }
+    
+    .event-resize-handle {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      cursor: ns-resize;
+    }
+    
+    .event-drop-highlight {
+      background-color: rgba(255, 107, 0, 0.2);
+      animation: fade-pulse 1s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes fade-pulse {
+      from { background-color: rgba(255, 107, 0, 0.1); }
+      to { background-color: rgba(255, 107, 0, 0.3); }
+    }
+    
+    /* Aggiungere sistema di snap per l'allineamento */
+    .calendar-hour-cell.snap-target {
+      background-color: rgba(255, 107, 0, 0.15);
+      transition: background-color 0.2s ease;
+    }
   </style>
 </head>
 <body>
@@ -4715,6 +4764,264 @@
           toast.show();
         };
 
+        // Supporto per interazioni touch
+        const touchState = ref({
+          longPressTimer: null,
+          isLongPress: false,
+          startX: 0,
+          startY: 0,
+          currentCell: null,
+          startTime: null,
+          draggedEvent: null,
+          resizingEvent: null,
+          initialEventHeight: 0,
+          startClientY: 0,
+          isResizing: false,
+          isDragging: false,
+          touchFeedbackElement: null
+        });
+
+        // Gestore del long press (circa riga 2265, dopo handleEventDrop)
+        const handleLongPress = (element, date, hour) => {
+          // Resetta eventuali stati precedenti
+          if (touchState.value.touchFeedbackElement) {
+            touchState.value.touchFeedbackElement.classList.remove('touch-feedback');
+          }
+          
+          touchState.value.isLongPress = true;
+          touchState.value.currentCell = element;
+          
+          // Aggiungi feedback visivo
+          element.classList.add('touch-feedback');
+          touchState.value.touchFeedbackElement = element;
+          
+          // Mostra prompt per nuovo appuntamento
+          const appointmentTime = new Date(date);
+          appointmentTime.setHours(hour, 0, 0, 0);
+          
+          // Imposta i valori per il nuovo appuntamento
+          const dateStr = appointmentTime.toISOString().split('T')[0];
+          const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+          
+          currentAppointment.value = {
+            title: '',
+            date: dateStr,
+            time: timeStr,
+            duration: '60',
+            status: 'pending',
+            clientId: '',
+            description: ''
+          };
+          
+          // Apri modale nuovo appuntamento
+          editingAppointment.value = false;
+          const modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+          modal.show();
+          
+          // Rimuovi il feedback dopo l'apertura del modale
+          setTimeout(() => {
+            if (touchState.value.touchFeedbackElement) {
+              touchState.value.touchFeedbackElement.classList.remove('touch-feedback');
+              touchState.value.touchFeedbackElement = null;
+            }
+          }, 300);
+        };
+        
+        // Gestore inizio touch (circa riga 2310)
+        const handleTouchStart = (e, element, date, hour) => {
+          if (e.touches.length !== 1) return; // Solo touch singolo
+          
+          const touch = e.touches[0];
+          touchState.value.startX = touch.clientX;
+          touchState.value.startY = touch.clientY;
+          touchState.value.startTime = Date.now();
+          
+          // Controlla se è su un evento esistente o su una cella vuota
+          const eventElement = e.target.closest('.calendar-day-event');
+          
+          if (eventElement) {
+            // Touch su un evento esistente
+            const eventId = eventElement.getAttribute('data-event-id');
+            touchState.value.draggedEvent = calendarEvents.value.find(ev => ev.id === eventId);
+            
+            // Controlla se il touch è sul handle di resize
+            const resizeHandle = e.target.closest('.event-resize-handle');
+            if (resizeHandle) {
+              touchState.value.isResizing = true;
+              touchState.value.resizingEvent = touchState.value.draggedEvent;
+              touchState.value.initialEventHeight = eventElement.offsetHeight;
+              touchState.value.startClientY = touch.clientY;
+              
+              // Feedback visivo
+              eventElement.classList.add('event-dragging');
+            } else {
+              // Prepara per drag
+              touchState.value.longPressTimer = setTimeout(() => {
+                touchState.value.isDragging = true;
+                eventElement.classList.add('event-dragging');
+              }, 500);
+            }
+          } else {
+            // Touch su una cella vuota (long press per nuovo appuntamento)
+            touchState.value.longPressTimer = setTimeout(() => {
+              handleLongPress(element, date, hour);
+            }, 800); // 800ms per long press
+          }
+        };
+        
+        // Gestore movimento touch (circa riga 2370)
+        const handleTouchMove = (e) => {
+          if (!touchState.value.isLongPress && !touchState.value.isDragging && !touchState.value.isResizing) {
+            // Cancella timer se l'utente sta scorrendo
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchState.value.startX);
+            const deltaY = Math.abs(touch.clientY - touchState.value.startY);
+            
+            // Se il movimento è significativo, cancella il timer di long press
+            if (deltaX > 10 || deltaY > 10) {
+              clearTimeout(touchState.value.longPressTimer);
+            }
+            return;
+          }
+          
+          // Previeni scroll durante drag o resize
+          e.preventDefault();
+          
+          if (touchState.value.isResizing && touchState.value.resizingEvent) {
+            // Logica di resize
+            const touch = e.touches[0];
+            const deltaY = touch.clientY - touchState.value.startClientY;
+            
+            // Calcola la nuova durata in base al movimento
+            const pixelsPerMinute = touchState.value.initialEventHeight / (parseInt(touchState.value.resizingEvent.duration) || 60);
+            const additionalMinutes = Math.round(deltaY / pixelsPerMinute);
+            const newDuration = Math.max(30, (parseInt(touchState.value.resizingEvent.duration) || 60) + additionalMinutes);
+            
+            // Trova l'elemento dell'evento e aggiorna l'altezza visivamente
+            const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.resizingEvent.id}"]`);
+            if (eventElement) {
+              const newHeight = (newDuration / 60) * 60; // 60px per ora
+              eventElement.style.height = `${newHeight}px`;
+            }
+          } else if (touchState.value.isDragging && touchState.value.draggedEvent) {
+            // Logica di drag
+            const touch = e.touches[0];
+            
+            // Trova la cella sotto il punto di touch corrente
+            const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
+            const targetCell = elementsAtPoint.find(el => el.classList.contains('calendar-events-cell'));
+            
+            if (targetCell) {
+              // Evidenzia la cella di destinazione per il feedback visivo
+              document.querySelectorAll('.calendar-events-cell').forEach(cell => {
+                cell.classList.remove('event-drop-highlight');
+              });
+              targetCell.classList.add('event-drop-highlight');
+              
+              // Snap to grid - trovare l'ora più vicina
+              const cellHour = parseInt(targetCell.getAttribute('data-hour') || '0');
+              touchState.value.currentDropHour = cellHour;
+            }
+          }
+        };
+        
+        // Gestore fine touch (circa riga 2450)
+        const handleTouchEnd = (e) => {
+          // Cancella sempre il timer di long press
+          clearTimeout(touchState.value.longPressTimer);
+          
+          // Rimuovi tutti i feedback visivi
+          if (touchState.value.touchFeedbackElement) {
+            touchState.value.touchFeedbackElement.classList.remove('touch-feedback');
+          }
+          
+          document.querySelectorAll('.calendar-events-cell').forEach(cell => {
+            cell.classList.remove('event-drop-highlight', 'snap-target');
+          });
+          
+          // Gestione del drag & drop di un evento
+          if (touchState.value.isDragging && touchState.value.draggedEvent && touchState.value.currentDropHour) {
+            const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.draggedEvent.id}"]`);
+            if (eventElement) {
+              eventElement.classList.remove('event-dragging');
+              
+              // Calcola nuova ora di inizio
+              const originalStart = new Date(touchState.value.draggedEvent.start);
+              const originalHour = originalStart.getHours();
+              
+              // Se l'ora è cambiata, aggiorna l'evento
+              if (originalHour !== touchState.value.currentDropHour) {
+                const newStart = new Date(originalStart);
+                newStart.setHours(touchState.value.currentDropHour);
+                
+                // Calcola nuova ora di fine
+                const duration = parseInt(touchState.value.draggedEvent.duration) || 60;
+                const newEnd = new Date(newStart.getTime() + duration * 60000);
+                
+                // Aggiorna l'evento
+                handleEventDrop(touchState.value.draggedEvent.id, newStart, newEnd);
+                
+                // Feedback visivo dell'aggiornamento
+                showToast('Successo', 'Appuntamento spostato', 'bg-success', 'bi bi-check-circle-fill me-2');
+              }
+            }
+          }
+          
+          // Gestione del resize di un evento
+          if (touchState.value.isResizing && touchState.value.resizingEvent) {
+            const eventElement = document.querySelector(`.calendar-day-event[data-event-id="${touchState.value.resizingEvent.id}"]`);
+            if (eventElement) {
+              eventElement.classList.remove('event-dragging');
+              
+              // Calcola la nuova durata in base all'altezza finale
+              const heightPx = parseFloat(eventElement.style.height);
+              const newDuration = Math.round(heightPx / 60 * 60); // 60px per ora, converte in minuti
+              
+              // Aggiorna l'evento solo se la durata è cambiata
+              if (newDuration !== parseInt(touchState.value.resizingEvent.duration)) {
+                const newStart = new Date(touchState.value.resizingEvent.start);
+                const newEnd = new Date(newStart.getTime() + newDuration * 60000);
+                
+                // Trova e aggiorna l'evento
+                const eventIndex = calendarEvents.value.findIndex(e => e.id === touchState.value.resizingEvent.id);
+                if (eventIndex !== -1) {
+                  // Aggiorna localmente
+                  calendarEvents.value[eventIndex].end = newEnd;
+                  calendarEvents.value[eventIndex].duration = newDuration.toString();
+                  
+                  // In un'implementazione reale, inviare al server
+                  // await axios.put(`/api/appointments/${eventId}`, { end: newEnd, duration: newDuration });
+                  
+                  // Feedback visivo
+                  showToast('Successo', 'Durata appuntamento modificata', 'bg-success', 'bi bi-check-circle-fill me-2');
+                  
+                  // Aggiorna la vista del calendario
+                  renderCalendarEvents();
+                  updateSelectedDateEvents();
+                }
+              }
+            }
+          }
+          
+          // Reset dello stato
+          touchState.value = {
+            longPressTimer: null,
+            isLongPress: false,
+            startX: 0,
+            startY: 0,
+            currentCell: null,
+            startTime: null,
+            draggedEvent: null,
+            resizingEvent: null,
+            initialEventHeight: 0,
+            startClientY: 0,
+            isResizing: false,
+            isDragging: false,
+            touchFeedbackElement: null,
+            currentDropHour: null
+          };
+        };
+
         const calendarEl = ref(null);
         const calendarInstance = ref(null);
         const calendarEvents = ref([]);
@@ -5352,6 +5659,27 @@
           // Ordina eventi per ora di inizio
           dayEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
           
+          // Aggiungi gestori touch a tutte le celle
+          const allEventCells = calendarEl.value.querySelectorAll('.calendar-events-cell');
+          allEventCells.forEach(cell => {
+            const hour = parseInt(cell.getAttribute('data-hour'));
+            
+            // Rimuovi event listener precedenti per evitare duplicazioni
+            cell.removeEventListener('touchstart', cell._touchStartHandler);
+            cell.removeEventListener('touchmove', cell._touchMoveHandler);
+            cell.removeEventListener('touchend', cell._touchEndHandler);
+            
+            // Salva riferimenti ai gestori per poterli rimuovere in futuro
+            cell._touchStartHandler = (e) => handleTouchStart(e, cell, dateKey, hour);
+            cell._touchMoveHandler = handleTouchMove;
+            cell._touchEndHandler = handleTouchEnd;
+            
+            // Aggiungi i gestori
+            cell.addEventListener('touchstart', cell._touchStartHandler, { passive: false });
+            cell.addEventListener('touchmove', cell._touchMoveHandler, { passive: false });
+            cell.addEventListener('touchend', cell._touchEndHandler);
+          });
+          
           // Renderizza ogni evento nella cella appropriata
           dayEvents.forEach(event => {
             const startDate = new Date(event.start);
@@ -5365,6 +5693,7 @@
             // Crea l'elemento dell'evento
             const eventElement = document.createElement('div');
             eventElement.className = 'calendar-day-event';
+            eventElement.setAttribute('data-event-id', event.id);
             eventElement.style.backgroundColor = event.backgroundColor;
             eventElement.style.borderColor = event.borderColor;
             
@@ -5383,11 +5712,15 @@
               <div class="calendar-event-time">${formatTime(startDate)} - ${formatTime(endDate)}</div>
               <div class="calendar-event-title">${event.title}</div>
               <div class="calendar-event-description">${event.description || ''}</div>
+              <div class="event-resize-handle"></div>
             `;
             
             // Aggiungi click handler
-            eventElement.addEventListener('click', () => {
-              editAppointment(event);
+            eventElement.addEventListener('click', (e) => {
+              // Evita che il click sul handle di resize apra la modale
+              if (!e.target.closest('.event-resize-handle')) {
+                editAppointment(event);
+              }
             });
             
             eventCell.appendChild(eventElement);
@@ -5935,6 +6268,7 @@
           viewLeadDetails,
           
           // Funzioni
+          touchState,
           formatDate,
           formatDateTime,
           getStatusBadgeClass,
