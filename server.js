@@ -40,14 +40,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Configurazione CORS
+// Configurazione CORS
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
       'https://costruzionedigitale.com',
-      'https://crm.costruzionedigitale.com',
       'https://www.costruzionedigitale.com',
+      'https://crm.costruzionedigitale.com',
+      'https://api.costruzionedigitale.com',
       'http://localhost:3000',
       'http://localhost:5001'
     ];
