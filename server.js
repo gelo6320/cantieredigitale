@@ -46,6 +46,7 @@ app.use(cors({
     
     const allowedOrigins = [
       'https://costruzionedigitale.com',
+      'https://crm.costruzionedigitale.com',
       'https://www.costruzionedigitale.com',
       'http://localhost:3000',
       'http://localhost:5001'
