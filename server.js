@@ -20,7 +20,6 @@ dotenv.config();
 // Inizializza Express
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DASHBOARD_PORT = process.env.DASHBOARD_PORT || 5001;
 
 // Aggiungi compressione per migliorare le prestazioni
 app.use(compression({
@@ -39,7 +38,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Configurazione CORS
 // Configurazione CORS
 app.use(cors({
   origin: function(origin, callback) {
