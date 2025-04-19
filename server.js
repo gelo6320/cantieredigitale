@@ -874,14 +874,19 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Logout
-app.get('/api/logout', (req, res) => {
+// In server.js, verifica che questa route funzioni correttamente
+app.post('/api/logout', (req, res) => {
+  // Distrugge la sessione
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Errore durante il logout' });
     }
     
-    res.redirect('/');
+    // Pulisce il cookie di sessione
+    res.clearCookie('connect.sid'); // Usa il nome del cookie di sessione corretto
+    
+    // Risponde con successo
+    res.status(200).json({ success: true, message: 'Logout effettuato con successo' });
   });
 });
 
