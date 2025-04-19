@@ -732,24 +732,36 @@ const isAuthenticated = (req, res, next) => {
     return res.redirect('/login');
   };
 
-  // Middleware per API (restituisce dati vuoti, non reindirizza)
+// Middleware per API (restituisce JSON con stato autenticazione, non reindirizza)
 const checkApiAuth = async (req, res, next) => {
+  // Se il percorso è un'API di autenticazione, salta
+  if (req.path === '/api/login' || req.path === '/api/logout' || req.path === '/api/check-auth') {
+    return next();
+  }
+  
   // Se autenticato, continua normalmente
   if (req.session && req.session.isAuthenticated) {
     return next();
   }
   
-  // Per tutte le API, restituisci dati vuoti con successo
-  return res.json({
-    success: true,
-    data: [],
-    pagination: {
-      total: 0,
-      page: req.query.page || 1,
-      limit: req.query.limit || 20,
-      pages: 0
-    }
-  });
+  // Per tutte le API, restituisci dati vuoti o stato 401 con messaggio JSON
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({
+      success: false,
+      authenticated: false,
+      message: 'Sessione non autenticata',
+      data: [],
+      pagination: {
+        total: 0,
+        page: req.query.page || 1,
+        limit: req.query.limit || 20,
+        pages: 0
+      }
+    });
+  }
+  
+  // Se non è un'API, passa al prossimo middleware
+  next();
 };
 
 // Middleware per catturare fbclid e inviare PageView alla CAPI
@@ -826,13 +838,12 @@ app.use(async (req, res, next) => {
 // Applica i middleware
 app.use(checkCookieConsent);
 
+app.use(checkApiAuth);
+
 // Proteggi le route CRM
 app.use('/crm', isAuthenticated);
 app.use('/api/crm', isAuthenticated);
 app.use('/api/dashboard', isAuthenticated);
-
-app.use('/api/leads', checkApiAuth);
-app.use('/api/events', checkApiAuth);
 
 // ===== ROUTE API =====
 
@@ -891,8 +902,25 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
+// API per il logout
+app.get('/api/logout', (req, res) => {
+  // Distrugge la sessione
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Errore durante il logout' });
+    }
+    
+    // Pulisce il cookie di sessione
+    res.clearCookie('connect.sid'); // Usa il nome del cookie di sessione corretto
+    
+    // Risponde con successo
+    res.status(200).json({ success: true, message: 'Logout effettuato con successo' });
+  });
+});
+
 // API per verificare lo stato dell'autenticazione
 app.get('/api/check-auth', (req, res) => {
+  // Sempre rispondere con un JSON, mai reindirizzare
   res.json({ 
     authenticated: !!(req.session && req.session.isAuthenticated),
     user: req.session && req.session.user ? req.session.user.username : null
