@@ -268,27 +268,13 @@ function extractDomain(url) {
   }
 }
 
-// Funzione per ottenere lo screenshot di un sito tramite API esterna
-async function getScreenshot(url) {
-  try {
-    // Usiamo l'API di screenshotapi.net (dovrai registrarti per una key)
-    // Alternativa: urlbox.io, screenshotlayer.com, o altri servizi
-    const apiKey = process.env.SCREENSHOT_API_KEY || 'demo';
-    const screenshotUrl = `https://api.screenshotmachine.com?key=${apiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
-    
-    return screenshotUrl;
-  } catch (error) {
-    console.error('Errore nel recupero dello screenshot:', error);
-    return '';
-  }
-}
-
 // Funzione per ottenere metrics di PageSpeed Insights
 async function getPageSpeedMetrics(url) {
   try {
     // Usa l'API di Google PageSpeed Insights
     const apiKey = process.env.PAGESPEED_API_KEY || '';
-    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=AIzaSyCOpDlfGSYWqrP1GI8hONmwG54Y5YWJlc8`;
+    // Aggiungi category=ACCESSIBILITY,BEST_PRACTICES,SEO,PERFORMANCE per ottenere tutte le metriche
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&category=PERFORMANCE`;
     
     const response = await axios.get(apiUrl);
     const data = response.data;
@@ -333,6 +319,34 @@ async function getPageSpeedMetrics(url) {
       bestPractices: 0,
       seo: 0
     };
+  }
+}
+
+// Funzione per ottenere lo screenshot di un sito tramite API esterna
+async function getScreenshot(url) {
+  try {
+    // Opzione 1: Usa l'API di PageSpeed Insights per lo screenshot
+    const apiKey = process.env.PAGESPEED_API_KEY || '';
+    const pageSpeedUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}`;
+    
+    const response = await axios.get(pageSpeedUrl);
+    
+    // Estrai lo screenshot dai risultati
+    const screenshot = response.data?.lighthouseResult?.audits?.['final-screenshot']?.details?.data;
+    
+    if (screenshot) {
+      return screenshot; // Questo è già in formato base64 pronto per essere usato come src
+    }
+    
+    // Fallback: Se non riusciamo a ottenere lo screenshot da PageSpeed, usiamo screenshotmachine
+    const screenshotApiKey = process.env.SCREENSHOT_API_KEY || 'demo';
+    return `https://api.screenshotmachine.com?key=${screenshotApiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
+  } catch (error) {
+    console.error('Errore nel recupero dello screenshot:', error);
+    
+    // Fallback in caso di errore
+    const screenshotApiKey = process.env.SCREENSHOT_API_KEY || 'demo';
+    return `https://api.screenshotmachine.com?key=${screenshotApiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
   }
 }
 
