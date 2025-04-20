@@ -337,7 +337,7 @@ async function getPageSpeedMetrics(url) {
 }
 
 // API per ottenere tutti i siti dell'utente
-app.get('/api/sites', isAuthenticated, async (req, res) => {
+app.get('/api/sites', async (req, res) => {
   try {
     const userId = req.session.user.id;
     const sites = await Site.find({ userId }).sort({ createdAt: -1 });
@@ -350,7 +350,7 @@ app.get('/api/sites', isAuthenticated, async (req, res) => {
 });
 
 // API per aggiungere un nuovo sito
-app.post('/api/sites', isAuthenticated, async (req, res) => {
+app.post('/api/sites', async (req, res) => {
   try {
     const { url } = req.body;
     const userId = req.session.user.id;
@@ -400,7 +400,7 @@ app.post('/api/sites', isAuthenticated, async (req, res) => {
 });
 
 // API per aggiornare le metriche di un sito
-app.post('/api/sites/:id/refresh', isAuthenticated, async (req, res) => {
+app.post('/api/sites/:id/refresh', async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.session.user.id;
@@ -434,7 +434,7 @@ app.post('/api/sites/:id/refresh', isAuthenticated, async (req, res) => {
 });
 
 // API per eliminare un sito
-app.delete('/api/sites/:id', isAuthenticated, async (req, res) => {
+app.delete('/api/sites/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.session.user.id;
@@ -2660,7 +2660,7 @@ app.post('/api/leads/facebook/:id/update', async (req, res) => {
 });
 
 // Configurazione utente API
-app.post('/api/user/config', isAuthenticated, async (req, res) => {
+app.post('/api/user/config', async (req, res) => {
   try {
     const { mongodb_uri, access_token, meta_pixel_id } = req.body;
     const username = req.session.user.username;
