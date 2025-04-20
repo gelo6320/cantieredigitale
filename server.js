@@ -118,6 +118,8 @@ const FormDataSchema = new mongoose.Schema({
     enum: ['new', 'contacted', 'qualified', 'opportunity', 'customer', 'lost'],
     default: 'new'
   },
+  value: { type: Number, default: 0 }, // Campo per il valore
+  service: String, // Campo per il servizio
   crmEvents: [{
     eventName: String,
     eventTime: Date,
@@ -144,6 +146,8 @@ const BookingSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'cancelled', 'completed', 'qualified', 'opportunity', 'customer', 'lost'], 
     default: 'pending' 
   },
+  value: { type: Number, default: 0 }, // Campo per il valore
+  service: String, // Campo per il servizio
   source: String,
   fbclid: String,
   fbclidTimestamp: Number,
@@ -205,6 +209,8 @@ const FacebookLeadSchema = new mongoose.Schema({
   phone: String,
   customFields: Object,
   rawData: Object,
+  value: { type: Number, default: 0 }, // Campo per il valore
+  service: String, // Campo per il servizio
   status: {
     type: String,
     enum: ['new', 'contacted', 'qualified', 'opportunity', 'customer', 'lost'],
@@ -1468,6 +1474,326 @@ app.post('/api/appointments', checkApiAuth, async (req, res) => {
   } catch (error) {
     console.error('Errore nella creazione appuntamento:', error);
     res.status(500).json({ success: false, message: 'Errore nella creazione appuntamento', error: error.message });
+  }
+});
+
+// API per aggiornare i metadati di un form (valore e servizio)
+app.post('/api/leads/forms/:id/update-metadata', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value, service } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID richiesto' 
+      });
+    }
+    
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    // Se non c'è connessione, restituisci un errore
+    if (connection === null) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Usa i modelli dalla connessione
+    const UserFormData = connection.model('FormData');
+    
+    // Trova il form
+    const form = await UserFormData.findById(id);
+    if (!form) {
+      return res.status(404).json({ success: false, message: 'Form non trovato' });
+    }
+    
+    // Aggiorna i metadati
+    if (value !== undefined && value !== null) {
+      form.value = value;
+    }
+    
+    if (service !== undefined) {
+      form.service = service;
+    }
+    
+    form.updatedAt = new Date();
+    
+    await form.save();
+    
+    res.json({
+      success: true,
+      message: 'Metadati aggiornati con successo',
+      data: form
+    });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento dei metadati:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento dei metadati', error: error.message });
+  }
+});
+
+// API per aggiornare i metadati di una prenotazione (valore e servizio)
+app.post('/api/leads/bookings/:id/update-metadata', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value, service } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID richiesto' 
+      });
+    }
+    
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    // Se non c'è connessione, restituisci un errore
+    if (connection === null) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Usa i modelli dalla connessione
+    const UserBooking = connection.model('Booking');
+    
+    // Trova la prenotazione
+    const booking = await UserBooking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Prenotazione non trovata' });
+    }
+    
+    // Aggiorna i metadati
+    if (value !== undefined && value !== null) {
+      booking.value = value;
+    }
+    
+    if (service !== undefined) {
+      booking.service = service;
+    }
+    
+    await booking.save();
+    
+    res.json({
+      success: true,
+      message: 'Metadati aggiornati con successo',
+      data: booking
+    });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento dei metadati:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento dei metadati', error: error.message });
+  }
+});
+
+// API per aggiornare i metadati di un lead Facebook (valore e servizio)
+app.post('/api/leads/facebook/:id/update-metadata', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value, service } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID richiesto' 
+      });
+    }
+    
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    // Se non c'è connessione, restituisci un errore
+    if (connection === null) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Usa i modelli dalla connessione
+    const UserFacebookLead = connection.model('FacebookLead');
+    
+    // Trova il lead
+    const lead = await UserFacebookLead.findById(id);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Lead Facebook non trovato' });
+    }
+    
+    // Aggiorna i metadati
+    if (value !== undefined && value !== null) {
+      lead.value = value;
+    }
+    
+    if (service !== undefined) {
+      lead.service = service;
+    }
+    
+    lead.updatedAt = new Date();
+    
+    await lead.save();
+    
+    res.json({
+      success: true,
+      message: 'Metadati aggiornati con successo',
+      data: lead
+    });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento dei metadati:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento dei metadati', error: error.message });
+  }
+});
+
+// API per spostare un lead da uno stato a un altro nel funnel
+app.post('/api/sales-funnel/move', async (req, res) => {
+  try {
+    const { leadId, leadType, fromStage, toStage } = req.body;
+    
+    if (!leadId || !leadType || !fromStage || !toStage) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID lead, tipo, stato di origine e stato di destinazione sono richiesti' 
+      });
+    }
+    
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    // Se non c'è connessione, restituisci un errore
+    if (connection === null) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    let model;
+    
+    // Determina il modello in base al tipo di lead
+    if (leadType === 'form') {
+      model = connection.model('FormData');
+    } else if (leadType === 'booking') {
+      model = connection.model('Booking');
+    } else if (leadType === 'facebook') {
+      model = connection.model('FacebookLead');
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Tipo di lead non valido' 
+      });
+    }
+    
+    // Trova il lead
+    const lead = await model.findById(leadId);
+    if (!lead) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Lead non trovato' 
+      });
+    }
+    
+    // Verifica che lo stato attuale sia corretto
+    if (lead.status !== fromStage) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Lo stato attuale del lead non corrisponde' 
+      });
+    }
+    
+    // Aggiorna lo stato
+    lead.status = toStage;
+    lead.updatedAt = new Date();
+    
+    await lead.save();
+    
+    // Invia evento a Facebook se necessario
+    let facebookResult = null;
+    
+    try {
+      // Determina l'evento Facebook in base al nuovo stato
+      let eventName = '';
+      
+      switch (toStage) {
+        case 'contacted':
+          eventName = 'QualifiedLead';
+          break;
+        case 'qualified':
+          eventName = 'QualifiedLead';
+          break;
+        case 'opportunity':
+          eventName = 'Opportunity';
+          break;
+        case 'proposal':
+          eventName = 'ProposalSent';
+          break;
+        case 'customer':
+          eventName = 'Purchase';
+          break;
+        case 'lost':
+          eventName = 'Lost';
+          break;
+        default:
+          // Per gli altri stati non inviamo eventi
+          break;
+      }
+      
+      if (eventName) {
+        // Prepara i dati
+        const userData = {
+          email: lead.email,
+          phone: lead.phone,
+          name: lead.name,
+          fbclid: lead.fbclid,
+          fbclidTimestamp: lead.fbclidTimestamp
+        };
+        
+        const customData = {
+          lead_id: leadId,
+          lead_type: leadType,
+          from_stage: fromStage,
+          to_stage: toStage,
+          value: lead.value || 0
+        };
+        
+        // Invia l'evento a Facebook
+        facebookResult = await sendFacebookConversionEvent(eventName, userData, customData, req);
+        
+        // Registra l'evento nel CRM
+        if (lead.crmEvents) {
+          lead.crmEvents.push({
+            eventName,
+            eventTime: new Date(),
+            sentToFacebook: facebookResult.success,
+            metadata: {
+              fromStage,
+              toStage,
+              facebookResult: facebookResult.success ? 'success' : 'error'
+            }
+          });
+          
+          await lead.save();
+        }
+      }
+    } catch (error) {
+      console.error('Errore nell\'invio dell\'evento a Facebook:', error);
+      // Non fallire l'intera richiesta se l'invio a Facebook fallisce
+    }
+    
+    res.json({
+      success: true,
+      message: 'Lead spostato con successo',
+      data: lead,
+      facebookResult
+    });
+  } catch (error) {
+    console.error('Errore nello spostamento del lead:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nello spostamento del lead', 
+      error: error.message 
+    });
   }
 });
 
