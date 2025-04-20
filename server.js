@@ -220,6 +220,239 @@ const FacebookLeadSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Aggiungi al file server.js
+
+// Schema per i siti web dell'utente
+const SiteSchema = new mongoose.Schema({
+  url: { type: String, required: true },
+  domain: { type: String, required: true },
+  screenshotUrl: { type: String, default: '' },
+  metrics: {
+    performance: { type: Number, default: 0 },
+    accessibility: { type: Number, default: 0 },
+    bestPractices: { type: Number, default: 0 },
+    seo: { type: Number, default: 0 },
+    firstContentfulPaint: { type: Number },
+    speedIndex: { type: Number },
+    largestContentfulPaint: { type: Number },
+    timeToInteractive: { type: Number },
+    totalBlockingTime: { type: Number },
+    cumulativeLayoutShift: { type: Number }
+  },
+  lastScan: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true }
+});
+
+// Aggiungere il modello Site
+const Site = mongoose.model('Site', SiteSchema);
+
+// Aggiungi nel mod. Admin
+// Aggiornamento dello schema Admin per includere i siti
+/* Update Admin Schema to include sites
+AdminSchema.virtual('sites', {
+  ref: 'Site',
+  localField: '_id',
+  foreignField: 'userId'
+});
+*/
+
+// Funzione per estrarre il dominio da un URL
+function extractDomain(url) {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname;
+  } catch (error) {
+    return url;
+  }
+}
+
+// Funzione per ottenere lo screenshot di un sito tramite API esterna
+async function getScreenshot(url) {
+  try {
+    // Usiamo l'API di screenshotapi.net (dovrai registrarti per una key)
+    // Alternativa: urlbox.io, screenshotlayer.com, o altri servizi
+    const apiKey = process.env.SCREENSHOT_API_KEY || 'demo';
+    const screenshotUrl = `https://api.screenshotmachine.com?key=${apiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
+    
+    return screenshotUrl;
+  } catch (error) {
+    console.error('Errore nel recupero dello screenshot:', error);
+    return '';
+  }
+}
+
+// Funzione per ottenere metrics di PageSpeed Insights
+async function getPageSpeedMetrics(url) {
+  try {
+    // Usa l'API di Google PageSpeed Insights
+    const apiKey = process.env.PAGESPEED_API_KEY || '';
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}`;
+    
+    const response = await axios.get(apiUrl);
+    const data = response.data;
+    
+    // Estrai le metriche principali
+    const metrics = {
+      performance: data.lighthouseResult?.categories?.performance?.score || 0,
+      accessibility: data.lighthouseResult?.categories?.accessibility?.score || 0,
+      bestPractices: data.lighthouseResult?.categories?.['best-practices']?.score || 0,
+      seo: data.lighthouseResult?.categories?.seo?.score || 0
+    };
+    
+    // Aggiungi metriche dettagliate se disponibili
+    const audits = data.lighthouseResult?.audits;
+    if (audits) {
+      if (audits['first-contentful-paint']) {
+        metrics.firstContentfulPaint = audits['first-contentful-paint'].numericValue;
+      }
+      if (audits['speed-index']) {
+        metrics.speedIndex = audits['speed-index'].numericValue;
+      }
+      if (audits['largest-contentful-paint']) {
+        metrics.largestContentfulPaint = audits['largest-contentful-paint'].numericValue;
+      }
+      if (audits['interactive']) {
+        metrics.timeToInteractive = audits['interactive'].numericValue;
+      }
+      if (audits['total-blocking-time']) {
+        metrics.totalBlockingTime = audits['total-blocking-time'].numericValue;
+      }
+      if (audits['cumulative-layout-shift']) {
+        metrics.cumulativeLayoutShift = audits['cumulative-layout-shift'].numericValue;
+      }
+    }
+    
+    return metrics;
+  } catch (error) {
+    console.error('Errore nel recupero delle metrics PageSpeed:', error);
+    return {
+      performance: 0,
+      accessibility: 0,
+      bestPractices: 0,
+      seo: 0
+    };
+  }
+}
+
+// API per ottenere tutti i siti dell'utente
+app.get('/api/sites', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const sites = await Site.find({ userId }).sort({ createdAt: -1 });
+    
+    res.json(sites);
+  } catch (error) {
+    console.error('Errore nel recupero dei siti:', error);
+    res.status(500).json({ success: false, message: 'Errore nel recupero dei siti', error: error.message });
+  }
+});
+
+// API per aggiungere un nuovo sito
+app.post('/api/sites', isAuthenticated, async (req, res) => {
+  try {
+    const { url } = req.body;
+    const userId = req.session.user.id;
+    
+    if (!url) {
+      return res.status(400).json({ success: false, message: 'URL richiesto' });
+    }
+    
+    // Verifica formato URL
+    try {
+      new URL(url);
+    } catch (e) {
+      return res.status(400).json({ success: false, message: 'URL non valido' });
+    }
+    
+    // Controlla se il sito esiste già
+    const domain = extractDomain(url);
+    const existingSite = await Site.findOne({ userId, domain });
+    
+    if (existingSite) {
+      return res.status(409).json({ success: false, message: 'Sito già esistente' });
+    }
+    
+    // Ottieni screenshot e metriche in parallelo
+    const [screenshotUrl, metrics] = await Promise.all([
+      getScreenshot(url),
+      getPageSpeedMetrics(url)
+    ]);
+    
+    // Crea il nuovo sito
+    const site = new Site({
+      url,
+      domain,
+      screenshotUrl,
+      metrics,
+      lastScan: new Date(),
+      userId
+    });
+    
+    await site.save();
+    
+    res.status(201).json(site);
+  } catch (error) {
+    console.error('Errore nell\'aggiunta del sito:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiunta del sito', error: error.message });
+  }
+});
+
+// API per aggiornare le metriche di un sito
+app.post('/api/sites/:id/refresh', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    
+    // Trova il sito
+    const site = await Site.findOne({ _id: id, userId });
+    
+    if (!site) {
+      return res.status(404).json({ success: false, message: 'Sito non trovato' });
+    }
+    
+    // Ottieni nuove metriche e screenshot in parallelo
+    const [screenshotUrl, metrics] = await Promise.all([
+      getScreenshot(site.url),
+      getPageSpeedMetrics(site.url)
+    ]);
+    
+    // Aggiorna il sito
+    site.screenshotUrl = screenshotUrl || site.screenshotUrl;
+    site.metrics = metrics;
+    site.lastScan = new Date();
+    site.updatedAt = new Date();
+    
+    await site.save();
+    
+    res.json(site);
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento delle metriche:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento delle metriche', error: error.message });
+  }
+});
+
+// API per eliminare un sito
+app.delete('/api/sites/:id', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    
+    // Trova ed elimina il sito
+    const result = await Site.deleteOne({ _id: id, userId });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Sito non trovato' });
+    }
+    
+    res.json({ success: true, message: 'Sito eliminato con successo' });
+  } catch (error) {
+    console.error('Errore nell\'eliminazione del sito:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'eliminazione del sito', error: error.message });
+  }
+});
+
 // Modelli principali
 const FormData = mongoose.model('FormData', FormDataSchema);
 const Admin = mongoose.model('Admin', AdminSchema);
