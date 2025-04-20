@@ -226,6 +226,7 @@ const FacebookLeadSchema = new mongoose.Schema({
 const SiteSchema = new mongoose.Schema({
   url: { type: String, required: true },
   domain: { type: String, required: true },
+  path: { type: String, default: '/' }, 
   screenshotUrl: { type: String, default: '' },
   metrics: {
     performance: { type: Number, default: 0 },
@@ -381,8 +382,10 @@ app.post('/api/sites', async (req, res) => {
     }
     
     // Controlla se il sito esiste già
-    const domain = extractDomain(url);
-    const existingSite = await Site.findOne({ userId, domain });
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname;
+    const path = urlObj.pathname;
+    const existingSite = await Site.findOne({ userId, domain, path });
     
     if (existingSite) {
       return res.status(409).json({ success: false, message: 'Sito già esistente' });
@@ -398,6 +401,7 @@ app.post('/api/sites', async (req, res) => {
     const site = new Site({
       url,
       domain,
+      path,  // Aggiungi questa linea
       screenshotUrl,
       metrics,
       lastScan: new Date(),
