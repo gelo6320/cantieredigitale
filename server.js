@@ -1434,64 +1434,6 @@ async function retrieveLeadDetails(leadId, formId) {
 
 // ===== ROUTE API DASHBOARD =====
 
-// API per la gestione degli appuntamenti
-app.get('/api/appointments', checkApiAuth, async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100;
-    const skip = (page - 1) * limit;
-    
-    // Filtri
-    let filter = {};
-    if (req.query.date) {
-      const startDate = new Date(req.query.date);
-      startDate.setHours(0, 0, 0, 0);
-      
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-      
-      filter.start = {
-        $gte: startDate,
-        $lt: endDate
-      };
-    }
-    
-    // Esempio di risposta, in produzione qui avresti la vera query dal database
-    const appointments = [
-      {
-        id: '1',
-        title: 'Consulenza Sig. Rossi',
-        start: new Date(new Date().setHours(10, 0, 0, 0)),
-        end: new Date(new Date().setHours(11, 0, 0, 0)),
-        backgroundColor: '#FF6B00',
-        borderColor: '#FF6B00',
-        status: 'confirmed',
-        description: 'Consulenza per ristrutturazione casa',
-        clientId: '12345'
-      },
-      {
-        id: '2',
-        title: 'Sopralluogo Bianchi',
-        start: new Date(new Date().setHours(14, 0, 0, 0)),
-        end: new Date(new Date().setHours(16, 0, 0, 0)),
-        backgroundColor: '#e67e22',
-        borderColor: '#e67e22',
-        status: 'pending',
-        description: 'Sopralluogo per preventivo',
-        clientId: '67890'
-      }
-    ];
-    
-    res.json({
-      success: true,
-      data: appointments
-    });
-  } catch (error) {
-    console.error('Errore nel recupero appuntamenti:', error);
-    res.status(500).json({ success: false, message: 'Errore nel recupero appuntamenti', error: error.message });
-  }
-});
-
 // API per creare un nuovo appuntamento
 app.post('/api/appointments', checkApiAuth, async (req, res) => {
   try {
