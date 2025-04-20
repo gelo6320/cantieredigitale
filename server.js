@@ -288,7 +288,7 @@ async function getPageSpeedMetrics(url) {
   try {
     // Usa l'API di Google PageSpeed Insights
     const apiKey = process.env.PAGESPEED_API_KEY || '';
-    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}`;
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=AIzaSyCOpDlfGSYWqrP1GI8hONmwG54Y5YWJlc8`;
     
     const response = await axios.get(apiUrl);
     const data = response.data;
