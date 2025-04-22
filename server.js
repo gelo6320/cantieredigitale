@@ -1188,8 +1188,10 @@ app.get('/api/check-auth', (req, res) => {
 app.get('/api/cookie-consent', async (req, res) => {
   try {
     const userId = req.cookies.userId;
+    console.log(`[Server] GET /api/cookie-consent - userId: ${userId}`);
     
     if (!userId) {
+      console.log('[Server] Nessun userId trovato nei cookie');
       return res.status(200).json({
         essential: true,
         analytics: false,
@@ -1201,6 +1203,7 @@ app.get('/api/cookie-consent', async (req, res) => {
     const consent = await CookieConsent.findOne({ userId });
     
     if (!consent) {
+      console.log('[Server] Nessun consenso trovato nel DB per userId:', userId);
       return res.status(200).json({
         essential: true,
         analytics: false,
@@ -1209,6 +1212,7 @@ app.get('/api/cookie-consent', async (req, res) => {
       });
     }
     
+    console.log('[Server] Consenso trovato nel DB:', consent);
     res.status(200).json({
       essential: consent.essential,
       analytics: consent.analytics,
@@ -1216,7 +1220,7 @@ app.get('/api/cookie-consent', async (req, res) => {
       configured: consent.configured || false
     });
   } catch (error) {
-    console.error('Errore nel recupero del consenso cookie:', error);
+    console.error('[Server] Errore nel recupero del consenso cookie:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero delle preferenze cookie'
@@ -1230,8 +1234,11 @@ app.post('/api/cookie-consent', async (req, res) => {
     const { essential, analytics, marketing } = req.body;
     const userId = req.cookies.userId || generateUserId();
     
+    console.log(`[Server] POST /api/cookie-consent - userId: ${userId}, data:`, req.body);
+    
     // Se l'utente non ha ancora un ID, imposta il cookie
     if (!req.cookies.userId) {
+      console.log('[Server] Impostando nuovo userId cookie:', userId);
       res.cookie('userId', userId, { 
         maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno
         httpOnly: true,
@@ -1240,21 +1247,26 @@ app.post('/api/cookie-consent', async (req, res) => {
     }
     
     // Imposta anche il cookie di consenso nel browser per garantire la sincronizzazione
-    res.cookie('user_cookie_consent', JSON.stringify({
+    const consentData = {
       essential: essential !== undefined ? essential : true,
       analytics: analytics !== undefined ? analytics : false,
       marketing: marketing !== undefined ? marketing : false,
       configured: true
-    }), { 
+    };
+    
+    res.cookie('user_cookie_consent', JSON.stringify(consentData), { 
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 anno
       path: '/',
       sameSite: 'strict'
     });
     
+    console.log('[Server] Cookie di consenso impostato:', consentData);
+    
     // Cerca il consenso esistente o crea nuovo
     let consent = await CookieConsent.findOne({ userId });
     
     if (consent) {
+      console.log('[Server] Aggiornamento consenso esistente nel DB');
       // Aggiorna il consenso esistente
       consent.essential = essential !== undefined ? essential : true; // Essential è sempre true
       consent.analytics = analytics !== undefined ? analytics : false;
@@ -1263,6 +1275,7 @@ app.post('/api/cookie-consent', async (req, res) => {
       consent.updatedAt = new Date();
       await consent.save();
     } else {
+      console.log('[Server] Creazione nuovo consenso nel DB');
       // Crea un nuovo record di consenso
       consent = await CookieConsent.create({
         userId,
@@ -1284,7 +1297,7 @@ app.post('/api/cookie-consent', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Errore nel salvataggio del consenso cookie:', error);
+    console.error('[Server] Errore nel salvataggio del consenso cookie:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel salvataggio delle preferenze cookie'
