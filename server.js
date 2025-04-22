@@ -164,6 +164,7 @@ const BookingSchema = new mongoose.Schema({
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' }, // Aggiungi questo campo
   config: {
     mongodb_uri: String,
     access_token: String,
@@ -1123,7 +1124,8 @@ app.post('/api/login', async (req, res) => {
     req.session.isAuthenticated = true;
     req.session.user = {
       id: user._id,
-      username: user.username
+      username: user.username,
+      role: user.role || 'user' // Includi il ruolo nella sessione
     };
     
     // Memorizza le configurazioni nella sessione
@@ -1180,7 +1182,10 @@ app.get('/api/check-auth', (req, res) => {
   // Sempre rispondere con un JSON, mai reindirizzare
   res.json({ 
     authenticated: !!(req.session && req.session.isAuthenticated),
-    user: req.session && req.session.user ? req.session.user.username : null
+    user: req.session && req.session.user ? {
+      username: req.session.user.username,
+      role: req.session.user.role || 'user'
+    } : null
   });
 });
 
@@ -2949,6 +2954,7 @@ const createInitialAdmin = async () => {
       await Admin.create({
         username: 'admin',
         password: hashedPassword,
+        role: 'admin', // Imposta il ruolo a 'admin'
         config: {
           mongodb_uri: process.env.MONGODB_URI,
           access_token: process.env.ACCESS_TOKEN,
