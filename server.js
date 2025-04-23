@@ -1177,6 +1177,292 @@ app.get('/api/logout', (req, res) => {
   });
 });
 
+// Schema per i progetti/cantieri
+const ProjectSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  client: { type: String, required: true },
+  address: { type: String, required: true },
+  description: { type: String },
+  startDate: { type: Date },
+  estimatedEndDate: { type: Date },
+  status: {
+    type: String,
+    enum: ['pianificazione', 'in corso', 'in pausa', 'completato', 'cancellato'],
+    default: 'pianificazione'
+  },
+  budget: { type: Number, default: 0 }, // Valore stimato in euro
+  progress: { type: Number, default: 0 }, // Percentuale di completamento
+  documents: [{
+    name: String,
+    fileUrl: String,
+    fileType: String,
+    uploadDate: { type: Date, default: Date.now }
+  }],
+  images: [{
+    name: String,
+    imageUrl: String,
+    caption: String,
+    uploadDate: { type: Date, default: Date.now }
+  }],
+  notes: [{
+    text: String,
+    createdAt: { type: Date, default: Date.now },
+    createdBy: String
+  }],
+  tasks: [{
+    name: String,
+    description: String,
+    status: {
+      type: String,
+      enum: ['da iniziare', 'in corso', 'completato'],
+      default: 'da iniziare'
+    },
+    dueDate: Date
+  }],
+  contactPerson: {
+    name: String,
+    phone: String,
+    email: String
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true }
+});
+
+// Crea il modello Project
+const Project = mongoose.model('Project', ProjectSchema);
+
+// API per ottenere tutti i progetti dell'utente
+app.get('/api/projects', async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const projects = await Project.find({ userId }).sort({ createdAt: -1 });
+    
+    res.json(projects);
+  } catch (error) {
+    console.error('Errore nel recupero dei progetti:', error);
+    res.status(500).json({ success: false, message: 'Errore nel recupero dei progetti', error: error.message });
+  }
+});
+
+// API per ottenere un singolo progetto
+app.get('/api/projects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    res.json(project);
+  } catch (error) {
+    console.error('Errore nel recupero del progetto:', error);
+    res.status(500).json({ success: false, message: 'Errore nel recupero del progetto', error: error.message });
+  }
+});
+
+// API per creare un nuovo progetto
+app.post('/api/projects', async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const projectData = {
+      ...req.body,
+      userId
+    };
+    
+    const project = new Project(projectData);
+    await project.save();
+    
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Errore nella creazione del progetto:', error);
+    res.status(500).json({ success: false, message: 'Errore nella creazione del progetto', error: error.message });
+  }
+});
+
+// API per aggiornare un progetto
+app.put('/api/projects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    
+    // Trova il progetto e verifica che appartenga all'utente
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    // Aggiorna i campi del progetto
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date()
+    };
+    
+    // Esegui l'aggiornamento
+    const updatedProject = await Project.findByIdAndUpdate(
+      id, 
+      updateData,
+      { new: true } // Ritorna il documento aggiornato
+    );
+    
+    res.json(updatedProject);
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento del progetto:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento del progetto', error: error.message });
+  }
+});
+
+// API per eliminare un progetto
+app.delete('/api/projects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    
+    // Trova ed elimina il progetto
+    const result = await Project.deleteOne({ _id: id, userId });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    res.json({ success: true, message: 'Progetto eliminato con successo' });
+  } catch (error) {
+    console.error('Errore nell\'eliminazione del progetto:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'eliminazione del progetto', error: error.message });
+  }
+});
+
+// API per aggiungere un'immagine a un progetto
+app.post('/api/projects/:id/images', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const { name, imageUrl, caption } = req.body;
+    
+    // Verifica che il progetto esista e appartenga all'utente
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    // Aggiungi l'immagine all'array delle immagini
+    project.images.push({
+      name,
+      imageUrl,
+      caption,
+      uploadDate: new Date()
+    });
+    
+    project.updatedAt = new Date();
+    await project.save();
+    
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Errore nell\'aggiunta dell\'immagine:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiunta dell\'immagine', error: error.message });
+  }
+});
+
+// API per aggiungere un documento a un progetto
+app.post('/api/projects/:id/documents', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const { name, fileUrl, fileType } = req.body;
+    
+    // Verifica che il progetto esista e appartenga all'utente
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    // Aggiungi il documento all'array dei documenti
+    project.documents.push({
+      name,
+      fileUrl,
+      fileType,
+      uploadDate: new Date()
+    });
+    
+    project.updatedAt = new Date();
+    await project.save();
+    
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Errore nell\'aggiunta del documento:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiunta del documento', error: error.message });
+  }
+});
+
+// API per aggiungere un'attività al progetto
+app.post('/api/projects/:id/tasks', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const { name, description, status, dueDate } = req.body;
+    
+    // Verifica che il progetto esista e appartenga all'utente
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    // Aggiungi l'attività all'array delle attività
+    project.tasks.push({
+      name,
+      description,
+      status: status || 'da iniziare',
+      dueDate: dueDate ? new Date(dueDate) : null
+    });
+    
+    project.updatedAt = new Date();
+    await project.save();
+    
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Errore nell\'aggiunta dell\'attività:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiunta dell\'attività', error: error.message });
+  }
+});
+
+// API per aggiungere una nota al progetto
+app.post('/api/projects/:id/notes', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const { text } = req.body;
+    
+    // Verifica che il progetto esista e appartenga all'utente
+    const project = await Project.findOne({ _id: id, userId });
+    
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Progetto non trovato' });
+    }
+    
+    // Aggiungi la nota all'array delle note
+    project.notes.push({
+      text,
+      createdAt: new Date(),
+      createdBy: req.session.user.username
+    });
+    
+    project.updatedAt = new Date();
+    await project.save();
+    
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Errore nell\'aggiunta della nota:', error);
+    res.status(500).json({ success: false, message: 'Errore nell\'aggiunta della nota', error: error.message });
+  }
+});
+
 // API per verificare lo stato dell'autenticazione
 app.get('/api/check-auth', (req, res) => {
   // Sempre rispondere con un JSON, mai reindirizzare
