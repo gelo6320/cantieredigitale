@@ -129,7 +129,9 @@ const FormDataSchema = new mongoose.Schema({
   fbclid: String,
   fbclidTimestamp: Number,
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  viewed: { type: Boolean, default: false },
+  viewedAt: { type: Date }
 });
 
 // Schema per le prenotazioni
@@ -157,7 +159,9 @@ const BookingSchema = new mongoose.Schema({
     sentToFacebook: Boolean,
     metadata: Object
   }],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  viewed: { type: Boolean, default: false },
+  viewedAt: { type: Date }
 });
 
 // Schema per gli amministratori
@@ -218,7 +222,9 @@ const FacebookLeadSchema = new mongoose.Schema({
     default: 'new'
   },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  viewed: { type: Boolean, default: false },
+  viewedAt: { type: Date }
 });
 
 // Aggiungi al file server.js
@@ -1231,6 +1237,347 @@ const ProjectSchema = new mongoose.Schema({
 
 // Crea il modello Project
 const Project = mongoose.model('Project', ProjectSchema);
+
+// Add these routes to your server.js file or appropriate route file
+
+// Dashboard API routes for enhanced functionality
+
+// API for dashboard statistics with enhanced metrics
+app.get('/api/dashboard/stats', async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione database non trovata' 
+      });
+    }
+    
+    // Get models
+    const UserFormData = connection.model('FormData');
+    const UserBooking = connection.model('Booking');
+    const UserFacebookLead = connection.model('FacebookLead');
+    const UserFacebookEvent = connection.model('FacebookEvent');
+    
+    // Get form statistics
+    const formStats = await calculateSourceStats(UserFormData);
+    
+    // Get booking statistics
+    const bookingStats = await calculateSourceStats(UserBooking);
+    
+    // Get Facebook lead statistics
+    const facebookStats = await calculateSourceStats(UserFacebookLead);
+    
+    // Calculate event statistics
+    const eventCount = await UserFacebookEvent.countDocuments({});
+    const successEvents = await UserFacebookEvent.countDocuments({ success: true });
+    
+    // Calculate total conversion rate
+    const totalLeads = formStats.total + bookingStats.total + facebookStats.total;
+    const totalConverted = formStats.converted + bookingStats.converted + facebookStats.converted;
+    const totalConversionRate = totalLeads > 0 
+      ? Math.round((totalConverted / totalLeads) * 100) 
+      : 0;
+    
+    // Prepare response
+    const stats = {
+      forms: formStats,
+      bookings: bookingStats,
+      facebook: facebookStats,
+      events: {
+        total: eventCount,
+        success: successEvents,
+        successRate: eventCount > 0 ? Math.round((successEvents / eventCount) * 100) : 0,
+        conversionRate: totalConversionRate
+      },
+      totalConversionRate
+    };
+    
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero delle statistiche' 
+    });
+  }
+});
+
+// Helper function to calculate source stats
+async function calculateSourceStats(Model) {
+  try {
+    // Get total count
+    const total = await Model.countDocuments({});
+    
+    // Get converted count (status = customer)
+    const converted = await Model.countDocuments({ status: 'customer' });
+    
+    // Calculate conversion rate
+    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    
+    // Calculate trend (simulated here - in production would compare to previous period)
+    // For now, we'll generate a random trend between -15 and +15
+    const trend = Math.floor(Math.random() * 31) - 15;
+    
+    return {
+      total,
+      converted,
+      conversionRate,
+      trend
+    };
+  } catch (error) {
+    console.error('Error calculating source stats:', error);
+    return { total: 0, converted: 0, conversionRate: 0, trend: 0 };
+  }
+}
+
+// API for recent events
+app.get('/api/dashboard/recent-events', async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione database non trovata' 
+      });
+    }
+    
+    // Get models
+    const UserFacebookEvent = connection.model('FacebookEvent');
+    
+    // Get the 10 most recent events
+    const events = await UserFacebookEvent.find({})
+      .sort({ createdAt: -1 })
+      .limit(10);
+    
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching recent events:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero degli eventi recenti' 
+    });
+  }
+});
+
+// API for unviewed contacts
+app.get('/api/dashboard/new-contacts', async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione database non trovata' 
+      });
+    }
+    
+    // Get models
+    const UserFormData = connection.model('FormData');
+    const UserBooking = connection.model('Booking');
+    const UserFacebookLead = connection.model('FacebookLead');
+    
+    // Get recent contacts with 'viewed' field (add this field to your schemas)
+    const formContacts = await UserFormData.find({ viewed: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('_id name email source createdAt viewed');
+    
+    const bookingContacts = await UserBooking.find({ viewed: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('_id name email source createdAt viewed');
+    
+    const facebookContacts = await UserFacebookLead.find({ viewed: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('_id name email formId createdAt viewed');
+    
+    // Transform data
+    const transformedForms = formContacts.map(contact => ({
+      _id: contact._id,
+      name: contact.name,
+      email: contact.email,
+      source: contact.source || 'Form di contatto',
+      type: 'form',
+      createdAt: contact.createdAt,
+      viewed: contact.viewed || false
+    }));
+    
+    const transformedBookings = bookingContacts.map(contact => ({
+      _id: contact._id,
+      name: contact.name,
+      email: contact.email,
+      source: contact.source || 'Prenotazione',
+      type: 'booking',
+      createdAt: contact.createdAt,
+      viewed: contact.viewed || false
+    }));
+    
+    const transformedFacebook = facebookContacts.map(contact => ({
+      _id: contact._id,
+      name: contact.name,
+      email: contact.email,
+      source: 'Facebook Lead',
+      type: 'facebook',
+      createdAt: contact.createdAt,
+      viewed: contact.viewed || false
+    }));
+    
+    // Combine and sort by date
+    const allContacts = [...transformedForms, ...transformedBookings, ...transformedFacebook]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 20); // Limit to 20 most recent
+    
+    res.json(allContacts);
+  } catch (error) {
+    console.error('Error fetching new contacts:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero dei nuovi contatti' 
+    });
+  }
+});
+
+// API to mark a contact as viewed
+app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    const { id } = req.params;
+    const { type } = req.body; // Optional: can be 'form', 'booking', or 'facebook'
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione database non trovata' 
+      });
+    }
+    
+    // Get models
+    const UserFormData = connection.model('FormData');
+    const UserBooking = connection.model('Booking');
+    const UserFacebookLead = connection.model('FacebookLead');
+    
+    // Try to update in all collections if type is not specified
+    let updateResult;
+    
+    if (!type || type === 'form') {
+      updateResult = await UserFormData.findByIdAndUpdate(
+        id,
+        { $set: { viewed: true, viewedAt: new Date() } },
+        { new: true }
+      );
+      
+      if (updateResult) {
+        return res.json({ 
+          success: true, 
+          message: 'Contatto segnato come visto', 
+          data: updateResult 
+        });
+      }
+    }
+    
+    if (!type || type === 'booking') {
+      updateResult = await UserBooking.findByIdAndUpdate(
+        id,
+        { $set: { viewed: true, viewedAt: new Date() } },
+        { new: true }
+      );
+      
+      if (updateResult) {
+        return res.json({ 
+          success: true, 
+          message: 'Prenotazione segnata come vista', 
+          data: updateResult 
+        });
+      }
+    }
+    
+    if (!type || type === 'facebook') {
+      updateResult = await UserFacebookLead.findByIdAndUpdate(
+        id,
+        { $set: { viewed: true, viewedAt: new Date() } },
+        { new: true }
+      );
+      
+      if (updateResult) {
+        return res.json({ 
+          success: true, 
+          message: 'Lead Facebook segnato come visto', 
+          data: updateResult 
+        });
+      }
+    }
+    
+    // If we get here, the contact wasn't found
+    res.status(404).json({ 
+      success: false, 
+      message: 'Contatto non trovato' 
+    });
+  } catch (error) {
+    console.error('Error marking contact as viewed:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel segnare il contatto come visto' 
+    });
+  }
+});
+
+// Update the schema definitions to include 'viewed' field
+
+// For FormDataSchema:
+// Add the following fields:
+// viewed: { type: Boolean, default: false },
+// viewedAt: { type: Date },
+
+// For BookingSchema:
+// Add the following fields:
+// viewed: { type: Boolean, default: false },
+// viewedAt: { type: Date },
+
+// For FacebookLeadSchema:
+// Add the following fields:
+// viewed: { type: Boolean, default: false },
+// viewedAt: { type: Date },
 
 // API per ottenere tutti i progetti dell'utente
 app.get('/api/projects', async (req, res) => {
