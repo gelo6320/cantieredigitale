@@ -998,8 +998,9 @@ const isAuthenticated = (req, res, next) => {
 
 // Middleware per API (restituisce JSON con stato autenticazione, non reindirizza)
 const checkApiAuth = async (req, res, next) => {
-  // Se il percorso è un'API di autenticazione, salta
-  if (req.path === '/api/login' || req.path === '/api/logout' || req.path === '/api/check-auth') {
+  // Se il percorso è un'API di autenticazione o cookie-consent, salta la verifica
+  if (req.path === '/api/login' || req.path === '/api/logout' || 
+      req.path === '/api/check-auth' || req.path === '/api/cookie-consent') {
     return next();
   }
   
@@ -1238,14 +1239,93 @@ const ProjectSchema = new mongoose.Schema({
 // Crea il modello Project
 const Project = mongoose.model('Project', ProjectSchema);
 
-// Add these routes to your server.js file or appropriate route file
+/**
+ * Calcola le statistiche per una specifica fonte di lead (form, booking, facebook)
+ * includendo un trend basato sulla variazione del volume di contatti settimanale
+ * @param {Model} Model - Il modello mongoose da interrogare
+ * @returns {Object} Le statistiche calcolate incluso il trend settimanale
+ */
+async function calculateSourceStats(Model) {
+  try {
+    // Ottieni la data di oggi
+    const today = new Date();
+    
+    // Calcola la data di una settimana fa
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(today.getDate() - 7);
+    
+    // Calcola la data di due settimane fa
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(today.getDate() - 14);
+    
+    // Statistiche totali all-time
+    const total = await Model.countDocuments({});
+    const converted = await Model.countDocuments({ status: 'customer' });
+    
+    // Calcola il tasso di conversione complessivo
+    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    
+    // Conta contatti della settimana corrente (ultimi 7 giorni)
+    const currentWeekTotal = await Model.countDocuments({
+      createdAt: { $gte: oneWeekAgo, $lte: today }
+    });
+    
+    // Conta contatti della settimana precedente (da 14 a 7 giorni fa)
+    const previousWeekTotal = await Model.countDocuments({
+      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo }
+    });
+    
+    // Calcola il trend basato sulla variazione del VOLUME di contatti
+    let trend = 0;
+    
+    if (previousWeekTotal > 0) {
+      // Calcola la variazione percentuale: ((nuovo - vecchio) / vecchio) * 100
+      trend = Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100);
+    } else if (currentWeekTotal > 0 && previousWeekTotal === 0) {
+      // Se la settimana precedente non aveva contatti ma questa settimana sì,
+      // imposta un valore positivo fisso (es. +100%)
+      trend = 100;
+    } else {
+      // Nessuna variazione
+      trend = 0;
+    }
+    
+    // Log per debug
+    console.log(`Stats for ${Model.modelName}:`, {
+      total,
+      converted,
+      conversionRate,
+      currentWeekTotal,
+      previousWeekTotal,
+      trend
+    });
+    
+    return {
+      total,
+      converted,
+      conversionRate,
+      trend,
+      // Include ulteriori metriche per eventuali analisi future
+      currentWeekTotal,
+      previousWeekTotal
+    };
+  } catch (error) {
+    console.error('Errore nel calcolo delle statistiche:', error);
+    return { 
+      total: 0, 
+      converted: 0, 
+      conversionRate: 0, 
+      trend: 0,
+      currentWeekTotal: 0,
+      previousWeekTotal: 0
+    };
+  }
+}
 
-// Dashboard API routes for enhanced functionality
-
-// API for dashboard statistics with enhanced metrics
+// Calcolo statistiche dashboard potenziate
 app.get('/api/dashboard/stats', async (req, res) => {
   try {
-    // Ensure user is authenticated
+    // Verifica autenticazione
     if (!req.session || !req.session.isAuthenticated) {
       return res.status(401).json({ 
         success: false, 
@@ -1253,7 +1333,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
       });
     }
     
-    // Get user connection
+    // Ottieni connessione utente
     const connection = await getUserConnection(req);
     
     if (!connection) {
@@ -1263,49 +1343,79 @@ app.get('/api/dashboard/stats', async (req, res) => {
       });
     }
     
-    // Get models
+    // Recupera modelli
     const UserFormData = connection.model('FormData');
     const UserBooking = connection.model('Booking');
     const UserFacebookLead = connection.model('FacebookLead');
     const UserFacebookEvent = connection.model('FacebookEvent');
     
-    // Get form statistics
+    // Ottieni statistiche per ciascuna fonte
     const formStats = await calculateSourceStats(UserFormData);
-    
-    // Get booking statistics
     const bookingStats = await calculateSourceStats(UserBooking);
-    
-    // Get Facebook lead statistics
     const facebookStats = await calculateSourceStats(UserFacebookLead);
     
-    // Calculate event statistics
+    // Calcola statistiche eventi
     const eventCount = await UserFacebookEvent.countDocuments({});
     const successEvents = await UserFacebookEvent.countDocuments({ success: true });
     
-    // Calculate total conversion rate
+    // Calcola tasso di conversione totale
     const totalLeads = formStats.total + bookingStats.total + facebookStats.total;
     const totalConverted = formStats.converted + bookingStats.converted + facebookStats.converted;
     const totalConversionRate = totalLeads > 0 
       ? Math.round((totalConverted / totalLeads) * 100) 
       : 0;
     
-    // Prepare response
+    // Calcola trend totale di acquisizione contatti (media ponderata dei trend)
+    const totalCurrentWeek = formStats.currentWeekTotal + bookingStats.currentWeekTotal + facebookStats.currentWeekTotal;
+    const totalPreviousWeek = formStats.previousWeekTotal + bookingStats.previousWeekTotal + facebookStats.previousWeekTotal;
+    
+    let totalTrend = 0;
+    if (totalPreviousWeek > 0) {
+      totalTrend = Math.round(((totalCurrentWeek - totalPreviousWeek) / totalPreviousWeek) * 100);
+    } else if (totalCurrentWeek > 0 && totalPreviousWeek === 0) {
+      totalTrend = 100;
+    }
+    
+    // Prepara risposta
     const stats = {
-      forms: formStats,
-      bookings: bookingStats,
-      facebook: facebookStats,
+      forms: {
+        total: formStats.total,
+        converted: formStats.converted,
+        conversionRate: formStats.conversionRate,
+        trend: formStats.trend,
+        thisWeek: formStats.currentWeekTotal,
+        lastWeek: formStats.previousWeekTotal
+      },
+      bookings: {
+        total: bookingStats.total,
+        converted: bookingStats.converted,
+        conversionRate: bookingStats.conversionRate,
+        trend: bookingStats.trend,
+        thisWeek: bookingStats.currentWeekTotal,
+        lastWeek: bookingStats.previousWeekTotal
+      },
+      facebook: {
+        total: facebookStats.total,
+        converted: facebookStats.converted,
+        conversionRate: facebookStats.conversionRate,
+        trend: facebookStats.trend,
+        thisWeek: facebookStats.currentWeekTotal,
+        lastWeek: facebookStats.previousWeekTotal
+      },
       events: {
         total: eventCount,
         success: successEvents,
         successRate: eventCount > 0 ? Math.round((successEvents / eventCount) * 100) : 0,
-        conversionRate: totalConversionRate
       },
-      totalConversionRate
+      totalConversionRate,
+      totalTrend,
+      totalThisWeek: totalCurrentWeek,
+      totalLastWeek: totalPreviousWeek
     };
     
     res.json(stats);
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error('Errore nel recupero delle statistiche:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero delle statistiche' 
