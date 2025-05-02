@@ -145,7 +145,7 @@ const BookingSchema = new mongoose.Schema({
   bookingTimestamp: { type: Date, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'qualified', 'opportunity', 'customer', 'lost'], 
+    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'qualified', 'opportunity', 'proposal', 'customer', 'lost'], 
     default: 'pending' 
   },
   value: { type: Number, default: 0 }, // Campo per il valore
