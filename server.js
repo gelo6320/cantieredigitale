@@ -1110,6 +1110,55 @@ app.use('/api/dashboard', isAuthenticated);
 
 // ===== ROUTE API =====
 
+// Add this to server.js
+app.get('/api/leads/:type/:id', async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database not available' 
+      });
+    }
+    
+    // Determine model based on lead type
+    let model;
+    if (type === 'forms' || type === 'form') {
+      model = connection.model('FormData');
+    } else if (type === 'bookings' || type === 'booking') {
+      model = connection.model('Booking');
+    } else if (type === 'facebook') {
+      model = connection.model('FacebookLead');
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid lead type' 
+      });
+    }
+    
+    // Find the lead
+    const lead = await model.findById(id);
+    if (!lead) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Lead not found' 
+      });
+    }
+    
+    res.json(lead);
+  } catch (error) {
+    console.error('Error fetching lead:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching lead', 
+      error: error.message 
+    });
+  }
+});
+
 // API per il login
 app.post('/api/login', async (req, res) => {
   try {
