@@ -1110,50 +1110,53 @@ app.use('/api/dashboard', isAuthenticated);
 
 // ===== ROUTE API =====
 
-// Add this to server.js
+// In server.js, aggiungi un endpoint per ottenere un singolo lead
 app.get('/api/leads/:type/:id', async (req, res) => {
   try {
     const { type, id } = req.params;
     
-    // Get user connection
+    // Ottieni la connessione dell'utente
     const connection = await getUserConnection(req);
-    if (!connection) {
+    
+    // Se non c'è connessione, restituisci un errore
+    if (connection === null) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Database not available' 
+        message: 'Database non disponibile o non configurato correttamente' 
       });
     }
     
-    // Determine model based on lead type
     let model;
-    if (type === 'forms' || type === 'form') {
+    
+    // Determina il modello in base al tipo di lead
+    if (type === 'form') {
       model = connection.model('FormData');
-    } else if (type === 'bookings' || type === 'booking') {
+    } else if (type === 'booking') {
       model = connection.model('Booking');
     } else if (type === 'facebook') {
       model = connection.model('FacebookLead');
     } else {
       return res.status(400).json({ 
         success: false, 
-        message: 'Invalid lead type' 
+        message: 'Tipo di lead non valido' 
       });
     }
     
-    // Find the lead
+    // Trova il lead
     const lead = await model.findById(id);
     if (!lead) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Lead not found' 
+        message: 'Lead non trovato' 
       });
     }
     
     res.json(lead);
   } catch (error) {
-    console.error('Error fetching lead:', error);
+    console.error('Errore nel recupero del lead:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Error fetching lead', 
+      message: 'Errore nel recupero del lead', 
       error: error.message 
     });
   }
@@ -2708,7 +2711,7 @@ app.post('/api/leads/facebook/:id/update-metadata', async (req, res) => {
 // API per spostare un lead da uno stato a un altro nel funnel
 app.post('/api/sales-funnel/move', async (req, res) => {
   try {
-    const { leadId, leadType, fromStage, toStage } = req.body;
+    const { leadId, leadType, fromStage, toStage, originalFromStage, originalToStage } = req.body;
     
     if (!leadId || !leadType || !fromStage || !toStage) {
       return res.status(400).json({ 
@@ -2755,13 +2758,24 @@ app.post('/api/sales-funnel/move', async (req, res) => {
     
     // Verifica che lo stato attuale sia corretto
     if (lead.status !== fromStage) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Lo stato attuale del lead non corrisponde' 
-      });
+      // Controlla se è un caso di mappatura per bookings
+      if (leadType === 'booking' && 
+          ((lead.status === 'pending' && originalFromStage === 'new') ||
+           (lead.status === 'confirmed' && originalFromStage === 'contacted') ||
+           (lead.status === 'completed' && originalFromStage === 'qualified') ||
+           (lead.status === 'cancelled' && originalFromStage === 'lost'))) {
+        // È una situazione di mappatura attesa, possiamo procedere
+        console.log(`Gestito mapping di stato: ${lead.status} -> ${originalFromStage}`);
+      } else {
+        // Stato effettivamente non corrispondente
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Lo stato attuale del lead non corrisponde' 
+        });
+      }
     }
     
-    // Aggiorna lo stato
+    // Aggiorna lo stato usando il valore corretto per il tipo
     lead.status = toStage;
     lead.updatedAt = new Date();
     
@@ -2843,8 +2857,7 @@ app.post('/api/sales-funnel/move', async (req, res) => {
     res.json({
       success: true,
       message: 'Lead spostato con successo',
-      data: lead,
-      facebookResult
+      data: lead
     });
   } catch (error) {
     console.error('Errore nello spostamento del lead:', error);
