@@ -511,8 +511,6 @@ async function getUserConnection(req) {
   try {
     // Crea una nuova connessione per l'utente
     const connection = await mongoose.createConnection(mongodb_uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       connectTimeoutMS: 5000,
       socketTimeoutMS: 5000
     });
