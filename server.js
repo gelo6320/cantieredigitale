@@ -424,6 +424,50 @@ app.post('/api/sites', async (req, res) => {
   }
 });
 
+// Aggiungi questo codice al tuo file server.js
+
+// API per ottenere le configurazioni utente
+app.get('/api/user/config', async (req, res) => {
+  try {
+    // Verifica autenticazione
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    const username = req.session.user.username;
+    
+    // Cerca l'utente nel database
+    const user = await Admin.findOne({ username });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Utente non trovato' 
+      });
+    }
+    
+    // Prepara l'oggetto di risposta con i valori delle configurazioni
+    // Nota: non restituiamo direttamente i valori sensibili, ma indichiamo solo se sono configurati
+    res.json({
+      success: true,
+      config: {
+        mongodb_uri: user.config?.mongodb_uri || "",
+        access_token: user.config?.access_token || "",
+        meta_pixel_id: user.config?.meta_pixel_id || ""
+      }
+    });
+  } catch (error) {
+    console.error('Errore nel recupero delle configurazioni:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero delle configurazioni' 
+    });
+  }
+});
+
 // API per aggiornare le metriche di un sito
 app.post('/api/sites/:id/refresh', async (req, res) => {
   try {
