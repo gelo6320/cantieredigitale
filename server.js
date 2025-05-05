@@ -534,12 +534,10 @@ const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
 
 // Funzione per ottenere la connessione MongoDB dell'utente
 async function getUserConnection(req) {
-  // Se la sessione non contiene informazioni sull'utente
   if (!req.session || !req.session.isAuthenticated || !req.session.userConfig) {
     return null;
   }
   
-  // A questo punto dovremmo avere le configurazioni dell'utente
   if (!req.session.userConfig || !req.session.userConfig.mongodb_uri) {
     return null;
   }
@@ -547,26 +545,16 @@ async function getUserConnection(req) {
   const username = req.session.user.username;
   const mongodb_uri = req.session.userConfig.mongodb_uri;
   
-  // Verifica se abbiamo già una connessione per questo utente
-  if (mongoose.connections.some(conn => conn.name === username)) {
-    return mongoose.connections.find(conn => conn.name === username);
-  }
-  
   try {
-    // Crea una nuova connessione per l'utente
-    const connection = await mongoose.createConnection(mongodb_uri, {
-      connectTimeoutMS: 5000,
-      socketTimeoutMS: 5000
-    });
+    const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Assegna un nome alla connessione
-    connection.name = username;
-    
-    // Definisci i modelli sulla connessione
-    connection.model('FormData', FormDataSchema);
-    connection.model('Booking', BookingSchema);
-    connection.model('FacebookEvent', FacebookEventSchema);
-    connection.model('FacebookLead', FacebookLeadSchema);
+    // Definisci i modelli sulla connessione solo se necessario
+    if (!connection.models['FormData']) {
+      connection.model('FormData', FormDataSchema);
+      connection.model('Booking', BookingSchema);
+      connection.model('FacebookEvent', FacebookEventSchema);
+      connection.model('FacebookLead', FacebookLeadSchema);
+    }
     
     return connection;
   } catch (error) {
@@ -613,6 +601,82 @@ async function getUserConfig(username) {
     };
   }
 }
+
+// Connection Manager
+const connectionManager = {
+  connections: {},
+  
+  async getConnection(username, uri) {
+    if (this.connections[username]) {
+      // Resetta il timeout se la connessione viene riutilizzata
+      this.resetTimeout(username);
+      return this.connections[username].connection;
+    }
+    
+    // Crea una nuova connessione
+    const connection = await mongoose.createConnection(uri, {
+        connectTimeoutMS: 5000,
+        socketTimeoutMS: 5000,
+        maxPoolSize: 10,          // Limita il numero di connessioni nel pool
+        minPoolSize: 1,           // Mantieni almeno una connessione disponibile
+        maxIdleTimeMS: 30000,     // Chiudi connessioni inattive dopo 30 secondi
+        serverSelectionTimeoutMS: 5000  // Timeout per la selezione del server
+    });
+    
+    // Salva la connessione con un timeout
+    this.connections[username] = {
+      connection,
+      lastUsed: Date.now(),
+      timeout: this.setConnectionTimeout(username)
+    };
+    
+    return connection;
+  },
+  
+  resetTimeout(username) {
+    if (this.connections[username]) {
+      clearTimeout(this.connections[username].timeout);
+      this.connections[username].lastUsed = Date.now();
+      this.connections[username].timeout = this.setConnectionTimeout(username);
+    }
+  },
+  
+  setConnectionTimeout(username) {
+    // Chiudi la connessione dopo 10 minuti di inattività
+    return setTimeout(() => {
+      if (this.connections[username]) {
+        this.connections[username].connection.close();
+        delete this.connections[username];
+        console.log(`Connessione per ${username} chiusa per inattività`);
+      }
+    }, 10 * 60 * 1000);
+  },
+  
+  closeAll() {
+    Object.keys(this.connections).forEach(username => {
+      clearTimeout(this.connections[username].timeout);
+      this.connections[username].connection.close();
+    });
+    this.connections = {};
+    console.log('Tutte le connessioni utente chiuse');
+  }
+};
+
+// Esegui cleanup ogni ora
+setInterval(() => {
+  const now = Date.now();
+  const inactiveThreshold = 30 * 60 * 1000; // 30 minuti
+  
+  Object.keys(connectionManager.connections).forEach(username => {
+    const connInfo = connectionManager.connections[username];
+    if (now - connInfo.lastUsed > inactiveThreshold) {
+      clearTimeout(connInfo.timeout);
+      connInfo.connection.close();
+      delete connectionManager.connections[username];
+      console.log(`Connessione inattiva per ${username} chiusa durante cleanup`);
+    }
+  });
+}, 60 * 60 * 1000); // Ogni ora
 
 // Funzione per inviare eventi a Facebook
 async function sendFacebookConversionEvent(eventName, userData, customData = {}, req) {
@@ -3817,9 +3881,32 @@ const createInitialAdmin = async () => {
 };
 
 // Avvia il server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server principale in esecuzione sulla porta ${PORT}`);
-  
-  // Crea l'admin all'avvio
   mongoose.connection.once('connected', createInitialAdmin);
+});
+
+// Gestione corretta dell'arresto del server
+process.on('SIGTERM', () => {
+  console.log('SIGTERM ricevuto. Chiusura del server...');
+  server.close(() => {
+    console.log('Server Express chiuso.');
+    connectionManager.closeAll();
+    mongoose.connection.close(false, () => {
+      console.log('Connessione MongoDB principale chiusa.');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT ricevuto. Chiusura del server...');
+  server.close(() => {
+    console.log('Server Express chiuso.');
+    connectionManager.closeAll();
+    mongoose.connection.close(false, () => {
+      console.log('Connessione MongoDB principale chiusa.');
+      process.exit(0);
+    });
+  });
 });
