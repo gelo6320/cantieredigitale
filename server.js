@@ -1363,7 +1363,66 @@ app.get('/api/leads', async (req, res) => {
   }
 });
 
-// API for updating lead metadata (value and service)
+// Add this new route before the existing /api/leads/:type/:id route
+app.get('/api/leads/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database not available or not properly configured' 
+      });
+    }
+    
+    // Get models for all lead types
+    const FormData = connection.model('FormData');
+    const Booking = connection.model('Booking');
+    const FacebookLead = connection.model('FacebookLead');
+    const Lead = connection.model('Lead');
+    
+    // Try to find the lead in any of the collections
+    let lead = null;
+    
+    // First try the unified Lead model (if it exists)
+    try {
+      lead = await Lead.findById(id);
+      if (lead) return res.json(lead);
+    } catch (err) {
+      // Continue to other models if Lead model doesn't exist or lead not found
+    }
+    
+    // Try FormData model
+    lead = await FormData.findById(id);
+    if (lead) return res.json(lead);
+    
+    // Try Booking model
+    lead = await Booking.findById(id);
+    if (lead) return res.json(lead);
+    
+    // Try FacebookLead model
+    lead = await FacebookLead.findById(id);
+    if (lead) return res.json(lead);
+    
+    // If we reach here, lead wasn't found in any collection
+    return res.status(404).json({ 
+      success: false, 
+      message: 'Lead not found in any collection' 
+    });
+    
+  } catch (error) {
+    console.error('Error retrieving lead:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error retrieving lead', 
+      error: error.message 
+    });
+  }
+});
+
 // API for updating lead metadata
 app.post('/api/leads/:id/update-metadata', async (req, res) => {
   try {
