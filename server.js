@@ -1404,6 +1404,7 @@ app.get('/api/leads/:id', async (req, res) => {
 });
 
 // API for updating lead metadata
+// API for updating lead metadata
 app.post('/api/leads/:id/update-metadata', async (req, res) => {
   try {
     const { id } = req.params;
@@ -1429,8 +1430,9 @@ app.post('/api/leads/:id/update-metadata', async (req, res) => {
     // Use the Lead model from the connection
     const Lead = connection.model('Lead');
     
-    // Find the lead
-    const lead = await Lead.findById(id);
+    // IMPORTANT: Find by leadId field instead of _id
+    const lead = await Lead.findOne({ leadId: id });
+    
     if (!lead) {
       return res.status(404).json({ success: false, message: 'Lead not found' });
     }
@@ -1463,17 +1465,14 @@ app.post('/api/leads/:id/update-metadata', async (req, res) => {
     
     updates.updatedAt = new Date();
     
-    // Update the lead with all changes at once
-    const updatedLead = await Lead.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true }
-    );
+    // Apply all the updates
+    Object.assign(lead, updates);
+    await lead.save();
     
     res.json({
       success: true,
       message: 'Metadata updated successfully',
-      data: updatedLead
+      data: lead
     });
   } catch (error) {
     console.error('Error updating lead metadata:', error);
