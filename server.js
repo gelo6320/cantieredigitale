@@ -1405,8 +1405,11 @@ const Project = mongoose.model('Project', ProjectSchema);
  */
 async function calculateLeadStats(LeadModel, formType = null) {
   try {
+    console.log(`[calculateLeadStats] Starting calculation for formType: ${formType || 'ALL'}`);
+    
     // Create filter based on formType if provided
     const baseFilter = formType ? { formType } : {};
+    console.log(`[calculateLeadStats] Using base filter:`, baseFilter);
     
     // Get today's date
     const today = new Date();
@@ -1419,27 +1422,39 @@ async function calculateLeadStats(LeadModel, formType = null) {
     const twoWeeksAgo = new Date();
     twoWeeksAgo.setDate(today.getDate() - 14);
     
+    console.log(`[calculateLeadStats] Date ranges: Today=${today.toISOString()}, OneWeekAgo=${oneWeekAgo.toISOString()}, TwoWeeksAgo=${twoWeeksAgo.toISOString()}`);
+    
     // Statistics totals all-time
+    console.log(`[calculateLeadStats] Counting total leads...`);
     const total = await LeadModel.countDocuments(baseFilter);
+    console.log(`[calculateLeadStats] Total leads: ${total}`);
+    
+    console.log(`[calculateLeadStats] Counting converted leads...`);
     const converted = await LeadModel.countDocuments({ 
       ...baseFilter,
       status: 'converted' 
     });
+    console.log(`[calculateLeadStats] Total converted: ${converted}`);
     
     // Calculate conversion rate
     const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    console.log(`[calculateLeadStats] Conversion rate: ${conversionRate}%`);
     
     // Count leads for current week (last 7 days)
+    console.log(`[calculateLeadStats] Counting current week leads...`);
     const currentWeekTotal = await LeadModel.countDocuments({
       ...baseFilter,
       createdAt: { $gte: oneWeekAgo, $lte: today }
     });
+    console.log(`[calculateLeadStats] Current week total: ${currentWeekTotal}`);
     
     // Count leads for previous week (from 14 to 7 days ago)
+    console.log(`[calculateLeadStats] Counting previous week leads...`);
     const previousWeekTotal = await LeadModel.countDocuments({
       ...baseFilter,
       createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo }
     });
+    console.log(`[calculateLeadStats] Previous week total: ${previousWeekTotal}`);
     
     // Calculate trend based on the change in volume
     let trend = 0;
@@ -1448,12 +1463,11 @@ async function calculateLeadStats(LeadModel, formType = null) {
       // Calculate percentage change: ((new - old) / old) * 100
       trend = Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100);
     } else if (currentWeekTotal > 0 && previousWeekTotal === 0) {
-      // If previous week had no contacts but this week does,
-      // set a fixed positive value (e.g., +100%)
       trend = 100;
     }
+    console.log(`[calculateLeadStats] Trend calculation: ${trend}%`);
     
-    return {
+    const result = {
       total,
       converted,
       conversionRate,
@@ -1461,8 +1475,11 @@ async function calculateLeadStats(LeadModel, formType = null) {
       thisWeek: currentWeekTotal,
       lastWeek: previousWeekTotal
     };
+    
+    console.log(`[calculateLeadStats] Returning result for ${formType || 'ALL'}:`, result);
+    return result;
   } catch (error) {
-    console.error('Error calculating lead statistics:', error);
+    console.error(`[calculateLeadStats] ERROR for formType ${formType || 'ALL'}:`, error);
     return { 
       total: 0, 
       converted: 0, 
@@ -1558,11 +1575,13 @@ async function calculateSourceStats(Model) {
 }
 
 // Calcolo statistiche dashboard potenziate
-// Updated dashboard stats API
 app.get('/api/dashboard/stats', async (req, res) => {
+  console.log(`[/api/dashboard/stats] Request received`);
   try {
     // Verify authentication
+    console.log(`[/api/dashboard/stats] Checking authentication...`);
     if (!req.session || !req.session.isAuthenticated) {
+      console.log(`[/api/dashboard/stats] Authentication failed: No valid session`);
       return res.status(401).json({ 
         success: false, 
         message: 'Non autorizzato' 
@@ -1570,27 +1589,114 @@ app.get('/api/dashboard/stats', async (req, res) => {
     }
     
     // Get user connection
+    console.log(`[/api/dashboard/stats] Getting user connection...`);
+    const username = req.session.user?.username;
+    console.log(`[/api/dashboard/stats] Username: ${username}`);
+    
     const connection = await getUserConnection(req);
     
     if (!connection) {
+      console.log(`[/api/dashboard/stats] No database connection found`);
       return res.status(400).json({ 
         success: false, 
         message: 'Configurazione database non trovata' 
       });
     }
     
+    console.log(`[/api/dashboard/stats] Connection established successfully`);
+    
+    // Check available models in connection
+    console.log(`[/api/dashboard/stats] Available models:`, Object.keys(connection.models));
+    
     // Get the Lead model - make sure the model name matches your actual model name
+    if (!connection.models.Lead) {
+      console.log(`[/api/dashboard/stats] Lead model not found, checking if we need to create it`);
+      // Check if we need to create the Lead model on this connection
+      try {
+        console.log(`[/api/dashboard/stats] Creating Lead model schema`);
+        
+        // Define the Lead schema - make sure this matches exactly with your actual schema
+        const LeadSchema = new mongoose.Schema({
+          leadId: { type: String, required: true, unique: true },
+          sessionId: { type: String, required: true, index: true },
+          userId: { type: String, sparse: true, index: true },
+          email: { type: String, required: true, index: true },
+          firstName: String,
+          lastName: String,
+          phone: String,
+          createdAt: { type: Date, default: Date.now },
+          updatedAt: { type: Date, default: Date.now },
+          source: String,
+          medium: String,
+          campaign: String,
+          formType: { type: String, required: true },
+          status: { 
+            type: String, 
+            enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+            default: 'new'
+          },
+          extendedData: {
+            consentGiven: { type: Boolean, default: false },
+            ipAddress: String,
+            userAgent: String,
+            utmParams: Object,
+            fbclid: String,
+            referrer: String,
+            landingPage: String,
+            deviceInfo: Object,
+            formData: Object,
+            notes: String,
+            value: Number,
+            currency: String
+          },
+          tags: [String],
+          properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+          consent: {
+            marketing: { type: Boolean, default: false },
+            analytics: { type: Boolean, default: false },
+            thirdParty: { type: Boolean, default: false },
+            timestamp: Date,
+            version: String,
+            method: String
+          }
+        });
+        
+        // Create model on this connection
+        connection.model('Lead', LeadSchema);
+        console.log(`[/api/dashboard/stats] Lead model created successfully`);
+      } catch (schemaError) {
+        console.error(`[/api/dashboard/stats] Error creating Lead model:`, schemaError);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Errore nella configurazione del modello Lead',
+          error: schemaError.message
+        });
+      }
+    }
+    
     const Lead = connection.model('Lead');
+    console.log(`[/api/dashboard/stats] Lead model retrieved successfully`);
     
     // Calculate stats for all leads
+    console.log(`[/api/dashboard/stats] Calculating all leads stats...`);
     const allLeadsStats = await calculateLeadStats(Lead);
+    console.log(`[/api/dashboard/stats] All leads stats calculated:`, allLeadsStats);
     
     // Get stats for each form type (form, booking, facebook)
+    console.log(`[/api/dashboard/stats] Calculating form stats...`);
     const formStats = await calculateLeadStats(Lead, 'form');
+    console.log(`[/api/dashboard/stats] Form stats calculated:`, formStats);
+    
+    console.log(`[/api/dashboard/stats] Calculating booking stats...`);
     const bookingStats = await calculateLeadStats(Lead, 'booking');
+    console.log(`[/api/dashboard/stats] Booking stats calculated:`, bookingStats);
+    
+    console.log(`[/api/dashboard/stats] Calculating facebook stats...`);
     const facebookStats = await calculateLeadStats(Lead, 'facebook');
+    console.log(`[/api/dashboard/stats] Facebook stats calculated:`, facebookStats);
     
     // Calculate total weekly trends
+    console.log(`[/api/dashboard/stats] Calculating total trend...`);
     const totalCurrentWeek = allLeadsStats.thisWeek;
     const totalPreviousWeek = allLeadsStats.lastWeek;
     
@@ -1600,12 +1706,14 @@ app.get('/api/dashboard/stats', async (req, res) => {
     } else if (totalCurrentWeek > 0 && totalPreviousWeek === 0) {
       totalTrend = 100;
     }
+    console.log(`[/api/dashboard/stats] Total trend calculated: ${totalTrend}%`);
     
     // Count events (placeholder for now)
     const eventCount = 0;
     const successEvents = 0;
     
-    // Prepare response to match the expected structure in the frontend
+    // Prepare response
+    console.log(`[/api/dashboard/stats] Preparing response...`);
     const stats = {
       forms: {
         total: formStats.total,
@@ -1642,43 +1750,18 @@ app.get('/api/dashboard/stats', async (req, res) => {
       totalLastWeek: totalPreviousWeek
     };
     
+    console.log(`[/api/dashboard/stats] Sending response`);
     res.json(stats);
   } catch (error) {
-    console.error('Error retrieving statistics:', error);
+    console.error('[/api/dashboard/stats] ERROR:', error);
+    console.error('[/api/dashboard/stats] Stack trace:', error.stack);
     res.status(500).json({ 
       success: false, 
-      message: 'Errore nel recupero delle statistiche' 
+      message: 'Errore nel recupero delle statistiche',
+      error: error.message
     });
   }
 });
-
-// Helper function to calculate source stats
-async function calculateSourceStats(Model) {
-  try {
-    // Get total count
-    const total = await Model.countDocuments({});
-    
-    // Get converted count (status = customer)
-    const converted = await Model.countDocuments({ status: 'customer' });
-    
-    // Calculate conversion rate
-    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
-    
-    // Calculate trend (simulated here - in production would compare to previous period)
-    // For now, we'll generate a random trend between -15 and +15
-    const trend = Math.floor(Math.random() * 31) - 15;
-    
-    return {
-      total,
-      converted,
-      conversionRate,
-      trend
-    };
-  } catch (error) {
-    console.error('Error calculating source stats:', error);
-    return { total: 0, converted: 0, conversionRate: 0, trend: 0 };
-  }
-}
 
 // API for recent events
 app.get('/api/dashboard/recent-events', async (req, res) => {
@@ -1720,11 +1803,13 @@ app.get('/api/dashboard/recent-events', async (req, res) => {
 });
 
 // API for unviewed contacts
-// Updated API for unviewed contacts
 app.get('/api/dashboard/new-contacts', async (req, res) => {
+  console.log(`[/api/dashboard/new-contacts] Request received`);
   try {
     // Ensure user is authenticated
+    console.log(`[/api/dashboard/new-contacts] Checking authentication...`);
     if (!req.session || !req.session.isAuthenticated) {
+      console.log(`[/api/dashboard/new-contacts] Authentication failed: No valid session`);
       return res.status(401).json({ 
         success: false, 
         message: 'Non autorizzato' 
@@ -1732,24 +1817,103 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
     }
     
     // Get user connection
+    console.log(`[/api/dashboard/new-contacts] Getting user connection...`);
+    const username = req.session.user?.username;
+    console.log(`[/api/dashboard/new-contacts] Username: ${username}`);
+    
     const connection = await getUserConnection(req);
     
     if (!connection) {
+      console.log(`[/api/dashboard/new-contacts] No database connection found`);
       return res.status(400).json({ 
         success: false, 
         message: 'Configurazione database non trovata' 
       });
     }
     
-    // Get the Lead model
+    console.log(`[/api/dashboard/new-contacts] Connection established successfully`);
+    
+    // Check available models in connection
+    console.log(`[/api/dashboard/new-contacts] Available models:`, Object.keys(connection.models));
+    
+    // Make sure Lead model is available
+    if (!connection.models.Lead) {
+      console.log(`[/api/dashboard/new-contacts] Lead model not found, checking if we need to create it`);
+      // Similar model creation logic as in stats endpoint
+      try {
+        // Create model schema and register it
+        console.log(`[/api/dashboard/new-contacts] Creating Lead model schema`);
+        // Same LeadSchema definition as in the stats endpoint
+        const LeadSchema = new mongoose.Schema({
+          leadId: { type: String, required: true, unique: true },
+          sessionId: { type: String, required: true, index: true },
+          userId: { type: String, sparse: true, index: true },
+          email: { type: String, required: true, index: true },
+          firstName: String,
+          lastName: String,
+          phone: String,
+          createdAt: { type: Date, default: Date.now },
+          updatedAt: { type: Date, default: Date.now },
+          source: String,
+          medium: String,
+          campaign: String,
+          formType: { type: String, required: true },
+          status: { 
+            type: String, 
+            enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+            default: 'new'
+          },
+          extendedData: {
+            consentGiven: { type: Boolean, default: false },
+            ipAddress: String,
+            userAgent: String,
+            utmParams: Object,
+            fbclid: String,
+            referrer: String,
+            landingPage: String,
+            deviceInfo: Object,
+            formData: Object,
+            notes: String,
+            value: Number,
+            currency: String
+          },
+          tags: [String],
+          properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+          consent: {
+            marketing: { type: Boolean, default: false },
+            analytics: { type: Boolean, default: false },
+            thirdParty: { type: Boolean, default: false },
+            timestamp: Date,
+            version: String,
+            method: String
+          }
+        });
+        
+        connection.model('Lead', LeadSchema);
+        console.log(`[/api/dashboard/new-contacts] Lead model created successfully`);
+      } catch (schemaError) {
+        console.error(`[/api/dashboard/new-contacts] Error creating Lead model:`, schemaError);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Errore nella configurazione del modello Lead',
+          error: schemaError.message
+        });
+      }
+    }
+    
     const Lead = connection.model('Lead');
+    console.log(`[/api/dashboard/new-contacts] Lead model retrieved successfully`);
     
     // Get leads with 'new' status (these are considered unviewed)
+    console.log(`[/api/dashboard/new-contacts] Fetching 'new' status leads...`);
     const recentLeads = await Lead.find({ status: 'new' })
       .sort({ createdAt: -1 })
       .limit(20);
     
+    console.log(`[/api/dashboard/new-contacts] Found ${recentLeads.length} new leads`);
+    
     // Transform data to match the expected frontend format
+    console.log(`[/api/dashboard/new-contacts] Transforming data for frontend...`);
     const transformedContacts = recentLeads.map(lead => {
       // Determine the contact type based on formType
       let type = 'form'; // Default
@@ -1770,12 +1934,16 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
       };
     });
     
+    console.log(`[/api/dashboard/new-contacts] Transformed ${transformedContacts.length} contacts`);
+    console.log(`[/api/dashboard/new-contacts] Sending response`);
     res.json(transformedContacts);
   } catch (error) {
-    console.error('Error fetching new contacts:', error);
+    console.error('[/api/dashboard/new-contacts] ERROR:', error);
+    console.error('[/api/dashboard/new-contacts] Stack trace:', error.stack);
     res.status(500).json({ 
       success: false, 
-      message: 'Errore nel recupero dei nuovi contatti' 
+      message: 'Errore nel recupero dei nuovi contatti',
+      error: error.message
     });
   }
 });
