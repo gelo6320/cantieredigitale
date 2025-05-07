@@ -566,6 +566,292 @@ async function getScreenshot(url) {
   }
 }
 
+// Endpoint per accedere ai dati delle visite
+app.get('/api/banca-dati/visits', isAuthenticated, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello Visit non esiste nella connessione, crealo
+    if (!connection.models['Visit']) {
+      connection.model('Visit', VisitSchema);
+    }
+    
+    const UserVisit = connection.model('Visit');
+    
+    // Conta il totale e ottieni i dati paginati
+    const total = await UserVisit.countDocuments({});
+    const visits = await UserVisit.find({})
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    res.json({
+      success: true,
+      data: visits,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Errore nel recupero delle visite:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero delle visite', 
+      error: error.message 
+    });
+  }
+});
+
+// Endpoint per accedere ai dati dei clienti
+app.get('/api/banca-dati/clients', isAuthenticated, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello Client non esiste nella connessione, crealo
+    if (!connection.models['Client']) {
+      connection.model('Client', ClientSchema);
+    }
+    
+    const UserClient = connection.model('Client');
+    
+    // Conta il totale e ottieni i dati paginati
+    const total = await UserClient.countDocuments({});
+    const clients = await UserClient.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    res.json({
+      success: true,
+      data: clients,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Errore nel recupero dei clienti:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero dei clienti', 
+      error: error.message 
+    });
+  }
+});
+
+// Endpoint per accedere ai dati delle audience Facebook
+app.get('/api/banca-dati/audiences', isAuthenticated, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello FacebookAudience esiste nella connessione, usalo
+    if (!connection.models['FacebookAudience']) {
+      connection.model('FacebookAudience', FacebookAudienceSchema);
+    }
+    
+    const UserFacebookAudience = connection.model('FacebookAudience');
+    
+    // Conta il totale e ottieni i dati paginati
+    const total = await UserFacebookAudience.countDocuments({});
+    const audiences = await UserFacebookAudience.find({})
+      .sort({ lastUpdated: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    res.json({
+      success: true,
+      data: audiences,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Errore nel recupero delle audience:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero delle audience', 
+      error: error.message 
+    });
+  }
+});
+
+// Endpoint per esportare i clienti in CSV
+app.get('/api/banca-dati/clients/export', isAuthenticated, async (req, res) => {
+  try {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello Client non esiste nella connessione, crealo
+    if (!connection.models['Client']) {
+      connection.model('Client', ClientSchema);
+    }
+    
+    const UserClient = connection.model('Client');
+    
+    // Ottieni tutti i clienti per l'esportazione
+    const clients = await UserClient.find({});
+    
+    // Definisci le intestazioni per il CSV
+    const headers = [
+      "email", "phone", "firstName", "lastName", "fullName",
+      "clientId", "leadId", "leadSource", "createdAt", "value",
+      "status", "service", "consent.marketing", "consent.analytics", 
+      "consent.thirdParty", "country", "city"
+    ];
+    
+    // Funzione per formattare una riga di CSV
+    const formatRow = (client) => {
+      return headers.map(header => {
+        // Gestisci gli oggetti annidati
+        if (header.includes('.')) {
+          const parts = header.split('.');
+          let value = client;
+          for (const part of parts) {
+            value = value?.[part] ?? '';
+          }
+          return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+        }
+        
+        // Gestisci i campi semplici
+        const value = client[header] ?? '';
+        return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+      }).join(',');
+    };
+    
+    // Crea il contenuto del CSV
+    let csv = headers.join(',') + '\n';
+    clients.forEach(client => {
+      csv += formatRow(client) + '\n';
+    });
+    
+    // Imposta gli header per il download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=clients.csv');
+    
+    // Invia il file CSV
+    res.send(csv);
+  } catch (error) {
+    console.error("Errore nell'esportazione dei clienti:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nell\'esportazione dei clienti', 
+      error: error.message 
+    });
+  }
+});
+
+// Endpoint per esportare le audience Facebook in CSV
+app.get('/api/banca-dati/audiences/export', isAuthenticated, async (req, res) => {
+  try {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello FacebookAudience non esiste nella connessione, crealo
+    if (!connection.models['FacebookAudience']) {
+      connection.model('FacebookAudience', FacebookAudienceSchema);
+    }
+    
+    const UserFacebookAudience = connection.model('FacebookAudience');
+    
+    // Ottieni tutte le audience per l'esportazione
+    const audiences = await UserFacebookAudience.find({});
+    
+    // Definisci le intestazioni per il CSV
+    const headers = [
+      "email", "phone", "firstName", "lastName",
+      "hashedEmail", "hashedPhone", "country", "city", 
+      "language", "source", "medium", "campaign",
+      "adOptimizationConsent", "firstSeen", "lastSeen"
+    ];
+    
+    // Funzione per formattare una riga di CSV
+    const formatRow = (audience) => {
+      return headers.map(header => {
+        const value = audience[header] ?? '';
+        return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+      }).join(',');
+    };
+    
+    // Crea il contenuto del CSV
+    let csv = headers.join(',') + '\n';
+    audiences.forEach(audience => {
+      csv += formatRow(audience) + '\n';
+    });
+    
+    // Imposta gli header per il download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=facebook_audience.csv');
+    
+    // Invia il file CSV
+    res.send(csv);
+  } catch (error) {
+    console.error("Errore nell'esportazione delle audience:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nell\'esportazione delle audience', 
+      error: error.message 
+    });
+  }
+});
+
 // API per ottenere tutti i siti dell'utente
 app.get('/api/sites', async (req, res) => {
   try {
