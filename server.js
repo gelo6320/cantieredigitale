@@ -534,32 +534,32 @@ const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
 
 // Funzione per ottenere la connessione MongoDB dell'utente
 async function getUserConnection(req) {
-  if (!req.session || !req.session.isAuthenticated || !req.session.userConfig) {
-    return null;
-  }
-  
-  if (!req.session.userConfig || !req.session.userConfig.mongodb_uri) {
-    return null;
-  }
-  
-  const username = req.session.user.username;
-  const mongodb_uri = req.session.userConfig.mongodb_uri;
-  
   try {
-    console.log(`[getUserConnection] Tentativo connessione per ${username} a ${mongodb_uri}`);
+    console.log("[getUserConnection] Starting...");
+    
+    if (!req.session || !req.session.isAuthenticated) {
+      console.log("[getUserConnection] No valid session");
+      return null;
+    }
+    
+    if (!req.session.userConfig || !req.session.userConfig.mongodb_uri) {
+      console.log("[getUserConnection] No MongoDB URI in config");
+      return null;
+    }
+    
+    const username = req.session.user.username;
+    const mongodb_uri = req.session.userConfig.mongodb_uri;
+    
+    console.log(`[getUserConnection] Attempting connection for ${username} to ${mongodb_uri.substring(0, 20)}...`);
+    
+    // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Definisci i modelli sulla connessione solo se necessario
-    if (!connection.models['FormData'] && !connection.models['leads']) {
-      console.log(`[getUserConnection] Definizione modelli sulla connessione`);
+    // Check if our models need to be registered
+    if (!connection.models['Lead']) {
+      console.log("[getUserConnection] Registering Lead model");
       
-      // Definisci i vecchi modelli per retrocompatibilità
-      connection.model('FormData', FormDataSchema);
-      connection.model('Booking', BookingSchema);
-      connection.model('FacebookEvent', FacebookEventSchema);
-      connection.model('FacebookLead', FacebookLeadSchema);
-      
-      // Definisci il nuovo modello Lead
+      // Define the Lead schema for the 'leads' collection
       const LeadSchema = new mongoose.Schema({
         leadId: { type: String, required: true, unique: true },
         sessionId: { type: String, required: true, index: true },
@@ -603,17 +603,28 @@ async function getUserConnection(req) {
           version: String,
           method: String
         }
-      }, { collection: 'leads' }); // Questo è cruciale: specifica esplicitamente il nome della collection
+      }, { collection: 'leads' }); // Specifies the actual collection name
       
-      // Registra il modello con il nome 'Lead'
+      // Register the model
       connection.model('Lead', LeadSchema);
-      
-      console.log(`[getUserConnection] Modelli definiti con successo`);
+      console.log("[getUserConnection] Lead model registered successfully");
     }
     
+    // For backwards compatibility, register the old models if needed
+    if (!connection.models['FormData']) {
+      console.log("[getUserConnection] Registering legacy models");
+      connection.model('FormData', FormDataSchema);
+      connection.model('Booking', BookingSchema);
+      connection.model('FacebookEvent', FacebookEventSchema);
+      connection.model('FacebookLead', FacebookLeadSchema);
+      console.log("[getUserConnection] Legacy models registered");
+    }
+    
+    console.log("[getUserConnection] Connection and models ready");
     return connection;
   } catch (error) {
-    console.error('Errore nella creazione della connessione:', error);
+    console.error('[getUserConnection] ERROR:', error);
+    console.error('[getUserConnection] Stack trace:', error.stack);
     return null;
   }
 }
@@ -661,31 +672,40 @@ async function getUserConfig(username) {
 const connectionManager = {
   connections: {},
   
+  // Update the getConnection method in connectionManager
   async getConnection(username, uri) {
+    console.log(`[connectionManager] Request for connection: ${username}`);
+    
     if (this.connections[username]) {
-      // Resetta il timeout se la connessione viene riutilizzata
+      console.log(`[connectionManager] Reusing existing connection for ${username}`);
       this.resetTimeout(username);
       return this.connections[username].connection;
     }
     
-    // Crea una nuova connessione
-    const connection = await mongoose.createConnection(uri, {
-        connectTimeoutMS: 5000,
-        socketTimeoutMS: 5000,
-        maxPoolSize: 10,          // Limita il numero di connessioni nel pool
-        minPoolSize: 1,           // Mantieni almeno una connessione disponibile
-        maxIdleTimeMS: 30000,     // Chiudi connessioni inattive dopo 30 secondi
-        serverSelectionTimeoutMS: 5000  // Timeout per la selezione del server
-    });
-    
-    // Salva la connessione con un timeout
-    this.connections[username] = {
-      connection,
-      lastUsed: Date.now(),
-      timeout: this.setConnectionTimeout(username)
-    };
-    
-    return connection;
+    console.log(`[connectionManager] Creating new connection for ${username}`);
+    try {
+      const connection = await mongoose.createConnection(uri, {
+        connectTimeoutMS: 10000,
+        socketTimeoutMS: 10000,
+        maxPoolSize: 10,
+        minPoolSize: 1,
+        maxIdleTimeMS: 30000,
+        serverSelectionTimeoutMS: 10000
+      });
+      
+      console.log(`[connectionManager] Connection established for ${username}`);
+      
+      this.connections[username] = {
+        connection,
+        lastUsed: Date.now(),
+        timeout: this.setConnectionTimeout(username)
+      };
+      
+      return connection;
+    } catch (error) {
+      console.error(`[connectionManager] Connection error for ${username}:`, error);
+      throw error;
+    }
   },
   
   resetTimeout(username) {
@@ -1631,185 +1651,130 @@ async function calculateSourceStats(Model) {
 
 // Calcolo statistiche dashboard potenziate
 app.get('/api/dashboard/stats', async (req, res) => {
-  console.log(`[/api/dashboard/stats] Request received`);
+  console.log("[/api/dashboard/stats] Request received");
   try {
     // Verify authentication
-    console.log(`[/api/dashboard/stats] Checking authentication...`);
     if (!req.session || !req.session.isAuthenticated) {
-      console.log(`[/api/dashboard/stats] Authentication failed: No valid session`);
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Non autorizzato' 
-      });
+      console.log("[/api/dashboard/stats] Not authenticated");
+      return res.status(401).json({ success: false, message: 'Non autorizzato' });
     }
     
-    // Get user connection
-    console.log(`[/api/dashboard/stats] Getting user connection...`);
-    const username = req.session.user?.username;
-    console.log(`[/api/dashboard/stats] Username: ${username}`);
+    console.log("[/api/dashboard/stats] User:", req.session.user?.username);
     
+    // Get user connection
     const connection = await getUserConnection(req);
     
     if (!connection) {
-      console.log(`[/api/dashboard/stats] No database connection found`);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Configurazione database non trovata' 
-      });
+      console.log("[/api/dashboard/stats] Failed to get database connection");
+      return res.status(400).json({ success: false, message: 'Configurazione database non trovata' });
     }
     
-    console.log(`[/api/dashboard/stats] Connection established successfully`);
-    
-    // Check available models in connection
-    console.log(`[/api/dashboard/stats] Available models:`, Object.keys(connection.models));
-    
-    // Get the Lead model - make sure the model name matches your actual model name
-    if (!connection.models.Lead) {
-      console.log(`[/api/dashboard/stats] Lead model not found, checking if we need to create it`);
-      // Check if we need to create the Lead model on this connection
-      try {
-        console.log(`[/api/dashboard/stats] Creating Lead model schema`);
-        
-        // Define the Lead schema - make sure this matches exactly with your actual schema
-        const LeadSchema = new mongoose.Schema({
-          leadId: { type: String, required: true, unique: true },
-          sessionId: { type: String, required: true, index: true },
-          userId: { type: String, sparse: true, index: true },
-          email: { type: String, required: true, index: true },
-          firstName: String,
-          lastName: String,
-          phone: String,
-          createdAt: { type: Date, default: Date.now },
-          updatedAt: { type: Date, default: Date.now },
-          source: String,
-          medium: String,
-          campaign: String,
-          formType: { type: String, required: true },
-          status: { 
-            type: String, 
-            enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
-            default: 'new'
-          },
-          extendedData: {
-            consentGiven: { type: Boolean, default: false },
-            ipAddress: String,
-            userAgent: String,
-            utmParams: Object,
-            fbclid: String,
-            referrer: String,
-            landingPage: String,
-            deviceInfo: Object,
-            formData: Object,
-            notes: String,
-            value: Number,
-            currency: String
-          },
-          tags: [String],
-          properties: { type: Map, of: mongoose.Schema.Types.Mixed },
-          consent: {
-            marketing: { type: Boolean, default: false },
-            analytics: { type: Boolean, default: false },
-            thirdParty: { type: Boolean, default: false },
-            timestamp: Date,
-            version: String,
-            method: String
-          }
-        });
-        
-        // Create model on this connection
-        connection.model('Lead', LeadSchema);
-        console.log(`[/api/dashboard/stats] Lead model created successfully`);
-      } catch (schemaError) {
-        console.error(`[/api/dashboard/stats] Error creating Lead model:`, schemaError);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Errore nella configurazione del modello Lead',
-          error: schemaError.message
-        });
-      }
-    }
-    
+    // Get Lead model
     const Lead = connection.model('Lead');
-    console.log(`[/api/dashboard/stats] Lead model retrieved successfully`);
+    console.log("[/api/dashboard/stats] Using Lead model");
     
-    // Calculate stats for all leads
-    console.log(`[/api/dashboard/stats] Calculating all leads stats...`);
-    const allLeadsStats = await calculateLeadStats(Lead);
-    console.log(`[/api/dashboard/stats] All leads stats calculated:`, allLeadsStats);
+    // Get data for dashboard stats
+    console.log("[/api/dashboard/stats] Calculating statistics...");
     
-    // Get stats for each form type (form, booking, facebook)
-    console.log(`[/api/dashboard/stats] Calculating form stats...`);
-    const formStats = await calculateLeadStats(Lead, 'form');
-    console.log(`[/api/dashboard/stats] Form stats calculated:`, formStats);
+    // Today and date ranges
+    const today = new Date();
+    const oneWeekAgo = new Date(today); oneWeekAgo.setDate(today.getDate() - 7);
+    const twoWeeksAgo = new Date(today); twoWeeksAgo.setDate(today.getDate() - 14);
     
-    console.log(`[/api/dashboard/stats] Calculating booking stats...`);
-    const bookingStats = await calculateLeadStats(Lead, 'booking');
-    console.log(`[/api/dashboard/stats] Booking stats calculated:`, bookingStats);
+    // Stats for form leads
+    const formTotal = await Lead.countDocuments({ formType: 'form' });
+    const formConverted = await Lead.countDocuments({ formType: 'form', status: 'converted' });
+    const formThisWeek = await Lead.countDocuments({ 
+      formType: 'form', 
+      createdAt: { $gte: oneWeekAgo, $lte: today } 
+    });
+    const formLastWeek = await Lead.countDocuments({ 
+      formType: 'form', 
+      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } 
+    });
     
-    console.log(`[/api/dashboard/stats] Calculating facebook stats...`);
-    const facebookStats = await calculateLeadStats(Lead, 'facebook');
-    console.log(`[/api/dashboard/stats] Facebook stats calculated:`, facebookStats);
+    // Stats for booking leads
+    const bookingTotal = await Lead.countDocuments({ formType: 'booking' });
+    const bookingConverted = await Lead.countDocuments({ formType: 'booking', status: 'converted' });
+    const bookingThisWeek = await Lead.countDocuments({ 
+      formType: 'booking', 
+      createdAt: { $gte: oneWeekAgo, $lte: today } 
+    });
+    const bookingLastWeek = await Lead.countDocuments({ 
+      formType: 'booking', 
+      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } 
+    });
     
-    // Calculate total weekly trends
-    console.log(`[/api/dashboard/stats] Calculating total trend...`);
-    const totalCurrentWeek = allLeadsStats.thisWeek;
-    const totalPreviousWeek = allLeadsStats.lastWeek;
+    // Stats for facebook leads
+    const facebookTotal = await Lead.countDocuments({ formType: 'facebook' });
+    const facebookConverted = await Lead.countDocuments({ formType: 'facebook', status: 'converted' });
+    const facebookThisWeek = await Lead.countDocuments({ 
+      formType: 'facebook', 
+      createdAt: { $gte: oneWeekAgo, $lte: today } 
+    });
+    const facebookLastWeek = await Lead.countDocuments({ 
+      formType: 'facebook', 
+      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } 
+    });
     
-    let totalTrend = 0;
-    if (totalPreviousWeek > 0) {
-      totalTrend = Math.round(((totalCurrentWeek - totalPreviousWeek) / totalPreviousWeek) * 100);
-    } else if (totalCurrentWeek > 0 && totalPreviousWeek === 0) {
-      totalTrend = 100;
-    }
-    console.log(`[/api/dashboard/stats] Total trend calculated: ${totalTrend}%`);
+    // Calculate total stats and conversion rates
+    const totalLeads = formTotal + bookingTotal + facebookTotal;
+    const totalConverted = formConverted + bookingConverted + facebookConverted;
+    const totalConversionRate = totalLeads > 0 ? Math.round((totalConverted / totalLeads) * 100) : 0;
     
-    // Count events (placeholder for now)
-    const eventCount = 0;
-    const successEvents = 0;
+    const totalThisWeek = formThisWeek + bookingThisWeek + facebookThisWeek;
+    const totalLastWeek = formLastWeek + bookingLastWeek + facebookLastWeek;
+    
+    // Calculate trends
+    let formTrend = 0, bookingTrend = 0, facebookTrend = 0, totalTrend = 0;
+    
+    if (formLastWeek > 0) formTrend = Math.round(((formThisWeek - formLastWeek) / formLastWeek) * 100);
+    if (bookingLastWeek > 0) bookingTrend = Math.round(((bookingThisWeek - bookingLastWeek) / bookingLastWeek) * 100);
+    if (facebookLastWeek > 0) facebookTrend = Math.round(((facebookThisWeek - facebookLastWeek) / facebookLastWeek) * 100);
+    if (totalLastWeek > 0) totalTrend = Math.round(((totalThisWeek - totalLastWeek) / totalLastWeek) * 100);
     
     // Prepare response
-    console.log(`[/api/dashboard/stats] Preparing response...`);
     const stats = {
       forms: {
-        total: formStats.total,
-        converted: formStats.converted,
-        conversionRate: formStats.conversionRate,
-        trend: formStats.trend,
-        thisWeek: formStats.thisWeek,
-        lastWeek: formStats.lastWeek
+        total: formTotal,
+        converted: formConverted,
+        conversionRate: formTotal > 0 ? Math.round((formConverted / formTotal) * 100) : 0,
+        trend: formTrend,
+        thisWeek: formThisWeek,
+        lastWeek: formLastWeek
       },
       bookings: {
-        total: bookingStats.total,
-        converted: bookingStats.converted,
-        conversionRate: bookingStats.conversionRate,
-        trend: bookingStats.trend,
-        thisWeek: bookingStats.thisWeek,
-        lastWeek: bookingStats.lastWeek
+        total: bookingTotal,
+        converted: bookingConverted,
+        conversionRate: bookingTotal > 0 ? Math.round((bookingConverted / bookingTotal) * 100) : 0,
+        trend: bookingTrend,
+        thisWeek: bookingThisWeek,
+        lastWeek: bookingLastWeek
       },
       facebook: {
-        total: facebookStats.total,
-        converted: facebookStats.converted,
-        conversionRate: facebookStats.conversionRate,
-        trend: facebookStats.trend,
-        thisWeek: facebookStats.thisWeek,
-        lastWeek: facebookStats.lastWeek
+        total: facebookTotal,
+        converted: facebookConverted,
+        conversionRate: facebookTotal > 0 ? Math.round((facebookConverted / facebookTotal) * 100) : 0,
+        trend: facebookTrend,
+        thisWeek: facebookThisWeek,
+        lastWeek: facebookLastWeek
       },
       events: {
-        total: eventCount,
-        success: successEvents,
-        successRate: eventCount > 0 ? Math.round((successEvents / eventCount) * 100) : 0,
+        total: 0,
+        success: 0,
+        successRate: 0
       },
-      totalConversionRate: allLeadsStats.conversionRate,
+      totalConversionRate,
       totalTrend,
-      totalThisWeek: totalCurrentWeek,
-      totalLastWeek: totalPreviousWeek
+      totalThisWeek,
+      totalLastWeek
     };
     
-    console.log(`[/api/dashboard/stats] Sending response`);
+    console.log("[/api/dashboard/stats] Sending response");
     res.json(stats);
   } catch (error) {
-    console.error('[/api/dashboard/stats] ERROR:', error);
-    console.error('[/api/dashboard/stats] Stack trace:', error.stack);
+    console.error("[/api/dashboard/stats] ERROR:", error.message);
+    console.error("[/api/dashboard/stats] Stack:", error.stack);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero delle statistiche',
@@ -1859,124 +1824,41 @@ app.get('/api/dashboard/recent-events', async (req, res) => {
 
 // API for unviewed contacts
 app.get('/api/dashboard/new-contacts', async (req, res) => {
-  console.log(`[/api/dashboard/new-contacts] Request received`);
+  console.log("[/api/dashboard/new-contacts] Request received");
   try {
     // Ensure user is authenticated
-    console.log(`[/api/dashboard/new-contacts] Checking authentication...`);
     if (!req.session || !req.session.isAuthenticated) {
-      console.log(`[/api/dashboard/new-contacts] Authentication failed: No valid session`);
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Non autorizzato' 
-      });
+      console.log("[/api/dashboard/new-contacts] Not authenticated");
+      return res.status(401).json({ success: false, message: 'Non autorizzato' });
     }
     
-    // Get user connection
-    console.log(`[/api/dashboard/new-contacts] Getting user connection...`);
-    const username = req.session.user?.username;
-    console.log(`[/api/dashboard/new-contacts] Username: ${username}`);
+    console.log("[/api/dashboard/new-contacts] User:", req.session.user?.username);
     
+    // Get user connection
     const connection = await getUserConnection(req);
     
     if (!connection) {
-      console.log(`[/api/dashboard/new-contacts] No database connection found`);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Configurazione database non trovata' 
-      });
+      console.log("[/api/dashboard/new-contacts] Failed to get database connection");
+      return res.status(400).json({ success: false, message: 'Configurazione database non trovata' });
     }
     
-    console.log(`[/api/dashboard/new-contacts] Connection established successfully`);
-    
-    // Check available models in connection
-    console.log(`[/api/dashboard/new-contacts] Available models:`, Object.keys(connection.models));
-    
-    // Make sure Lead model is available
-    if (!connection.models.Lead) {
-      console.log(`[/api/dashboard/new-contacts] Lead model not found, checking if we need to create it`);
-      // Similar model creation logic as in stats endpoint
-      try {
-        // Create model schema and register it
-        console.log(`[/api/dashboard/new-contacts] Creating Lead model schema`);
-        // Same LeadSchema definition as in the stats endpoint
-        const LeadSchema = new mongoose.Schema({
-          leadId: { type: String, required: true, unique: true },
-          sessionId: { type: String, required: true, index: true },
-          userId: { type: String, sparse: true, index: true },
-          email: { type: String, required: true, index: true },
-          firstName: String,
-          lastName: String,
-          phone: String,
-          createdAt: { type: Date, default: Date.now },
-          updatedAt: { type: Date, default: Date.now },
-          source: String,
-          medium: String,
-          campaign: String,
-          formType: { type: String, required: true },
-          status: { 
-            type: String, 
-            enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
-            default: 'new'
-          },
-          extendedData: {
-            consentGiven: { type: Boolean, default: false },
-            ipAddress: String,
-            userAgent: String,
-            utmParams: Object,
-            fbclid: String,
-            referrer: String,
-            landingPage: String,
-            deviceInfo: Object,
-            formData: Object,
-            notes: String,
-            value: Number,
-            currency: String
-          },
-          tags: [String],
-          properties: { type: Map, of: mongoose.Schema.Types.Mixed },
-          consent: {
-            marketing: { type: Boolean, default: false },
-            analytics: { type: Boolean, default: false },
-            thirdParty: { type: Boolean, default: false },
-            timestamp: Date,
-            version: String,
-            method: String
-          }
-        });
-        
-        connection.model('Lead', LeadSchema);
-        console.log(`[/api/dashboard/new-contacts] Lead model created successfully`);
-      } catch (schemaError) {
-        console.error(`[/api/dashboard/new-contacts] Error creating Lead model:`, schemaError);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Errore nella configurazione del modello Lead',
-          error: schemaError.message
-        });
-      }
-    }
-    
+    // Get Lead model
     const Lead = connection.model('Lead');
-    console.log(`[/api/dashboard/new-contacts] Lead model retrieved successfully`);
+    console.log("[/api/dashboard/new-contacts] Using Lead model");
     
-    // Get leads with 'new' status (these are considered unviewed)
-    console.log(`[/api/dashboard/new-contacts] Fetching 'new' status leads...`);
+    // Get recent leads with 'new' status
     const recentLeads = await Lead.find({ status: 'new' })
       .sort({ createdAt: -1 })
       .limit(20);
     
     console.log(`[/api/dashboard/new-contacts] Found ${recentLeads.length} new leads`);
     
-    // Transform data to match the expected frontend format
-    console.log(`[/api/dashboard/new-contacts] Transforming data for frontend...`);
-    const transformedContacts = recentLeads.map(lead => {
-      // Determine the contact type based on formType
-      let type = 'form'; // Default
+    // Transform for frontend
+    const contacts = recentLeads.map(lead => {
+      const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
+      let type = 'form';
       if (lead.formType === 'booking') type = 'booking';
       if (lead.formType === 'facebook') type = 'facebook';
-      
-      // Construct the name from firstName and lastName
-      const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
       
       return {
         _id: lead._id,
@@ -1985,16 +1867,15 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
         source: lead.source || lead.formType || 'Unknown',
         type: type,
         createdAt: lead.createdAt,
-        viewed: false // All leads with 'new' status are considered unviewed
+        viewed: false
       };
     });
     
-    console.log(`[/api/dashboard/new-contacts] Transformed ${transformedContacts.length} contacts`);
-    console.log(`[/api/dashboard/new-contacts] Sending response`);
-    res.json(transformedContacts);
+    console.log("[/api/dashboard/new-contacts] Sending response");
+    res.json(contacts);
   } catch (error) {
-    console.error('[/api/dashboard/new-contacts] ERROR:', error);
-    console.error('[/api/dashboard/new-contacts] Stack trace:', error.stack);
+    console.error("[/api/dashboard/new-contacts] ERROR:", error.message);
+    console.error("[/api/dashboard/new-contacts] Stack:", error.stack);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero dei nuovi contatti',
