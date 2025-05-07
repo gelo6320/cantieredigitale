@@ -1807,11 +1807,11 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
     console.log("[/api/dashboard/new-contacts] Using Lead model");
     
     // Get recent leads with 'new' status
-    const recentLeads = await Lead.find({ status: 'new' })
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const recentLeads = await Lead.find({})
+    .sort({ createdAt: -1 })
+    .limit(20);
     
-    console.log(`[/api/dashboard/new-contacts] Found ${recentLeads.length} new leads`);
+    console.log(`[/api/dashboard/new-contacts] Query result:`, recentLeads.length);
     
     // Transform for frontend
     const contacts = recentLeads.map(lead => {
