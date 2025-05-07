@@ -555,59 +555,19 @@ async function getUserConnection(req) {
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Check if our models need to be registered
+    // Modify this section in the getUserConnection function
     if (!connection.models['Lead']) {
-      console.log("[getUserConnection] Registering Lead model");
+      console.log("[getUserConnection] Accessing leads collection");
       
-      // Define the Lead schema for the 'leads' collection
-      const LeadSchema = new mongoose.Schema({
-        leadId: { type: String, required: true, unique: true },
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        email: { type: String, required: true, index: true },
-        firstName: String,
-        lastName: String,
-        phone: String,
-        createdAt: { type: Date, default: Date.now },
-        updatedAt: { type: Date, default: Date.now },
-        source: String,
-        medium: String,
-        campaign: String,
-        formType: { type: String, required: true },
-        status: { 
-          type: String, 
-          enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
-          default: 'new'
-        },
-        extendedData: {
-          consentGiven: { type: Boolean, default: false },
-          ipAddress: String,
-          userAgent: String,
-          utmParams: Object,
-          fbclid: String,
-          referrer: String,
-          landingPage: String,
-          deviceInfo: Object,
-          formData: Object,
-          notes: String,
-          value: Number,
-          currency: String
-        },
-        tags: [String],
-        properties: { type: Map, of: mongoose.Schema.Types.Mixed },
-        consent: {
-          marketing: { type: Boolean, default: false },
-          analytics: { type: Boolean, default: false },
-          thirdParty: { type: Boolean, default: false },
-          timestamp: Date,
-          version: String,
-          method: String
-        }
-      }, { collection: 'leads' }); // Specifies the actual collection name
+      // Instead of defining a detailed schema, use a flexible schema
+      const LeadSchema = new mongoose.Schema({}, { 
+        collection: 'leads',
+        strict: false // This allows any fields without validation
+      });
       
-      // Register the model
+      // Register the model with the existing collection
       connection.model('Lead', LeadSchema);
-      console.log("[getUserConnection] Lead model registered successfully");
+      console.log("[getUserConnection] Leads collection accessed successfully");
     }
     
     // For backwards compatibility, register the old models if needed
