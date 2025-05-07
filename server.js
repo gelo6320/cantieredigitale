@@ -400,15 +400,43 @@ app.get('/api/sites', async (req, res) => {
 
 app.get('/api/tracciamento/statistics', async (req, res) => {
   try {
+    console.log("🔍 [STATS API] Richiesta ricevuta per le statistiche");
+    console.log(`[STATS API] Headers: ${JSON.stringify(req.headers.origin)}`);
+    console.log(`[STATS API] Query params: ${JSON.stringify(req.query)}`);
+
+    // Query the database for all statistics without filtering
+    console.log("[STATS API] Esecuzione query su Statistics collection...");
     
-    // Query the database for all statistics without date filtering
     const statistics = await Statistics.find({}).sort({ date: -1 });
     
-    // Non servono i custom CORS headers, come suggerito in precedenza
+    console.log(`[STATS API] Query completata. Trovati ${statistics.length} documenti`);
     
+    // Log dei primi due documenti (se esistono) per debug
+    if (statistics.length > 0) {
+      console.log("[STATS API] Primo documento trovato:");
+      console.log(JSON.stringify(statistics[0], null, 2).substring(0, 500) + "...");
+    } else {
+      console.log("[STATS API] ATTENZIONE: Nessun documento trovato nella collection Statistics!");
+      
+      // Verifichiamo se la collection esiste e quanti documenti contiene
+      const collections = await mongoose.connection.db.listCollections().toArray();
+      console.log("[STATS API] Collections nel database:");
+      collections.forEach(c => console.log(` - ${c.name}`));
+      
+      // Conta i documenti se la collection esiste
+      if (collections.some(c => c.name === 'statistics')) {
+        const count = await Statistics.countDocuments();
+        console.log(`[STATS API] La collection Statistics esiste e contiene ${count} documenti`);
+      }
+    }
+    
+    // Rimuoviamo i custom CORS headers
     res.json(statistics);
+    console.log("[STATS API] Risposta inviata al client");
+    
   } catch (error) {
-    console.error('Error getting statistics:', error);
+    console.error('[STATS API] ERRORE durante il recupero delle statistiche:', error);
+    console.error('[STATS API] Stack trace:', error.stack);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to fetch statistics data', 
