@@ -1806,30 +1806,42 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
     const Lead = connection.model('Lead');
     console.log("[/api/dashboard/new-contacts] Using Lead model");
     
-    // Get recent leads with 'new' status
+    // Get recent leads
     const recentLeads = await Lead.find({})
     .sort({ createdAt: -1 })
     .limit(20);
     
     console.log(`[/api/dashboard/new-contacts] Query result:`, recentLeads.length);
     
-    // Transform for frontend
+    // Log the first lead to see its structure
+    if (recentLeads.length > 0) {
+    console.log("First lead details:", JSON.stringify(recentLeads[0]));
+    }
+    
+    // Transform for frontend with improved mapping
     const contacts = recentLeads.map(lead => {
-      const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
-      let type = 'form';
-      if (lead.formType === 'booking') type = 'booking';
-      if (lead.formType === 'facebook') type = 'facebook';
-      
-      return {
-        _id: lead._id,
-        name: name,
-        email: lead.email,
-        source: lead.source || lead.formType || 'Unknown',
-        type: type,
-        createdAt: lead.createdAt,
-        viewed: false
-      };
+    // Better name extraction from firstName/lastName fields
+    const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
+    
+    // Improved type mapping - handle 'contact' formType as 'form'
+    let type = 'form';
+    if (lead.formType === 'booking') type = 'booking';
+    if (lead.formType === 'facebook') type = 'facebook';
+    if (lead.formType === 'contact') type = 'form'; // Map 'contact' to 'form'
+    
+    // Create contact object with proper fields
+    return {
+      _id: lead._id,
+      name: name,
+      email: lead.email || '',
+      source: lead.source || lead.formType || 'Unknown',
+      type: type,
+      createdAt: lead.createdAt,
+      viewed: lead.status !== 'new' // Mark as viewed if status is not 'new'
+    };
     });
+    
+    console.log(`[/api/dashboard/new-contacts] Transformed contacts:`, contacts.length);
     
     console.log("[/api/dashboard/new-contacts] Sending response");
     res.json(contacts);
