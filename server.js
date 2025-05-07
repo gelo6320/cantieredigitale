@@ -550,7 +550,7 @@ async function getUserConnection(req) {
     const username = req.session.user.username;
     const mongodb_uri = req.session.userConfig.mongodb_uri;
     
-    console.log(`[getUserConnection] Attempting connection for ${username} to ${mongodb_uri.substring(0, 20)}...`);
+    console.log(`[getUserConnection] Attempting connection for ${username} to ${mongodb_uri}`);
     
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
