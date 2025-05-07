@@ -293,16 +293,6 @@ const StatisticsSchema = new mongoose.Schema({
 // Create the model
 const Statistics = mongoose.model('Statistics', StatisticsSchema);
 
-// Funzione per estrarre il dominio da un URL
-function extractDomain(url) {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname;
-  } catch (error) {
-    return url;
-  }
-}
-
 // Funzione per ottenere metrics di PageSpeed Insights
 async function getPageSpeedMetrics(url) {
   try {
@@ -400,37 +390,49 @@ app.get('/api/sites', async (req, res) => {
 
 app.get('/api/tracciamento/statistics', async (req, res) => {
   try {
-    console.log("🔍 [STATS API] Richiesta ricevuta per le statistiche");
+    console.log("[STATS API] Richiesta ricevuta per le statistiche");
     console.log(`[STATS API] Headers: ${JSON.stringify(req.headers.origin)}`);
-    console.log(`[STATS API] Query params: ${JSON.stringify(req.query)}`);
-
-    // Query the database for all statistics without filtering
-    console.log("[STATS API] Esecuzione query su Statistics collection...");
     
-    const statistics = await Statistics.find({}).sort({ date: -1 });
+    // Otteniamo la connessione al database dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      console.log("[STATS API] ERRORE: Nessuna connessione utente disponibile");
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    console.log("[STATS API] Connessione al database utente ottenuta con successo");
+    
+    // Definire il modello Statistics sulla connessione dell'utente se non esiste già
+    if (!connection.models['Statistics']) {
+      console.log("[STATS API] Registrazione del modello Statistics sulla connessione");
+      connection.model('Statistics', StatisticsSchema);
+    }
+    
+    // Utilizziamo il modello Statistics dalla connessione dell'utente
+    const UserStatistics = connection.model('Statistics');
+    
+    // Query al database senza filtri temporali
+    console.log("[STATS API] Esecuzione query sulla collection Statistics...");
+    const statistics = await UserStatistics.find({}).sort({ date: -1 });
     
     console.log(`[STATS API] Query completata. Trovati ${statistics.length} documenti`);
     
-    // Log dei primi due documenti (se esistono) per debug
+    // Log dei primi documenti per debug se ce ne sono
     if (statistics.length > 0) {
       console.log("[STATS API] Primo documento trovato:");
-      console.log(JSON.stringify(statistics[0], null, 2).substring(0, 500) + "...");
-    } else {
-      console.log("[STATS API] ATTENZIONE: Nessun documento trovato nella collection Statistics!");
-      
-      // Verifichiamo se la collection esiste e quanti documenti contiene
-      const collections = await mongoose.connection.db.listCollections().toArray();
-      console.log("[STATS API] Collections nel database:");
-      collections.forEach(c => console.log(` - ${c.name}`));
-      
-      // Conta i documenti se la collection esiste
-      if (collections.some(c => c.name === 'statistics')) {
-        const count = await Statistics.countDocuments();
-        console.log(`[STATS API] La collection Statistics esiste e contiene ${count} documenti`);
-      }
+      console.log(JSON.stringify(statistics[0], null, 2).substring(0, 300) + "...");
     }
     
-    // Rimuoviamo i custom CORS headers
+    // Configurazione corretta di CORS
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
     res.json(statistics);
     console.log("[STATS API] Risposta inviata al client");
     
@@ -1738,183 +1740,6 @@ const ProjectSchema = new mongoose.Schema({
 
 // Crea il modello Project
 const Project = mongoose.model('Project', ProjectSchema);
-
-/**
- * Calculates statistics for leads with trend analysis based on weekly volume
- * @param {Model} LeadModel - The Lead mongoose model
- * @param {String} formType - The type of form to filter by (optional)
- * @returns {Object} The statistics calculated including the trend
- */
-async function calculateLeadStats(LeadModel, formType = null) {
-  try {
-    console.log(`[calculateLeadStats] Starting calculation for formType: ${formType || 'ALL'}`);
-    
-    // Create filter based on formType if provided
-    const baseFilter = formType ? { formType } : {};
-    console.log(`[calculateLeadStats] Using base filter:`, baseFilter);
-    
-    // Get today's date
-    const today = new Date();
-    
-    // Calculate date for one week ago
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(today.getDate() - 7);
-    
-    // Calculate date for two weeks ago
-    const twoWeeksAgo = new Date();
-    twoWeeksAgo.setDate(today.getDate() - 14);
-    
-    console.log(`[calculateLeadStats] Date ranges: Today=${today.toISOString()}, OneWeekAgo=${oneWeekAgo.toISOString()}, TwoWeeksAgo=${twoWeeksAgo.toISOString()}`);
-    
-    // Statistics totals all-time
-    console.log(`[calculateLeadStats] Counting total leads...`);
-    const total = await LeadModel.countDocuments(baseFilter);
-    console.log(`[calculateLeadStats] Total leads: ${total}`);
-    
-    console.log(`[calculateLeadStats] Counting converted leads...`);
-    const converted = await LeadModel.countDocuments({ 
-      ...baseFilter,
-      status: 'converted' 
-    });
-    console.log(`[calculateLeadStats] Total converted: ${converted}`);
-    
-    // Calculate conversion rate
-    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
-    console.log(`[calculateLeadStats] Conversion rate: ${conversionRate}%`);
-    
-    // Count leads for current week (last 7 days)
-    console.log(`[calculateLeadStats] Counting current week leads...`);
-    const currentWeekTotal = await LeadModel.countDocuments({
-      ...baseFilter,
-      createdAt: { $gte: oneWeekAgo, $lte: today }
-    });
-    console.log(`[calculateLeadStats] Current week total: ${currentWeekTotal}`);
-    
-    // Count leads for previous week (from 14 to 7 days ago)
-    console.log(`[calculateLeadStats] Counting previous week leads...`);
-    const previousWeekTotal = await LeadModel.countDocuments({
-      ...baseFilter,
-      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo }
-    });
-    console.log(`[calculateLeadStats] Previous week total: ${previousWeekTotal}`);
-    
-    // Calculate trend based on the change in volume
-    let trend = 0;
-    
-    if (previousWeekTotal > 0) {
-      // Calculate percentage change: ((new - old) / old) * 100
-      trend = Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100);
-    } else if (currentWeekTotal > 0 && previousWeekTotal === 0) {
-      trend = 100;
-    }
-    console.log(`[calculateLeadStats] Trend calculation: ${trend}%`);
-    
-    const result = {
-      total,
-      converted,
-      conversionRate,
-      trend,
-      thisWeek: currentWeekTotal,
-      lastWeek: previousWeekTotal
-    };
-    
-    console.log(`[calculateLeadStats] Returning result for ${formType || 'ALL'}:`, result);
-    return result;
-  } catch (error) {
-    console.error(`[calculateLeadStats] ERROR for formType ${formType || 'ALL'}:`, error);
-    return { 
-      total: 0, 
-      converted: 0, 
-      conversionRate: 0, 
-      trend: 0,
-      thisWeek: 0,
-      lastWeek: 0
-    };
-  }
-}
-
-/**
- * Calcola le statistiche per una specifica fonte di lead (form, booking, facebook)
- * includendo un trend basato sulla variazione del volume di contatti settimanale
- * @param {Model} Model - Il modello mongoose da interrogare
- * @returns {Object} Le statistiche calcolate incluso il trend settimanale
- */
-async function calculateSourceStats(Model) {
-  try {
-    // Ottieni la data di oggi
-    const today = new Date();
-    
-    // Calcola la data di una settimana fa
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(today.getDate() - 7);
-    
-    // Calcola la data di due settimane fa
-    const twoWeeksAgo = new Date();
-    twoWeeksAgo.setDate(today.getDate() - 14);
-    
-    // Statistiche totali all-time
-    const total = await Model.countDocuments({});
-    const converted = await Model.countDocuments({ status: 'customer' });
-    
-    // Calcola il tasso di conversione complessivo
-    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
-    
-    // Conta contatti della settimana corrente (ultimi 7 giorni)
-    const currentWeekTotal = await Model.countDocuments({
-      createdAt: { $gte: oneWeekAgo, $lte: today }
-    });
-    
-    // Conta contatti della settimana precedente (da 14 a 7 giorni fa)
-    const previousWeekTotal = await Model.countDocuments({
-      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo }
-    });
-    
-    // Calcola il trend basato sulla variazione del VOLUME di contatti
-    let trend = 0;
-    
-    if (previousWeekTotal > 0) {
-      // Calcola la variazione percentuale: ((nuovo - vecchio) / vecchio) * 100
-      trend = Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100);
-    } else if (currentWeekTotal > 0 && previousWeekTotal === 0) {
-      // Se la settimana precedente non aveva contatti ma questa settimana sì,
-      // imposta un valore positivo fisso (es. +100%)
-      trend = 100;
-    } else {
-      // Nessuna variazione
-      trend = 0;
-    }
-    
-    // Log per debug
-    console.log(`Stats for ${Model.modelName}:`, {
-      total,
-      converted,
-      conversionRate,
-      currentWeekTotal,
-      previousWeekTotal,
-      trend
-    });
-    
-    return {
-      total,
-      converted,
-      conversionRate,
-      trend,
-      // Include ulteriori metriche per eventuali analisi future
-      currentWeekTotal,
-      previousWeekTotal
-    };
-  } catch (error) {
-    console.error('Errore nel calcolo delle statistiche:', error);
-    return { 
-      total: 0, 
-      converted: 0, 
-      conversionRate: 0, 
-      trend: 0,
-      currentWeekTotal: 0,
-      previousWeekTotal: 0
-    };
-  }
-}
 
 // Calcolo statistiche dashboard potenziate
 app.get('/api/dashboard/stats', async (req, res) => {
