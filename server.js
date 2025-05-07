@@ -533,10 +533,16 @@ const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
 // ===== FUNZIONI UTILITY =====
 
 // Funzione per ottenere la connessione MongoDB dell'utente
+/**
+ * Gets or creates a database connection for the user based on their configuration
+ * @param {Object} req - Express request object containing session data
+ * @returns {Promise<Connection|null>} Mongoose connection or null if error
+ */
 async function getUserConnection(req) {
   try {
     console.log("[getUserConnection] Starting...");
     
+    // Check for valid session and configuration
     if (!req.session || !req.session.isAuthenticated) {
       console.log("[getUserConnection] No valid session");
       return null;
@@ -550,81 +556,106 @@ async function getUserConnection(req) {
     const username = req.session.user.username;
     const mongodb_uri = req.session.userConfig.mongodb_uri;
     
-    console.log(`[getUserConnection] Attempting connection for ${username} to ${mongodb_uri}`);
+    console.log(`[getUserConnection] Attempting connection for ${username}`);
     
-    // Get or create connection
-    const connection = await connectionManager.getConnection(username, mongodb_uri);
-    
-    // Check if our models need to be registered
-    if (!connection.models['Lead']) {
-      console.log("[getUserConnection] Registering Lead model");
+    try {
+      // Get or create the connection
+      const connection = await connectionManager.getConnection(username, mongodb_uri);
       
-      // Define the Lead schema for the 'leads' collection
-      const LeadSchema = new mongoose.Schema({
-        leadId: { type: String, required: true, unique: true },
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        email: { type: String, required: true, index: true },
-        firstName: String,
-        lastName: String,
-        phone: String,
-        createdAt: { type: Date, default: Date.now },
-        updatedAt: { type: Date, default: Date.now },
-        source: String,
-        medium: String,
-        campaign: String,
-        formType: { type: String, required: true },
-        status: { 
-          type: String, 
-          enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
-          default: 'new'
-        },
-        extendedData: {
-          consentGiven: { type: Boolean, default: false },
-          ipAddress: String,
-          userAgent: String,
-          utmParams: Object,
-          fbclid: String,
-          referrer: String,
-          landingPage: String,
-          deviceInfo: Object,
-          formData: Object,
-          notes: String,
-          value: Number,
-          currency: String
-        },
-        tags: [String],
-        properties: { type: Map, of: mongoose.Schema.Types.Mixed },
-        consent: {
-          marketing: { type: Boolean, default: false },
-          analytics: { type: Boolean, default: false },
-          thirdParty: { type: Boolean, default: false },
-          timestamp: Date,
-          version: String,
-          method: String
-        }
-      }, { collection: 'leads' }); // Specifies the actual collection name
+      // Force authentication early by sending a ping command
+      try {
+        await connection.db.command({ ping: 1 });
+        console.log(`[getUserConnection] Authentication successful`);
+      } catch (pingError) {
+        console.error(`[getUserConnection] Authentication failed during ping: ${pingError.message}`);
+        throw pingError;
+      }
       
-      // Register the model
-      connection.model('Lead', LeadSchema);
-      console.log("[getUserConnection] Lead model registered successfully");
+      // Register the Lead model if not already defined
+      if (!connection.models['Lead']) {
+        console.log(`[getUserConnection] Registering Lead model`);
+        
+        // Define the Lead schema for the 'leads' collection
+        const LeadSchema = new mongoose.Schema({
+          leadId: { type: String, required: true, unique: true },
+          sessionId: { type: String, required: true, index: true },
+          userId: { type: String, sparse: true, index: true },
+          email: { type: String, required: true, index: true },
+          firstName: String,
+          lastName: String,
+          phone: String,
+          createdAt: { type: Date, default: Date.now },
+          updatedAt: { type: Date, default: Date.now },
+          source: String,
+          medium: String,
+          campaign: String,
+          formType: { type: String, required: true },
+          status: { 
+            type: String, 
+            enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+            default: 'new'
+          },
+          extendedData: {
+            consentGiven: { type: Boolean, default: false },
+            ipAddress: String,
+            userAgent: String,
+            utmParams: Object,
+            fbclid: String,
+            referrer: String,
+            landingPage: String,
+            deviceInfo: Object,
+            formData: Object,
+            notes: String,
+            value: Number,
+            currency: String
+          },
+          tags: [String],
+          properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+          consent: {
+            marketing: { type: Boolean, default: false },
+            analytics: { type: Boolean, default: false },
+            thirdParty: { type: Boolean, default: false },
+            timestamp: Date,
+            version: String,
+            method: String
+          }
+        }, { collection: 'leads' }); // Explicitly use the 'leads' collection
+        
+        // Register the model
+        connection.model('Lead', LeadSchema);
+        console.log(`[getUserConnection] Lead model registered successfully`);
+      } else {
+        console.log(`[getUserConnection] Lead model already registered`);
+      }
+      
+      // Register the legacy models for backward compatibility if needed
+      if (!connection.models['FormData']) {
+        console.log(`[getUserConnection] Registering legacy models`);
+        connection.model('FormData', FormDataSchema);
+        connection.model('Booking', BookingSchema);
+        connection.model('FacebookEvent', FacebookEventSchema);
+        connection.model('FacebookLead', FacebookLeadSchema);
+        console.log(`[getUserConnection] Legacy models registered`);
+      }
+      
+      console.log(`[getUserConnection] Connection and models ready`);
+      return connection;
+    } catch (connectionError) {
+      console.error(`[getUserConnection] Connection error: ${connectionError.message}`);
+      console.error(`[getUserConnection] Stack trace: ${connectionError.stack}`);
+      
+      // Remove the failed connection from the manager
+      if (connectionManager.connections[username]) {
+        console.log(`[getUserConnection] Removing failed connection from manager`);
+        clearTimeout(connectionManager.connections[username].timeout);
+        delete connectionManager.connections[username];
+      }
+      
+      return null;
     }
-    
-    // For backwards compatibility, register the old models if needed
-    if (!connection.models['FormData']) {
-      console.log("[getUserConnection] Registering legacy models");
-      connection.model('FormData', FormDataSchema);
-      connection.model('Booking', BookingSchema);
-      connection.model('FacebookEvent', FacebookEventSchema);
-      connection.model('FacebookLead', FacebookLeadSchema);
-      console.log("[getUserConnection] Legacy models registered");
-    }
-    
-    console.log("[getUserConnection] Connection and models ready");
-    return connection;
   } catch (error) {
-    console.error('[getUserConnection] ERROR:', error);
-    console.error('[getUserConnection] Stack trace:', error.stack);
+    console.error(`[getUserConnection] Unexpected error: ${error.message}`);
+    console.error(`[getUserConnection] Stack trace: ${error.stack}`);
     return null;
   }
 }
