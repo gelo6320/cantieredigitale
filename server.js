@@ -546,14 +546,69 @@ async function getUserConnection(req) {
   const mongodb_uri = req.session.userConfig.mongodb_uri;
   
   try {
+    console.log(`[getUserConnection] Tentativo connessione per ${username} a ${mongodb_uri}`);
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
     // Definisci i modelli sulla connessione solo se necessario
-    if (!connection.models['FormData']) {
+    if (!connection.models['FormData'] && !connection.models['leads']) {
+      console.log(`[getUserConnection] Definizione modelli sulla connessione`);
+      
+      // Definisci i vecchi modelli per retrocompatibilità
       connection.model('FormData', FormDataSchema);
       connection.model('Booking', BookingSchema);
       connection.model('FacebookEvent', FacebookEventSchema);
       connection.model('FacebookLead', FacebookLeadSchema);
+      
+      // Definisci il nuovo modello Lead
+      const LeadSchema = new mongoose.Schema({
+        leadId: { type: String, required: true, unique: true },
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        email: { type: String, required: true, index: true },
+        firstName: String,
+        lastName: String,
+        phone: String,
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+        source: String,
+        medium: String,
+        campaign: String,
+        formType: { type: String, required: true },
+        status: { 
+          type: String, 
+          enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+          default: 'new'
+        },
+        extendedData: {
+          consentGiven: { type: Boolean, default: false },
+          ipAddress: String,
+          userAgent: String,
+          utmParams: Object,
+          fbclid: String,
+          referrer: String,
+          landingPage: String,
+          deviceInfo: Object,
+          formData: Object,
+          notes: String,
+          value: Number,
+          currency: String
+        },
+        tags: [String],
+        properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+        consent: {
+          marketing: { type: Boolean, default: false },
+          analytics: { type: Boolean, default: false },
+          thirdParty: { type: Boolean, default: false },
+          timestamp: Date,
+          version: String,
+          method: String
+        }
+      }, { collection: 'leads' }); // Questo è cruciale: specifica esplicitamente il nome della collection
+      
+      // Registra il modello con il nome 'Lead'
+      connection.model('Lead', LeadSchema);
+      
+      console.log(`[getUserConnection] Modelli definiti con successo`);
     }
     
     return connection;
