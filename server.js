@@ -1398,6 +1398,83 @@ const ProjectSchema = new mongoose.Schema({
 const Project = mongoose.model('Project', ProjectSchema);
 
 /**
+ * Calculates statistics for leads with trend analysis based on weekly volume
+ * @param {Model} LeadModel - The Lead mongoose model
+ * @param {String} formType - The type of form to filter by (optional)
+ * @returns {Object} The statistics calculated including the trend
+ */
+async function calculateLeadStats(LeadModel, formType = null) {
+  try {
+    // Create filter based on formType if provided
+    const baseFilter = formType ? { formType } : {};
+    
+    // Get today's date
+    const today = new Date();
+    
+    // Calculate date for one week ago
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(today.getDate() - 7);
+    
+    // Calculate date for two weeks ago
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(today.getDate() - 14);
+    
+    // Statistics totals all-time
+    const total = await LeadModel.countDocuments(baseFilter);
+    const converted = await LeadModel.countDocuments({ 
+      ...baseFilter,
+      status: 'converted' 
+    });
+    
+    // Calculate conversion rate
+    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    
+    // Count leads for current week (last 7 days)
+    const currentWeekTotal = await LeadModel.countDocuments({
+      ...baseFilter,
+      createdAt: { $gte: oneWeekAgo, $lte: today }
+    });
+    
+    // Count leads for previous week (from 14 to 7 days ago)
+    const previousWeekTotal = await LeadModel.countDocuments({
+      ...baseFilter,
+      createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo }
+    });
+    
+    // Calculate trend based on the change in volume
+    let trend = 0;
+    
+    if (previousWeekTotal > 0) {
+      // Calculate percentage change: ((new - old) / old) * 100
+      trend = Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100);
+    } else if (currentWeekTotal > 0 && previousWeekTotal === 0) {
+      // If previous week had no contacts but this week does,
+      // set a fixed positive value (e.g., +100%)
+      trend = 100;
+    }
+    
+    return {
+      total,
+      converted,
+      conversionRate,
+      trend,
+      thisWeek: currentWeekTotal,
+      lastWeek: previousWeekTotal
+    };
+  } catch (error) {
+    console.error('Error calculating lead statistics:', error);
+    return { 
+      total: 0, 
+      converted: 0, 
+      conversionRate: 0, 
+      trend: 0,
+      thisWeek: 0,
+      lastWeek: 0
+    };
+  }
+}
+
+/**
  * Calcola le statistiche per una specifica fonte di lead (form, booking, facebook)
  * includendo un trend basato sulla variazione del volume di contatti settimanale
  * @param {Model} Model - Il modello mongoose da interrogare
@@ -1481,9 +1558,10 @@ async function calculateSourceStats(Model) {
 }
 
 // Calcolo statistiche dashboard potenziate
+// Updated dashboard stats API
 app.get('/api/dashboard/stats', async (req, res) => {
   try {
-    // Verifica autenticazione
+    // Verify authentication
     if (!req.session || !req.session.isAuthenticated) {
       return res.status(401).json({ 
         success: false, 
@@ -1491,7 +1569,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
       });
     }
     
-    // Ottieni connessione utente
+    // Get user connection
     const connection = await getUserConnection(req);
     
     if (!connection) {
@@ -1501,31 +1579,20 @@ app.get('/api/dashboard/stats', async (req, res) => {
       });
     }
     
-    // Recupera modelli
-    const UserFormData = connection.model('FormData');
-    const UserBooking = connection.model('Booking');
-    const UserFacebookLead = connection.model('FacebookLead');
-    const UserFacebookEvent = connection.model('FacebookEvent');
+    // Get the Lead model - make sure the model name matches your actual model name
+    const Lead = connection.model('Lead');
     
-    // Ottieni statistiche per ciascuna fonte
-    const formStats = await calculateSourceStats(UserFormData);
-    const bookingStats = await calculateSourceStats(UserBooking);
-    const facebookStats = await calculateSourceStats(UserFacebookLead);
+    // Calculate stats for all leads
+    const allLeadsStats = await calculateLeadStats(Lead);
     
-    // Calcola statistiche eventi
-    const eventCount = await UserFacebookEvent.countDocuments({});
-    const successEvents = await UserFacebookEvent.countDocuments({ success: true });
+    // Get stats for each form type (form, booking, facebook)
+    const formStats = await calculateLeadStats(Lead, 'form');
+    const bookingStats = await calculateLeadStats(Lead, 'booking');
+    const facebookStats = await calculateLeadStats(Lead, 'facebook');
     
-    // Calcola tasso di conversione totale
-    const totalLeads = formStats.total + bookingStats.total + facebookStats.total;
-    const totalConverted = formStats.converted + bookingStats.converted + facebookStats.converted;
-    const totalConversionRate = totalLeads > 0 
-      ? Math.round((totalConverted / totalLeads) * 100) 
-      : 0;
-    
-    // Calcola trend totale di acquisizione contatti (media ponderata dei trend)
-    const totalCurrentWeek = formStats.currentWeekTotal + bookingStats.currentWeekTotal + facebookStats.currentWeekTotal;
-    const totalPreviousWeek = formStats.previousWeekTotal + bookingStats.previousWeekTotal + facebookStats.previousWeekTotal;
+    // Calculate total weekly trends
+    const totalCurrentWeek = allLeadsStats.thisWeek;
+    const totalPreviousWeek = allLeadsStats.lastWeek;
     
     let totalTrend = 0;
     if (totalPreviousWeek > 0) {
@@ -1534,38 +1601,42 @@ app.get('/api/dashboard/stats', async (req, res) => {
       totalTrend = 100;
     }
     
-    // Prepara risposta
+    // Count events (placeholder for now)
+    const eventCount = 0;
+    const successEvents = 0;
+    
+    // Prepare response to match the expected structure in the frontend
     const stats = {
       forms: {
         total: formStats.total,
         converted: formStats.converted,
         conversionRate: formStats.conversionRate,
         trend: formStats.trend,
-        thisWeek: formStats.currentWeekTotal,
-        lastWeek: formStats.previousWeekTotal
+        thisWeek: formStats.thisWeek,
+        lastWeek: formStats.lastWeek
       },
       bookings: {
         total: bookingStats.total,
         converted: bookingStats.converted,
         conversionRate: bookingStats.conversionRate,
         trend: bookingStats.trend,
-        thisWeek: bookingStats.currentWeekTotal,
-        lastWeek: bookingStats.previousWeekTotal
+        thisWeek: bookingStats.thisWeek,
+        lastWeek: bookingStats.lastWeek
       },
       facebook: {
         total: facebookStats.total,
         converted: facebookStats.converted,
         conversionRate: facebookStats.conversionRate,
         trend: facebookStats.trend,
-        thisWeek: facebookStats.currentWeekTotal,
-        lastWeek: facebookStats.previousWeekTotal
+        thisWeek: facebookStats.thisWeek,
+        lastWeek: facebookStats.lastWeek
       },
       events: {
         total: eventCount,
         success: successEvents,
         successRate: eventCount > 0 ? Math.round((successEvents / eventCount) * 100) : 0,
       },
-      totalConversionRate,
+      totalConversionRate: allLeadsStats.conversionRate,
       totalTrend,
       totalThisWeek: totalCurrentWeek,
       totalLastWeek: totalPreviousWeek
@@ -1573,7 +1644,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
     
     res.json(stats);
   } catch (error) {
-    console.error('Errore nel recupero delle statistiche:', error);
+    console.error('Error retrieving statistics:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero delle statistiche' 
@@ -1649,6 +1720,7 @@ app.get('/api/dashboard/recent-events', async (req, res) => {
 });
 
 // API for unviewed contacts
+// Updated API for unviewed contacts
 app.get('/api/dashboard/new-contacts', async (req, res) => {
   try {
     // Ensure user is authenticated
@@ -1669,64 +1741,36 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
       });
     }
     
-    // Get models
-    const UserFormData = connection.model('FormData');
-    const UserBooking = connection.model('Booking');
-    const UserFacebookLead = connection.model('FacebookLead');
+    // Get the Lead model
+    const Lead = connection.model('Lead');
     
-    // Get recent contacts with 'viewed' field (add this field to your schemas)
-    const formContacts = await UserFormData.find({ viewed: { $ne: true } })
+    // Get leads with 'new' status (these are considered unviewed)
+    const recentLeads = await Lead.find({ status: 'new' })
       .sort({ createdAt: -1 })
-      .limit(20)
-      .select('_id name email source createdAt viewed');
+      .limit(20);
     
-    const bookingContacts = await UserBooking.find({ viewed: { $ne: true } })
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .select('_id name email source createdAt viewed');
+    // Transform data to match the expected frontend format
+    const transformedContacts = recentLeads.map(lead => {
+      // Determine the contact type based on formType
+      let type = 'form'; // Default
+      if (lead.formType === 'booking') type = 'booking';
+      if (lead.formType === 'facebook') type = 'facebook';
+      
+      // Construct the name from firstName and lastName
+      const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
+      
+      return {
+        _id: lead._id,
+        name: name,
+        email: lead.email,
+        source: lead.source || lead.formType || 'Unknown',
+        type: type,
+        createdAt: lead.createdAt,
+        viewed: false // All leads with 'new' status are considered unviewed
+      };
+    });
     
-    const facebookContacts = await UserFacebookLead.find({ viewed: { $ne: true } })
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .select('_id name email formId createdAt viewed');
-    
-    // Transform data
-    const transformedForms = formContacts.map(contact => ({
-      _id: contact._id,
-      name: contact.name,
-      email: contact.email,
-      source: contact.source || 'Form di contatto',
-      type: 'form',
-      createdAt: contact.createdAt,
-      viewed: contact.viewed || false
-    }));
-    
-    const transformedBookings = bookingContacts.map(contact => ({
-      _id: contact._id,
-      name: contact.name,
-      email: contact.email,
-      source: contact.source || 'Prenotazione',
-      type: 'booking',
-      createdAt: contact.createdAt,
-      viewed: contact.viewed || false
-    }));
-    
-    const transformedFacebook = facebookContacts.map(contact => ({
-      _id: contact._id,
-      name: contact.name,
-      email: contact.email,
-      source: 'Facebook Lead',
-      type: 'facebook',
-      createdAt: contact.createdAt,
-      viewed: contact.viewed || false
-    }));
-    
-    // Combine and sort by date
-    const allContacts = [...transformedForms, ...transformedBookings, ...transformedFacebook]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 20); // Limit to 20 most recent
-    
-    res.json(allContacts);
+    res.json(transformedContacts);
   } catch (error) {
     console.error('Error fetching new contacts:', error);
     res.status(500).json({ 
@@ -1736,7 +1780,7 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
   }
 });
 
-// API to mark a contact as viewed
+// Updated API to mark a contact as viewed
 app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
   try {
     // Ensure user is authenticated
@@ -1748,7 +1792,6 @@ app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
     }
     
     const { id } = req.params;
-    const { type } = req.body; // Optional: can be 'form', 'booking', or 'facebook'
     
     // Get user connection
     const connection = await getUserConnection(req);
@@ -1760,72 +1803,87 @@ app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
       });
     }
     
-    // Get models
-    const UserFormData = connection.model('FormData');
-    const UserBooking = connection.model('Booking');
-    const UserFacebookLead = connection.model('FacebookLead');
+    // Get the Lead model
+    const Lead = connection.model('Lead');
     
-    // Try to update in all collections if type is not specified
-    let updateResult;
+    // Update lead status from 'new' to 'contacted' (which indicates it's been viewed)
+    const updateResult = await Lead.findByIdAndUpdate(
+      id,
+      { 
+        $set: { 
+          status: 'contacted', 
+          updatedAt: new Date() 
+        } 
+      },
+      { new: true }
+    );
     
-    if (!type || type === 'form') {
-      updateResult = await UserFormData.findByIdAndUpdate(
-        id,
-        { $set: { viewed: true, viewedAt: new Date() } },
-        { new: true }
-      );
-      
-      if (updateResult) {
-        return res.json({ 
-          success: true, 
-          message: 'Contatto segnato come visto', 
-          data: updateResult 
-        });
-      }
+    if (!updateResult) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Contatto non trovato' 
+      });
     }
     
-    if (!type || type === 'booking') {
-      updateResult = await UserBooking.findByIdAndUpdate(
-        id,
-        { $set: { viewed: true, viewedAt: new Date() } },
-        { new: true }
-      );
-      
-      if (updateResult) {
-        return res.json({ 
-          success: true, 
-          message: 'Prenotazione segnata come vista', 
-          data: updateResult 
-        });
-      }
-    }
-    
-    if (!type || type === 'facebook') {
-      updateResult = await UserFacebookLead.findByIdAndUpdate(
-        id,
-        { $set: { viewed: true, viewedAt: new Date() } },
-        { new: true }
-      );
-      
-      if (updateResult) {
-        return res.json({ 
-          success: true, 
-          message: 'Lead Facebook segnato come visto', 
-          data: updateResult 
-        });
-      }
-    }
-    
-    // If we get here, the contact wasn't found
-    res.status(404).json({ 
-      success: false, 
-      message: 'Contatto non trovato' 
+    res.json({ 
+      success: true, 
+      message: 'Contatto segnato come visto', 
+      data: updateResult 
     });
   } catch (error) {
     console.error('Error marking contact as viewed:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel segnare il contatto come visto' 
+    });
+  }
+});
+
+// Updated API to mark all contacts as viewed
+app.post('/api/dashboard/mark-all-viewed', async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione database non trovata' 
+      });
+    }
+    
+    // Get the Lead model
+    const Lead = connection.model('Lead');
+    
+    // Update all leads with status 'new' to 'contacted'
+    const result = await Lead.updateMany(
+      { status: 'new' },
+      { 
+        $set: { 
+          status: 'contacted',
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
+    res.json({ 
+      success: true, 
+      message: 'Tutti i contatti segnati come visti',
+      count: result.nModified || 0
+    });
+  } catch (error) {
+    console.error('Error marking all contacts as viewed:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel segnare tutti i contatti come visti' 
     });
   }
 });
