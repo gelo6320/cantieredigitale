@@ -532,48 +532,106 @@ const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
 
 // ===== FUNZIONI UTILITY =====
 
-// Funzione per ottenere la connessione MongoDB dell'utente
 /**
  * Gets or creates a database connection for the user based on their configuration
+ * with enhanced error logging
  * @param {Object} req - Express request object containing session data
  * @returns {Promise<Connection|null>} Mongoose connection or null if error
  */
 async function getUserConnection(req) {
   try {
-    console.log("[getUserConnection] Starting...");
+    console.log("[getUserConnection] Starting connection process...");
     
     // Check for valid session and configuration
     if (!req.session || !req.session.isAuthenticated) {
-      console.log("[getUserConnection] No valid session");
+      console.log("[getUserConnection] No valid session found");
       return null;
     }
     
     if (!req.session.userConfig || !req.session.userConfig.mongodb_uri) {
-      console.log("[getUserConnection] No MongoDB URI in config");
+      console.log("[getUserConnection] No MongoDB URI found in user config");
       return null;
     }
     
     const username = req.session.user.username;
     const mongodb_uri = req.session.userConfig.mongodb_uri;
     
-    console.log(`[getUserConnection] Attempting connection for ${username}`);
+    // Parse MongoDB URI to extract components for logging
+    let parsedUri;
+    try {
+      // Extract parts of the URI for debugging (hide password)
+      const uriParts = mongodb_uri.split('@');
+      const afterAt = uriParts[1] || '';
+      const hostAndParams = afterAt.split('?');
+      const host = hostAndParams[0] || '';
+      
+      // Check if database name is specified
+      const dbName = host.split('/')[1];
+      if (!dbName) {
+        console.warn("[getUserConnection] WARNING: No database name specified in MongoDB URI. Using default database.");
+      } else {
+        console.log(`[getUserConnection] Using database: ${dbName}`);
+      }
+      
+      console.log(`[getUserConnection] Attempting connection for ${username} to host: ${host.split('/')[0]}`);
+    } catch (parseError) {
+      console.error(`[getUserConnection] Error parsing MongoDB URI: ${parseError.message}`);
+    }
     
     try {
       // Get or create the connection
+      console.log(`[getUserConnection] Requesting connection from connection manager`);
       const connection = await connectionManager.getConnection(username, mongodb_uri);
       
       // Force authentication early by sending a ping command
       try {
+        console.log(`[getUserConnection] Testing connection with ping command...`);
         await connection.db.command({ ping: 1 });
-        console.log(`[getUserConnection] Authentication successful`);
+        console.log(`[getUserConnection] Ping successful! Authentication verified.`);
+        
+        // List available databases for debugging
+        const adminDb = connection.db('admin');
+        const dbInfo = await adminDb.admin().listDatabases();
+        console.log(`[getUserConnection] Available databases: ${dbInfo.databases.map(db => db.name).join(', ')}`);
+        
+        // Check if the Lead model's collection exists
+        const currentDb = connection.db();
+        const collections = await currentDb.listCollections().toArray();
+        const collectionNames = collections.map(c => c.name);
+        console.log(`[getUserConnection] Available collections in current database: ${collectionNames.join(', ')}`);
+        
+        if (!collectionNames.includes('leads')) {
+          console.warn(`[getUserConnection] WARNING: 'leads' collection not found in the current database!`);
+        } else {
+          console.log(`[getUserConnection] 'leads' collection found in database`);
+          
+          // Count documents in the leads collection for verification
+          const count = await currentDb.collection('leads').countDocuments();
+          console.log(`[getUserConnection] 'leads' collection contains ${count} documents`);
+        }
       } catch (pingError) {
-        console.error(`[getUserConnection] Authentication failed during ping: ${pingError.message}`);
+        console.error(`[getUserConnection] Authentication/connection test failed: ${pingError.message}`);
+        
+        // Log detailed error information
+        if (pingError.name === 'MongoServerError') {
+          console.error(`[getUserConnection] MongoDB Error Code: ${pingError.code}`);
+          console.error(`[getUserConnection] MongoDB Error CodeName: ${pingError.codeName}`);
+          
+          if (pingError.code === 18 || pingError.message.includes('auth')) {
+            console.error(`[getUserConnection] This appears to be an AUTHENTICATION FAILURE. Please verify username and password.`);
+          } else if (pingError.code === 13) {
+            console.error(`[getUserConnection] This appears to be an AUTHORIZATION FAILURE. User may not have permissions to access this database.`);
+          } else if (pingError.code === 8000 && pingError.message.includes('AtlasError')) {
+            console.error(`[getUserConnection] This appears to be a MongoDB Atlas specific error. Check Atlas dashboard for issues.`);
+          }
+        }
+        
         throw pingError;
       }
       
       // Register the Lead model if not already defined
       if (!connection.models['Lead']) {
-        console.log(`[getUserConnection] Registering Lead model`);
+        console.log(`[getUserConnection] Registering Lead model...`);
         
         // Define the Lead schema for the 'leads' collection
         const LeadSchema = new mongoose.Schema({
@@ -630,15 +688,15 @@ async function getUserConnection(req) {
       
       // Register the legacy models for backward compatibility if needed
       if (!connection.models['FormData']) {
-        console.log(`[getUserConnection] Registering legacy models`);
+        console.log(`[getUserConnection] Registering legacy models...`);
         connection.model('FormData', FormDataSchema);
         connection.model('Booking', BookingSchema);
         connection.model('FacebookEvent', FacebookEventSchema);
         connection.model('FacebookLead', FacebookLeadSchema);
-        console.log(`[getUserConnection] Legacy models registered`);
+        console.log(`[getUserConnection] Legacy models registered successfully`);
       }
       
-      console.log(`[getUserConnection] Connection and models ready`);
+      console.log(`[getUserConnection] Connection and models ready for use`);
       return connection;
     } catch (connectionError) {
       console.error(`[getUserConnection] Connection error: ${connectionError.message}`);
@@ -647,7 +705,14 @@ async function getUserConnection(req) {
       // Remove the failed connection from the manager
       if (connectionManager.connections[username]) {
         console.log(`[getUserConnection] Removing failed connection from manager`);
-        clearTimeout(connectionManager.connections[username].timeout);
+        if (connectionManager.connections[username].timeout) {
+          clearTimeout(connectionManager.connections[username].timeout);
+        }
+        try {
+          await connectionManager.connections[username].connection.close();
+        } catch (closeError) {
+          console.error(`[getUserConnection] Error closing connection: ${closeError.message}`);
+        }
         delete connectionManager.connections[username];
       }
       
@@ -699,32 +764,68 @@ async function getUserConfig(username) {
   }
 }
 
-// Connection Manager
+// Connection Manager with improved logging
 const connectionManager = {
   connections: {},
   
-  // Update the getConnection method in connectionManager
   async getConnection(username, uri) {
-    console.log(`[connectionManager] Request for connection: ${username}`);
+    console.log(`[connectionManager] Connection requested for user: ${username}`);
     
     if (this.connections[username]) {
-      console.log(`[connectionManager] Reusing existing connection for ${username}`);
+      console.log(`[connectionManager] Existing connection found for ${username}`);
       this.resetTimeout(username);
       return this.connections[username].connection;
     }
     
     console.log(`[connectionManager] Creating new connection for ${username}`);
+    
+    // Parse MongoDB URI to check for database name
     try {
-      const connection = await mongoose.createConnection(uri, {
+      const uriParts = uri.split('@');
+      const hostWithParams = uriParts[1] || '';
+      const hostPath = hostWithParams.split('?')[0] || '';
+      const dbName = hostPath.includes('/') ? hostPath.split('/')[1] : null;
+      
+      if (!dbName) {
+        console.warn(`[connectionManager] WARNING: URI does not contain a database name. This may cause issues.`);
+      } else {
+        console.log(`[connectionManager] Database name from URI: ${dbName}`);
+      }
+    } catch (parseError) {
+      console.error(`[connectionManager] Error parsing URI: ${parseError.message}`);
+    }
+    
+    try {
+      // Set more robust connection options
+      const connectionOptions = {
         connectTimeoutMS: 10000,
-        socketTimeoutMS: 10000,
+        socketTimeoutMS: 30000,
         maxPoolSize: 10,
         minPoolSize: 1,
         maxIdleTimeMS: 30000,
-        serverSelectionTimeoutMS: 10000
-      });
+        serverSelectionTimeoutMS: 10000,
+        heartbeatFrequencyMS: 10000,
+        retryWrites: true,
+        family: 4  // Use IPv4 to avoid some connection issues
+      };
       
+      console.log(`[connectionManager] Mongoose connecting with options:`, connectionOptions);
+      
+      const connection = await mongoose.createConnection(uri, connectionOptions);
       console.log(`[connectionManager] Connection established for ${username}`);
+      
+      // Test connection
+      try {
+        await connection.db.admin().ping();
+        console.log(`[connectionManager] Initial connection test successful`);
+      } catch (pingError) {
+        console.error(`[connectionManager] Initial connection test failed: ${pingError.message}`);
+        throw pingError;
+      }
+      
+      // Get database name from the connection
+      const dbName = connection.db.databaseName;
+      console.log(`[connectionManager] Using database: ${dbName}`);
       
       this.connections[username] = {
         connection,
@@ -734,13 +835,15 @@ const connectionManager = {
       
       return connection;
     } catch (error) {
-      console.error(`[connectionManager] Connection error for ${username}:`, error);
+      console.error(`[connectionManager] Connection failed for ${username}: ${error.message}`);
+      console.error(`[connectionManager] Error details:`, error);
       throw error;
     }
   },
   
   resetTimeout(username) {
     if (this.connections[username]) {
+      console.log(`[connectionManager] Resetting idle timeout for ${username}`);
       clearTimeout(this.connections[username].timeout);
       this.connections[username].lastUsed = Date.now();
       this.connections[username].timeout = this.setConnectionTimeout(username);
@@ -748,23 +851,29 @@ const connectionManager = {
   },
   
   setConnectionTimeout(username) {
-    // Chiudi la connessione dopo 10 minuti di inattività
+    console.log(`[connectionManager] Setting idle timeout for ${username} (10 minutes)`);
     return setTimeout(() => {
       if (this.connections[username]) {
-        this.connections[username].connection.close();
+        console.log(`[connectionManager] Closing idle connection for ${username}`);
+        this.connections[username].connection.close()
+          .then(() => console.log(`[connectionManager] Connection closed successfully for ${username}`))
+          .catch(err => console.error(`[connectionManager] Error closing connection for ${username}:`, err));
         delete this.connections[username];
-        console.log(`Connessione per ${username} chiusa per inattività`);
       }
-    }, 10 * 60 * 1000);
+    }, 10 * 60 * 1000); // 10 minutes
   },
   
   closeAll() {
+    console.log(`[connectionManager] Closing all connections`);
     Object.keys(this.connections).forEach(username => {
+      console.log(`[connectionManager] Closing connection for ${username}`);
       clearTimeout(this.connections[username].timeout);
-      this.connections[username].connection.close();
+      this.connections[username].connection.close()
+        .then(() => console.log(`[connectionManager] Connection closed successfully for ${username}`))
+        .catch(err => console.error(`[connectionManager] Error closing connection for ${username}:`, err));
     });
     this.connections = {};
-    console.log('Tutte le connessioni utente chiuse');
+    console.log('[connectionManager] All connections closed');
   }
 };
 
