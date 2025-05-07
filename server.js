@@ -424,12 +424,6 @@ app.get('/api/tracciamento/statistics', async (req, res) => {
     // Query the database for statistics
     const statistics = await Statistics.find(dateFilter).sort({ date: -1 });
     
-    // Add CORS headers for the frontend
-    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'https://costruzionedigitale.com');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
     res.json(statistics);
   } catch (error) {
     console.error('Error getting statistics:', error);
