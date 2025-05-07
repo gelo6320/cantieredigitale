@@ -400,29 +400,11 @@ app.get('/api/sites', async (req, res) => {
 
 app.get('/api/tracciamento/statistics', async (req, res) => {
   try {
-    // Parse query parameters
-    const timeRange = req.query.timeRange || '7d';  // Default to 7 days
     
-    // Determine date filter based on timeRange
-    const dateFilter = {};
-    const now = new Date();
+    // Query the database for all statistics without date filtering
+    const statistics = await Statistics.find({}).sort({ date: -1 });
     
-    if (timeRange === '24h') {
-      const oneDayAgo = new Date(now);
-      oneDayAgo.setDate(now.getDate() - 1);
-      dateFilter.date = { $gte: oneDayAgo };
-    } else if (timeRange === '7d') {
-      const sevenDaysAgo = new Date(now);
-      sevenDaysAgo.setDate(now.getDate() - 7);
-      dateFilter.date = { $gte: sevenDaysAgo };
-    } else if (timeRange === '30d') {
-      const thirtyDaysAgo = new Date(now);
-      thirtyDaysAgo.setDate(now.getDate() - 30);
-      dateFilter.date = { $gte: thirtyDaysAgo };
-    }
-    
-    // Query the database for statistics
-    const statistics = await Statistics.find(dateFilter).sort({ date: -1 });
+    // Non servono i custom CORS headers, come suggerito in precedenza
     
     res.json(statistics);
   } catch (error) {
