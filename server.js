@@ -227,8 +227,6 @@ const FacebookLeadSchema = new mongoose.Schema({
   viewedAt: { type: Date }
 });
 
-// Aggiungi al file server.js
-
 // Schema per i siti web dell'utente
 const SiteSchema = new mongoose.Schema({
   url: { type: String, required: true },
@@ -555,21 +553,62 @@ async function getUserConnection(req) {
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Modify this section in the getUserConnection function where you define the LeadSchema
     if (!connection.models['Lead']) {
       console.log("[getUserConnection] Accessing leads collection");
       
-      // Use a flexible schema with the viewed field explicitly defined
       const LeadSchema = new mongoose.Schema({
-        // Keep the existing flexible schema structure
-        viewed: { type: Boolean, default: false }, // Add the viewed field with default false
-        viewedAt: { type: Date }                  // Track when it was viewed
+        leadId: { type: String, required: true, unique: true },
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        email: { type: String, required: true, index: true },
+        firstName: String,
+        lastName: String,
+        phone: String,
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+        source: String,
+        medium: String,
+        campaign: String,
+        formType: { type: String, required: true },
+        status: { 
+          type: String, 
+          enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+          default: 'new'
+        },
+        // Add these two fields at the top level:
+        value: { type: Number, default: 0 },
+        service: { type: String },
+        extendedData: {
+          consentGiven: { type: Boolean, default: false },
+          ipAddress: String,
+          userAgent: String,
+          utmParams: Object,
+          fbclid: String,
+          referrer: String,
+          landingPage: String,
+          deviceInfo: Object,
+          formData: Object,
+          notes: String,
+          value: Number,
+          currency: String
+        },
+        tags: [String],
+        properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+        consent: {
+          marketing: { type: Boolean, default: false },
+          analytics: { type: Boolean, default: false },
+          thirdParty: { type: Boolean, default: false },
+          timestamp: Date,
+          version: String,
+          method: String
+        },
+        viewed: { type: Boolean, default: false },
+        viewedAt: { type: Date }
       }, { 
         collection: 'leads',
-        strict: false // This allows any other fields without validation
+        strict: false
       });
       
-      // Register the model with the existing collection
       connection.model('Lead', LeadSchema);
       console.log("[getUserConnection] Leads collection accessed successfully");
     }
@@ -1325,10 +1364,11 @@ app.get('/api/leads', async (req, res) => {
 });
 
 // API for updating lead metadata (value and service)
+// API for updating lead metadata
 app.post('/api/leads/:id/update-metadata', async (req, res) => {
   try {
     const { id } = req.params;
-    const { value, service } = req.body;
+    const { value, service, leadType } = req.body;
     
     if (!id) {
       return res.status(400).json({ 
@@ -1356,33 +1396,45 @@ app.post('/api/leads/:id/update-metadata', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Lead not found' });
     }
     
-    // Update metadata
-    // Initialize extendedData if it doesn't exist
-    if (!lead.extendedData) {
-      lead.extendedData = {};
-    }
+    // Update both top-level fields and extendedData for compatibility
+    const updates = {};
     
-    // Update value if provided
     if (value !== undefined && value !== null) {
+      updates.value = value;
+      
+      // Also update in extendedData for backward compatibility
+      if (!lead.extendedData) {
+        lead.extendedData = {};
+      }
       lead.extendedData.value = value;
     }
     
-    // Update service if provided (in formData for new schema)
     if (service !== undefined) {
+      updates.service = service;
+      
+      // Also update in extendedData.formData for backward compatibility
+      if (!lead.extendedData) {
+        lead.extendedData = {};
+      }
       if (!lead.extendedData.formData) {
         lead.extendedData.formData = {};
       }
       lead.extendedData.formData.service = service;
     }
     
-    lead.updatedAt = new Date();
+    updates.updatedAt = new Date();
     
-    await lead.save();
+    // Update the lead with all changes at once
+    const updatedLead = await Lead.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true }
+    );
     
     res.json({
       success: true,
       message: 'Metadata updated successfully',
-      data: lead
+      data: updatedLead
     });
   } catch (error) {
     console.error('Error updating lead metadata:', error);
