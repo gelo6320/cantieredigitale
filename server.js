@@ -814,10 +814,14 @@ const connectionManager = {
       const connection = await mongoose.createConnection(uri, connectionOptions);
       console.log(`[connectionManager] Connection established for ${username}`);
       
-      // Test connection
       try {
-        await connection.db.admin().ping();
-        console.log(`[connectionManager] Initial connection test successful`);
+        // Test connection
+        if (connection && connection.db) {
+          await connection.db.admin().ping();
+          console.log(`[connectionManager] Initial connection test successful`);
+        } else {
+          throw new Error("Connection or connection.db is undefined");
+        }
       } catch (pingError) {
         console.error(`[connectionManager] Initial connection test failed: ${pingError.message}`);
         throw pingError;
