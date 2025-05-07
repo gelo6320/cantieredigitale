@@ -1641,19 +1641,44 @@ app.get('/api/dashboard/stats', async (req, res) => {
     const oneWeekAgo = new Date(today); oneWeekAgo.setDate(today.getDate() - 7);
     const twoWeeksAgo = new Date(today); twoWeeksAgo.setDate(today.getDate() - 14);
     
-    // Stats for form leads
-    const formTotal = await Lead.countDocuments({ formType: 'form' });
-    const formConverted = await Lead.countDocuments({ formType: 'form', status: 'converted' });
+    // Form leads include both 'form' and 'contact' formTypes
+    console.log("[/api/dashboard/stats] Counting form leads (including 'contact' type)");
+    const formTotal = await Lead.countDocuments({ 
+      $or: [
+        { formType: 'form' },
+        { formType: 'contact' }
+      ]
+    });
+    console.log(`[/api/dashboard/stats] Form leads count: ${formTotal}`);
+    
+    // Form conversions
+    const formConverted = await Lead.countDocuments({ 
+      $or: [
+        { formType: 'form' },
+        { formType: 'contact' }
+      ], 
+      status: 'converted' 
+    });
+    
+    // Form leads this week
     const formThisWeek = await Lead.countDocuments({ 
-      formType: 'form', 
+      $or: [
+        { formType: 'form' },
+        { formType: 'contact' }
+      ],
       createdAt: { $gte: oneWeekAgo, $lte: today } 
     });
+    
+    // Form leads last week
     const formLastWeek = await Lead.countDocuments({ 
-      formType: 'form', 
+      $or: [
+        { formType: 'form' },
+        { formType: 'contact' }
+      ],
       createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } 
     });
     
-    // Stats for booking leads
+    // Booking leads
     const bookingTotal = await Lead.countDocuments({ formType: 'booking' });
     const bookingConverted = await Lead.countDocuments({ formType: 'booking', status: 'converted' });
     const bookingThisWeek = await Lead.countDocuments({ 
@@ -1665,7 +1690,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
       createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } 
     });
     
-    // Stats for facebook leads
+    // Facebook leads
     const facebookTotal = await Lead.countDocuments({ formType: 'facebook' });
     const facebookConverted = await Lead.countDocuments({ formType: 'facebook', status: 'converted' });
     const facebookThisWeek = await Lead.countDocuments({ 
@@ -1692,6 +1717,9 @@ app.get('/api/dashboard/stats', async (req, res) => {
     if (bookingLastWeek > 0) bookingTrend = Math.round(((bookingThisWeek - bookingLastWeek) / bookingLastWeek) * 100);
     if (facebookLastWeek > 0) facebookTrend = Math.round(((facebookThisWeek - facebookLastWeek) / facebookLastWeek) * 100);
     if (totalLastWeek > 0) totalTrend = Math.round(((totalThisWeek - totalLastWeek) / totalLastWeek) * 100);
+    
+    // Debug total counts
+    console.log(`[/api/dashboard/stats] Total counts - Forms: ${formTotal}, Bookings: ${bookingTotal}, Facebook: ${facebookTotal}`);
     
     // Prepare response
     const stats = {
@@ -1806,43 +1834,41 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
     const Lead = connection.model('Lead');
     console.log("[/api/dashboard/new-contacts] Using Lead model");
     
-    // Get recent leads
+    // Get recent leads regardless of status
     const recentLeads = await Lead.find({})
-    .sort({ createdAt: -1 })
-    .limit(20);
+      .sort({ createdAt: -1 })
+      .limit(20);
     
-    console.log(`[/api/dashboard/new-contacts] Query result:`, recentLeads.length);
+    console.log(`[/api/dashboard/new-contacts] Query result: ${recentLeads.length}`);
     
-    // Log the first lead to see its structure
+    // Debug the first lead
     if (recentLeads.length > 0) {
-    console.log("First lead details:", JSON.stringify(recentLeads[0]));
+      console.log("First lead details:", JSON.stringify(recentLeads[0]).substring(0, 500));
     }
     
     // Transform for frontend with improved mapping
     const contacts = recentLeads.map(lead => {
-    // Better name extraction from firstName/lastName fields
-    const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || 'Contact';
-    
-    // Improved type mapping - handle 'contact' formType as 'form'
-    let type = 'form';
-    if (lead.formType === 'booking') type = 'booking';
-    if (lead.formType === 'facebook') type = 'facebook';
-    if (lead.formType === 'contact') type = 'form'; // Map 'contact' to 'form'
-    
-    // Create contact object with proper fields
-    return {
-      _id: lead._id,
-      name: name,
-      email: lead.email || '',
-      source: lead.source || lead.formType || 'Unknown',
-      type: type,
-      createdAt: lead.createdAt,
-      viewed: lead.status !== 'new' // Mark as viewed if status is not 'new'
-    };
+      // Name extraction from firstName/lastName or fallback
+      const name = [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || lead.name || 'Contact';
+      
+      // Improved type mapping - handle 'contact' formType as 'form'
+      let type = 'form'; // Default to form
+      if (lead.formType === 'booking') type = 'booking';
+      if (lead.formType === 'facebook') type = 'facebook';
+      // Any formType including "contact" will default to "form"
+      
+      return {
+        _id: lead._id,
+        name: name,
+        email: lead.email || '',
+        source: lead.source || lead.formType || 'Unknown',
+        type: type,
+        createdAt: lead.createdAt,
+        viewed: lead.status !== 'new' // Considered viewed if status is not "new"
+      };
     });
     
-    console.log(`[/api/dashboard/new-contacts] Transformed contacts:`, contacts.length);
-    
+    console.log(`[/api/dashboard/new-contacts] Transformed contacts: ${contacts.length}`);
     console.log("[/api/dashboard/new-contacts] Sending response");
     res.json(contacts);
   } catch (error) {
