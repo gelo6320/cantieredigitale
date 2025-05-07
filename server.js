@@ -2143,11 +2143,10 @@ app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
       id,
       { 
         $set: { 
-          status: 'contacted', 
-          viewed: true,          // Set viewed flag to true
-          viewedAt: new Date(),  // Set viewedAt to current time
+          viewed: true,          
+          viewedAt: new Date(),  
           updatedAt: new Date() 
-        } 
+        }
       },
       { new: true }
     );
@@ -2202,11 +2201,10 @@ app.post('/api/dashboard/mark-all-viewed', async (req, res) => {
       { viewed: false }, // Only update unviewed leads
       { 
         $set: { 
-          status: 'contacted',
           viewed: true,
           viewedAt: new Date(),
           updatedAt: new Date()
-        } 
+        }
       }
     );
     
