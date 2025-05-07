@@ -1485,91 +1485,6 @@ app.post('/api/leads/:id/update-metadata', async (req, res) => {
   }
 });
 
-// Updated API for the funnel to move leads between stages
-app.post('/api/sales-funnel/move', async (req, res) => {
-  try {
-    const { leadId, fromStage, toStage, sendToFacebook, facebookEvent, eventMetadata } = req.body;
-    
-    if (!leadId || !fromStage || !toStage) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Lead ID, source status, and destination status are required' 
-      });
-    }
-    
-    // Get user connection
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database not available or not properly configured' 
-      });
-    }
-    
-    // Use the Lead model
-    const Lead = connection.model('Lead');
-    
-    // Find the lead
-    const lead = await Lead.findById(leadId);
-    if (!lead) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Lead not found' 
-      });
-    }
-    
-    // Update status
-    lead.status = toStage;
-    lead.updatedAt = new Date();
-    
-    await lead.save();
-    
-    // Send event to Facebook if needed
-    let facebookResult = null;
-    
-    if (sendToFacebook && facebookEvent) {
-      try {
-        // Prepare user data
-        const userData = {
-          email: lead.email,
-          phone: lead.phone,
-          name: [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' '),
-          fbclid: lead.extendedData?.fbclid
-        };
-        
-        // Prepare custom data
-        const customData = {
-          lead_id: leadId,
-          from_stage: fromStage,
-          to_stage: toStage,
-          value: lead.extendedData?.value || 0,
-          ...eventMetadata
-        };
-        
-        // Send the event to Facebook
-        facebookResult = await sendFacebookConversionEvent(facebookEvent, userData, customData, req);
-      } catch (error) {
-        console.error('Error sending Facebook event:', error);
-      }
-    }
-    
-    res.json({
-      success: true,
-      message: 'Lead successfully moved',
-      data: lead,
-      facebookResult
-    });
-  } catch (error) {
-    console.error('Error moving lead:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error moving lead', 
-      error: error.message 
-    });
-  }
-});
-
 // In server.js, aggiungi un endpoint per ottenere un singolo lead
 app.get('/api/leads/:type/:id', async (req, res) => {
   try {
@@ -3282,71 +3197,39 @@ app.post('/api/leads/facebook/:id/update-metadata', async (req, res) => {
 // API per spostare un lead da uno stato a un altro nel funnel
 app.post('/api/sales-funnel/move', async (req, res) => {
   try {
-    const { leadId, leadType, fromStage, toStage, originalFromStage, originalToStage } = req.body;
+    const { leadId, leadType, fromStage, toStage, sendToFacebook, facebookEvent, eventMetadata } = req.body;
     
-    if (!leadId || !leadType || !fromStage || !toStage) {
+    if (!leadId || !fromStage || !toStage) {
       return res.status(400).json({ 
         success: false, 
-        message: 'ID lead, tipo, stato di origine e stato di destinazione sono richiesti' 
+        message: 'Lead ID, source status, and destination status are required' 
       });
     }
     
-    // Ottieni la connessione dell'utente
+    // Get user connection
     const connection = await getUserConnection(req);
     
-    // Se non c'è connessione, restituisci un errore
-    if (connection === null) {
+    if (!connection) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
+        message: 'Database not available or not properly configured' 
       });
     }
     
-    let model;
+    // Use the Lead model
+    const Lead = connection.model('Lead');
     
-    // Determina il modello in base al tipo di lead
-    if (leadType === 'form') {
-      model = connection.model('FormData');
-    } else if (leadType === 'booking') {
-      model = connection.model('Booking');
-    } else if (leadType === 'facebook') {
-      model = connection.model('FacebookLead');
-    } else {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Tipo di lead non valido' 
-      });
-    }
+    // CHANGE THIS LINE: Find by leadId field instead of _id
+    const lead = await Lead.findOne({ leadId: leadId });
     
-    // Trova il lead
-    const lead = await model.findById(leadId);
     if (!lead) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Lead non trovato' 
+        message: 'Lead not found' 
       });
     }
     
-    // Verifica che lo stato attuale sia corretto
-    if (lead.status !== fromStage) {
-      // Controlla se è un caso di mappatura per bookings
-      if (leadType === 'booking' && 
-          ((lead.status === 'pending' && originalFromStage === 'new') ||
-           (lead.status === 'confirmed' && originalFromStage === 'contacted') ||
-           (lead.status === 'completed' && originalFromStage === 'qualified') ||
-           (lead.status === 'cancelled' && originalFromStage === 'lost'))) {
-        // È una situazione di mappatura attesa, possiamo procedere
-        console.log(`Gestito mapping di stato: ${lead.status} -> ${originalFromStage}`);
-      } else {
-        // Stato effettivamente non corrispondente
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Lo stato attuale del lead non corrisponde' 
-        });
-      }
-    }
-    
-    // Aggiorna lo stato usando il valore corretto per il tipo
+    // Update status
     lead.status = toStage;
     lead.updatedAt = new Date();
     
@@ -3427,14 +3310,15 @@ app.post('/api/sales-funnel/move', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Lead spostato con successo',
-      data: lead
+      message: 'Lead successfully moved',
+      data: lead,
+      facebookResult: null // Or actual result if you implement Facebook event sending
     });
   } catch (error) {
-    console.error('Errore nello spostamento del lead:', error);
+    console.error('Error moving lead:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Errore nello spostamento del lead', 
+      message: 'Error moving lead', 
       error: error.message 
     });
   }
