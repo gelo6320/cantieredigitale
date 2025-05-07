@@ -1257,6 +1257,228 @@ app.use('/api/dashboard', isAuthenticated);
 
 // ===== ROUTE API =====
 
+// API for getting all leads with unified structure
+app.get('/api/leads', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 200;
+    const skip = (page - 1) * limit;
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.json({
+        success: true,
+        data: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          pages: 0
+        }
+      });
+    }
+    
+    // Use the Lead model from the connection
+    const Lead = connection.model('Lead');
+    
+    // Filtering
+    let filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.formType) filter.formType = req.query.formType;
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      filter.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex }
+      ];
+    }
+    
+    // Count total documents and get data
+    const total = await Lead.countDocuments(filter);
+    const leads = await Lead.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    res.json({
+      success: true,
+      data: leads,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching leads:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching leads', 
+      error: error.message 
+    });
+  }
+});
+
+// API for updating lead metadata (value and service)
+app.post('/api/leads/:id/update-metadata', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value, service } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID required' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database not available or not properly configured' 
+      });
+    }
+    
+    // Use the Lead model from the connection
+    const Lead = connection.model('Lead');
+    
+    // Find the lead
+    const lead = await Lead.findById(id);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Lead not found' });
+    }
+    
+    // Update metadata
+    // Initialize extendedData if it doesn't exist
+    if (!lead.extendedData) {
+      lead.extendedData = {};
+    }
+    
+    // Update value if provided
+    if (value !== undefined && value !== null) {
+      lead.extendedData.value = value;
+    }
+    
+    // Update service if provided (in formData for new schema)
+    if (service !== undefined) {
+      if (!lead.extendedData.formData) {
+        lead.extendedData.formData = {};
+      }
+      lead.extendedData.formData.service = service;
+    }
+    
+    lead.updatedAt = new Date();
+    
+    await lead.save();
+    
+    res.json({
+      success: true,
+      message: 'Metadata updated successfully',
+      data: lead
+    });
+  } catch (error) {
+    console.error('Error updating lead metadata:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error updating metadata', 
+      error: error.message 
+    });
+  }
+});
+
+// Updated API for the funnel to move leads between stages
+app.post('/api/sales-funnel/move', async (req, res) => {
+  try {
+    const { leadId, fromStage, toStage, sendToFacebook, facebookEvent, eventMetadata } = req.body;
+    
+    if (!leadId || !fromStage || !toStage) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Lead ID, source status, and destination status are required' 
+      });
+    }
+    
+    // Get user connection
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database not available or not properly configured' 
+      });
+    }
+    
+    // Use the Lead model
+    const Lead = connection.model('Lead');
+    
+    // Find the lead
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Lead not found' 
+      });
+    }
+    
+    // Update status
+    lead.status = toStage;
+    lead.updatedAt = new Date();
+    
+    await lead.save();
+    
+    // Send event to Facebook if needed
+    let facebookResult = null;
+    
+    if (sendToFacebook && facebookEvent) {
+      try {
+        // Prepare user data
+        const userData = {
+          email: lead.email,
+          phone: lead.phone,
+          name: [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' '),
+          fbclid: lead.extendedData?.fbclid
+        };
+        
+        // Prepare custom data
+        const customData = {
+          lead_id: leadId,
+          from_stage: fromStage,
+          to_stage: toStage,
+          value: lead.extendedData?.value || 0,
+          ...eventMetadata
+        };
+        
+        // Send the event to Facebook
+        facebookResult = await sendFacebookConversionEvent(facebookEvent, userData, customData, req);
+      } catch (error) {
+        console.error('Error sending Facebook event:', error);
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: 'Lead successfully moved',
+      data: lead,
+      facebookResult
+    });
+  } catch (error) {
+    console.error('Error moving lead:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error moving lead', 
+      error: error.message 
+    });
+  }
+});
+
 // In server.js, aggiungi un endpoint per ottenere un singolo lead
 app.get('/api/leads/:type/:id', async (req, res) => {
   try {
