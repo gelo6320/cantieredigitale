@@ -567,7 +567,7 @@ async function getScreenshot(url) {
 }
 
 // Endpoint per accedere ai dati delle visite
-app.get('/api/banca-dati/visits', isAuthenticated, async (req, res) => {
+app.get('/api/banca-dati/visits', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;
@@ -618,7 +618,7 @@ app.get('/api/banca-dati/visits', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint per accedere ai dati dei clienti
-app.get('/api/banca-dati/clients', isAuthenticated, async (req, res) => {
+app.get('/api/banca-dati/clients', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;
@@ -669,7 +669,7 @@ app.get('/api/banca-dati/clients', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint per accedere ai dati delle audience Facebook
-app.get('/api/banca-dati/audiences', isAuthenticated, async (req, res) => {
+app.get('/api/banca-dati/audiences', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;
@@ -720,7 +720,7 @@ app.get('/api/banca-dati/audiences', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint per esportare i clienti in CSV
-app.get('/api/banca-dati/clients/export', isAuthenticated, async (req, res) => {
+app.get('/api/banca-dati/clients/export', async (req, res) => {
   try {
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
@@ -792,7 +792,7 @@ app.get('/api/banca-dati/clients/export', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint per esportare le audience Facebook in CSV
-app.get('/api/banca-dati/audiences/export', isAuthenticated, async (req, res) => {
+app.get('/api/banca-dati/audiences/export', async (req, res) => {
   try {
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
