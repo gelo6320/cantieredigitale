@@ -254,15 +254,44 @@ const SiteSchema = new mongoose.Schema({
 // Aggiungere il modello Site
 const Site = mongoose.model('Site', SiteSchema);
 
-// Aggiungi nel mod. Admin
-// Aggiornamento dello schema Admin per includere i siti
-/* Update Admin Schema to include sites
-AdminSchema.virtual('sites', {
-  ref: 'Site',
-  localField: '_id',
-  foreignField: 'userId'
+// Schema for tracking statistics
+const StatisticsSchema = new mongoose.Schema({
+  date: { type: Date, required: true, index: true },
+  totalVisits: { type: Number, default: 0 },
+  uniqueVisitors: { type: Number, default: 0 },
+  consentedVisits: { type: Number, default: 0 },
+  consentRate: { type: Number, default: 0 },
+  pageViews: { type: Number, default: 0 },
+  bounceRate: { type: Number, default: 0 },
+  avgTimeOnSite: { type: Number, default: 0 },
+  totalTimeOnPage: { type: Number, default: 0 },
+  avgTimeOnPage: { type: Number, default: 0 },
+  buttonClicks: {
+    total: { type: Number, default: 0 },
+    byId: { type: Map, of: Number, default: {} }
+  },
+  conversions: {
+    total: { type: Number, default: 0 },
+    byType: { type: Map, of: Number, default: {} },
+    bySource: { type: Map, of: Number, default: {} }
+  },
+  conversionRate: { type: Number, default: 0 },
+  funnel: {
+    entries: { type: Number, default: 0 },
+    completions: { type: Number, default: 0 }
+  },
+  mobileVsDesktop: {
+    mobile: { type: Number, default: 0 },
+    desktop: { type: Number, default: 0 }
+  },
+  timeBySource: { type: Map, of: mongoose.Schema.Types.Mixed, default: {} },
+  sources: { type: Map, of: Number, default: {} },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
-*/
+
+// Create the model
+const Statistics = mongoose.model('Statistics', StatisticsSchema);
 
 // Funzione per estrarre il dominio da un URL
 function extractDomain(url) {
@@ -366,6 +395,49 @@ app.get('/api/sites', async (req, res) => {
   } catch (error) {
     console.error('Errore nel recupero dei siti:', error);
     res.status(500).json({ success: false, message: 'Errore nel recupero dei siti', error: error.message });
+  }
+});
+
+app.get('/api/tracciamento/statistics', async (req, res) => {
+  try {
+    // Parse query parameters
+    const timeRange = req.query.timeRange || '7d';  // Default to 7 days
+    
+    // Determine date filter based on timeRange
+    const dateFilter = {};
+    const now = new Date();
+    
+    if (timeRange === '24h') {
+      const oneDayAgo = new Date(now);
+      oneDayAgo.setDate(now.getDate() - 1);
+      dateFilter.date = { $gte: oneDayAgo };
+    } else if (timeRange === '7d') {
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+      dateFilter.date = { $gte: sevenDaysAgo };
+    } else if (timeRange === '30d') {
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      dateFilter.date = { $gte: thirtyDaysAgo };
+    }
+    
+    // Query the database for statistics
+    const statistics = await Statistics.find(dateFilter).sort({ date: -1 });
+    
+    // Add CORS headers for the frontend
+    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'https://costruzionedigitale.com');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    res.json(statistics);
+  } catch (error) {
+    console.error('Error getting statistics:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch statistics data', 
+      error: error.message 
+    });
   }
 });
 
