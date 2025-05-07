@@ -106,6 +106,114 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // ===== DEFINIZIONE SCHEMI =====
 
+const VisitSchema = new mongoose.Schema({
+  sessionId: { type: String, required: true, index: true },
+  timestamp: { type: Date, default: Date.now },
+  url: String,
+  path: String,
+  title: String,
+  referrer: String,
+  funnelStep: Number,
+  funnelName: String,
+  userAgent: String,
+  ip: String,
+  deviceInfo: Object,
+  cookieConsent: { type: Boolean, default: false },
+  utmParams: Object,
+  isNewVisitor: Boolean,
+  isEntryPoint: { type: Boolean, default: false },
+  isExitPoint: { type: Boolean, default: false },
+  timeOnPage: Number, // in secondi
+  scrollDepth: Number, // percentuale
+});
+
+const Visit = mongoose.model('Visit', VisitSchema);
+
+// Schema per i client
+const ClientSchema = new mongoose.Schema({
+  // Identificatori
+  leadId: { type: String, required: true, unique: true }, // ID del lead originale
+  clientId: { type: String, required: true, unique: true }, // ID unico del cliente
+  
+  // Dati personali
+  firstName: String,
+  lastName: String,
+  email: { type: String, required: true, index: true },
+  phone: String,
+  fullName: String,
+  
+  // Dati commerciali
+  value: { type: Number, default: 0 },
+  service: String,
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive', 'completed', 'on-hold'], 
+    default: 'active' 
+  },
+  
+  // Date importanti
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  convertedAt: { type: Date, default: Date.now }, // Data di conversione da lead a cliente
+  
+  // Origine
+  leadSource: String, // Form, booking, facebook, etc.
+  originalSource: String, // Dettaglio della fonte (google, facebook, referral, etc.)
+  campaign: String,
+  medium: String,
+  
+  // Consensi
+  consent: {
+    marketing: { type: Boolean, default: false },
+    analytics: { type: Boolean, default: false },
+    thirdParty: { type: Boolean, default: false },
+    timestamp: Date,
+    version: String,
+    method: String
+  },
+  
+  // Dati estesi
+  extendedData: {
+    consentGiven: { type: Boolean, default: false },
+    ipAddress: String,
+    userAgent: String,
+    utmParams: Object,
+    fbclid: String,
+    referrer: String,
+    landingPage: String,
+    deviceInfo: Object,
+    formData: Object,
+    notes: String,
+    currency: { type: String, default: 'EUR' }
+  },
+  
+  // Dati aggiuntivi
+  notes: [{ 
+    text: String,
+    createdAt: { type: Date, default: Date.now },
+    createdBy: String
+  }],
+  tags: [String],
+  properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+  
+  // Progetti associati
+  projects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+  
+  // Flag amministrativi
+  isArchived: { type: Boolean, default: false },
+  
+}, { collection: 'clients', strict: false });
+
+// Crea indici per prestazioni migliori
+ClientSchema.index({ email: 1 });
+ClientSchema.index({ clientId: 1 });
+ClientSchema.index({ leadId: 1 });
+ClientSchema.index({ createdAt: 1 });
+ClientSchema.index({ updatedAt: 1 });
+
+// Crea il modello Client
+const Client = mongoose.model('Client', ClientSchema);
+
 // Schema per i dati del form
 const FormDataSchema = new mongoose.Schema({
   name: String,
@@ -292,6 +400,89 @@ const StatisticsSchema = new mongoose.Schema({
 
 // Create the model
 const Statistics = mongoose.model('Statistics', StatisticsSchema);
+
+const FacebookAudienceSchema = new mongoose.Schema({
+  // Identificatori principali
+  userId: { type: String, sparse: true, index: true },
+  email: { type: String, sparse: true, index: true },
+  phone: { type: String, sparse: true },
+  fingerprint: { type: String, sparse: true, index: true },
+  
+  // Dati utente base
+  firstName: String,
+  lastName: String,
+  
+  // Campi specifici per Facebook
+  fbclid: String,
+  fbp: String,
+  fbc: String,
+  
+  // Dati per CAPI (Conversion API)
+  hashedEmail: String,
+  hashedPhone: String,
+  
+  // Dati demografici e di posizione
+  country: String,
+  city: String,
+  language: String,
+  deviceInfo: mongoose.Schema.Types.Mixed,
+  
+  // Dati di origine e attribuzione
+  source: String,
+  medium: String,
+  campaign: String,
+  referrer: String,
+  landingPage: String,
+  utmParams: mongoose.Schema.Types.Mixed,
+  
+  // Dati di conversione (semplificato per evitare problemi di validazione)
+  conversions: [{
+    type: { type: String },
+    formType: String,
+    value: Number,
+    timestamp: { type: Date, default: Date.now },
+    metadata: mongoose.Schema.Types.Mixed
+  }],
+  
+  // Gestione del consenso
+  adOptimizationConsent: { 
+    type: String, 
+    enum: ['GRANTED', 'DENIED', 'UNSPECIFIED'], 
+    default: 'UNSPECIFIED' 
+  },
+  
+  // Metadati
+  firstSeen: { type: Date, default: Date.now },
+  lastSeen: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now },
+  
+  // Campi per deduplicazione
+  duplicateOf: { type: String, sparse: true },
+  duplicateScore: Number,
+  mergedWith: { type: String, sparse: true },
+  mergedRecords: [String],
+  
+  // Stato di sincronizzazione con Facebook
+  syncedToFacebook: { type: Boolean, default: false },
+  lastSyncAttempt: Date,
+  syncResult: mongoose.Schema.Types.Mixed
+}, {
+  // Opzioni schema per maggiore flessibilità
+  strict: false, // Permette campi non definiti nello schema
+  minimize: false // Non rimuove oggetti vuoti
+});
+
+// Verifica se il modello esiste già per evitare duplicati
+let FacebookAudience;
+try {
+  // Prova a ottenere il modello esistente
+  FacebookAudience = mongoose.model('FacebookAudience');
+  console.log('Modello FacebookAudience già registrato, utilizzo quello esistente');
+} catch (e) {
+  // Se il modello non esiste, crealo
+  FacebookAudience = mongoose.model('FacebookAudience', FacebookAudienceSchema);
+  console.log('Nuovo modello FacebookAudience registrato');
+}
 
 // Funzione per ottenere metrics di PageSpeed Insights
 async function getPageSpeedMetrics(url) {
@@ -3093,130 +3284,308 @@ app.post('/api/leads/facebook/:id/update-metadata', async (req, res) => {
 });
 
 // API per spostare un lead da uno stato a un altro nel funnel
+// API per spostare un lead da uno stato a un altro nel funnel (versione aggiornata)
 app.post('/api/sales-funnel/move', async (req, res) => {
   try {
-    const { leadId, leadType, fromStage, toStage, sendToFacebook, facebookEvent, eventMetadata } = req.body;
+    const { 
+      leadId, 
+      leadType, 
+      fromStage, 
+      toStage, 
+      sendToFacebook, 
+      facebookData, 
+      originalFromStage, 
+      originalToStage,
+      createClient,
+      consentError
+    } = req.body;
     
     if (!leadId || !fromStage || !toStage) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Lead ID, source status, and destination status are required' 
+        message: 'Lead ID, status originale e status destinazione sono richiesti' 
       });
     }
     
-    // Get user connection
+    // Ottieni la connessione dell'utente
     const connection = await getUserConnection(req);
     
     if (!connection) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Database not available or not properly configured' 
+        message: 'Database non disponibile o non configurato correttamente' 
       });
     }
     
-    // Use the Lead model
+    // Usa il modello Lead
     const Lead = connection.model('Lead');
     
-    // CHANGE THIS LINE: Find by leadId field instead of _id
+    // IMPORTANTE: Cerca utilizzando il campo leadId invece di _id
     const lead = await Lead.findOne({ leadId: leadId });
     
     if (!lead) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Lead not found' 
+        message: 'Lead non trovato' 
       });
     }
     
-    // Update status
+    // Aggiorna lo stato
     lead.status = toStage;
     lead.updatedAt = new Date();
     
     await lead.save();
     
-    // Invia evento a Facebook se necessario
+    // Risultati dell'invio a Facebook
     let facebookResult = null;
+    let clientResult = null;
     
-    try {
-      // Determina l'evento Facebook in base al nuovo stato
-      let eventName = '';
-      
-      switch (toStage) {
-        case 'contacted':
-          eventName = 'QualifiedLead';
-          break;
-        case 'qualified':
-          eventName = 'QualifiedLead';
-          break;
-        case 'opportunity':
-          eventName = 'Opportunity';
-          break;
-        case 'proposal':
-          eventName = 'ProposalSent';
-          break;
-        case 'customer':
-          eventName = 'Purchase';
-          break;
-        case 'lost':
-          eventName = 'Lost';
-          break;
-        default:
-          // Per gli altri stati non inviamo eventi
-          break;
-      }
-      
-      if (eventName) {
-        // Prepara i dati
-        const userData = {
-          email: lead.email,
-          phone: lead.phone,
-          name: lead.name,
-          fbclid: lead.fbclid,
-          fbclidTimestamp: lead.fbclidTimestamp
-        };
-        
-        const customData = {
-          lead_id: leadId,
-          lead_type: leadType,
-          from_stage: fromStage,
-          to_stage: toStage,
-          value: lead.value || 0
-        };
-        
-        // Invia l'evento a Facebook
-        facebookResult = await sendFacebookConversionEvent(eventName, userData, customData, req);
-        
-        // Registra l'evento nel CRM
-        if (lead.crmEvents) {
-          lead.crmEvents.push({
-            eventName,
-            eventTime: new Date(),
-            sentToFacebook: facebookResult.success,
-            metadata: {
-              fromStage,
-              toStage,
-              facebookResult: facebookResult.success ? 'success' : 'error'
-            }
-          });
+    // Se è richiesta la creazione di un cliente (lead convertito in customer)
+    if (createClient && toStage === 'converted') {
+      try {
+        // Verifica se esiste già un Client model nel connection
+        if (!connection.models['Client']) {
+          // Definiamo lo schema Client sulla connessione dell'utente
+          const ClientSchema = new mongoose.Schema({
+            leadId: { type: String, required: true, unique: true },
+            clientId: { type: String, required: true, unique: true },
+            firstName: String,
+            lastName: String,
+            email: { type: String, required: true, index: true },
+            phone: String,
+            fullName: String,
+            value: { type: Number, default: 0 },
+            service: String,
+            status: { 
+              type: String, 
+              enum: ['active', 'inactive', 'completed', 'on-hold'], 
+              default: 'active' 
+            },
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now },
+            convertedAt: { type: Date, default: Date.now },
+            leadSource: String,
+            originalSource: String,
+            campaign: String,
+            medium: String,
+            consent: {
+              marketing: { type: Boolean, default: false },
+              analytics: { type: Boolean, default: false },
+              thirdParty: { type: Boolean, default: false },
+              timestamp: Date,
+              version: String,
+              method: String
+            },
+            extendedData: mongoose.Schema.Types.Mixed,
+            notes: [{
+              text: String,
+              createdAt: { type: Date, default: Date.now },
+              createdBy: String
+            }],
+            tags: [String],
+            properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+            isArchived: { type: Boolean, default: false }
+          }, { collection: 'clients', strict: false });
           
-          await lead.save();
+          // Registra il modello
+          connection.model('Client', ClientSchema);
         }
+        
+        // Ottieni il modello Client
+        const Client = connection.model('Client');
+        
+        // Verifica se esiste già un cliente con questo leadId
+        const existingClient = await Client.findOne({ leadId: leadId });
+        
+        if (!existingClient) {
+          // Prepara i dati del cliente basandosi sul lead
+          const clientData = {
+            leadId: lead.leadId,
+            clientId: 'CL-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            firstName: lead.firstName || '',
+            lastName: lead.lastName || '',
+            email: lead.email,
+            phone: lead.phone || '',
+            fullName: [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || lead.name || lead.email.split('@')[0],
+            value: lead.value || 0,
+            service: lead.service || '',
+            leadSource: leadType,
+            originalSource: lead.source || lead.medium || '',
+            campaign: lead.campaign || '',
+            medium: lead.medium || '',
+            convertedAt: new Date(),
+            consent: lead.consent || {
+              marketing: false,
+              analytics: false,
+              thirdParty: false
+            },
+            extendedData: lead.extendedData || {}
+          };
+          
+          // Crea il nuovo cliente
+          const newClient = new Client(clientData);
+          await newClient.save();
+          
+          clientResult = {
+            success: true,
+            clientId: newClient.clientId,
+            message: 'Cliente creato con successo'
+          };
+        } else {
+          // Aggiorna il cliente esistente
+          existingClient.updatedAt = new Date();
+          existingClient.value = lead.value || existingClient.value;
+          existingClient.service = lead.service || existingClient.service;
+          existingClient.status = 'active';
+          await existingClient.save();
+          
+          clientResult = {
+            success: true,
+            clientId: existingClient.clientId,
+            message: 'Cliente esistente aggiornato'
+          };
+        }
+      } catch (clientError) {
+        console.error('Errore nella creazione/aggiornamento del cliente:', clientError);
+        clientResult = {
+          success: false,
+          error: clientError.message,
+          message: 'Errore nella gestione del cliente'
+        };
       }
-    } catch (error) {
-      console.error('Errore nell\'invio dell\'evento a Facebook:', error);
-      // Non fallire l'intera richiesta se l'invio a Facebook fallisce
+    }
+    
+    // Se è richiesto l'invio a Facebook
+    if (sendToFacebook && facebookData) {
+      try {
+        // Recupera le configurazioni Facebook dell'utente
+        const accessToken = req.session?.userConfig?.access_token || process.env.FACEBOOK_ACCESS_TOKEN || process.env.ACCESS_TOKEN;
+        const metaPixelId = req.session?.userConfig?.meta_pixel_id || process.env.FACEBOOK_PIXEL_ID || '1543790469631614';
+        
+        if (!accessToken) {
+          throw new Error('Facebook Access Token non configurato');
+        }
+        
+        // Prepara il payload per la CAPI
+        const payload = {
+          data: [{
+            event_name: facebookData.eventName,
+            event_time: Math.floor(Date.now() / 1000),
+            event_id: facebookData.eventId,
+            action_source: "system_generated",
+            user_data: facebookData.userData,
+            custom_data: facebookData.customData,
+            event_source_url: facebookData.eventSourceUrl || `https://${req.get('host')}`,
+          }],
+          access_token: accessToken,
+          partner_agent: 'costruzionedigitale-nodejs-crm'
+        };
+        
+        // Aggiungi parametri specifici per eventi di acquisto
+        if (facebookData.eventName === 'Purchase') {
+          payload.data[0].custom_data = {
+            ...payload.data[0].custom_data,
+            value: facebookData.value || 0,
+            currency: facebookData.currency || 'EUR',
+            content_type: facebookData.contentType || 'product',
+            content_name: facebookData.customData.content_name || 'Servizio'
+          };
+        }
+        
+        // IP address e user agent se disponibili
+        if (facebookData.ipAddress) {
+          payload.data[0].user_data.client_ip_address = facebookData.ipAddress;
+        }
+        
+        if (facebookData.userAgent) {
+          payload.data[0].user_data.client_user_agent = facebookData.userAgent;
+        }
+        
+        // Aggiungi FBC se disponibile
+        if (facebookData.fbc) {
+          payload.data[0].user_data.fbc = facebookData.fbc;
+        }
+        
+        // Invia l'evento alla Facebook CAPI
+        const response = await axios.post(
+          `https://graph.facebook.com/v22.0/${metaPixelId}/events`,
+          payload
+        );
+        
+        // Salva l'evento nel database
+        if (connection.models['FacebookEvent']) {
+          const FacebookEvent = connection.models['FacebookEvent'];
+          
+          await FacebookEvent.create({
+            leadId: lead._id,
+            leadType: leadType,
+            eventName: facebookData.eventName,
+            eventTime: new Date(),
+            userData: facebookData.userData,
+            customData: facebookData.customData,
+            eventId: facebookData.eventId,
+            success: true,
+            response: response.data
+          });
+        }
+        
+        facebookResult = {
+          success: true,
+          eventId: facebookData.eventId,
+          response: response.data
+        };
+      } catch (fbError) {
+        console.error(`Errore nell'invio dell'evento ${facebookData.eventName}:`, fbError);
+        
+        // Registra comunque l'errore nel database
+        if (connection.models['FacebookEvent']) {
+          const FacebookEvent = connection.models['FacebookEvent'];
+          
+          await FacebookEvent.create({
+            leadId: lead._id,
+            leadType: leadType,
+            eventName: facebookData?.eventName || 'unknown',
+            eventTime: new Date(),
+            userData: facebookData?.userData || {},
+            customData: facebookData?.customData || {},
+            eventId: facebookData?.eventId || `error_${Date.now()}`,
+            success: false,
+            error: fbError.message || 'Errore sconosciuto',
+            details: fbError.response ? fbError.response.data : null
+          });
+        }
+        
+        facebookResult = {
+          success: false,
+          error: fbError.message || 'Errore sconosciuto',
+          details: fbError.response ? fbError.response.data : null
+        };
+      }
+    } else if (consentError) {
+      // Registra l'errore di consenso
+      facebookResult = {
+        success: false,
+        error: consentError,
+        details: 'Consenso terze parti mancante'
+      };
     }
     
     res.json({
       success: true,
-      message: 'Lead successfully moved',
-      data: lead,
-      facebookResult: null // Or actual result if you implement Facebook event sending
+      message: 'Lead spostato con successo',
+      data: { 
+        leadId, 
+        status: toStage, 
+        originalStatus: originalToStage || toStage 
+      },
+      facebookResult,
+      clientResult
     });
   } catch (error) {
-    console.error('Error moving lead:', error);
+    console.error('Errore nello spostamento del lead:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Error moving lead', 
+      message: 'Errore nello spostamento del lead', 
       error: error.message 
     });
   }
