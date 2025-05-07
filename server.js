@@ -555,14 +555,18 @@ async function getUserConnection(req) {
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Modify this section in the getUserConnection function
+    // Modify this section in the getUserConnection function where you define the LeadSchema
     if (!connection.models['Lead']) {
       console.log("[getUserConnection] Accessing leads collection");
       
-      // Instead of defining a detailed schema, use a flexible schema
-      const LeadSchema = new mongoose.Schema({}, { 
+      // Use a flexible schema with the viewed field explicitly defined
+      const LeadSchema = new mongoose.Schema({
+        // Keep the existing flexible schema structure
+        viewed: { type: Boolean, default: false }, // Add the viewed field with default false
+        viewedAt: { type: Date }                  // Track when it was viewed
+      }, { 
         collection: 'leads',
-        strict: false // This allows any fields without validation
+        strict: false // This allows any other fields without validation
       });
       
       // Register the model with the existing collection
@@ -1855,7 +1859,6 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
       let type = 'form'; // Default to form
       if (lead.formType === 'booking') type = 'booking';
       if (lead.formType === 'facebook') type = 'facebook';
-      // Any formType including "contact" will default to "form"
       
       return {
         _id: lead._id,
@@ -1864,7 +1867,7 @@ app.get('/api/dashboard/new-contacts', async (req, res) => {
         source: lead.source || lead.formType || 'Unknown',
         type: type,
         createdAt: lead.createdAt,
-        viewed: lead.status !== 'new' // Considered viewed if status is not "new"
+        viewed: lead.viewed === true // Use the explicit viewed field instead of inferring from status
       };
     });
     
@@ -1908,12 +1911,14 @@ app.post('/api/dashboard/mark-viewed/:id', async (req, res) => {
     // Get the Lead model
     const Lead = connection.model('Lead');
     
-    // Update lead status from 'new' to 'contacted' (which indicates it's been viewed)
+    // Update lead to set viewed=true and update status from 'new' to 'contacted'
     const updateResult = await Lead.findByIdAndUpdate(
       id,
       { 
         $set: { 
           status: 'contacted', 
+          viewed: true,          // Set viewed flag to true
+          viewedAt: new Date(),  // Set viewedAt to current time
           updatedAt: new Date() 
         } 
       },
@@ -1965,12 +1970,14 @@ app.post('/api/dashboard/mark-all-viewed', async (req, res) => {
     // Get the Lead model
     const Lead = connection.model('Lead');
     
-    // Update all leads with status 'new' to 'contacted'
+    // Update all leads with viewed=false to set viewed=true
     const result = await Lead.updateMany(
-      { status: 'new' },
+      { viewed: false }, // Only update unviewed leads
       { 
         $set: { 
           status: 'contacted',
+          viewed: true,
+          viewedAt: new Date(),
           updatedAt: new Date()
         } 
       }
@@ -1979,7 +1986,7 @@ app.post('/api/dashboard/mark-all-viewed', async (req, res) => {
     res.json({ 
       success: true, 
       message: 'Tutti i contatti segnati come visti',
-      count: result.nModified || 0
+      count: result.modifiedCount || 0
     });
   } catch (error) {
     console.error('Error marking all contacts as viewed:', error);
@@ -1989,23 +1996,6 @@ app.post('/api/dashboard/mark-all-viewed', async (req, res) => {
     });
   }
 });
-
-// Update the schema definitions to include 'viewed' field
-
-// For FormDataSchema:
-// Add the following fields:
-// viewed: { type: Boolean, default: false },
-// viewedAt: { type: Date },
-
-// For BookingSchema:
-// Add the following fields:
-// viewed: { type: Boolean, default: false },
-// viewedAt: { type: Date },
-
-// For FacebookLeadSchema:
-// Add the following fields:
-// viewed: { type: Boolean, default: false },
-// viewedAt: { type: Date },
 
 // API per ottenere tutti i progetti dell'utente
 app.get('/api/projects', async (req, res) => {
