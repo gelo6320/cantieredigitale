@@ -1127,7 +1127,7 @@ async function getUserConnection(req) {
         formType: { type: String, required: true },
         status: {
           type: String,
-          enum: ['new', 'contacted', 'qualified', 'opportunity', 'customer', 'lost'],
+          enum: ['new', 'contacted', 'qualified', 'opportunity', 'proposal', 'customer', 'lost'],
           default: 'new'
         },
         // Add these two fields at the top level:
