@@ -4792,9 +4792,13 @@ process.on('SIGTERM', () => {
   server.close(() => {
     console.log('Server Express chiuso.');
     connectionManager.closeAll();
-    mongoose.connection.close(false, () => {
+    // Fix: Remove the callback
+    mongoose.connection.close().then(() => {
       console.log('Connessione MongoDB principale chiusa.');
       process.exit(0);
+    }).catch(err => {
+      console.error('Errore nella chiusura della connessione:', err);
+      process.exit(1);
     });
   });
 });
@@ -4804,9 +4808,12 @@ process.on('SIGINT', () => {
   server.close(() => {
     console.log('Server Express chiuso.');
     connectionManager.closeAll();
-    mongoose.connection.close(false, () => {
+    mongoose.connection.close().then(() => {
       console.log('Connessione MongoDB principale chiusa.');
       process.exit(0);
+    }).catch(err => {
+      console.error('Errore nella chiusura della connessione:', err);
+      process.exit(1);
     });
   });
 });
