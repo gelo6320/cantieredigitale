@@ -502,6 +502,27 @@ try {
   console.log('Nuovo modello FacebookAudience registrato');
 }
 
+// Schema per gli eventi del calendario
+const CalendarEventSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date, required: true },
+  status: { 
+    type: String, 
+    enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+    default: 'pending'
+  },
+  eventType: {
+    type: String,
+    enum: ['appointment', 'reminder'],
+    default: 'appointment'
+  },
+  location: { type: String },
+  description: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 // Funzione per ottenere metrics di PageSpeed Insights
 async function getPageSpeedMetrics(url) {
   try {
@@ -583,6 +604,213 @@ async function getScreenshot(url) {
     return `https://api.screenshotmachine.com?key=${screenshotApiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
   }
 }
+
+// ----------------------------------------------------------------
+// ENDPOINT CALENDARIO
+// ----------------------------------------------------------------
+
+
+// API per ottenere tutti gli eventi del calendario
+app.get('/api/calendar/events', checkApiAuth, async (req, res) => {
+  try {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello CalendarEvent non esiste nella connessione, crealo
+    if (!connection.models['CalendarEvent']) {
+      connection.model('CalendarEvent', CalendarEventSchema);
+    }
+    
+    const CalendarEvent = connection.model('CalendarEvent');
+    
+    // Filtri opzionali
+    let filter = {};
+    
+    // Filtro per date (opzionale)
+    if (req.query.startDate && req.query.endDate) {
+      filter.start = { 
+        $gte: new Date(req.query.startDate),
+        $lte: new Date(req.query.endDate)
+      };
+    }
+    
+    // Recupera gli eventi
+    const events = await CalendarEvent.find(filter).sort({ start: 1 });
+    
+    res.json({
+      success: true,
+      data: events
+    });
+  } catch (error) {
+    console.error("Errore nel recupero degli eventi del calendario:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero degli eventi', 
+      error: error.message 
+    });
+  }
+});
+
+// API per creare un nuovo evento del calendario
+app.post('/api/calendar/events', checkApiAuth, async (req, res) => {
+  try {
+    const { title, start, end, status, eventType, location, description } = req.body;
+    
+    if (!title || !start || !end) {
+      return res.status(400).json({ success: false, message: 'Titolo, data di inizio e fine sono richiesti' });
+    }
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello CalendarEvent non esiste nella connessione, crealo
+    if (!connection.models['CalendarEvent']) {
+      connection.model('CalendarEvent', CalendarEventSchema);
+    }
+    
+    const CalendarEvent = connection.model('CalendarEvent');
+    
+    // Crea il nuovo evento
+    const newEvent = new CalendarEvent({
+      title,
+      start: new Date(start),
+      end: new Date(end),
+      status: status || 'pending',
+      eventType: eventType || 'appointment',
+      location,
+      description
+    });
+    
+    await newEvent.save();
+    
+    res.status(201).json({
+      success: true,
+      data: newEvent,
+      message: 'Evento creato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nella creazione dell\'evento:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nella creazione dell\'evento', 
+      error: error.message 
+    });
+  }
+});
+
+// API per aggiornare un evento del calendario
+app.put('/api/calendar/events/:id', checkApiAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, start, end, status, eventType, location, description } = req.body;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello CalendarEvent non esiste nella connessione, crealo
+    if (!connection.models['CalendarEvent']) {
+      connection.model('CalendarEvent', CalendarEventSchema);
+    }
+    
+    const CalendarEvent = connection.model('CalendarEvent');
+    
+    // Trova l'evento
+    const event = await CalendarEvent.findById(id);
+    
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Evento non trovato' });
+    }
+    
+    // Aggiorna i campi
+    if (title) event.title = title;
+    if (start) event.start = new Date(start);
+    if (end) event.end = new Date(end);
+    if (status) event.status = status;
+    if (eventType) event.eventType = eventType;
+    if (location !== undefined) event.location = location;
+    if (description !== undefined) event.description = description;
+    event.updatedAt = new Date();
+    
+    await event.save();
+    
+    res.json({
+      success: true,
+      data: event,
+      message: 'Evento aggiornato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento dell\'evento:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nell\'aggiornamento dell\'evento', 
+      error: error.message 
+    });
+  }
+});
+
+// API per eliminare un evento del calendario
+app.delete('/api/calendar/events/:id', checkApiAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello CalendarEvent non esiste nella connessione, crealo
+    if (!connection.models['CalendarEvent']) {
+      connection.model('CalendarEvent', CalendarEventSchema);
+    }
+    
+    const CalendarEvent = connection.model('CalendarEvent');
+    
+    // Trova ed elimina l'evento
+    const result = await CalendarEvent.deleteOne({ _id: id });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Evento non trovato' });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Evento eliminato con successo'
+    });
+  } catch (error) {
+    console.error('Errore nell\'eliminazione dell\'evento:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nell\'eliminazione dell\'evento', 
+      error: error.message 
+    });
+  }
+});
 
 // ----------------------------------------------------------------
 // ENDPOINT TRACCIAMENTO CRM
@@ -4741,43 +4969,6 @@ async function retrieveLeadDetails(leadId, formId) {
 
 // ===== ROUTE API DASHBOARD =====
 
-// API per creare un nuovo appuntamento
-app.post('/api/appointments', checkApiAuth, async (req, res) => {
-  try {
-    const { title, date, time, duration, status, clientId, description } = req.body;
-    
-    if (!title || !date || !time) {
-      return res.status(400).json({ success: false, message: 'Titolo, data e ora sono richiesti' });
-    }
-    
-    // Crea oggetti Date per inizio e fine
-    const start = new Date(`${date}T${time}`);
-    const end = new Date(start.getTime() + parseInt(duration || 60) * 60000);
-    
-    // In produzione salveresti nel DB, qui simuliamo
-    const newAppointment = {
-      id: Date.now().toString(),
-      title,
-      start,
-      end,
-      backgroundColor: getStatusColor(status),
-      borderColor: getStatusColor(status),
-      status: status || 'pending',
-      clientId: clientId || '',
-      description: description || ''
-    };
-    
-    res.status(201).json({
-      success: true,
-      data: newAppointment,
-      message: 'Appuntamento creato con successo'
-    });
-  } catch (error) {
-    console.error('Errore nella creazione appuntamento:', error);
-    res.status(500).json({ success: false, message: 'Errore nella creazione appuntamento', error: error.message });
-  }
-});
-
 // API per aggiornare i metadati di un form (valore e servizio)
 app.post('/api/leads/forms/:id/update-metadata', async (req, res) => {
   try {
@@ -5254,64 +5445,6 @@ app.post('/api/sales-funnel/move', async (req, res) => {
     });
   }
 });
-
-// API per aggiornare un appuntamento
-app.put('/api/appointments/:id', checkApiAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, date, time, duration, status, clientId, description, start, end } = req.body;
-    
-    // Simuliamo l'aggiornamento
-    const updatedAppointment = {
-      id,
-      title: title || 'Appuntamento aggiornato',
-      start: start || (date && time ? new Date(`${date}T${time}`) : new Date()),
-      end: end || (date && time && duration ? new Date(new Date(`${date}T${time}`).getTime() + parseInt(duration) * 60000) : new Date()),
-      backgroundColor: getStatusColor(status),
-      borderColor: getStatusColor(status),
-      status: status || 'pending',
-      clientId: clientId || '',
-      description: description || ''
-    };
-    
-    res.json({
-      success: true,
-      data: updatedAppointment,
-      message: 'Appuntamento aggiornato con successo'
-    });
-  } catch (error) {
-    console.error('Errore nell\'aggiornamento appuntamento:', error);
-    res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento appuntamento', error: error.message });
-  }
-});
-
-// API per eliminare un appuntamento
-app.delete('/api/appointments/:id', checkApiAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Simuliamo l'eliminazione
-    res.json({
-      success: true,
-      data: { id },
-      message: 'Appuntamento eliminato con successo'
-    });
-  } catch (error) {
-    console.error('Errore nell\'eliminazione appuntamento:', error);
-    res.status(500).json({ success: false, message: 'Errore nell\'eliminazione appuntamento', error: error.message });
-  }
-});
-
-// Funzione helper per ottenere colore in base allo stato
-function getStatusColor(status) {
-  switch (status) {
-    case 'pending': return '#e67e22';
-    case 'confirmed': return '#FF6B00';
-    case 'completed': return '#27ae60';
-    case 'cancelled': return '#e74c3c';
-    default: return '#FF6B00';
-  }
-}
 
 // Inizializza sessione dashboard
 app.get('/api/dashboard/init-session', (req, res) => {
