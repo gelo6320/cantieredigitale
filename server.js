@@ -313,7 +313,7 @@ const CookieConsentSchema = new mongoose.Schema({
 // Schema per gli eventi Facebook
 const FacebookEventSchema = new mongoose.Schema({
   leadId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  leadType: { type: String, enum: ['form', 'booking', 'facebook'], required: true },
+  leadType: { type: String, enum: ['form', 'booking', 'facebook', 'contact'], required: true },
   eventName: { type: String, required: true },
   eventTime: { type: Date, default: Date.now },
   userData: Object,
