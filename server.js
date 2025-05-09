@@ -787,7 +787,6 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
 });
 
 // Endpoint per esportare i clienti in CSV
-// Endpoint per esportare i clienti in CSV
 app.get('/api/banca-dati/clients/export', async (req, res) => {
   try {
     console.log("[EXPORT API] Richiesta di esportazione clienti per Facebook");
@@ -813,10 +812,31 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
     const clients = await UserClient.find({});
     console.log(`[EXPORT API] Trovati ${clients.length} clienti`);
     
-    // Definisci le intestazioni per il CSV secondo il formato Facebook
-    // https://www.facebook.com/business/help/112061095610075
+    // Definisci le intestazioni per il CSV secondo il formato Facebook esteso
     const headers = [
-      "email", "phone", "fn", "ln", "country", "ct", "external_id", "value", "st"
+      "email",              // Email
+      "phone",              // Telefono
+      "fn",                 // Nome
+      "ln",                 // Cognome
+      "country",            // Paese (codice ISO)
+      "ct",                 // Città
+      "external_id",        // ID esterno (clientId)
+      "client_ip_address",  // Indirizzo IP
+      "client_user_agent",  // User agent
+      "fbc",                // Facebook click parameter
+      "fbp",                // Facebook browser parameter
+      "lead_id",            // ID del lead originale
+      "subscription_id",    // ID abbonamento
+      "value",              // Valore cliente (LTV)
+      "currency",           // Valuta
+      "f_name",             // Nome (formato alternativo)
+      "l_name",             // Cognome (formato alternativo)
+      "st",                 // Stato/Provincia
+      "zp",                 // CAP
+      "conversion_date",    // Data di conversione
+      "source",             // Fonte
+      "medium",             // Medium
+      "campaign"            // Campagna
     ];
     
     // Funzione per formattare una riga di CSV e pulire i dati
@@ -835,37 +855,47 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
       // Formatta il telefono in formato internazionale
       let phone = client.phone || "";
       if (phone && !phone.startsWith('+')) {
-        // Assumiamo che sia italiano se non ha prefisso
         phone = phone.replace(/^0/, '+39');
       }
       
-      // Estrai paese e città dalle informazioni estese
-      let country = "IT"; // Default Italia
-      let city = "";
-      let state = "";
+      // Estrai dati estesi
+      let extData = client.extendedData || {};
       
-      if (client.extendedData) {
-        if (client.extendedData.country) country = client.extendedData.country;
-        if (client.extendedData.city) city = client.extendedData.city;
-        if (client.extendedData.state || client.extendedData.province) {
-          state = client.extendedData.state || client.extendedData.province;
-        }
+      // Estrai fbc da fbclid se disponibile
+      let fbc = "";
+      if (extData.fbclid) {
+        const timestamp = extData.fbclidTimestamp || Math.floor(Date.now() / 1000);
+        fbc = `fb.1.${timestamp}.${extData.fbclid}`;
       }
       
       // Crea un array di valori secondo l'ordine delle intestazioni
       const values = [
-        client.email || "", // email
-        phone.replace(/\s+/g, ""), // phone (pulito)
-        firstName, // fn
-        lastName, // ln
-        country, // country (default IT)
-        city, // ct (city)
-        client.clientId || "", // external_id
-        (client.value || 0).toString(), // value (per LTV targeting)
-        state // st (state/province)
+        client.email || "",                 // email
+        phone.replace(/\s+/g, ""),          // phone (pulito)
+        firstName,                          // fn
+        lastName,                           // ln
+        extData.country || "IT",            // country (default IT)
+        extData.city || "",                 // ct (city)
+        client.clientId || "",              // external_id
+        extData.ipAddress || "",            // client_ip_address
+        extData.userAgent || "",            // client_user_agent
+        fbc,                                // fbc
+        extData.fbp || "",                  // fbp
+        client.leadId || "",                // lead_id
+        "",                                 // subscription_id (vuoto)
+        (client.value || 0).toString(),     // value
+        extData.currency || "EUR",          // currency (default EUR)
+        firstName,                          // f_name (duplicate di fn per compatibilità)
+        lastName,                           // l_name (duplicate di ln per compatibilità)
+        extData.state || extData.province || "", // st (stato/provincia)
+        extData.postalCode || extData.zip || "", // zp (CAP)
+        client.convertedAt ? new Date(client.convertedAt).toISOString().split('T')[0] : "", // conversion_date
+        client.leadSource || "",            // source
+        client.medium || "",                // medium
+        client.campaign || ""               // campaign
       ];
       
-      // Escape dei valori CSV, assicurandoci che non ci siano problemi con virgole o apici
+      // Escape dei valori CSV
       return values.map(value => {
         if (typeof value !== 'string') return '';
         const escaped = value.replace(/"/g, '""');
@@ -876,15 +906,15 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
     // Crea il contenuto del CSV
     let csv = headers.join(',') + '\n';
     clients.forEach(client => {
-      // Includi solo record con almeno un identificatore valido
-      if (client.email || client.phone || (client.firstName && client.lastName)) {
+      // Include solo record con almeno un identificatore valido
+      if (client.email || client.phone || client.clientId || (client.firstName && client.lastName)) {
         csv += formatRow(client) + '\n';
       }
     });
     
     // Imposta gli header per il download
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename=clients_facebook.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=clients_facebook_complete.csv');
     
     // Invia il file CSV
     res.send(csv);
@@ -945,33 +975,81 @@ app.get('/api/banca-dati/audiences/export', async (req, res) => {
       return normalized;
     });
     
-    // Definisci le intestazioni per il CSV secondo il formato Facebook
-    // https://www.facebook.com/business/help/112061095610075
+    // Definisci le intestazioni per il CSV secondo il formato Facebook esteso
+    // Include tutti i possibili identificatori supportati da Facebook
     const headers = [
-      "email", "phone", "fn", "ln", "country", "ct", "external_id"
+      "email",              // Email
+      "phone",              // Telefono
+      "fn",                 // Nome
+      "ln",                 // Cognome
+      "country",            // Paese (codice ISO)
+      "ct",                 // Città
+      "external_id",        // ID esterno
+      "client_ip_address",  // Indirizzo IP
+      "client_user_agent",  // User agent
+      "fbc",                // Facebook click parameter
+      "fbp",                // Facebook browser parameter
+      "lead_id",            // Facebook lead ID
+      "subscription_id",    // ID abbonamento
+      "madid",              // Mobile advertiser ID
+      "value",              // Valore cliente
+      "f_name",             // Nome (formato alternativo)
+      "l_name",             // Cognome (formato alternativo)
+      "st",                 // Stato/Provincia
+      "zp",                 // CAP
+      "gen",                // Genere
+      "db"                  // Data di nascita
     ];
     
     // Funzione per formattare una riga di CSV e pulire i dati
     const formatRow = (audience) => {
-      // Formatta il telefono in formato internazionale se necessario
+      // Formatta il telefono in formato internazionale
       let phone = audience.phone || "";
       if (phone && !phone.startsWith('+')) {
-        // Assumiamo che sia italiano se non ha prefisso
         phone = phone.replace(/^0/, '+39');
+      }
+      
+      // Estrai ip e user agent
+      let ip = "";
+      let userAgent = "";
+      if (audience.deviceInfo) {
+        ip = audience.deviceInfo.ip || "";
+        userAgent = audience.deviceInfo.userAgent || "";
+      }
+      
+      // Formatta fbc con fbclid se disponibile
+      let fbc = audience.fbc || "";
+      if (!fbc && audience.fbclid) {
+        const timestamp = audience.fbclidTimestamp || Math.floor(Date.now() / 1000);
+        fbc = `fb.1.${timestamp}.${audience.fbclid}`;
       }
       
       // Crea un array di valori secondo l'ordine delle intestazioni
       const values = [
-        audience.email || "", // email
-        phone.replace(/\s+/g, ""), // phone (pulito)
-        audience.firstName || "", // fn
-        audience.lastName || "", // ln
-        audience.country || "IT", // country (default IT)
-        audience.city || "", // ct (city)
-        audience.userId || "" // external_id
+        audience.email || "",                 // email
+        phone.replace(/\s+/g, ""),           // phone (pulito)
+        audience.firstName || "",             // fn
+        audience.lastName || "",              // ln
+        audience.country || "IT",             // country (default IT)
+        audience.city || "",                  // ct (city)
+        audience.userId || "",                // external_id
+        ip,                                   // client_ip_address
+        userAgent,                            // client_user_agent
+        fbc,                                  // fbc
+        audience.fbp || "",                   // fbp
+        audience.leadId || "",                // lead_id
+        "",                                   // subscription_id (vuoto)
+        audience.madid || "",                 // madid (mobile advertiser ID)
+        (audience.value || 0).toString(),     // value
+        audience.firstName || "",             // f_name (duplicate di fn per compatibilità)
+        audience.lastName || "",              // l_name (duplicate di ln per compatibilità)
+        audience.state || "",                 // st (stato/provincia)
+        audience.zip || audience.postalCode || "", // zp (CAP)
+        audience.gender || "",                // gen (genere)
+        audience.birthdate || ""              // db (data di nascita)
       ];
       
-      // Escape dei valori CSV, assicurandoci che non ci siano problemi con virgole o apici
+      // Escape dei valori CSV
       return values.map(value => {
         if (typeof value !== 'string') return '';
         const escaped = value.replace(/"/g, '""');
@@ -982,14 +1060,15 @@ app.get('/api/banca-dati/audiences/export', async (req, res) => {
     // Crea il contenuto del CSV
     let csv = headers.join(',') + '\n';
     normalizedAudiences.forEach(audience => {
-      if (audience.email || audience.phone || (audience.firstName && audience.lastName)) {
+      // Include solo record con almeno un identificatore valido
+      if (audience.email || audience.phone || audience.fbclid || audience.userId || (audience.firstName && audience.lastName)) {
         csv += formatRow(audience) + '\n';
       }
     });
     
     // Imposta gli header per il download
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename=facebook_audience.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=facebook_audience_complete.csv');
     
     // Invia il file CSV
     res.send(csv);
