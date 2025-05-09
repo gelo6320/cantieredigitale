@@ -671,6 +671,9 @@ app.get('/api/banca-dati/clients', async (req, res) => {
 // Endpoint per accedere ai dati delle audience Facebook
 app.get('/api/banca-dati/audiences', async (req, res) => {
   try {
+    console.log("[AUDIENCE API] Richiesta ricevuta per le audience Facebook");
+    console.log(`[AUDIENCE API] Headers: ${JSON.stringify(req.headers.origin)}`);
+    
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;
     const skip = (page - 1) * limit;
@@ -679,25 +682,44 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
     const connection = await getUserConnection(req);
     
     if (!connection) {
+      console.log("[AUDIENCE API] ERRORE: Nessuna connessione utente disponibile");
       return res.status(404).json({ 
         success: false, 
         message: 'Database non disponibile o non configurato correttamente' 
       });
     }
     
-    // Se il modello FacebookAudience esiste nella connessione, usalo
+    console.log("[AUDIENCE API] Connessione al database utente ottenuta con successo");
+    
+    // Se il modello FacebookAudience non esiste nella connessione, crealo
     if (!connection.models['FacebookAudience']) {
+      console.log("[AUDIENCE API] Registrazione del modello FacebookAudience sulla connessione");
       connection.model('FacebookAudience', FacebookAudienceSchema);
     }
     
     const UserFacebookAudience = connection.model('FacebookAudience');
     
     // Conta il totale e ottieni i dati paginati
+    console.log("[AUDIENCE API] Esecuzione query sulla collection FacebookAudience...");
     const total = await UserFacebookAudience.countDocuments({});
     const audiences = await UserFacebookAudience.find({})
       .sort({ lastUpdated: -1 })
       .skip(skip)
       .limit(limit);
+    
+    console.log(`[AUDIENCE API] Query completata. Trovati ${audiences.length} documenti`);
+    
+    // Log dei primi documenti per debug se ce ne sono
+    if (audiences.length > 0) {
+      console.log("[AUDIENCE API] Primo documento trovato:");
+      console.log(JSON.stringify(audiences[0], null, 2).substring(0, 300) + "...");
+    }
+    
+    // Configurazione corretta di CORS
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     res.json({
       success: true,
@@ -709,8 +731,11 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
         pages: Math.ceil(total / limit)
       }
     });
+    console.log("[AUDIENCE API] Risposta inviata al client");
+    
   } catch (error) {
-    console.error("Errore nel recupero delle audience:", error);
+    console.error('[AUDIENCE API] ERRORE durante il recupero delle audience:', error);
+    console.error('[AUDIENCE API] Stack trace:', error.stack);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero delle audience', 
