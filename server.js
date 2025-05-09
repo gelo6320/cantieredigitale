@@ -116,6 +116,12 @@ const VisitSchema = new mongoose.Schema({
   funnelStep: Number,
   funnelName: String,
   userAgent: String,
+  location: {
+    city: String,
+    region: String,
+    country: String,
+    country_code: String
+  },
   ip: String,
   deviceInfo: Object,
   cookieConsent: { type: Boolean, default: false },
@@ -195,6 +201,14 @@ const ClientSchema = new mongoose.Schema({
   }],
   tags: [String],
   properties: { type: Map, of: mongoose.Schema.Types.Mixed },
+
+  location: {
+    city: String,
+    region: String,
+    country: String,
+    country_code: String
+  },
+  
   
   // Progetti associati
   projects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
@@ -422,9 +436,13 @@ const FacebookAudienceSchema = new mongoose.Schema({
   hashedPhone: String,
   
   // Dati demografici e di posizione
-  country: String,
-  city: String,
   language: String,
+  location: {
+    city: String,
+    region: String,
+    country: String,
+    country_code: String
+  },
   deviceInfo: mongoose.Schema.Types.Mixed,
   
   // Dati di origine e attribuzione
@@ -710,7 +728,13 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
         email: doc.email || null,
         phone: doc.phone || null,
         firstName: doc.firstName || null,
-        lastName: doc.lastName || null
+        lastName: doc.lastName || null,
+        location: doc.location || {
+          city: doc.city,
+          region: doc.region || doc.state,
+          country: doc.country,
+          country_code: doc.country_code
+        }
       };
       
       // Cerca i dati nelle conversioni se presenti
@@ -820,6 +844,7 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
       "ln",                 // Cognome
       "country",            // Paese (codice ISO)
       "ct",                 // Città
+      "st",                 // Stato/Regione
       "external_id",        // ID esterno (clientId)
       "client_ip_address",  // Indirizzo IP
       "client_user_agent",  // User agent
@@ -831,7 +856,6 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
       "currency",           // Valuta
       "f_name",             // Nome (formato alternativo)
       "l_name",             // Cognome (formato alternativo)
-      "st",                 // Stato/Provincia
       "zp",                 // CAP
       "conversion_date",    // Data di conversione
       "source",             // Fonte
@@ -984,6 +1008,7 @@ app.get('/api/banca-dati/audiences/export', async (req, res) => {
       "ln",                 // Cognome
       "country",            // Paese (codice ISO)
       "ct",                 // Città
+      "st",                 // Stato/Regione
       "external_id",        // ID esterno
       "client_ip_address",  // Indirizzo IP
       "client_user_agent",  // User agent
@@ -995,7 +1020,6 @@ app.get('/api/banca-dati/audiences/export', async (req, res) => {
       "value",              // Valore cliente
       "f_name",             // Nome (formato alternativo)
       "l_name",             // Cognome (formato alternativo)
-      "st",                 // Stato/Provincia
       "zp",                 // CAP
       "gen",                // Genere
       "db"                  // Data di nascita
