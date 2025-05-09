@@ -3950,10 +3950,10 @@ app.post('/api/sales-funnel/move', async (req, res) => {
             fullName: [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || lead.name || lead.email.split('@')[0],
             value: lead.value || 0,
             service: lead.service || '',
-            leadSource: leadType,
-            originalSource: lead.source || lead.medium || '',
+            leadSource: lead.source || lead.medium || '',  // CORRETTO: usa la fonte effettiva del lead
             campaign: lead.campaign || '',
             medium: lead.medium || '',
+            location: lead.location || {},  // AGGIUNTO: trasferisce i dati sulla posizione
             convertedAt: new Date(),
             consent: lead.consent || {
               marketing: false,
