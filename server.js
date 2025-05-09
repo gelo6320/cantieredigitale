@@ -668,7 +668,7 @@ app.get('/api/banca-dati/clients', async (req, res) => {
   }
 });
 
-// Endpoint per accedere ai dati delle audience Facebook
+// API per accedere ai dati delle audience Facebook
 app.get('/api/banca-dati/audiences', async (req, res) => {
   try {
     console.log("[AUDIENCE API] Richiesta ricevuta per le audience Facebook");
@@ -699,6 +699,45 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
     
     const UserFacebookAudience = connection.model('FacebookAudience');
     
+    // Funzione per normalizzare i documenti audience
+    function normalizeAudience(audience) {
+      // Se l'audience è un documento Mongoose, convertiamolo in oggetto normale
+      const doc = audience.toObject ? audience.toObject() : {...audience};
+      
+      // Creiamo un nuovo oggetto normalizzato con i dati di base
+      const normalized = {
+        ...doc,
+        email: doc.email || null,
+        phone: doc.phone || null,
+        firstName: doc.firstName || null,
+        lastName: doc.lastName || null
+      };
+      
+      // Cerca i dati nelle conversioni se presenti
+      if (doc.conversions && doc.conversions.length > 0) {
+        // Ottieni l'ultima conversione
+        const lastConversion = doc.conversions[doc.conversions.length - 1];
+        
+        // Estrai i dati dal formData, se disponibili
+        if (lastConversion.metadata && lastConversion.metadata.formData) {
+          const formData = lastConversion.metadata.formData;
+          
+          // Aggiungi i dati mancanti dall'ultima conversione
+          if (!normalized.email && formData.email) normalized.email = formData.email;
+          if (!normalized.phone && formData.phone) normalized.phone = formData.phone;
+          if (!normalized.firstName && formData.firstName) normalized.firstName = formData.firstName;
+          if (!normalized.lastName && formData.lastName) normalized.lastName = formData.lastName;
+          
+          // Aggiungi il campo consentAds se presente
+          if (formData.adOptimizationConsent && !normalized.adOptimizationConsent) {
+            normalized.adOptimizationConsent = formData.adOptimizationConsent === true ? 'GRANTED' : 'DENIED';
+          }
+        }
+      }
+      
+      return normalized;
+    }
+    
     // Conta il totale e ottieni i dati paginati
     console.log("[AUDIENCE API] Esecuzione query sulla collection FacebookAudience...");
     const total = await UserFacebookAudience.countDocuments({});
@@ -709,10 +748,13 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
     
     console.log(`[AUDIENCE API] Query completata. Trovati ${audiences.length} documenti`);
     
+    // Normalizza ogni audience prima di inviarla
+    const normalizedAudiences = audiences.map(normalizeAudience);
+    
     // Log dei primi documenti per debug se ce ne sono
-    if (audiences.length > 0) {
-      console.log("[AUDIENCE API] Primo documento trovato:");
-      console.log(JSON.stringify(audiences[0], null, 2).substring(0, 300) + "...");
+    if (normalizedAudiences.length > 0) {
+      console.log("[AUDIENCE API] Primo documento normalizzato:");
+      console.log(JSON.stringify(normalizedAudiences[0], null, 2).substring(0, 300) + "...");
     }
     
     // Configurazione corretta di CORS
@@ -723,7 +765,7 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
     
     res.json({
       success: true,
-      data: audiences,
+      data: normalizedAudiences,
       pagination: {
         total,
         page,
@@ -745,8 +787,11 @@ app.get('/api/banca-dati/audiences', async (req, res) => {
 });
 
 // Endpoint per esportare i clienti in CSV
+// Endpoint per esportare i clienti in CSV
 app.get('/api/banca-dati/clients/export', async (req, res) => {
   try {
+    console.log("[EXPORT API] Richiesta di esportazione clienti per Facebook");
+    
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
     
@@ -766,48 +811,86 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
     
     // Ottieni tutti i clienti per l'esportazione
     const clients = await UserClient.find({});
+    console.log(`[EXPORT API] Trovati ${clients.length} clienti`);
     
-    // Definisci le intestazioni per il CSV
+    // Definisci le intestazioni per il CSV secondo il formato Facebook
+    // https://www.facebook.com/business/help/112061095610075
     const headers = [
-      "email", "phone", "firstName", "lastName", "fullName",
-      "clientId", "leadId", "leadSource", "createdAt", "value",
-      "status", "service", "consent.marketing", "consent.analytics", 
-      "consent.thirdParty", "country", "city"
+      "email", "phone", "fn", "ln", "country", "ct", "external_id", "value", "st"
     ];
     
-    // Funzione per formattare una riga di CSV
+    // Funzione per formattare una riga di CSV e pulire i dati
     const formatRow = (client) => {
-      return headers.map(header => {
-        // Gestisci gli oggetti annidati
-        if (header.includes('.')) {
-          const parts = header.split('.');
-          let value = client;
-          for (const part of parts) {
-            value = value?.[part] ?? '';
-          }
-          return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+      // Estrai il nome e cognome
+      let firstName = client.firstName || "";
+      let lastName = client.lastName || "";
+      
+      // Se è disponibile solo il fullName, tenta di dividerlo
+      if (!firstName && !lastName && client.fullName) {
+        const parts = client.fullName.split(' ');
+        if (parts.length > 0) firstName = parts[0];
+        if (parts.length > 1) lastName = parts.slice(1).join(' ');
+      }
+      
+      // Formatta il telefono in formato internazionale
+      let phone = client.phone || "";
+      if (phone && !phone.startsWith('+')) {
+        // Assumiamo che sia italiano se non ha prefisso
+        phone = phone.replace(/^0/, '+39');
+      }
+      
+      // Estrai paese e città dalle informazioni estese
+      let country = "IT"; // Default Italia
+      let city = "";
+      let state = "";
+      
+      if (client.extendedData) {
+        if (client.extendedData.country) country = client.extendedData.country;
+        if (client.extendedData.city) city = client.extendedData.city;
+        if (client.extendedData.state || client.extendedData.province) {
+          state = client.extendedData.state || client.extendedData.province;
         }
-        
-        // Gestisci i campi semplici
-        const value = client[header] ?? '';
-        return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+      }
+      
+      // Crea un array di valori secondo l'ordine delle intestazioni
+      const values = [
+        client.email || "", // email
+        phone.replace(/\s+/g, ""), // phone (pulito)
+        firstName, // fn
+        lastName, // ln
+        country, // country (default IT)
+        city, // ct (city)
+        client.clientId || "", // external_id
+        (client.value || 0).toString(), // value (per LTV targeting)
+        state // st (state/province)
+      ];
+      
+      // Escape dei valori CSV, assicurandoci che non ci siano problemi con virgole o apici
+      return values.map(value => {
+        if (typeof value !== 'string') return '';
+        const escaped = value.replace(/"/g, '""');
+        return `"${escaped}"`;
       }).join(',');
     };
     
     // Crea il contenuto del CSV
     let csv = headers.join(',') + '\n';
     clients.forEach(client => {
-      csv += formatRow(client) + '\n';
+      // Includi solo record con almeno un identificatore valido
+      if (client.email || client.phone || (client.firstName && client.lastName)) {
+        csv += formatRow(client) + '\n';
+      }
     });
     
     // Imposta gli header per il download
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=clients.csv');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=clients_facebook.csv');
     
     // Invia il file CSV
     res.send(csv);
+    console.log("[EXPORT API] CSV clienti inviato");
   } catch (error) {
-    console.error("Errore nell'esportazione dei clienti:", error);
+    console.error("[EXPORT API] Errore nell'esportazione dei clienti:", error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nell\'esportazione dei clienti', 
@@ -819,6 +902,8 @@ app.get('/api/banca-dati/clients/export', async (req, res) => {
 // Endpoint per esportare le audience Facebook in CSV
 app.get('/api/banca-dati/audiences/export', async (req, res) => {
   try {
+    console.log("[EXPORT API] Richiesta di esportazione audience per Facebook");
+    
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
     
@@ -838,37 +923,79 @@ app.get('/api/banca-dati/audiences/export', async (req, res) => {
     
     // Ottieni tutte le audience per l'esportazione
     const audiences = await UserFacebookAudience.find({});
+    console.log(`[EXPORT API] Trovate ${audiences.length} audience`);
     
-    // Definisci le intestazioni per il CSV
+    // Normalizza i documenti per estrarre i dati anche dalle conversioni
+    const normalizedAudiences = audiences.map(audience => {
+      const doc = audience.toObject ? audience.toObject() : {...audience};
+      const normalized = {...doc};
+      
+      // Cerca i dati nelle conversioni se presenti
+      if (doc.conversions && doc.conversions.length > 0) {
+        const lastConversion = doc.conversions[doc.conversions.length - 1];
+        if (lastConversion.metadata?.formData) {
+          const formData = lastConversion.metadata.formData;
+          if (!normalized.email && formData.email) normalized.email = formData.email;
+          if (!normalized.phone && formData.phone) normalized.phone = formData.phone;
+          if (!normalized.firstName && formData.firstName) normalized.firstName = formData.firstName;
+          if (!normalized.lastName && formData.lastName) normalized.lastName = formData.lastName;
+        }
+      }
+      
+      return normalized;
+    });
+    
+    // Definisci le intestazioni per il CSV secondo il formato Facebook
+    // https://www.facebook.com/business/help/112061095610075
     const headers = [
-      "email", "phone", "firstName", "lastName",
-      "hashedEmail", "hashedPhone", "country", "city", 
-      "language", "source", "medium", "campaign",
-      "adOptimizationConsent", "firstSeen", "lastSeen"
+      "email", "phone", "fn", "ln", "country", "ct", "external_id"
     ];
     
-    // Funzione per formattare una riga di CSV
+    // Funzione per formattare una riga di CSV e pulire i dati
     const formatRow = (audience) => {
-      return headers.map(header => {
-        const value = audience[header] ?? '';
-        return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+      // Formatta il telefono in formato internazionale se necessario
+      let phone = audience.phone || "";
+      if (phone && !phone.startsWith('+')) {
+        // Assumiamo che sia italiano se non ha prefisso
+        phone = phone.replace(/^0/, '+39');
+      }
+      
+      // Crea un array di valori secondo l'ordine delle intestazioni
+      const values = [
+        audience.email || "", // email
+        phone.replace(/\s+/g, ""), // phone (pulito)
+        audience.firstName || "", // fn
+        audience.lastName || "", // ln
+        audience.country || "IT", // country (default IT)
+        audience.city || "", // ct (city)
+        audience.userId || "" // external_id
+      ];
+      
+      // Escape dei valori CSV, assicurandoci che non ci siano problemi con virgole o apici
+      return values.map(value => {
+        if (typeof value !== 'string') return '';
+        const escaped = value.replace(/"/g, '""');
+        return `"${escaped}"`;
       }).join(',');
     };
     
     // Crea il contenuto del CSV
     let csv = headers.join(',') + '\n';
-    audiences.forEach(audience => {
-      csv += formatRow(audience) + '\n';
+    normalizedAudiences.forEach(audience => {
+      if (audience.email || audience.phone || (audience.firstName && audience.lastName)) {
+        csv += formatRow(audience) + '\n';
+      }
     });
     
     // Imposta gli header per il download
-    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename=facebook_audience.csv');
     
     // Invia il file CSV
     res.send(csv);
+    console.log("[EXPORT API] CSV audience inviato");
   } catch (error) {
-    console.error("Errore nell'esportazione delle audience:", error);
+    console.error("[EXPORT API] Errore nell'esportazione delle audience:", error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nell\'esportazione delle audience', 
