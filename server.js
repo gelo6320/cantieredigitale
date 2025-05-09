@@ -611,7 +611,7 @@ async function getScreenshot(url) {
 
 
 // API per ottenere tutti gli eventi del calendario
-app.get('/api/calendar/events', checkApiAuth, async (req, res) => {
+app.get('/api/calendar/events', async (req, res) => {
   try {
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
@@ -659,7 +659,7 @@ app.get('/api/calendar/events', checkApiAuth, async (req, res) => {
 });
 
 // API per creare un nuovo evento del calendario
-app.post('/api/calendar/events', checkApiAuth, async (req, res) => {
+app.post('/api/calendar/events', async (req, res) => {
   try {
     const { title, start, end, status, eventType, location, description } = req.body;
     
@@ -713,7 +713,7 @@ app.post('/api/calendar/events', checkApiAuth, async (req, res) => {
 });
 
 // API per aggiornare un evento del calendario
-app.put('/api/calendar/events/:id', checkApiAuth, async (req, res) => {
+app.put('/api/calendar/events/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, start, end, status, eventType, location, description } = req.body;
@@ -770,7 +770,7 @@ app.put('/api/calendar/events/:id', checkApiAuth, async (req, res) => {
 });
 
 // API per eliminare un evento del calendario
-app.delete('/api/calendar/events/:id', checkApiAuth, async (req, res) => {
+app.delete('/api/calendar/events/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
