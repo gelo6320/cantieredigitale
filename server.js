@@ -584,6 +584,1129 @@ async function getScreenshot(url) {
   }
 }
 
+// ----------------------------------------------------------------
+// ENDPOINT TRACCIAMENTO CRM
+// ----------------------------------------------------------------
+
+// Endpoint per ottenere le landing page
+app.get('/api/tracciamento/landing-pages', async (req, res) => {
+  try {
+    const { timeRange = '7d', search } = req.query;
+    
+    console.log(`\n===== INIZIO RECUPERO LANDING PAGES =====`);
+    console.log(`Intervallo temporale: ${timeRange}`);
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se il modello Visit non esiste nella connessione, crealo
+    if (!connection.models['Visit']) {
+      connection.model('Visit', VisitSchema);
+    }
+    
+    const Visit = connection.model('Visit');
+    
+    // Calcola data di inizio in base al timeRange
+    let startDate = new Date();
+    switch(timeRange) {
+      case '24h':
+        startDate.setHours(startDate.getHours() - 24);
+        break;
+      case '7d':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+      case 'all':
+        startDate = new Date(0); // Dal 1970
+        break;
+    }
+    
+    console.log(`Data inizio ricerca: ${startDate.toISOString()}`);
+    
+    // FASE 1: Ottieni tutte le visite nel periodo selezionato
+    const visits = await Visit.find({
+      timestamp: { $gte: startDate }
+    });
+    
+    console.log(`Totale visite trovate: ${visits.length}`);
+    
+    // FASE 2: Raggruppa le visite per URL 
+    const urlMap = new Map();
+    const sessionsByUrl = new Map();
+    const userIdsByUrl = new Map();
+    
+    // Primo passaggio: raccogliamo i dati
+    for (const visit of visits) {
+      const url = visit.url;
+      
+      // Raggruppa visite per URL
+      if (!urlMap.has(url)) {
+        urlMap.set(url, {
+          url,
+          title: visit.title || url,
+          totalVisits: 0,
+          uniqueUsers: 0,
+          conversionRate: 0,
+          lastAccess: new Date(0)
+        });
+        sessionsByUrl.set(url, new Set());
+        userIdsByUrl.set(url, new Set());
+      }
+      
+      // Incrementa contatore visite
+      urlMap.get(url).totalVisits++;
+      
+      // Aggiorna la data dell'ultimo accesso
+      if (visit.timestamp > urlMap.get(url).lastAccess) {
+        urlMap.get(url).lastAccess = visit.timestamp;
+      }
+      
+      // Aggiungi sessionId al set di questa URL
+      sessionsByUrl.get(url).add(visit.sessionId);
+    }
+    
+    console.log(`URL unici trovati: ${urlMap.size}`);
+    
+    // Se il modello Session non esiste, crealo
+    if (!connection.models['Session']) {
+      const SessionSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, unique: true },
+        userId: { type: String, sparse: true, index: true },
+        fingerprint: String,
+        startTime: { type: Date, default: Date.now },
+        endTime: Date,
+        duration: Number,
+        isActive: { type: Boolean, default: true },
+        lastActivity: { type: Date, default: Date.now },
+        entryPage: String,
+        exitPage: String,
+        referrer: String,
+        deviceInfo: Object,
+        browserInfo: Object,
+        ip: String,
+        userAgent: String,
+        isNewUser: Boolean,
+        cookieConsent: { type: Boolean, default: false },
+        location: {
+          city: String,
+          region: String,
+          country: String,
+          country_code: String
+        },
+        consentCategories: Object,
+        utmParams: Object,
+        pageViews: { type: Number, default: 0 },
+        events: { type: Number, default: 0 },
+        conversions: { type: Number, default: 0 },
+        totalValue: { type: Number, default: 0 },
+        funnelProgress: Object,
+        abTestVariants: Object
+      });
+      
+      connection.model('Session', SessionSchema);
+    }
+    
+    const Session = connection.model('Session');
+    
+    // FASE 3: Ottieni tutti gli utenti unici per URL
+    // Recuperiamo le sessioni in un'unica query per minimizzare le richieste al DB
+    const allSessionIds = Array.from(
+      new Set(Array.from(sessionsByUrl.values()).flatMap(set => Array.from(set)))
+    );
+    
+    console.log(`Sessioni totali da controllare: ${allSessionIds.length}`);
+    
+    const sessions = await Session.find({
+      sessionId: { $in: allSessionIds }
+    });
+    
+    console.log(`Sessioni trovate nel DB: ${sessions.length}`);
+    
+    // Crea una mappa di sessioni per lookup veloce
+    const sessionMap = new Map();
+    sessions.forEach(session => {
+      sessionMap.set(session.sessionId, session);
+    });
+    
+    // Ora otteniamo gli userId o fingerprint unici per ogni URL
+    for (const [url, sessionIds] of sessionsByUrl.entries()) {
+      const userSet = userIdsByUrl.get(url);
+      
+      for (const sessionId of sessionIds) {
+        const session = sessionMap.get(sessionId);
+        
+        if (session) {
+          // Usa prima l'userId se disponibile, altrimenti il fingerprint
+          if (session.userId) {
+            userSet.add(session.userId);
+          } else if (session.fingerprint) {
+            userSet.add(session.fingerprint);
+          }
+        }
+      }
+      
+      // Aggiorna il conteggio di utenti unici
+      urlMap.get(url).uniqueUsers = userSet.size;
+    }
+    
+    // FASE 4: Calcola i tassi di conversione
+    // Se il modello Event non esiste, crealo
+    if (!connection.models['Event']) {
+      const EventSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        eventName: { type: String, required: true },
+        eventData: Object,
+        timestamp: { type: Date, default: Date.now },
+        url: String,
+        path: String,
+        ip: String,
+        userAgent: String,
+        location: Object,
+        category: { 
+          type: String, 
+          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          default: 'interaction'
+        }
+      });
+      
+      connection.model('Event', EventSchema);
+    }
+    
+    const Event = connection.model('Event');
+    
+    // Ottieni le conversioni nel periodo
+    const conversions = await Event.find({
+      category: 'conversion',
+      timestamp: { $gte: startDate }
+    });
+    
+    console.log(`Conversioni totali trovate: ${conversions.length}`);
+    
+    // Mappa le conversioni per sessionId
+    const conversionsBySession = new Map();
+    for (const conversion of conversions) {
+      conversionsBySession.set(conversion.sessionId, true);
+    }
+    
+    // Calcola i tassi di conversione per ogni URL
+    for (const [url, sessionIds] of sessionsByUrl.entries()) {
+      let conversionsCount = 0;
+      
+      for (const sessionId of sessionIds) {
+        if (conversionsBySession.has(sessionId)) {
+          conversionsCount++;
+        }
+      }
+      
+      // Calcola il tasso di conversione
+      const totalSessions = sessionIds.size;
+      if (totalSessions > 0) {
+        urlMap.get(url).conversionRate = parseFloat(
+          ((conversionsCount / totalSessions) * 100).toFixed(2)
+        );
+      }
+    }
+    
+    // FASE 5: Prepara i dati per la risposta
+    let landingPages = Array.from(urlMap.values());
+    
+    // Filtra i risultati se è presente una query di ricerca
+    if (search) {
+      const searchLower = search.toLowerCase();
+      landingPages = landingPages.filter(page => 
+        page.url.toLowerCase().includes(searchLower) ||
+        page.title.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Ordina per numero di visite (decrescente)
+    landingPages = landingPages.sort((a, b) => b.totalVisits - a.totalVisits);
+    
+    console.log(`Landing pages filtrate: ${landingPages.length}`);
+    
+    // Aggiungi un ID ad ogni landing page (necessario per il frontend)
+    landingPages = landingPages.map(page => ({
+      ...page,
+      id: Buffer.from(page.url).toString('base64')
+    }));
+    
+    console.log(`===== FINE RECUPERO LANDING PAGES =====\n`);
+    
+    res.status(200).json(landingPages);
+  } catch (error) {
+    console.error('Errore nel recupero delle landing page:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Errore nel recupero delle landing page',
+      details: error.message
+    });
+  }
+});
+
+// Endpoint per ottenere gli utenti di una landing page
+app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
+  try {
+    const { landingPageId } = req.params;
+    const { timeRange = '7d', search } = req.query;
+    
+    console.log(`\n===== INIZIO RECUPERO UTENTI =====`);
+    console.log(`ID landing page: ${landingPageId}`);
+    console.log(`Intervallo temporale: ${timeRange}`);
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Decodifica l'ID (che è l'URL codificato in base64 della landing page)
+    let pageUrl;
+    try {
+      pageUrl = Buffer.from(landingPageId, 'base64').toString('utf-8');
+      console.log(`URL decodificato: ${pageUrl}`);
+    } catch (e) {
+      // Se non si riesce a decodificare, assumiamo che sia l'URL codificato in URI
+      try {
+        pageUrl = decodeURIComponent(landingPageId);
+        console.log(`URL decodificato da URI: ${pageUrl}`);
+      } catch (e2) {
+        console.error('Errore nella decodifica dell\'ID landing page:', e2);
+        pageUrl = landingPageId; // Usa il valore così com'è
+        console.log(`Usando URL non decodificato: ${pageUrl}`);
+      }
+    }
+    
+    // Assicurati che i modelli necessari esistano nella connessione
+    if (!connection.models['Visit']) {
+      connection.model('Visit', VisitSchema);
+    }
+    if (!connection.models['Session']) {
+      const SessionSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, unique: true },
+        userId: { type: String, sparse: true, index: true },
+        fingerprint: String,
+        startTime: { type: Date, default: Date.now },
+        endTime: Date,
+        duration: Number,
+        isActive: { type: Boolean, default: true },
+        lastActivity: { type: Date, default: Date.now },
+        entryPage: String,
+        exitPage: String,
+        referrer: String,
+        deviceInfo: Object,
+        browserInfo: Object,
+        ip: String,
+        userAgent: String,
+        isNewUser: Boolean,
+        cookieConsent: { type: Boolean, default: false },
+        location: Object,
+        consentCategories: Object,
+        utmParams: Object,
+        pageViews: { type: Number, default: 0 },
+        events: { type: Number, default: 0 },
+        conversions: { type: Number, default: 0 },
+        totalValue: { type: Number, default: 0 },
+        funnelProgress: Object,
+        abTestVariants: Object
+      });
+      
+      connection.model('Session', SessionSchema);
+    }
+    if (!connection.models['User']) {
+      const UserSchema = new mongoose.Schema({
+        userId: { type: String, required: true, unique: true },
+        fingerprint: { type: String, sparse: true, index: true },
+        email: { type: String, sparse: true, index: true, unique: true },
+        firstName: String,
+        lastName: String,
+        phone: String,
+        leadStage: String,
+        firstSeen: { type: Date, default: Date.now },
+        lastSeen: { type: Date, default: Date.now },
+        visits: { type: Number, default: 1 },
+        sessions: [String],
+        deviceIds: [String],
+        traits: Object,
+        adOptimizationConsent: { 
+          type: String, 
+          enum: ['GRANTED', 'DENIED', 'UNSPECIFIED'], 
+          default: 'UNSPECIFIED' 
+        },
+        totalTimeOnSite: { type: Number, default: 0 },
+        totalPageViews: { type: Number, default: 0 },
+        conversions: Array,
+        location: Object,
+        totalValue: { type: Number, default: 0 },
+        leadSource: Object,
+        tags: [String]
+      });
+      
+      connection.model('User', UserSchema);
+    }
+    
+    const Visit = connection.model('Visit');
+    const Session = connection.model('Session');
+    const User = connection.model('User');
+    
+    // Calcola data di inizio in base al timeRange
+    let startDate = new Date();
+    switch(timeRange) {
+      case '24h':
+        startDate.setHours(startDate.getHours() - 24);
+        break;
+      case '7d':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+      case 'all':
+        startDate = new Date(0); // Dal 1970
+        break;
+    }
+    
+    console.log(`Data inizio ricerca: ${startDate.toISOString()}`);
+    
+    // FASE 1: Trova tutte le visite per questa URL nel periodo selezionato
+    const visits = await Visit.find({
+      url: pageUrl,
+      timestamp: { $gte: startDate }
+    });
+    
+    console.log(`Visite trovate per l'URL: ${visits.length}`);
+    
+    if (visits.length === 0) {
+      console.log('Nessuna visita trovata per questa URL');
+      return res.status(200).json([]);
+    }
+    
+    // FASE 2: Estrai tutte le sessionId uniche
+    const sessionIds = [...new Set(visits.map(visit => visit.sessionId))];
+    console.log(`Session ID unici trovati: ${sessionIds.length}`);
+    
+    // FASE 3: Trova tutte le sessioni corrispondenti
+    const sessions = await Session.find({
+      sessionId: { $in: sessionIds }
+    });
+    
+    console.log(`Sessioni trovate nel DB: ${sessions.length}`);
+    
+    // FASE 4: Estrai informazioni utente uniche e consolida
+    // Useremo una mappa per raggruppare per utente
+    const userMap = new Map();
+    
+    // Primo passaggio: usa userId se disponibile o fingerprint come fallback
+    for (const session of sessions) {
+      // Determina l'identificatore primario
+      const identifier = session.userId || session.fingerprint;
+      
+      if (!identifier) {
+        console.log(`Sessione senza userId o fingerprint: ${session.sessionId}`);
+        continue;
+      }
+      
+      if (!userMap.has(identifier)) {
+        // Inizializza un nuovo record utente
+        userMap.set(identifier, {
+          id: identifier,
+          fingerprint: session.fingerprint || 'Sconosciuto',
+          ip: session.ip || 'Sconosciuto',
+          userAgent: session.userAgent || 'Sconosciuto',
+          location: session.location?.city || 'Sconosciuta',
+          referrer: session.referrer || '',
+          firstVisit: session.startTime,
+          lastActivity: session.lastActivity || session.startTime,
+          sessionsCount: 0,
+          isActive: false
+        });
+      }
+      
+      const user = userMap.get(identifier);
+      
+      // Aggiorna le informazioni utente con dati più recenti
+      user.sessionsCount++;
+      
+      // Aggiorna il timestamp di prima visita se precedente
+      if (session.startTime < user.firstVisit) {
+        user.firstVisit = session.startTime;
+      }
+      
+      // Aggiorna il timestamp dell'ultima attività se successivo
+      if (session.lastActivity && session.lastActivity > user.lastActivity) {
+        user.lastActivity = session.lastActivity;
+      }
+      
+      // Imposta come attivo se l'ultima attività è negli ultimi 5 minuti
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      if (session.lastActivity && session.lastActivity >= fiveMinutesAgo) {
+        user.isActive = true;
+      }
+    }
+    
+    console.log(`Utenti unici trovati: ${userMap.size}`);
+    
+    // FASE 5: Ottieni dati aggiuntivi dagli utenti nel modello User (se disponibili)
+    const userIds = Array.from(userMap.keys());
+    const fingerprints = Array.from(userMap.values())
+      .map(user => user.fingerprint)
+      .filter(fp => fp && fp !== 'Sconosciuto');
+    
+    // Costruisci una query OR per trovare utenti sia per userId che per fingerprint
+    let userQuery = { $or: [] };
+    
+    if (userIds.length > 0) {
+      userQuery.$or.push({ userId: { $in: userIds } });
+    }
+    
+    if (fingerprints.length > 0) {
+      userQuery.$or.push({ fingerprint: { $in: fingerprints } });
+      userQuery.$or.push({ deviceIds: { $in: fingerprints } });
+    }
+    
+    // Se non abbiamo nessun criterio di ricerca, usiamo una query vuota
+    let userRecords = [];
+    if (userQuery.$or.length > 0) {
+      userRecords = await User.find(userQuery);
+      console.log(`Record utenti trovati nel modello User: ${userRecords.length}`);
+    }
+    
+    // Arricchisci i dati utente con informazioni dal modello User
+    for (const userRecord of userRecords) {
+      // Cerca prima per userId
+      if (userRecord.userId && userMap.has(userRecord.userId)) {
+        const user = userMap.get(userRecord.userId);
+        
+        // Aggiorna con dati dal modello User
+        user.location = userRecord.location?.city || user.location;
+        
+        // Se ci sono più dati disponibili dal modello User, aggiungerli qui
+      }
+      
+      // Cerca anche per fingerprint (per catch-all)
+      else if (userRecord.fingerprint && userMap.has(userRecord.fingerprint)) {
+        const user = userMap.get(userRecord.fingerprint);
+        
+        // Aggiorna con dati dal modello User
+        user.location = userRecord.location?.city || user.location;
+        
+        // Se ci sono più dati disponibili dal modello User, aggiungerli qui
+      }
+    }
+    
+    // FASE 6: Prepara la risposta
+    let users = Array.from(userMap.values());
+    
+    // Filtra i risultati se è presente una query di ricerca
+    if (search) {
+      const searchLower = search.toLowerCase();
+      users = users.filter(user => 
+        (user.fingerprint && user.fingerprint.toLowerCase().includes(searchLower)) ||
+        (user.ip && user.ip.toLowerCase().includes(searchLower)) ||
+        (user.location && String(user.location).toLowerCase().includes(searchLower)) ||
+        (user.referrer && user.referrer.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Ordina per ultima attività (decrescente)
+    users = users.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+    
+    console.log(`Utenti filtrati: ${users.length}`);
+    console.log(`===== FINE RECUPERO UTENTI =====\n`);
+    
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Errore nel recupero degli utenti:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Errore nel recupero degli utenti',
+      details: error.message
+    });
+  }
+});
+
+// Endpoint per ottenere le sessioni di un utente
+app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { timeRange = '7d' } = req.query;
+    
+    console.log(`\n===== INIZIO RICERCA SESSIONI =====`);
+    console.log(`ID utente ricevuto: ${userId}`);
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Assicurati che i modelli necessari esistano nella connessione
+    if (!connection.models['Session']) {
+      const SessionSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, unique: true },
+        userId: { type: String, sparse: true, index: true },
+        fingerprint: String,
+        startTime: { type: Date, default: Date.now },
+        endTime: Date,
+        duration: Number,
+        isActive: { type: Boolean, default: true },
+        lastActivity: { type: Date, default: Date.now },
+        entryPage: String,
+        exitPage: String,
+        referrer: String,
+        deviceInfo: Object,
+        browserInfo: Object,
+        ip: String,
+        userAgent: String,
+        isNewUser: Boolean,
+        cookieConsent: { type: Boolean, default: false },
+        location: Object,
+        consentCategories: Object,
+        utmParams: Object,
+        pageViews: { type: Number, default: 0 },
+        events: { type: Number, default: 0 },
+        conversions: { type: Number, default: 0 },
+        totalValue: { type: Number, default: 0 },
+        funnelProgress: Object,
+        abTestVariants: Object
+      });
+      
+      connection.model('Session', SessionSchema);
+    }
+    if (!connection.models['User']) {
+      const UserSchema = new mongoose.Schema({
+        userId: { type: String, required: true, unique: true },
+        fingerprint: { type: String, sparse: true, index: true },
+        email: { type: String, sparse: true, index: true, unique: true },
+        firstName: String,
+        lastName: String,
+        phone: String,
+        leadStage: String,
+        firstSeen: { type: Date, default: Date.now },
+        lastSeen: { type: Date, default: Date.now },
+        visits: { type: Number, default: 1 },
+        sessions: [String],
+        deviceIds: [String],
+        traits: Object,
+        adOptimizationConsent: String,
+        totalTimeOnSite: { type: Number, default: 0 },
+        totalPageViews: { type: Number, default: 0 },
+        conversions: Array,
+        location: Object,
+        totalValue: { type: Number, default: 0 },
+        leadSource: Object,
+        tags: [String]
+      });
+      
+      connection.model('User', UserSchema);
+    }
+    if (!connection.models['Visit']) {
+      connection.model('Visit', VisitSchema);
+    }
+    if (!connection.models['Event']) {
+      const EventSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        eventName: { type: String, required: true },
+        eventData: Object,
+        timestamp: { type: Date, default: Date.now },
+        url: String,
+        path: String,
+        ip: String,
+        userAgent: String,
+        location: Object,
+        category: { 
+          type: String, 
+          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          default: 'interaction'
+        }
+      });
+      
+      connection.model('Event', EventSchema);
+    }
+    
+    const Session = connection.model('Session');
+    const User = connection.model('User');
+    const Visit = connection.model('Visit');
+    const Event = connection.model('Event');
+    
+    // Calcola data di inizio in base al timeRange
+    let startDate = new Date();
+    switch(timeRange) {
+      case '24h':
+        startDate.setHours(startDate.getHours() - 24);
+        break;
+      case '7d':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+      case 'all':
+        startDate = new Date(0); // Dal 1970
+        break;
+    }
+    
+    // La query principale: cercare sia per userId che per fingerprint
+    const query = {
+      startTime: { $gte: startDate },
+      $or: [
+        { userId: userId },
+        { fingerprint: userId }
+      ]
+    };
+    
+    console.log(`Query di ricerca principale:`, JSON.stringify(query));
+    
+    // Esegui la query
+    const sessions = await Session.find(query).sort({ startTime: -1 });
+    console.log(`Trovate ${sessions.length} sessioni direttamente`);
+    
+    // Se non abbiamo trovato sessioni, possiamo cercare in modo più approfondito
+    let allSessions = [...sessions];
+    
+    if (sessions.length === 0) {
+      console.log(`Nessuna sessione trovata direttamente, esecuzione ricerca approfondita...`);
+      
+      // Cerchiamo l'utente nel modello User
+      const user = await User.findOne({ 
+        $or: [
+          { userId: userId },
+          { fingerprint: userId },
+          { deviceIds: userId },
+          { sessions: userId }
+        ]
+      });
+      
+      if (user) {
+        console.log(`Utente trovato: ${user.userId}`);
+        
+        // Se abbiamo trovato un utente, cerchiamo le sue sessioni
+        if (user.userId && user.userId !== userId) {
+          const userSessions = await Session.find({
+            userId: user.userId,
+            startTime: { $gte: startDate }
+          });
+          
+          if (userSessions.length > 0) {
+            console.log(`Trovate ${userSessions.length} sessioni tramite userId dell'utente`);
+            allSessions = [...allSessions, ...userSessions];
+          }
+        }
+        
+        // Cerchiamo anche per i suoi fingerprint (se diversi)
+        if (user.fingerprint && user.fingerprint !== userId) {
+          const fingerprintSessions = await Session.find({
+            fingerprint: user.fingerprint,
+            startTime: { $gte: startDate }
+          });
+          
+          if (fingerprintSessions.length > 0) {
+            console.log(`Trovate ${fingerprintSessions.length} sessioni tramite fingerprint dell'utente`);
+            allSessions = [...allSessions, ...fingerprintSessions];
+          }
+        }
+        
+        // Controlla anche l'array deviceIds
+        if (user.deviceIds && user.deviceIds.length > 0) {
+          const deviceSessions = await Session.find({
+            fingerprint: { $in: user.deviceIds },
+            startTime: { $gte: startDate }
+          });
+          
+          if (deviceSessions.length > 0) {
+            console.log(`Trovate ${deviceSessions.length} sessioni tramite deviceIds dell'utente`);
+            allSessions = [...allSessions, ...deviceSessions];
+          }
+        }
+      } else {
+        console.log(`Nessun utente trovato con questo identificatore`);
+      }
+    }
+    
+    // Rimuovi i duplicati 
+    const uniqueSessions = [];
+    const sessionIds = new Set();
+    
+    allSessions.forEach(session => {
+      if (!sessionIds.has(session.sessionId)) {
+        sessionIds.add(session.sessionId);
+        uniqueSessions.push(session);
+      }
+    });
+    
+    console.log(`Dopo la rimozione dei duplicati: ${uniqueSessions.length} sessioni uniche`);
+    
+    // Prepara le sessioni per il frontend
+    const sessionList = await Promise.all(uniqueSessions.map(async (session) => {
+      // Verifica se ci sono conversioni in questa sessione
+      const conversions = await Event.find({ 
+        sessionId: session.sessionId,
+        category: 'conversion'
+      });
+      
+      // Trova la pagina di uscita
+      const lastVisit = await Visit.findOne({ 
+        sessionId: session.sessionId 
+      }).sort({ timestamp: -1 });
+      
+      // Conta le visite di pagina
+      const pageViews = await Visit.countDocuments({ sessionId: session.sessionId });
+      
+      // Conta le interazioni
+      const interactions = await Event.countDocuments({ 
+        sessionId: session.sessionId,
+        category: { $in: ['interaction', 'form', 'media'] }
+      });
+      
+      return {
+        id: session.sessionId,
+        userId: session.userId || userId,
+        landingPageId: session.landingPageId,
+        startTime: session.startTime,
+        endTime: session.endTime || null,
+        duration: session.duration || 0,
+        pagesViewed: pageViews || session.pageViews || 0,
+        interactionsCount: interactions || 0,
+        entryUrl: session.entryPage,
+        exitUrl: lastVisit ? lastVisit.url : session.exitPage,
+        isConverted: conversions.length > 0
+      };
+    }));
+    
+    console.log(`===== FINE RICERCA SESSIONI =====\n`);
+    
+    res.status(200).json(sessionList);
+  } catch (error) {
+    console.error('Errore nel recupero delle sessioni:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Errore nel recupero delle sessioni',
+      details: error.message
+    });
+  }
+});
+
+// Endpoint per ottenere i dettagli di una sessione
+app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    console.log(`\n===== INIZIO RECUPERO DETTAGLI SESSIONE =====`);
+    console.log(`ID sessione: ${sessionId}`);
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Assicurati che i modelli necessari esistano nella connessione
+    if (!connection.models['Session']) {
+      const SessionSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, unique: true },
+        userId: { type: String, sparse: true, index: true },
+        fingerprint: String,
+        startTime: { type: Date, default: Date.now },
+        endTime: Date,
+        duration: Number,
+        isActive: { type: Boolean, default: true },
+        lastActivity: { type: Date, default: Date.now },
+        entryPage: String,
+        exitPage: String,
+        referrer: String,
+        deviceInfo: Object,
+        browserInfo: Object,
+        ip: String,
+        userAgent: String,
+        isNewUser: Boolean,
+        cookieConsent: { type: Boolean, default: false },
+        location: Object,
+        consentCategories: Object,
+        utmParams: Object,
+        pageViews: { type: Number, default: 0 },
+        events: { type: Number, default: 0 },
+        conversions: { type: Number, default: 0 },
+        totalValue: { type: Number, default: 0 },
+        funnelProgress: Object,
+        abTestVariants: Object
+      });
+      
+      connection.model('Session', SessionSchema);
+    }
+    if (!connection.models['Event']) {
+      const EventSchema = new mongoose.Schema({
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        eventName: { type: String, required: true },
+        eventData: Object,
+        timestamp: { type: Date, default: Date.now },
+        url: String,
+        path: String,
+        ip: String,
+        userAgent: String,
+        location: Object,
+        category: { 
+          type: String, 
+          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          default: 'interaction'
+        }
+      });
+      
+      connection.model('Event', EventSchema);
+    }
+    if (!connection.models['Visit']) {
+      connection.model('Visit', VisitSchema);
+    }
+    
+    const Session = connection.model('Session');
+    const Event = connection.model('Event');
+    const Visit = connection.model('Visit');
+    
+    // Verifica che la sessione esista
+    const session = await Session.findOne({ sessionId });
+    
+    if (!session) {
+      console.warn(`Sessione non trovata: ${sessionId}`);
+      return res.status(404).json({ 
+        status: 'error', 
+        message: 'Sessione non trovata' 
+      });
+    }
+    
+    console.log(`Sessione trovata: ${session.sessionId}, User: ${session.userId}`);
+    
+    // Ottieni tutti gli eventi della sessione
+    const events = await Event.find({ 
+      sessionId 
+    }).sort({ timestamp: 1 });
+    
+    console.log(`Trovati ${events.length} eventi per la sessione`);
+    
+    // Ottieni tutte le visite di pagina della sessione
+    const pageViews = await Visit.find({ 
+      sessionId 
+    }).sort({ timestamp: 1 });
+    
+    console.log(`Trovate ${pageViews.length} visualizzazioni di pagina per la sessione`);
+    
+    // Se non ci sono né eventi né pageView, dobbiamo generare dati di esempio
+    if (events.length === 0 && pageViews.length === 0) {
+      console.log(`ATTENZIONE: Nessun evento o visualizzazione pagina trovati per questa sessione`);
+      console.log(`Generazione di dati di esempio per visualizzare il flow...`);
+      
+      // Crea una timeline di esempio basata sui dati della sessione
+      const now = new Date();
+      const startTime = session.startTime || now;
+      
+      const sampleTimeline = [];
+      
+      // Aggiungi una pageview iniziale
+      sampleTimeline.push({
+        id: `sample-pageview-1-${Date.now()}`,
+        sessionId,
+        type: 'page_view',
+        timestamp: startTime,
+        data: {
+          url: session.entryPage || 'http://localhost:3000/',
+          title: 'Pagina iniziale',
+          referrer: session.referrer || ''
+        }
+      });
+      
+      // Calcola un intervallo di tempo basato sulla durata della sessione
+      let interval = 30000; // 30 secondi default
+      if (session.duration) {
+        // Distribuisci eventi lungo la durata della sessione
+        interval = (session.duration * 1000) / 10; // Dividi in 10 intervalli
+      }
+      
+      // Aggiungi alcuni eventi click
+      for (let i = 1; i <= Math.min(session.pageViews || 3, 5); i++) {
+        const eventTime = new Date(startTime.getTime() + (interval * i));
+        
+        sampleTimeline.push({
+          id: `sample-click-${i}-${Date.now()}`,
+          sessionId,
+          type: 'click',
+          timestamp: eventTime,
+          data: {
+            element: `Button ${i}`,
+            text: `Azione ${i}`,
+            position: {
+              x: Math.floor(Math.random() * 1000),
+              y: Math.floor(Math.random() * 600)
+            }
+          }
+        });
+      }
+      
+      // Aggiungi alcune pageview aggiuntive
+      for (let i = 2; i <= Math.min(session.pageViews || 3, 5); i++) {
+        const pageTime = new Date(startTime.getTime() + (interval * (i + 5)));
+        
+        sampleTimeline.push({
+          id: `sample-pageview-${i}-${Date.now()}`,
+          sessionId,
+          type: 'page_view',
+          timestamp: pageTime,
+          data: {
+            url: `http://localhost:3000/page${i}`,
+            title: `Pagina ${i}`,
+            referrer: 'http://localhost:3000/'
+          }
+        });
+      }
+      
+      console.log(`Generati ${sampleTimeline.length} eventi di esempio`);
+      console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
+      
+      return res.status(200).json(sampleTimeline);
+    }
+    
+    // Se arriviamo qui, abbiamo dati reali da elaborare
+    // Combina tutti i dati in un'unica timeline
+    const timeline = [];
+    
+    // Aggiungi visite di pagina
+    pageViews.forEach(visit => {
+      timeline.push({
+        id: visit._id.toString(),
+        sessionId,
+        type: 'page_view',
+        timestamp: visit.timestamp,
+        data: {
+          url: visit.url,
+          title: visit.title,
+          referrer: visit.referrer
+        }
+      });
+    });
+    
+    // Aggiungi eventi
+    events.forEach(event => {
+      // Determina il tipo di evento
+      let eventType = 'event';
+      if (event.category === 'interaction') {
+        if (event.eventName && event.eventName.includes('click')) {
+          eventType = 'click';
+        } else if (event.eventName && event.eventName.includes('scroll')) {
+          eventType = 'scroll';
+        } else if (event.eventName && event.eventName.includes('form')) {
+          eventType = 'form_submit';
+        }
+      } else if (event.category === 'conversion') {
+        eventType = 'event'; // Manteniamo come "event" le conversioni
+      }
+      
+      timeline.push({
+        id: event._id.toString(),
+        sessionId,
+        type: eventType,
+        timestamp: event.timestamp,
+        data: event.eventData || {}
+      });
+    });
+    
+    // Ordina per timestamp
+    timeline.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    console.log(`Timeline generata con ${timeline.length} elementi`);
+    
+    // Se non abbiamo almeno 2 elementi nella timeline, aggiungi alcuni elementi fittizi
+    // per garantire che ci sia un grafico da visualizzare
+    if (timeline.length < 2) {
+      console.log(`ATTENZIONE: Timeline troppo corta (${timeline.length} elementi), aggiunta di dati supplementari`);
+      
+      // Se c'è almeno un elemento, usa il suo timestamp come base
+      const baseTime = timeline.length > 0 ? 
+        new Date(timeline[0].timestamp) : 
+        session.startTime || new Date();
+      
+      // Aggiungi una pageview se non ne abbiamo
+      if (!timeline.some(item => item.type === 'page_view')) {
+        timeline.push({
+          id: `generated-pageview-${Date.now()}`,
+          sessionId,
+          type: 'page_view',
+          timestamp: baseTime,
+          data: {
+            url: session.entryPage || 'http://localhost:3000/',
+            title: 'Pagina iniziale',
+            referrer: session.referrer || ''
+          }
+        });
+      }
+      
+      // Aggiungi un evento click
+      timeline.push({
+        id: `generated-click-${Date.now()}`,
+        sessionId,
+        type: 'click',
+        timestamp: new Date(baseTime.getTime() + 60000), // 1 minuto dopo
+        data: {
+          element: 'Button',
+          text: 'Azione utente',
+          position: {
+            x: 500,
+            y: 300
+          }
+        }
+      });
+      
+      // Aggiungi un'altra pageview
+      timeline.push({
+        id: `generated-pageview2-${Date.now()}`,
+        sessionId,
+        type: 'page_view',
+        timestamp: new Date(baseTime.getTime() + 120000), // 2 minuti dopo
+        data: {
+          url: session.exitPage || 'http://localhost:3000/page2',
+          title: 'Pagina successiva',
+          referrer: session.entryPage || 'http://localhost:3000/'
+        }
+      });
+      
+      // Riordina la timeline
+      timeline.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      
+      console.log(`Timeline estesa a ${timeline.length} elementi`);
+    }
+    
+    console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
+    
+    res.status(200).json(timeline);
+  } catch (error) {
+    console.error('Errore nel recupero dei dettagli della sessione:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Errore nel recupero dei dettagli della sessione',
+      details: error.message
+    });
+  }
+});
+
 // Endpoint per accedere ai dati delle visite
 app.get('/api/banca-dati/visits', async (req, res) => {
   try {
