@@ -813,11 +813,10 @@ app.delete('/api/calendar/events/:id', async (req, res) => {
 });
 
 // ----------------------------------------------------------------
-// ENDPOINT TRACCIAMENTO CRM
+// ENDPOINT TRACCIAMENTO CRM - CON DEDUPLICAZIONE EVENTID
 // ----------------------------------------------------------------
 
-// Endpoint per ottenere le landing page
-// Endpoint per ottenere le landing page da userPath
+// 1. Endpoint per ottenere le landing page
 app.get('/api/tracciamento/landing-pages', async (req, res) => {
   try {
     const { timeRange = '7d', search } = req.query;
@@ -845,8 +844,10 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
           url: String,
           title: String,
           events: [{
+            eventId: String,      // NUOVO: Reference to the eventId in Events collection
             timestamp: Date,
             name: String,
+            category: String,
             data: Object
           }]
         }],
@@ -861,6 +862,32 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
     }
     
     const UserPath = connection.model('userPath');
+    
+    // Se il modello Event non esiste, crealo
+    if (!connection.models['Event']) {
+      const EventSchema = new mongoose.Schema({
+        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        eventName: { type: String, required: true },
+        eventData: Object,
+        timestamp: { type: Date, default: Date.now },
+        url: String,
+        path: String,
+        ip: String,
+        userAgent: String,
+        location: Object,
+        category: { 
+          type: String, 
+          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          default: 'interaction'
+        }
+      });
+      
+      connection.model('Event', EventSchema);
+    }
+    
+    const Event = connection.model('Event');
     
     // Calcola data di inizio in base al timeRange
     let startDate = new Date();
@@ -888,10 +915,11 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
     
     console.log(`Percorsi utente trovati: ${userPaths.length}`);
     
-    // FASE 2: Raggruppa i dati per URL
+    // FASE 2: Raggruppa i dati per URL con deduplicazione per eventId
     const urlMap = new Map();
     const sessionsByUrl = new Map();
     const userIdsByUrl = new Map();
+    const processedEventIds = new Set(); // Per tracciare gli eventId già processati
     
     // Processa ogni percorso utente
     for (const userPath of userPaths) {
@@ -915,8 +943,19 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
             userIdsByUrl.set(url, new Set());
           }
           
-          // Incrementa il contatore delle visite totali
-          urlMap.get(url).totalVisits++;
+          // Conta solo pageview unici per eventId
+          if (page.events && page.events.length > 0) {
+            for (const event of page.events) {
+              if (event.eventId && !processedEventIds.has(event.eventId)) {
+                processedEventIds.add(event.eventId);
+                // Incrementa il contatore delle visite totali solo per eventi unici
+                urlMap.get(url).totalVisits++;
+              }
+            }
+          } else {
+            // Se non ci sono eventi, incrementa normalmente
+            urlMap.get(url).totalVisits++;
+          }
           
           // Aggiorna la data dell'ultimo accesso
           if (page.timestamp > urlMap.get(url).lastAccess) {
@@ -933,6 +972,7 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
     }
     
     console.log(`URL unici trovati: ${urlMap.size}`);
+    console.log(`Eventi unici processati: ${processedEventIds.size}`);
     
     // FASE 3: Conta gli utenti unici per ogni URL
     for (const [url, userSet] of userIdsByUrl.entries()) {
@@ -945,7 +985,7 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
       }
     }
     
-    // FASE 4: Calcola i tassi di conversione
+    // FASE 4: Calcola i tassi di conversione con deduplicazione
     // Se il modello Session non esiste, crealo
     if (!connection.models['Session']) {
       const SessionSchema = new mongoose.Schema({
@@ -987,38 +1027,25 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
     
     const Session = connection.model('Session');
     
-    // Se il modello Event non esiste, crealo
-    if (!connection.models['Event']) {
-      const EventSchema = new mongoose.Schema({
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        eventName: { type: String, required: true },
-        eventData: Object,
-        timestamp: { type: Date, default: Date.now },
-        url: String,
-        path: String,
-        ip: String,
-        userAgent: String,
-        location: Object,
-        category: { 
-          type: String, 
-          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
-          default: 'interaction'
+    // Ottieni le conversioni nel periodo con deduplicazione per eventId
+    const conversions = await Event.aggregate([
+      {
+        $match: {
+          category: 'conversion',
+          timestamp: { $gte: startDate },
+          eventId: { $exists: true, $ne: '' }
         }
-      });
-      
-      connection.model('Event', EventSchema);
-    }
+      },
+      {
+        $group: {
+          _id: '$eventId', // Raggruppa per eventId
+          sessionId: { $first: '$sessionId' },
+          timestamp: { $first: '$timestamp' }
+        }
+      }
+    ]);
     
-    const Event = connection.model('Event');
-    
-    // Ottieni le conversioni nel periodo
-    const conversions = await Event.find({
-      category: 'conversion',
-      timestamp: { $gte: startDate }
-    });
-    
-    console.log(`Conversioni totali trovate: ${conversions.length}`);
+    console.log(`Conversioni uniche trovate: ${conversions.length}`);
     
     // Mappa le conversioni per sessionId
     const conversionsBySession = new Map();
@@ -1081,7 +1108,7 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
   }
 });
 
-// Endpoint per ottenere gli utenti di una landing page
+// 2. Endpoint per ottenere gli utenti di una landing page con deduplicazione eventId
 app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
   try {
     const { landingPageId } = req.params;
@@ -1185,10 +1212,33 @@ app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
       
       connection.model('User', UserSchema);
     }
+    if (!connection.models['Event']) {
+      const EventSchema = new mongoose.Schema({
+        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
+        sessionId: { type: String, required: true, index: true },
+        userId: { type: String, sparse: true, index: true },
+        eventName: { type: String, required: true },
+        eventData: Object,
+        timestamp: { type: Date, default: Date.now },
+        url: String,
+        path: String,
+        ip: String,
+        userAgent: String,
+        location: Object,
+        category: { 
+          type: String, 
+          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          default: 'interaction'
+        }
+      });
+      
+      connection.model('Event', EventSchema);
+    }
     
     const Visit = connection.model('Visit');
     const Session = connection.model('Session');
     const User = connection.model('User');
+    const Event = connection.model('Event');
     
     // Calcola data di inizio in base al timeRange
     let startDate = new Date();
@@ -1210,20 +1260,35 @@ app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
     console.log(`Data inizio ricerca: ${startDate.toISOString()}`);
     
     // FASE 1: Trova tutte le visite per questa URL nel periodo selezionato
-    const visits = await Visit.find({
+    // Deduplicazione per eventId se disponibile nell'Event collection
+    const pageviewEvents = await Event.find({
       url: pageUrl,
-      timestamp: { $gte: startDate }
-    });
+      timestamp: { $gte: startDate },
+      eventName: 'pageview',
+      eventId: { $exists: true, $ne: '' }
+    }).distinct('sessionId'); // Ottieni solo i sessionId unici
     
-    console.log(`Visite trovate per l'URL: ${visits.length}`);
+    console.log(`Eventi pageview unici trovati per l'URL: ${pageviewEvents.length}`);
     
-    if (visits.length === 0) {
+    // Fallback per visite senza eventId
+    let visits = [];
+    if (pageviewEvents.length === 0) {
+      visits = await Visit.find({
+        url: pageUrl,
+        timestamp: { $gte: startDate }
+      });
+      console.log(`Visite di fallback trovate per l'URL: ${visits.length}`);
+    }
+    
+    if (pageviewEvents.length === 0 && visits.length === 0) {
       console.log('Nessuna visita trovata per questa URL');
       return res.status(200).json([]);
     }
     
     // FASE 2: Estrai tutte le sessionId uniche
-    const sessionIds = [...new Set(visits.map(visit => visit.sessionId))];
+    let sessionIds = pageviewEvents.length > 0 ? pageviewEvents : 
+                     [...new Set(visits.map(visit => visit.sessionId))];
+    
     console.log(`Session ID unici trovati: ${sessionIds.length}`);
     
     // FASE 3: Trova tutte le sessioni corrispondenti
@@ -1366,7 +1431,7 @@ app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
   }
 });
 
-// Endpoint per ottenere le sessioni di un utente
+// 3. Endpoint per ottenere le sessioni di un utente con deduplicazione eventId
 app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -1450,6 +1515,7 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
     }
     if (!connection.models['Event']) {
       const EventSchema = new mongoose.Schema({
+        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
         sessionId: { type: String, required: true, index: true },
         userId: { type: String, sparse: true, index: true },
         eventName: { type: String, required: true },
@@ -1582,27 +1648,72 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
     
     console.log(`Dopo la rimozione dei duplicati: ${uniqueSessions.length} sessioni uniche`);
     
-    // Prepara le sessioni per il frontend
+    // Prepara le sessioni per il frontend con deduplicazione eventId
     const sessionList = await Promise.all(uniqueSessions.map(async (session) => {
-      // Verifica se ci sono conversioni in questa sessione
-      const conversions = await Event.find({ 
-        sessionId: session.sessionId,
-        category: 'conversion'
-      });
+      // Verifica se ci sono conversioni in questa sessione con deduplicazione per eventId
+      const conversions = await Event.aggregate([
+        {
+          $match: { 
+            sessionId: session.sessionId,
+            category: 'conversion',
+            eventId: { $exists: true, $ne: '' }
+          }
+        },
+        {
+          $group: {
+            _id: '$eventId', // Raggruppa per eventId per evitare duplicati
+            sessionId: { $first: '$sessionId' },
+            timestamp: { $first: '$timestamp' }
+          }
+        }
+      ]);
       
       // Trova la pagina di uscita
       const lastVisit = await Visit.findOne({ 
         sessionId: session.sessionId 
       }).sort({ timestamp: -1 });
       
-      // Conta le visite di pagina
-      const pageViews = await Visit.countDocuments({ sessionId: session.sessionId });
+      // Conta le visite di pagina uniche per eventId
+      const pageViews = await Event.aggregate([
+        {
+          $match: { 
+            sessionId: session.sessionId,
+            eventName: 'pageview',
+            eventId: { $exists: true, $ne: '' }
+          }
+        },
+        {
+          $group: {
+            _id: '$eventId' // Conta solo pageview unici per eventId
+          }
+        },
+        {
+          $count: 'total'
+        }
+      ]);
       
-      // Conta le interazioni
-      const interactions = await Event.countDocuments({ 
-        sessionId: session.sessionId,
-        category: { $in: ['interaction', 'form', 'media'] }
-      });
+      const pageViewCount = pageViews.length > 0 ? pageViews[0].total : session.pageViews || 0;
+      
+      // Conta le interazioni uniche per eventId
+      const interactions = await Event.aggregate([
+        {
+          $match: { 
+            sessionId: session.sessionId,
+            category: { $in: ['interaction', 'form', 'media'] },
+            eventId: { $exists: true, $ne: '' }
+          }
+        },
+        {
+          $group: {
+            _id: '$eventId' // Conta solo interazioni uniche per eventId
+          }
+        },
+        {
+          $count: 'total'
+        }
+      ]);
+      
+      const interactionCount = interactions.length > 0 ? interactions[0].total : 0;
       
       return {
         id: session.sessionId,
@@ -1611,8 +1722,8 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
         startTime: session.startTime,
         endTime: session.endTime || null,
         duration: session.duration || 0,
-        pagesViewed: pageViews || session.pageViews || 0,
-        interactionsCount: interactions || 0,
+        pagesViewed: pageViewCount,
+        interactionsCount: interactionCount,
         entryUrl: session.entryPage,
         exitUrl: lastVisit ? lastVisit.url : session.exitPage,
         isConverted: conversions.length > 0
@@ -1632,8 +1743,7 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
   }
 });
 
-// Endpoint per ottenere i dettagli di una sessione
-// Endpoint completo che usa userPath e Event
+// 4. Endpoint per ottenere i dettagli di una sessione con deduplicazione eventId
 app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -1661,8 +1771,10 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           url: String,
           title: String,
           events: [{
+            eventId: String,      // NEW: Reference to the eventId in Events collection
             timestamp: Date,
             name: String,
+            category: String,
             data: Object
           }]
         }],
@@ -1677,6 +1789,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     if (!connection.models['Event']) {
       const EventSchema = new mongoose.Schema({
+        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
         sessionId: { type: String, required: true, index: true },
         userId: { type: String, sparse: true, index: true },
         eventName: { type: String, required: true },
@@ -1727,28 +1840,49 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       console.log(`Nessun userPath trovato per la sessione: ${sessionId}`);
     }
     
-    // FASE 2: Recupera gli eventi dalla collezione Event
-    const allEvents = await Event.find({ sessionId }).sort({ timestamp: 1 });
-    console.log(`Eventi trovati nella collezione Event: ${allEvents.length}`);
+    // FASE 2: Recupera gli eventi dalla collezione Event con deduplicazione per eventId
+    const allEvents = await Event.aggregate([
+      {
+        $match: { 
+          sessionId: sessionId,
+          eventId: { $exists: true, $ne: '' }
+        }
+      },
+      {
+        $group: {
+          _id: '$eventId', // Raggruppa per eventId per evitare duplicati
+          doc: { $first: '$$ROOT' }
+        }
+      },
+      {
+        $replaceRoot: { newRoot: '$doc' }
+      },
+      {
+        $sort: { timestamp: 1 }
+      }
+    ]);
+    
+    console.log(`Eventi unici trovati nella collezione Event: ${allEvents.length}`);
     
     // FASE 3: Recupera le informazioni della sessione
     const sessionInfo = await Session.findOne({ sessionId });
     
-    // FASE 4: Mappa per evitare duplicati
-    const addedEventIds = new Map(); // timestamp_name -> true
+    // FASE 4: Mappa per evitare duplicati basata su eventId
+    const addedEventIds = new Set(); // Set di eventId già processati
     const sessionDetails = [];
     
     // Helper per aggiungere eventi evitando duplicati
     const addEvent = (eventData, source) => {
-      const timestamp = new Date(eventData.timestamp);
-      const eventKey = `${timestamp.getTime()}_${eventData.type}_${eventData.data?.name || ''}`;
+      // Usa l'eventId se disponibile, altrimenti crea una chiave di deduplicazione
+      const uniqueKey = eventData.eventId || 
+                       `${new Date(eventData.timestamp).getTime()}_${eventData.type}_${eventData.data?.name || ''}`;
       
-      if (!addedEventIds.has(eventKey)) {
-        addedEventIds.set(eventKey, true);
+      if (!addedEventIds.has(uniqueKey)) {
+        addedEventIds.add(uniqueKey);
         sessionDetails.push(eventData);
-        console.log(`Aggiunto evento da ${source}: ${eventData.type} @ ${timestamp.toISOString()}`);
+        console.log(`Aggiunto evento da ${source}: ${eventData.type} @ ${eventData.timestamp} (ID: ${uniqueKey})`);
       } else {
-        console.log(`Evento duplicato ignorato da ${source}: ${eventData.type} @ ${timestamp.toISOString()}`);
+        console.log(`Evento duplicato ignorato da ${source}: ${eventData.type} @ ${eventData.timestamp} (ID: ${uniqueKey})`);
       }
     };
     
@@ -1768,11 +1902,12 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           pageReferrer = userPath.path[i - 1].url;
         }
         
-        // Aggiungi pageview
+        // Aggiungi pageview (potrebbe avere eventId dal path)
         const pageviewEvent = {
           id: `page_${i}_${pageTimestamp.getTime()}`,
           type: 'page_view',
           timestamp: pageTimestamp.toISOString(),
+          eventId: page.eventId || null, // Include eventId se disponibile dal path
           data: {
             url: page.url,
             title: page.title || 'Senza titolo',
@@ -1839,6 +1974,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
               id: `event_${i}_${j}_${eventTimestamp.getTime()}`,
               type: eventType,
               timestamp: eventTimestamp.toISOString(),
+              eventId: event.eventId || null, // Include eventId se disponibile
               data: {
                 ...eventData,
                 name: event.name,
@@ -1854,7 +1990,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       }
     }
     
-    // FASE 6: Aggiungi eventi dalla collezione Event
+    // FASE 6: Aggiungi eventi dalla collezione Event (già deduplicati)
     console.log(`\nProcessamento eventi dalla collezione Event`);
     
     for (const event of allEvents) {
@@ -1885,6 +2021,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
         id: `db_event_${event._id}`,
         type: eventType,
         timestamp: eventTimestamp.toISOString(),
+        eventId: event.eventId, // Include eventId dal database
         data: {
           name: event.eventName,
           category: event.category,
@@ -1906,7 +2043,8 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
     console.log(`\n===== RISULTATO FINALE =====`);
-    console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
+    console.log(`Totale dettagli sessione (dopo deduplicazione): ${sessionDetails.length}`);
+    console.log(`Eventi unici processati: ${addedEventIds.size}`);
     console.log(`Dettagli per tipo:`);
     
     const typeStats = sessionDetails.reduce((acc, detail) => {
@@ -1922,7 +2060,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     if (sessionDetails.length > 0) {
       console.log(`\nPrimi 3 eventi:`);
       sessionDetails.slice(0, 3).forEach((detail, index) => {
-        console.log(`${index + 1}. ${detail.type} @ ${detail.timestamp} | URL: ${detail.data.url || 'N/A'}`);
+        console.log(`${index + 1}. ${detail.type} @ ${detail.timestamp} | EventID: ${detail.eventId || 'N/A'} | URL: ${detail.data.url || 'N/A'}`);
       });
     }
     
