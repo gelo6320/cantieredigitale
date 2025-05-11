@@ -921,15 +921,12 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
     const userIdsByUrl = new Map();
     const processedEventIds = new Set(); // Per tracciare gli eventId già processati
     
-    // Processa ogni percorso utente
+    // Modifica la sezione che conta le visite
     for (const userPath of userPaths) {
-      // Processa ogni pagina del percorso
       for (const page of userPath.path) {
-        // Filtra solo le pagine nel periodo selezionato
         if (page.timestamp >= startDate) {
           const url = page.url;
           
-          // Inizializza i dati per questo URL se non esistono già
           if (!urlMap.has(url)) {
             urlMap.set(url, {
               url,
@@ -943,18 +940,14 @@ app.get('/api/tracciamento/landing-pages', async (req, res) => {
             userIdsByUrl.set(url, new Set());
           }
           
-          // Conta solo pageview unici per eventId
-          if (page.events && page.events.length > 0) {
-            for (const event of page.events) {
-              if (event.eventId && !processedEventIds.has(event.eventId)) {
-                processedEventIds.add(event.eventId);
-                // Incrementa il contatore delle visite totali solo per eventi unici
-                urlMap.get(url).totalVisits++;
-              }
+          // CORRETTO: Conta solo i pageview, non tutti gli eventi
+          const pageviewEvents = page.events.filter(event => event.name === 'pageview');
+          
+          for (const event of pageviewEvents) {
+            if (event.eventId && !processedEventIds.has(event.eventId)) {
+              processedEventIds.add(event.eventId);
+              urlMap.get(url).totalVisits++;
             }
-          } else {
-            // Se non ci sono eventi, incrementa normalmente
-            urlMap.get(url).totalVisits++;
           }
           
           // Aggiorna la data dell'ultimo accesso
