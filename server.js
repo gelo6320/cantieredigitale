@@ -415,6 +415,148 @@ const StatisticsSchema = new mongoose.Schema({
 // Create the model
 const Statistics = mongoose.model('Statistics', StatisticsSchema);
 
+// Dopo la definizione di StatisticsSchema, aggiungere i nuovi schemi per timeframe
+
+// Schema base per le statistiche - definisce la struttura comune per tutti i timeframe
+const BaseStatisticsSchema = {
+  visitsByUrl: {
+    type: Object,
+    default: {}
+  },
+  uniqueVisitorsByUrl: {
+    type: Object,
+    default: {}
+  },
+  uniqueIdentifiers: [{
+    identifier: String,
+    type: { type: String, enum: ['userId', 'fingerprint', 'sessionId'] },
+    firstSeen: Date,
+    urls: [String]
+  }],
+  totalVisits: { type: Number, default: 0 },
+  consentedVisits: { type: Number, default: 0 },
+  consentRate: { type: Number, default: 0 },
+  pageViews: { type: Number, default: 0 },
+  uniqueVisitors: { type: Number, default: 0 },
+  bounceRate: { type: Number, default: 0 },
+  avgTimeOnSite: { type: Number, default: 0 },
+  totalTimeOnPage: { type: Number, default: 0 },
+  avgTimeOnPage: { type: Number, default: 0 },
+  buttonClicks: {
+    total: { type: Number, default: 0 },
+    byId: { type: Object, default: {} }
+  },
+  timeBySource: { type: Object, default: {} },
+  conversions: {
+    total: { type: Number, default: 0 },
+    byType: { type: Object, default: {} },
+    bySource: { type: Object, default: {} }
+  },
+  conversionRate: { type: Number, default: 0 },
+  funnel: {
+    entries: { type: Number, default: 0 },
+    completions: { type: Number, default: 0 },
+    dropOffs: Object
+  },
+  sources: Object,
+  campaigns: Object,
+  mobileVsDesktop: {
+    mobile: { type: Number, default: 0 },
+    desktop: { type: Number, default: 0 }
+  }
+};
+
+// Schema Statistiche Giornaliere
+const DailyStatisticsSchema = new mongoose.Schema({
+  date: { type: Date, required: true, index: true },
+  ...BaseStatisticsSchema,
+  // Rinominato per chiarezza
+  uniqueIdentifiersToday: [{
+    identifier: String,
+    type: { type: String, enum: ['userId', 'fingerprint', 'sessionId'] },
+    firstSeen: Date,
+    urls: [String]
+  }]
+});
+
+// Schema Statistiche Settimanali
+const WeeklyStatisticsSchema = new mongoose.Schema({
+  // Anno e numero della settimana (formato: AAAA-WW)
+  weekKey: { type: String, required: true, index: true },
+  year: { type: Number, required: true },
+  week: { type: Number, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  ...BaseStatisticsSchema,
+  // Identificatori univoci per questa settimana
+  uniqueIdentifiersThisWeek: [{
+    identifier: String,
+    type: { type: String, enum: ['userId', 'fingerprint', 'sessionId'] },
+    firstSeen: Date,
+    urls: [String]
+  }],
+  // Aggiornamenti giornalieri nella settimana
+  dailyBreakdown: [{
+    date: Date,
+    visits: Number,
+    pageViews: Number,
+    conversions: Number
+  }]
+});
+
+// Schema Statistiche Mensili
+const MonthlyStatisticsSchema = new mongoose.Schema({
+  // Anno e mese (formato: AAAA-MM)
+  monthKey: { type: String, required: true, index: true },
+  year: { type: Number, required: true },
+  month: { type: Number, required: true }, // 1-12
+  ...BaseStatisticsSchema,
+  // Identificatori univoci per questo mese
+  uniqueIdentifiersThisMonth: [{
+    identifier: String,
+    type: { type: String, enum: ['userId', 'fingerprint', 'sessionId'] },
+    firstSeen: Date,
+    urls: [String]
+  }],
+  // Aggiornamenti settimanali nel mese
+  weeklyBreakdown: [{
+    weekKey: String,
+    visits: Number,
+    pageViews: Number,
+    conversions: Number
+  }]
+});
+
+// Schema Statistiche Totali
+const TotalStatisticsSchema = new mongoose.Schema({
+  // Identificatore per le statistiche totali
+  key: { type: String, default: 'total', required: true, index: true },
+  // Periodo coperto
+  firstDataPoint: { type: Date },
+  lastUpdated: { type: Date, default: Date.now },
+  ...BaseStatisticsSchema,
+  // Aggiornamenti mensili
+  monthlyBreakdown: [{
+    monthKey: String,
+    year: Number,
+    month: Number,
+    visits: Number,
+    pageViews: Number,
+    conversions: Number
+  }],
+  uniqueUserIdentifiers: [{
+    identifier: String,
+    type: { type: String, enum: ['userId', 'fingerprint', 'sessionId'] },
+    firstSeen: Date
+  }]
+});
+
+// Registrazione dei modelli
+const DailyStatistics = mongoose.model('DailyStatistics', DailyStatisticsSchema);
+const WeeklyStatistics = mongoose.model('WeeklyStatistics', WeeklyStatisticsSchema);
+const MonthlyStatistics = mongoose.model('MonthlyStatistics', MonthlyStatisticsSchema);
+const TotalStatistics = mongoose.model('TotalStatistics', TotalStatisticsSchema);
+
 const FacebookAudienceSchema = new mongoose.Schema({
   // Identificatori principali
   userId: { type: String, sparse: true, index: true },
@@ -816,292 +958,7 @@ app.delete('/api/calendar/events/:id', async (req, res) => {
 // ENDPOINT TRACCIAMENTO CRM - CON DEDUPLICAZIONE EVENTID
 // ----------------------------------------------------------------
 
-// 1. Endpoint per ottenere le landing page
-app.get('/api/tracciamento/landing-pages', async (req, res) => {
-  try {
-    const { timeRange = '7d', search } = req.query;
-    
-    console.log(`\n===== INIZIO RECUPERO LANDING PAGES DA userPath =====`);
-    console.log(`Intervallo temporale: ${timeRange}`);
-    
-    // Ottieni la connessione utente
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
-      });
-    }
-    
-    // Se il modello userPath non esiste nella connessione, crealo
-    if (!connection.models['userPath']) {
-      const userPathSchema = new mongoose.Schema({
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, index: true },
-        path: [{
-          timestamp: Date,
-          url: String,
-          title: String,
-          events: [{
-            eventId: String,      // NUOVO: Reference to the eventId in Events collection
-            timestamp: Date,
-            name: String,
-            category: String,
-            data: Object
-          }]
-        }],
-        entryPoint: String,
-        exitPoint: String,
-        interactions: Number,
-        touchpoints: Number,
-        duration: Number
-      });
-      
-      connection.model('userPath', userPathSchema);
-    }
-    
-    const UserPath = connection.model('userPath');
-    
-    // Se il modello Event non esiste, crealo
-    if (!connection.models['Event']) {
-      const EventSchema = new mongoose.Schema({
-        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        eventName: { type: String, required: true },
-        eventData: Object,
-        timestamp: { type: Date, default: Date.now },
-        url: String,
-        path: String,
-        ip: String,
-        userAgent: String,
-        location: Object,
-        category: { 
-          type: String, 
-          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
-          default: 'interaction'
-        }
-      });
-      
-      connection.model('Event', EventSchema);
-    }
-    
-    const Event = connection.model('Event');
-    
-    // Calcola data di inizio in base al timeRange
-    let startDate = new Date();
-    switch(timeRange) {
-      case '24h':
-        startDate.setHours(startDate.getHours() - 24);
-        break;
-      case '7d':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case '30d':
-        startDate.setDate(startDate.getDate() - 30);
-        break;
-      case 'all':
-        startDate = new Date(0); // Dal 1970
-        break;
-    }
-    
-    console.log(`Data inizio ricerca: ${startDate.toISOString()}`);
-    
-    // FASE 1: Ottieni tutti i userPath che hanno almeno una pagina nel periodo selezionato
-    const userPaths = await UserPath.find({
-      'path.timestamp': { $gte: startDate }
-    });
-    
-    console.log(`Percorsi utente trovati: ${userPaths.length}`);
-    
-    // FASE 2: Raggruppa i dati per URL con deduplicazione per eventId
-    const urlMap = new Map();
-    const sessionsByUrl = new Map();
-    const userIdsByUrl = new Map();
-    const processedEventIds = new Set(); // Per tracciare gli eventId già processati
-    
-    // Modifica la sezione che conta le visite
-    for (const userPath of userPaths) {
-      for (const page of userPath.path) {
-        if (page.timestamp >= startDate) {
-          const url = page.url;
-          
-          if (!urlMap.has(url)) {
-            urlMap.set(url, {
-              url,
-              title: page.title || url,
-              totalVisits: 0,
-              uniqueUsers: 0,
-              conversionRate: 0,
-              lastAccess: new Date(0)
-            });
-            sessionsByUrl.set(url, new Set());
-            userIdsByUrl.set(url, new Set());
-          }
-          
-          // CORRETTO: Conta solo i pageview, non tutti gli eventi
-          const pageviewEvents = page.events.filter(event => event.name === 'pageview');
-          
-          for (const event of pageviewEvents) {
-            if (event.eventId && !processedEventIds.has(event.eventId)) {
-              processedEventIds.add(event.eventId);
-              urlMap.get(url).totalVisits++;
-            }
-          }
-          
-          // Aggiorna la data dell'ultimo accesso
-          if (page.timestamp > urlMap.get(url).lastAccess) {
-            urlMap.get(url).lastAccess = page.timestamp;
-          }
-          
-          // Aggiungi sessionId e userId ai set
-          sessionsByUrl.get(url).add(userPath.sessionId);
-          if (userPath.userId) {
-            userIdsByUrl.get(url).add(userPath.userId);
-          }
-        }
-      }
-    }
-    
-    console.log(`URL unici trovati: ${urlMap.size}`);
-    console.log(`Eventi unici processati: ${processedEventIds.size}`);
-    
-    // FASE 3: Conta gli utenti unici per ogni URL
-    for (const [url, userSet] of userIdsByUrl.entries()) {
-      // Se ci sono userId, usali per il conteggio, altrimenti usa le sessioni
-      if (userSet.size > 0) {
-        urlMap.get(url).uniqueUsers = userSet.size;
-      } else {
-        // Se non ci sono userId, usa il numero di sessioni uniche come approssimazione
-        urlMap.get(url).uniqueUsers = sessionsByUrl.get(url).size;
-      }
-    }
-    
-    // FASE 4: Calcola i tassi di conversione con deduplicazione
-    // Se il modello Session non esiste, crealo
-    if (!connection.models['Session']) {
-      const SessionSchema = new mongoose.Schema({
-        sessionId: { type: String, required: true, unique: true },
-        userId: { type: String, sparse: true, index: true },
-        fingerprint: String,
-        startTime: { type: Date, default: Date.now },
-        endTime: Date,
-        duration: Number,
-        isActive: { type: Boolean, default: true },
-        lastActivity: { type: Date, default: Date.now },
-        entryPage: String,
-        exitPage: String,
-        referrer: String,
-        deviceInfo: Object,
-        browserInfo: Object,
-        ip: String,
-        userAgent: String,
-        isNewUser: Boolean,
-        cookieConsent: { type: Boolean, default: false },
-        location: {
-          city: String,
-          region: String,
-          country: String,
-          country_code: String
-        },
-        consentCategories: Object,
-        utmParams: Object,
-        pageViews: { type: Number, default: 0 },
-        events: { type: Number, default: 0 },
-        conversions: { type: Number, default: 0 },
-        totalValue: { type: Number, default: 0 },
-        funnelProgress: Object,
-        abTestVariants: Object
-      });
-      
-      connection.model('Session', SessionSchema);
-    }
-    
-    const Session = connection.model('Session');
-    
-    // Ottieni le conversioni nel periodo con deduplicazione per eventId
-    const conversions = await Event.aggregate([
-      {
-        $match: {
-          category: 'conversion',
-          timestamp: { $gte: startDate },
-          eventId: { $exists: true, $ne: '' }
-        }
-      },
-      {
-        $group: {
-          _id: '$eventId', // Raggruppa per eventId
-          sessionId: { $first: '$sessionId' },
-          timestamp: { $first: '$timestamp' }
-        }
-      }
-    ]);
-    
-    console.log(`Conversioni uniche trovate: ${conversions.length}`);
-    
-    // Mappa le conversioni per sessionId
-    const conversionsBySession = new Map();
-    for (const conversion of conversions) {
-      conversionsBySession.set(conversion.sessionId, true);
-    }
-    
-    // Calcola i tassi di conversione per ogni URL
-    for (const [url, sessionIds] of sessionsByUrl.entries()) {
-      let conversionsCount = 0;
-      
-      for (const sessionId of sessionIds) {
-        if (conversionsBySession.has(sessionId)) {
-          conversionsCount++;
-        }
-      }
-      
-      // Calcola il tasso di conversione
-      const totalSessions = sessionIds.size;
-      if (totalSessions > 0) {
-        urlMap.get(url).conversionRate = parseFloat(
-          ((conversionsCount / totalSessions) * 100).toFixed(2)
-        );
-      }
-    }
-    
-    // FASE 5: Prepara i dati per la risposta
-    let landingPages = Array.from(urlMap.values());
-    
-    // Filtra i risultati se è presente una query di ricerca
-    if (search) {
-      const searchLower = search.toLowerCase();
-      landingPages = landingPages.filter(page => 
-        page.url.toLowerCase().includes(searchLower) ||
-        page.title.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    // Ordina per numero di visite (decrescente)
-    landingPages = landingPages.sort((a, b) => b.totalVisits - a.totalVisits);
-    
-    console.log(`Landing pages filtrate: ${landingPages.length}`);
-    
-    // Aggiungi un ID ad ogni landing page (necessario per il frontend)
-    landingPages = landingPages.map(page => ({
-      ...page,
-      id: Buffer.from(page.url).toString('base64')
-    }));
-    
-    console.log(`===== FINE RECUPERO LANDING PAGES =====\n`);
-    
-    res.status(200).json(landingPages);
-  } catch (error) {
-    console.error('Errore nel recupero delle landing page:', error);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Errore nel recupero delle landing page',
-      details: error.message
-    });
-  }
-});
-
-// Add this new endpoint to server.js
+// Aggiungi questo nuovo endpoint a server.js
 app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
   try {
     const { timeRange = '7d', search } = req.query;
@@ -1119,117 +976,120 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
       });
     }
     
-    // Se il modello Statistics non esiste nella connessione, crealo
-    if (!connection.models['Statistics']) {
-      connection.model('Statistics', StatisticsSchema);
-    }
+    // Determina quale modello di statistiche utilizzare in base al timeRange
+    let StatModel;
+    let query = {};
     
-    const Statistics = connection.model('Statistics');
-    
-    // Calcola data di inizio in base al timeRange
-    let startDate = new Date();
     switch(timeRange) {
       case '24h':
-        startDate.setHours(startDate.getHours() - 24);
+        // Registra il modello DailyStatistics sulla connessione se non esiste già
+        if (!connection.models['DailyStatistics']) {
+          connection.model('DailyStatistics', DailyStatisticsSchema);
+        }
+        StatModel = connection.model('DailyStatistics');
+        
+        // Imposta la query per l'ultimo giorno
+        const yesterday = new Date();
+        yesterday.setHours(yesterday.getHours() - 24);
+        query = { date: { $gte: yesterday } };
         break;
+        
       case '7d':
-        startDate.setDate(startDate.getDate() - 7);
+        // Registra il modello WeeklyStatistics sulla connessione se non esiste già
+        if (!connection.models['WeeklyStatistics']) {
+          connection.model('WeeklyStatistics', WeeklyStatisticsSchema);
+        }
+        StatModel = connection.model('WeeklyStatistics');
+        
+        // Calcola la chiave della settimana corrente
+        const currentDate = new Date();
+        const weekNumber = getWeekNumber(currentDate);
+        const weekKey = `${currentDate.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
+        
+        query = { weekKey };
         break;
+        
       case '30d':
-        startDate.setDate(startDate.getDate() - 30);
+        // Registra il modello MonthlyStatistics sulla connessione se non esiste già
+        if (!connection.models['MonthlyStatistics']) {
+          connection.model('MonthlyStatistics', MonthlyStatisticsSchema);
+        }
+        StatModel = connection.model('MonthlyStatistics');
+        
+        // Calcola la chiave del mese corrente
+        const monthDate = new Date();
+        const monthKey = `${monthDate.getFullYear()}-${(monthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        query = { monthKey };
         break;
+        
       case 'all':
-        startDate = new Date(0); // Dal 1970
+      default:
+        // Registra il modello TotalStatistics sulla connessione se non esiste già
+        if (!connection.models['TotalStatistics']) {
+          connection.model('TotalStatistics', TotalStatisticsSchema);
+        }
+        StatModel = connection.model('TotalStatistics');
+        
+        // Query per le statistiche totali
+        query = { key: 'total' };
         break;
     }
     
-    console.log(`Data inizio ricerca: ${startDate.toISOString()}`);
+    console.log(`Modello statistico utilizzato: ${StatModel.modelName}`);
+    console.log(`Query: ${JSON.stringify(query)}`);
     
     // Trova le statistiche nel periodo selezionato
-    const statistics = await Statistics.find({
-      date: { $gte: startDate }
-    }).sort({ date: -1 });
+    const statistics = await StatModel.findOne(query);
     
-    console.log(`Documenti Statistics trovati: ${statistics.length}`);
+    if (!statistics) {
+      console.log('Nessuna statistica trovata per il periodo selezionato');
+      return res.status(200).json([]);
+    }
     
-          // Raccogli i dati delle URL da tutte le statistiche
-    const urlMap = new Map();
+    // Raccogli i dati delle URL da visitsByUrl e uniqueVisitorsByUrl
+    const landingPages = [];
     
-    // Per ogni documento di statistiche
-    for (const stat of statistics) {
-      // Esamina visitsByUrl
-      if (stat.visitsByUrl) {
-        for (const [url, visits] of Object.entries(stat.visitsByUrl)) {
-          if (!urlMap.has(url)) {
-            urlMap.set(url, {
-              url,
-              title: url, // Usiamo l'URL come titolo
-              // Use totalVisits instead of visits to match expected property name
-              totalVisits: 0,
-              uniqueUsers: 0, // We'll also use uniqueUsers instead of uniqueVisitors
-              conversionRate: 0,
-              lastAccess: stat.date // Utilizza la data della statistica
-            });
-          }
-          
-          // Aggiorna le visite totali
-          urlMap.get(url).totalVisits += Number(visits);
-          
-          // Aggiorna la data dell'ultimo accesso se più recente
-          if (new Date(stat.date) > new Date(urlMap.get(url).lastAccess)) {
-            urlMap.get(url).lastAccess = stat.date;
-          }
+    if (statistics.visitsByUrl && Object.keys(statistics.visitsByUrl).length > 0) {
+      for (const [url, visits] of Object.entries(statistics.visitsByUrl)) {
+        // Ottieni i visitatori unici per questa URL
+        const uniqueUsers = statistics.uniqueVisitorsByUrl[url] || 0;
+        
+        // Calcola il tasso di conversione specifico per questa URL (se disponibile)
+        // Altrimenti usa un valore stimato basato sul tasso di conversione globale
+        let conversionRate = 0;
+        if (uniqueUsers > 0 && statistics.conversions && statistics.conversions.total > 0) {
+          conversionRate = (statistics.conversions.total / statistics.uniqueVisitors) * 100;
         }
-      }
-      
-      // Esamina uniqueVisitorsByUrl
-      if (stat.uniqueVisitorsByUrl) {
-        for (const [url, visitors] of Object.entries(stat.uniqueVisitorsByUrl)) {
-          if (!urlMap.has(url)) {
-            urlMap.set(url, {
-              url,
-              title: url,
-              totalVisits: 0,
-              uniqueUsers: 0,
-              conversionRate: 0,
-              lastAccess: stat.date
-            });
-          }
-          
-          // Aggiorna i visitatori unici
-          urlMap.get(url).uniqueUsers += Number(visitors);
-        }
+        
+        landingPages.push({
+          url,
+          title: url, // Potremmo migliorare questo in futuro recuperando i titoli effettivi
+          totalVisits: Number(visits),
+          uniqueUsers: Number(uniqueUsers),
+          conversionRate: parseFloat(conversionRate.toFixed(2)),
+          lastAccess: statistics.lastUpdated || statistics.date || new Date()
+        });
       }
     }
     
-    // Calcola il tasso di conversione (se possibile)
-    // Per semplicità, utilizziamo un valore casuale tra 0 e 10 se non disponibile
-    urlMap.forEach(page => {
-      if (!page.conversionRate || page.conversionRate === 0) {
-        // Si potrebbe utilizzare un calcolo più sofisticato, ma per ora utilizziamo un valore casuale
-        page.conversionRate = parseFloat((Math.random() * 10).toFixed(2));
-      }
-    });
-    
-    // Trasforma la mappa in array
-    let landingPages = Array.from(urlMap.values());
-    
     // Filtra i risultati se è presente una query di ricerca
+    let filteredLandingPages = landingPages;
     if (search) {
       const searchLower = search.toLowerCase();
-      landingPages = landingPages.filter(page => 
+      filteredLandingPages = landingPages.filter(page => 
         page.url.toLowerCase().includes(searchLower) ||
         page.title.toLowerCase().includes(searchLower)
       );
     }
     
     // Ordina per numero di visite (decrescente)
-    landingPages = landingPages.sort((a, b) => b.visits - a.visits);
+    filteredLandingPages = filteredLandingPages.sort((a, b) => b.totalVisits - a.totalVisits);
     
-    console.log(`Landing pages filtrate: ${landingPages.length}`);
+    console.log(`Landing pages filtrate: ${filteredLandingPages.length}`);
     console.log(`===== FINE RECUPERO LANDING PAGES =====\n`);
     
-    res.status(200).json(landingPages);
+    res.status(200).json(filteredLandingPages);
   } catch (error) {
     console.error('Errore nel recupero delle landing page da statistics:', error);
     res.status(500).json({ 
@@ -1239,6 +1099,15 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
     });
   }
 });
+
+// Funzione helper per ottenere il numero della settimana
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
 
 // 2. Endpoint per ottenere gli utenti di una landing page con deduplicazione eventId
 app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
