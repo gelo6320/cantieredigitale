@@ -982,38 +982,24 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
     
     switch(timeRange) {
       case '24h':
-        // Registra il modello DailyStatistics sulla connessione se non esiste già
-        if (!connection.models['DailyStatistics']) {
-          connection.model('DailyStatistics', DailyStatisticsSchema);
-        }
         StatModel = connection.model('DailyStatistics');
         
         // Imposta la query per l'ultimo giorno
         const yesterday = new Date();
-        yesterday.setHours(yesterday.getHours() - 24);
+        yesterday.setDate(yesterday.getDate() - 1);
         query = { date: { $gte: yesterday } };
         break;
         
       case '7d':
-        // Registra il modello WeeklyStatistics sulla connessione se non esiste già
-        if (!connection.models['WeeklyStatistics']) {
-          connection.model('WeeklyStatistics', WeeklyStatisticsSchema);
-        }
         StatModel = connection.model('WeeklyStatistics');
         
-        // Calcola la chiave della settimana corrente
-        const currentDate = new Date();
-        const weekNumber = getWeekNumber(currentDate);
-        const weekKey = `${currentDate.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
-        
-        query = { weekKey };
+        // CORREZIONE: Ottieni tutte le settimane disponibili invece di cercare una sola
+        // Questo evita i problemi di calcolo delle settimane
+        query = {};
+        console.log("Cerco tutte le statistiche settimanali disponibili");
         break;
         
       case '30d':
-        // Registra il modello MonthlyStatistics sulla connessione se non esiste già
-        if (!connection.models['MonthlyStatistics']) {
-          connection.model('MonthlyStatistics', MonthlyStatisticsSchema);
-        }
         StatModel = connection.model('MonthlyStatistics');
         
         // Calcola la chiave del mese corrente
@@ -1024,52 +1010,88 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
         break;
         
       case 'all':
-      default:
-        // Registra il modello TotalStatistics sulla connessione se non esiste già
-        if (!connection.models['TotalStatistics']) {
-          connection.model('TotalStatistics', TotalStatisticsSchema);
-        }
         StatModel = connection.model('TotalStatistics');
-        
-        // Query per le statistiche totali
-        query = { key: 'total' };
+        // Cerchiamo tutti i record, poi filtreremo per 'total'
+        query = {};
+        console.log("Cerco tutte le statistiche totali disponibili");
         break;
+        
+      default:
+        // Default per opzioni non previste
+        StatModel = connection.model('DailyStatistics');
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() - 7);
+        query = { date: { $gte: defaultDate } };
     }
     
     console.log(`Modello statistico utilizzato: ${StatModel.modelName}`);
     console.log(`Query: ${JSON.stringify(query)}`);
     
     // Trova le statistiche nel periodo selezionato
-    const statistics = await StatModel.findOne(query);
+    const statistics = await StatModel.find(query).sort({ 
+      // Ordinamento appropriato in base al tipo di statistica
+      ...(StatModel.modelName === 'DailyStatistics' ? { date: -1 } : {}),
+      ...(StatModel.modelName === 'WeeklyStatistics' ? { weekKey: -1 } : {}),
+      ...(StatModel.modelName === 'MonthlyStatistics' ? { monthKey: -1 } : {}),
+      ...(StatModel.modelName === 'TotalStatistics' ? { lastUpdated: -1 } : {})
+    });
     
-    if (!statistics) {
+    if (!statistics || statistics.length === 0) {
       console.log('Nessuna statistica trovata per il periodo selezionato');
       return res.status(200).json([]);
     }
     
+    console.log(`Trovate ${statistics.length} statistiche`);
+    
+    // Selezione delle statistiche rilevanti
+    let relevantStats = statistics;
+    
+    // Per le statistiche settimanali, prendi solo la settimana più recente
+    if (timeRange === '7d' && statistics.length > 0) {
+      // La statistica più recente è già la prima grazie all'ordinamento
+      relevantStats = [statistics[0]];
+      console.log(`Settimana selezionata: ${relevantStats[0].weekKey || 'N/A'}`);
+    }
+    
+    // Per le statistiche totali, cerca il record con key='total'
+    if (timeRange === 'all' && statistics.length > 0) {
+      const totalStat = statistics.find(stat => stat.key === 'total');
+      if (totalStat) {
+        relevantStats = [totalStat];
+        console.log('Trovato record con key=total');
+      } else {
+        console.log('Nessun record con key=total trovato, usando il primo record');
+        relevantStats = [statistics[0]];
+      }
+    }
+    
     // Raccogli i dati delle URL da visitsByUrl e uniqueVisitorsByUrl
     const landingPages = [];
-    
-    if (statistics.visitsByUrl && Object.keys(statistics.visitsByUrl).length > 0) {
-      for (const [url, visits] of Object.entries(statistics.visitsByUrl)) {
-        // Ottieni i visitatori unici per questa URL
-        const uniqueUsers = statistics.uniqueVisitorsByUrl[url] || 0;
+    let lastUpdated = new Date();
+
+    for (const stat of relevantStats) {
+      // Verifica che visitsByUrl esista e sia un oggetto
+      if (stat.visitsByUrl && typeof stat.visitsByUrl === 'object') {
+        console.log(`Elaborazione statistiche con ${Object.keys(stat.visitsByUrl).length} URL`);
         
-        // Calcola il tasso di conversione specifico per questa URL (se disponibile)
-        // Altrimenti usa un valore stimato basato sul tasso di conversione globale
-        let conversionRate = 0;
-        if (uniqueUsers > 0 && statistics.conversions && statistics.conversions.total > 0) {
-          conversionRate = (statistics.conversions.total / statistics.uniqueVisitors) * 100;
+        // Processa ogni URL
+        for (const [url, visits] of Object.entries(stat.visitsByUrl)) {
+          // Ottieni i visitatori unici, con fallback a 0 se non disponibili
+          const uniqueVisitors = stat.uniqueVisitorsByUrl && typeof stat.uniqueVisitorsByUrl === 'object' 
+            ? (stat.uniqueVisitorsByUrl[url] || 0)
+            : 0;
+          
+          landingPages.push({
+            url,
+            title: url, // Potremmo migliorare questo in futuro recuperando i titoli effettivi
+            totalVisits: Number(visits),
+            uniqueUsers: Number(uniqueVisitors),
+            conversionRate: 0, // Sarà calcolato dopo
+            lastAccess: stat.lastUpdated || stat.date || new Date()
+          });
         }
-        
-        landingPages.push({
-          url,
-          title: url, // Potremmo migliorare questo in futuro recuperando i titoli effettivi
-          totalVisits: Number(visits),
-          uniqueUsers: Number(uniqueUsers),
-          conversionRate: parseFloat(conversionRate.toFixed(2)),
-          lastAccess: statistics.lastUpdated || statistics.date || new Date()
-        });
+      } else {
+        console.log('Attenzione: visitsByUrl non trovato o non valido');
       }
     }
     
@@ -1099,15 +1121,6 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
     });
   }
 });
-
-// Funzione helper per ottenere il numero della settimana
-function getWeekNumber(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
 
 // 2. Endpoint per ottenere gli utenti di una landing page con deduplicazione eventId
 app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
