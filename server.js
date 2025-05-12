@@ -2875,6 +2875,7 @@ async function getUserConnection(req) {
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
+    // Register all your models here
     if (!connection.models['Lead']) {
       console.log("[getUserConnection] Accessing leads collection");
       
@@ -2943,6 +2944,23 @@ async function getUserConnection(req) {
       connection.model('FacebookEvent', FacebookEventSchema);
       connection.model('FacebookLead', FacebookLeadSchema);
       console.log("[getUserConnection] Legacy models registered");
+    }
+    
+    // Register statistics models if they don't exist
+    if (!connection.models['DailyStatistics']) {
+      connection.model('DailyStatistics', DailyStatisticsSchema);
+    }
+    
+    if (!connection.models['WeeklyStatistics']) {
+      connection.model('WeeklyStatistics', WeeklyStatisticsSchema);
+    }
+    
+    if (!connection.models['MonthlyStatistics']) {
+      connection.model('MonthlyStatistics', MonthlyStatisticsSchema);
+    }
+    
+    if (!connection.models['TotalStatistics']) {
+      connection.model('TotalStatistics', TotalStatisticsSchema);
     }
     
     console.log("[getUserConnection] Connection and models ready");
