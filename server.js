@@ -2636,6 +2636,10 @@ app.get('/api/tracciamento/statistics', async (req, res) => {
   try {
     console.log("[STATS API] Richiesta ricevuta per le statistiche");
     console.log(`[STATS API] Headers: ${JSON.stringify(req.headers.origin)}`);
+    console.log(`[STATS API] Query params: ${JSON.stringify(req.query)}`);
+    
+    const { timeRange = '7d' } = req.query;
+    console.log(`[STATS API] Intervallo temporale richiesto: ${timeRange}`);
     
     // Otteniamo la connessione al database dell'utente
     const connection = await getUserConnection(req);
@@ -2650,18 +2654,147 @@ app.get('/api/tracciamento/statistics', async (req, res) => {
     
     console.log("[STATS API] Connessione al database utente ottenuta con successo");
     
-    // Definire il modello Statistics sulla connessione dell'utente se non esiste già
-    if (!connection.models['Statistics']) {
-      console.log("[STATS API] Registrazione del modello Statistics sulla connessione");
-      connection.model('Statistics', StatisticsSchema);
+    // Determina quale modello di statistiche utilizzare in base al timeRange
+    let StatModel;
+    let query = {};
+    
+    switch(timeRange) {
+      case '24h':
+        // Verifica che il modello DailyStatistics esista
+        if (!connection.models['DailyStatistics']) {
+          console.log("[STATS API] Modello DailyStatistics non registrato, verifico la disponibilità dello schema");
+          if (DailyStatisticsSchema) {
+            console.log("[STATS API] Registrando il modello DailyStatistics sulla connessione utente");
+            connection.model('DailyStatistics', DailyStatisticsSchema);
+          } else {
+            console.log("[STATS API] Schema DailyStatistics non disponibile!");
+          }
+        }
+        
+        StatModel = connection.model('DailyStatistics');
+        
+        // Imposta la query per l'ultimo giorno
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        query = { date: { $gte: yesterday } };
+        break;
+        
+      case '7d':
+        // Verifica che il modello WeeklyStatistics esista
+        if (!connection.models['WeeklyStatistics']) {
+          console.log("[STATS API] Modello WeeklyStatistics non registrato, verifico la disponibilità dello schema");
+          if (WeeklyStatisticsSchema) {
+            console.log("[STATS API] Registrando il modello WeeklyStatistics sulla connessione utente");
+            connection.model('WeeklyStatistics', WeeklyStatisticsSchema);
+          } else {
+            console.log("[STATS API] Schema WeeklyStatistics non disponibile!");
+          }
+        }
+        
+        StatModel = connection.model('WeeklyStatistics');
+        
+        // Ottieni tutte le settimane disponibili invece di cercare una sola
+        query = {};
+        console.log("[STATS API] Cerco tutte le statistiche settimanali disponibili");
+        break;
+        
+      case '30d':
+        // Verifica che il modello MonthlyStatistics esista
+        if (!connection.models['MonthlyStatistics']) {
+          console.log("[STATS API] Modello MonthlyStatistics non registrato, verifico la disponibilità dello schema");
+          if (MonthlyStatisticsSchema) {
+            console.log("[STATS API] Registrando il modello MonthlyStatistics sulla connessione utente");
+            connection.model('MonthlyStatistics', MonthlyStatisticsSchema);
+          } else {
+            console.log("[STATS API] Schema MonthlyStatistics non disponibile!");
+          }
+        }
+        
+        StatModel = connection.model('MonthlyStatistics');
+        
+        // Calcola la chiave del mese corrente
+        const monthDate = new Date();
+        const monthKey = `${monthDate.getFullYear()}-${(monthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        query = { monthKey };
+        break;
+        
+      case 'all':
+        // Verifica che il modello TotalStatistics esista
+        if (!connection.models['TotalStatistics']) {
+          console.log("[STATS API] Modello TotalStatistics non registrato, verifico la disponibilità dello schema");
+          if (TotalStatisticsSchema) {
+            console.log("[STATS API] Registrando il modello TotalStatistics sulla connessione utente");
+            connection.model('TotalStatistics', TotalStatisticsSchema);
+          } else {
+            console.log("[STATS API] Schema TotalStatistics non disponibile!");
+          }
+        }
+        
+        StatModel = connection.model('TotalStatistics');
+        // Cerchiamo tutti i record, poi filtreremo per 'total'
+        query = {};
+        console.log("[STATS API] Cerco tutte le statistiche totali disponibili");
+        break;
+        
+      default:
+        // Fallback a Statistics se esiste
+        if (connection.models['Statistics']) {
+          console.log("[STATS API] Utilizzo del modello Statistics (fallback)");
+          StatModel = connection.model('Statistics');
+          query = {};
+        } else {
+          console.log("[STATS API] Fallback a DailyStatistics");
+          // Fallback a DailyStatistics
+          if (!connection.models['DailyStatistics']) {
+            if (DailyStatisticsSchema) {
+              connection.model('DailyStatistics', DailyStatisticsSchema);
+            } else {
+              return res.status(500).json({ 
+                success: false, 
+                message: 'Modelli statistici non disponibili nel database'
+              });
+            }
+          }
+          
+          StatModel = connection.model('DailyStatistics');
+          const defaultDate = new Date();
+          defaultDate.setDate(defaultDate.getDate() - 7);
+          query = { date: { $gte: defaultDate } };
+        }
     }
     
-    // Utilizziamo il modello Statistics dalla connessione dell'utente
-    const UserStatistics = connection.model('Statistics');
+    console.log(`[STATS API] Modello statistico utilizzato: ${StatModel.modelName}`);
+    console.log(`[STATS API] Query: ${JSON.stringify(query)}`);
     
-    // Query al database senza filtri temporali
-    console.log("[STATS API] Esecuzione query sulla collection Statistics...");
-    const statistics = await UserStatistics.find({}).sort({ date: -1 });
+    // Elenca tutte le collezioni disponibili (solo in debug)
+    try {
+      const collections = await connection.db.listCollections().toArray();
+      console.log(`[STATS API] Collezioni disponibili nel database: ${collections.map(c => c.name).join(', ')}`);
+    } catch (err) {
+      console.log(`[STATS API] Impossibile elencare le collezioni: ${err.message}`);
+    }
+    
+    try {
+      // Controlla l'esistenza della collezione prima di eseguire la query
+      const collections = await connection.db.listCollections({ name: StatModel.collection.name }).toArray();
+      if (collections.length === 0) {
+        console.log(`[STATS API] ATTENZIONE: La collezione ${StatModel.collection.name} non esiste nel database!`);
+        return res.status(200).json([]); // Restituisci un array vuoto
+      }
+    } catch (err) {
+      console.log(`[STATS API] Errore durante la verifica della collezione: ${err.message}`);
+    }
+    
+    // Trova le statistiche nel periodo selezionato
+    const statistics = await StatModel.find(query).sort({ 
+      // Ordinamento appropriato in base al tipo di statistica
+      ...(StatModel.modelName === 'DailyStatistics' ? { date: -1 } : {}),
+      ...(StatModel.modelName === 'WeeklyStatistics' ? { weekKey: -1 } : {}),
+      ...(StatModel.modelName === 'MonthlyStatistics' ? { monthKey: -1 } : {}),
+      ...(StatModel.modelName === 'TotalStatistics' ? { lastUpdated: -1 } : {}),
+      ...(StatModel.modelName === 'Statistics' ? { date: -1 } : {})
+    });
     
     console.log(`[STATS API] Query completata. Trovati ${statistics.length} documenti`);
     
@@ -2669,6 +2802,43 @@ app.get('/api/tracciamento/statistics', async (req, res) => {
     if (statistics.length > 0) {
       console.log("[STATS API] Primo documento trovato:");
       console.log(JSON.stringify(statistics[0], null, 2).substring(0, 300) + "...");
+    } else {
+      console.log("[STATS API] Nessun documento trovato nella collezione. Verificare che i dati esistano.");
+      
+      // Opzionale: verifica se i dati esistono in altre collezioni
+      try {
+        const collectionsToCheck = ['DailyStatistics', 'WeeklyStatistics', 'MonthlyStatistics', 'TotalStatistics', 'Statistics'];
+        for (const collName of collectionsToCheck) {
+          if (connection.models[collName]) {
+            const count = await connection.models[collName].countDocuments({});
+            console.log(`[STATS API] Collezione ${collName} contiene ${count} documenti`);
+          }
+        }
+      } catch (err) {
+        console.log(`[STATS API] Errore durante la verifica di altre collezioni: ${err.message}`);
+      }
+    }
+    
+    // Seleziona statistiche rilevanti con la stessa logica dell'altro endpoint
+    let relevantStats = statistics;
+    
+    // Per le statistiche settimanali, prendi solo la settimana più recente
+    if (timeRange === '7d' && statistics.length > 0) {
+      // La statistica più recente è già la prima grazie all'ordinamento
+      relevantStats = [statistics[0]];
+      console.log(`[STATS API] Settimana selezionata: ${relevantStats[0].weekKey || 'N/A'}`);
+    }
+    
+    // Per le statistiche totali, cerca il record con key='total'
+    if (timeRange === 'all' && statistics.length > 0) {
+      const totalStat = statistics.find(stat => stat.key === 'total');
+      if (totalStat) {
+        relevantStats = [totalStat];
+        console.log('[STATS API] Trovato record con key=total');
+      } else {
+        console.log('[STATS API] Nessun record con key=total trovato, usando il primo record');
+        relevantStats = [statistics[0]];
+      }
     }
     
     // Configurazione corretta di CORS
@@ -2677,7 +2847,9 @@ app.get('/api/tracciamento/statistics', async (req, res) => {
     res.header('Access-Control-Allow-Methods', 'GET');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
-    res.json(statistics);
+    // Invia le statistiche rilevanti
+    res.json(relevantStats);
+    
     console.log("[STATS API] Risposta inviata al client");
     
   } catch (error) {
