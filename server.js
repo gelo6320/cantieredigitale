@@ -557,6 +557,43 @@ const WeeklyStatistics = mongoose.model('WeeklyStatistics', WeeklyStatisticsSche
 const MonthlyStatistics = mongoose.model('MonthlyStatistics', MonthlyStatisticsSchema);
 const TotalStatistics = mongoose.model('TotalStatistics', TotalStatisticsSchema);
 
+const UserPathSchema = new mongoose.Schema({
+  sessionId: { type: String, required: true, index: true },
+  userId: { type: String, sparse: true, index: true },
+  fingerprint: { type: String, sparse: true, index: true },
+  path: [{
+    timestamp: Date,
+    url: String,
+    rawUrl: String, 
+    title: String,
+    referrer: String,
+    pageType: { type: String, enum: ['landing', 'transition', 'exit'], default: 'transition' },
+    timeOnPage: Number,
+    tempStartTime: Date,
+    scrollDepth: Number,
+    interactions: [InteractionSchema],
+    exitReason: { type: String, enum: ['navigation', 'tab_switch', 'window_close', 'timeout', 'unknown'] }
+  }],
+  entryPoint: String,
+  exitPoint: String,
+  duration: Number,
+  totalInteractions: { type: Number, default: 0 },
+  totalPages: { type: Number, default: 0 },
+  conversionOccurred: { type: Boolean, default: false },
+  conversionDetails: {
+    type: {
+      type: String
+    },
+    value: Number,
+    pageUrl: String,
+    timestamp: Date
+  },
+  isActive: { type: Boolean, default: true },
+  lastActivity: { type: Date, default: Date.now }
+});
+
+const UserPath = mongoose.model('UserPath', UserPathSchema);
+
 const FacebookAudienceSchema = new mongoose.Schema({
   // Identificatori principali
   userId: { type: String, sparse: true, index: true },
@@ -1775,309 +1812,132 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       });
     }
     
-    // Inizializza i modelli necessari
-    if (!connection.models['userPath']) {
-      const userPathSchema = new mongoose.Schema({
+    // Inizializza il modello UserPath se non esiste
+    if (!connection.models['UserPath']) {
+      // Definizione schema UserPath
+      const UserPathSchema = new mongoose.Schema({
         sessionId: { type: String, required: true, index: true },
-        userId: { type: String, index: true },
+        userId: { type: String, sparse: true, index: true },
+        fingerprint: { type: String, sparse: true, index: true },
         path: [{
           timestamp: Date,
           url: String,
           title: String,
-          events: [{
-            eventId: String,      // NEW: Reference to the eventId in Events collection
+          referrer: String,
+          pageType: { type: String, enum: ['landing', 'transition', 'exit'], default: 'transition' },
+          timeOnPage: Number,
+          scrollDepth: Number,
+          interactions: [{
+            eventId: String,
             timestamp: Date,
+            type: String,
             name: String,
             category: String,
             data: Object
-          }]
+          }],
+          exitReason: String
         }],
         entryPoint: String,
         exitPoint: String,
-        interactions: Number,
-        touchpoints: Number,
-        duration: Number
+        duration: Number,
+        totalInteractions: { type: Number, default: 0 },
+        totalPages: { type: Number, default: 0 },
+        conversionOccurred: { type: Boolean, default: false },
+        conversionDetails: {
+          type: { type: String },
+          value: Number,
+          pageUrl: String,
+          timestamp: Date
+        },
+        isActive: { type: Boolean, default: true },
+        lastActivity: { type: Date, default: Date.now }
       });
-      connection.model('userPath', userPathSchema);
+      
+      connection.model('UserPath', UserPathSchema);
     }
     
-    if (!connection.models['Event']) {
-      const EventSchema = new mongoose.Schema({
-        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        eventName: { type: String, required: true },
-        eventData: Object,
-        timestamp: { type: Date, default: Date.now },
-        url: String,
-        path: String,
-        ip: String,
-        userAgent: String,
-        location: Object,
-        category: { 
-          type: String, 
-          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
-          default: 'interaction'
-        }
-      });
-      connection.model('Event', EventSchema);
-    }
+    const UserPath = connection.model('UserPath');
     
-    if (!connection.models['Session']) {
-      const SessionSchema = new mongoose.Schema({
-        sessionId: { type: String, required: true, unique: true },
-        userId: { type: String, sparse: true, index: true },
-        fingerprint: String,
-        startTime: { type: Date, default: Date.now },
-        endTime: Date,
-        referrer: String,
-        entryPage: String,
-        exitPage: String,
-        location: Object,
-        deviceInfo: Object,
-        browserInfo: Object,
-        cookieConsent: Boolean,
-        userAgent: String,
-        ip: String
-      });
-      connection.model('Session', SessionSchema);
-    }
-    
-    const UserPath = connection.model('userPath');
-    const Event = connection.model('Event');
-    const Session = connection.model('Session');
-    
-    // FASE 1: Recupera il userPath
+    // Recupera il percorso utente
     const userPath = await UserPath.findOne({ sessionId });
     
     if (!userPath) {
-      console.log(`Nessun userPath trovato per la sessione: ${sessionId}`);
+      console.log(`Nessun percorso utente trovato per la sessione: ${sessionId}`);
+      return res.status(200).json([]);
     }
     
-    // FASE 2: Recupera gli eventi dalla collezione Event con deduplicazione per eventId
-    const allEvents = await Event.aggregate([
-      {
-        $match: { 
-          sessionId: sessionId,
-          eventId: { $exists: true, $ne: '' }
-        }
-      },
-      {
-        $group: {
-          _id: '$eventId', // Raggruppa per eventId per evitare duplicati
-          doc: { $first: '$$ROOT' }
-        }
-      },
-      {
-        $replaceRoot: { newRoot: '$doc' }
-      },
-      {
-        $sort: { timestamp: 1 }
-      }
-    ]);
+    console.log(`UserPath trovato con ${userPath.path.length} pagine`);
     
-    console.log(`Eventi unici trovati nella collezione Event: ${allEvents.length}`);
-    
-    // FASE 3: Recupera le informazioni della sessione
-    const sessionInfo = await Session.findOne({ sessionId });
-    
-    // FASE 4: Mappa per evitare duplicati basata su eventId
-    const addedEventIds = new Set(); // Set di eventId già processati
+    // Trasforma i dati del userPath nel formato atteso dal frontend
     const sessionDetails = [];
     
-    // Helper per aggiungere eventi evitando duplicati
-    const addEvent = (eventData, source) => {
-      // Usa l'eventId se disponibile, altrimenti crea una chiave di deduplicazione
-      const uniqueKey = eventData.eventId || 
-                       `${new Date(eventData.timestamp).getTime()}_${eventData.type}_${eventData.data?.name || ''}`;
+    // Processa le pagine visitate
+    for (let i = 0; i < userPath.path.length; i++) {
+      const page = userPath.path[i];
+      const pageTimestamp = new Date(page.timestamp);
       
-      if (!addedEventIds.has(uniqueKey)) {
-        addedEventIds.add(uniqueKey);
-        sessionDetails.push(eventData);
-        console.log(`Aggiunto evento da ${source}: ${eventData.type} @ ${eventData.timestamp} (ID: ${uniqueKey})`);
-      } else {
-        console.log(`Evento duplicato ignorato da ${source}: ${eventData.type} @ ${eventData.timestamp} (ID: ${uniqueKey})`);
-      }
-    };
-    
-    // FASE 5: Processa il userPath se esiste
-    if (userPath) {
-      console.log(`\nProcessamento userPath con ${userPath.path.length} pagine`);
-      
-      for (let i = 0; i < userPath.path.length; i++) {
-        const page = userPath.path[i];
-        const pageTimestamp = new Date(page.timestamp);
-        
-        // Determina il referrer
-        let pageReferrer = '';
-        if (i === 0) {
-          pageReferrer = sessionInfo?.referrer || userPath.entryPoint || '';
-        } else {
-          pageReferrer = userPath.path[i - 1].url;
-        }
-        
-        // Aggiungi pageview (potrebbe avere eventId dal path)
-        const pageviewEvent = {
-          id: `page_${i}_${pageTimestamp.getTime()}`,
-          type: 'page_view',
-          timestamp: pageTimestamp.toISOString(),
-          eventId: page.eventId || null, // Include eventId se disponibile dal path
-          data: {
-            url: page.url,
-            title: page.title || 'Senza titolo',
-            referrer: pageReferrer,
-            path: new URL(page.url).pathname,
-            sessionId: userPath.sessionId,
-            userId: userPath.userId
-          }
-        };
-        
-        addEvent(pageviewEvent, 'userPath');
-        
-        // Aggiungi eventi della pagina
-        if (page.events && page.events.length > 0) {
-          for (let j = 0; j < page.events.length; j++) {
-            const event = page.events[j];
-            const eventTimestamp = new Date(event.timestamp);
-            
-            // Determina il tipo di evento
-            let eventType = 'event';
-            let eventData = { ...event.data };
-            
-            // Gestisci diversi tipi di eventi
-            if (event.name === 'generic_click' || (eventData.tagName && eventData.text)) {
-              eventType = 'click';
-              eventData = {
-                ...eventData,
-                selector: eventData.selector || null,
-                text: eventData.text || null,
-                element: eventData.tagName || eventData.element || 'elemento'
-              };
-            } else if (event.name.includes('scroll')) {
-              eventType = 'scroll';
-              eventData = {
-                ...eventData,
-                direction: eventData.direction || 'down',
-                depth: eventData.depth || eventData.percent || 0
-              };
-            } else if (event.name.includes('form') && event.name.includes('submit')) {
-              eventType = 'form_submit';
-              eventData = {
-                ...eventData,
-                formId: eventData.formId || eventData.form || 'unknown'
-              };
-            } else if (event.name === 'time_on_page') {
-              eventType = 'time_on_page';
-              eventData = {
-                ...eventData,
-                duration: eventData.seconds || eventData.timeOnPage || 0
-              };
-            } else if (event.name === 'exit_intent') {
-              eventType = 'exit_intent';
-            } else if (event.name === 'session_end') {
-              eventType = 'session_end';
-            }
-            
-            // Se è un evento di conversione
-            if (eventData.conversionType || eventData.category === 'conversion' || 
-                (event.name && event.name.includes('conversion'))) {
-              eventData.category = 'conversion';
-            }
-            
-            const transformedEvent = {
-              id: `event_${i}_${j}_${eventTimestamp.getTime()}`,
-              type: eventType,
-              timestamp: eventTimestamp.toISOString(),
-              eventId: event.eventId || null, // Include eventId se disponibile
-              data: {
-                ...eventData,
-                name: event.name,
-                sessionId: userPath.sessionId,
-                userId: userPath.userId,
-                url: page.url
-              }
-            };
-            
-            addEvent(transformedEvent, 'userPath');
-          }
-        }
-      }
-    }
-    
-    // FASE 6: Aggiungi eventi dalla collezione Event (già deduplicati)
-    console.log(`\nProcessamento eventi dalla collezione Event`);
-    
-    for (const event of allEvents) {
-      const eventTimestamp = new Date(event.timestamp);
-      
-      // Determina il tipo di evento
-      let eventType = 'event';
-      
-      // Gestisci diversi tipi di eventi
-      if (event.eventName === 'pageview' || event.eventName === 'page_view') {
-        eventType = 'page_view';
-      } else if (event.eventName === 'click' || event.eventName === 'generic_click') {
-        eventType = 'click';
-      } else if (event.eventName.includes('scroll')) {
-        eventType = 'scroll';
-      } else if (event.eventName.includes('form') && event.eventName.includes('submit')) {
-        eventType = 'form_submit';
-      } else if (event.eventName === 'session_end') {
-        eventType = 'session_end';
-      }
-      
-      // Se è un evento di conversione
-      if (event.category === 'conversion' || event.eventName.includes('conversion')) {
-        eventType = 'event';
-      }
-      
-      const standardEvent = {
-        id: `db_event_${event._id}`,
-        type: eventType,
-        timestamp: eventTimestamp.toISOString(),
-        eventId: event.eventId, // Include eventId dal database
+      // Aggiungi l'evento pageview
+      sessionDetails.push({
+        id: `page_${i}_${pageTimestamp.getTime()}`,
+        type: 'page_view',
+        timestamp: pageTimestamp.toISOString(),
         data: {
-          name: event.eventName,
-          category: event.category,
-          url: event.url,
-          path: event.path,
-          sessionId: event.sessionId,
-          userId: event.userId,
-          ip: event.ip,
-          userAgent: event.userAgent,
-          location: event.location,
-          ...event.eventData
+          url: page.url,
+          title: page.title || 'Senza titolo',
+          referrer: page.referrer || (i > 0 ? userPath.path[i-1].url : userPath.entryPoint || ''),
+          timeOnPage: page.timeOnPage,
+          scrollDepth: page.scrollDepth
         }
-      };
+      });
       
-      addEvent(standardEvent, 'Event');
+      // Aggiungi le interazioni della pagina
+      if (page.interactions && page.interactions.length > 0) {
+        for (let j = 0; j < page.interactions.length; j++) {
+          const interaction = page.interactions[j];
+          const interactionTimestamp = new Date(interaction.timestamp);
+          
+          // Determina il tipo di interazione
+          let interactionType = interaction.type || 'event';
+          
+          // Aggiungi l'interazione ai dettagli della sessione
+          sessionDetails.push({
+            id: `interaction_${i}_${j}_${interactionTimestamp.getTime()}`,
+            type: interactionType,
+            timestamp: interactionTimestamp.toISOString(),
+            data: {
+              name: interaction.name,
+              category: interaction.category,
+              url: page.url,
+              ...interaction.data
+            }
+          });
+        }
+      }
     }
     
-    // FASE 7: Ordina tutti gli eventi per timestamp
-    sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    
-    console.log(`\n===== RISULTATO FINALE =====`);
-    console.log(`Totale dettagli sessione (dopo deduplicazione): ${sessionDetails.length}`);
-    console.log(`Eventi unici processati: ${addedEventIds.size}`);
-    console.log(`Dettagli per tipo:`);
-    
-    const typeStats = sessionDetails.reduce((acc, detail) => {
-      acc[detail.type] = (acc[detail.type] || 0) + 1;
-      return acc;
-    }, {});
-    
-    Object.entries(typeStats).forEach(([type, count]) => {
-      console.log(`  ${type}: ${count}`);
-    });
-    
-    // Log di alcuni dettagli per debug
-    if (sessionDetails.length > 0) {
-      console.log(`\nPrimi 3 eventi:`);
-      sessionDetails.slice(0, 3).forEach((detail, index) => {
-        console.log(`${index + 1}. ${detail.type} @ ${detail.timestamp} | EventID: ${detail.eventId || 'N/A'} | URL: ${detail.data.url || 'N/A'}`);
+    // Se ci sono dettagli di conversione, aggiungi un evento di conversione
+    if (userPath.conversionOccurred && userPath.conversionDetails) {
+      const conversionTimestamp = new Date(userPath.conversionDetails.timestamp);
+      
+      sessionDetails.push({
+        id: `conversion_${conversionTimestamp.getTime()}`,
+        type: 'event',
+        timestamp: conversionTimestamp.toISOString(),
+        data: {
+          name: 'conversion',
+          category: 'conversion',
+          conversionType: userPath.conversionDetails.type,
+          value: userPath.conversionDetails.value,
+          url: userPath.conversionDetails.pageUrl
+        }
       });
     }
     
+    // Ordina tutti gli eventi per timestamp
+    sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    console.log(`\n===== RISULTATO FINALE =====`);
+    console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
     console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
     
     // Restituisci i dettagli della sessione
