@@ -1839,15 +1839,28 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       return res.status(200).json([]);
     }
     
+    console.log(`\n========== DIAGNOSTIC INFO ==========`);
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
+    console.log(`UserPath keys: ${Object.keys(userPath).join(', ')}`);
+    console.log(`TotalInteractions from document: ${userPath.totalInteractions || 0}`);
+    console.log(`Conversion occurred: ${userPath.conversionOccurred ? 'Yes' : 'No'}`);
     
     // Extract ALL interactions for the timeline
     const sessionDetails = [];
+    let totalInteractionsExtracted = 0;
     
     // Process each page in the path
     userPath.path.forEach((page, pageIndex) => {
+      console.log(`\n----- PAGE ${pageIndex + 1} -----`);
+      console.log(`URL: ${page.url}`);
+      console.log(`Page keys: ${Object.keys(page).join(', ')}`);
+      console.log(`Has interactions array: ${Array.isArray(page.interactions)}`);
+      if (Array.isArray(page.interactions)) {
+        console.log(`Interactions count: ${page.interactions.length}`);
+      }
+      
       // Add page view entry with enhanced data
-      sessionDetails.push({
+      const pageViewEvent = {
         id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
         type: 'page_view',
         timestamp: new Date(page.timestamp).toISOString(),
@@ -1860,11 +1873,26 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           // Display percentage format
           scrollPercentage: page.scrollDepth ? `${page.scrollDepth}%` : '0%'
         }
-      });
+      };
+      
+      sessionDetails.push(pageViewEvent);
+      console.log(`Added page_view event: ${JSON.stringify(pageViewEvent.data, null, 2).substring(0, 200)}...`);
       
       // Process interactions if they exist
       if (Array.isArray(page.interactions)) {
         page.interactions.forEach((interaction, idx) => {
+          console.log(`\n  -- INTERACTION ${idx + 1} --`);
+          console.log(`  Type: ${interaction.type || 'unknown'}`);
+          console.log(`  EventId: ${interaction.eventId || 'none'}`);
+          console.log(`  Interaction keys: ${Object.keys(interaction).join(', ')}`);
+          console.log(`  Has metadata: ${interaction.metadata ? 'Yes' : 'No'}`);
+          
+          if (interaction.metadata) {
+            console.log(`  Metadata keys: ${Object.keys(interaction.metadata).join(', ')}`);
+          }
+          
+          totalInteractionsExtracted++;
+          
           // Enhanced formatting for frontend display
           let displayData = {
             name: interaction.type || 'event',
@@ -1882,6 +1910,8 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
             const scrollDepth = interaction.metadata?.scrollDepth || 
                                 interaction.metadata?.raw?.percent || 
                                 interaction.metadata?.raw?.depth || 0;
+            
+            console.log(`  Scroll depth found: ${scrollDepth}`);
             
             displayData = {
               ...displayData,
@@ -1922,19 +1952,27 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           }
           
           // Add to session details
-          sessionDetails.push({
+          const interactionEvent = {
             id: interaction.eventId || `interaction_${pageIndex}_${idx}_${new Date(interaction.timestamp).getTime()}`,
             type: interaction.type || 'event',
             timestamp: new Date(interaction.timestamp).toISOString(),
             data: displayData
-          });
+          };
+          
+          sessionDetails.push(interactionEvent);
+          console.log(`  Added interaction event: ${interactionEvent.type}, data: ${JSON.stringify(interactionEvent.data).substring(0, 100)}...`);
         });
       }
     });
     
     // Add conversion event if it exists
     if (userPath.conversionOccurred && userPath.conversionDetails) {
-      sessionDetails.push({
+      console.log(`\n----- CONVERSION EVENT -----`);
+      console.log(`Type: ${userPath.conversionDetails.type}`);
+      console.log(`Value: ${userPath.conversionDetails.value || 0}`);
+      console.log(`URL: ${userPath.conversionDetails.pageUrl}`);
+      
+      const conversionEvent = {
         id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
         type: 'conversion',
         timestamp: new Date(userPath.conversionDetails.timestamp).toISOString(),
@@ -1946,13 +1984,17 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           valueFormatted: `${userPath.conversionDetails.value || 0}€`,
           url: userPath.conversionDetails.pageUrl
         }
-      });
+      };
+      
+      sessionDetails.push(conversionEvent);
+      console.log(`Added conversion event: ${JSON.stringify(conversionEvent.data, null, 2)}`);
     }
     
     // Sort everything by timestamp
     sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
     console.log(`\n===== RISULTATO FINALE =====`);
+    console.log(`Interazioni estratte: ${totalInteractionsExtracted}`);
     console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
     console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
     
