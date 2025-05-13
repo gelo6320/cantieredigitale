@@ -1831,7 +1831,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     const UserPath = connection.model('UserPath');
     
-    // Use lean() to get a plain JavaScript object
+    // Use lean() for better performance and to get plain JavaScript object
     const userPath = await UserPath.findOne({ sessionId }).lean();
     
     if (!userPath) {
@@ -1841,22 +1841,12 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
     
-    // Convert to raw JSON and back to handle any serialization issues
-    const rawJson = JSON.stringify(userPath);
-    const userData = JSON.parse(rawJson);
-    
-    console.log(`Path length after parse: ${userData.path.length}`);
-    
     // Extract ALL interactions for the timeline
     const sessionDetails = [];
-    let totalInteractions = 0;
     
     // Process each page in the path
-    userData.path.forEach((page, pageIndex) => {
-      console.log(`\nProcessing page ${pageIndex}: ${page.url}`);
-      console.log(`Page keys: ${Object.keys(page)}`);
-      
-      // Add page view entry
+    userPath.path.forEach((page, pageIndex) => {
+      // Add page view entry with enhanced data
       sessionDetails.push({
         id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
         type: 'page_view',
@@ -1865,52 +1855,96 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           url: page.url,
           title: page.title || 'Senza titolo',
           referrer: page.referrer || '',
-          timeOnPage: page.timeOnPage || 0,
-          scrollDepth: page.scrollDepth || 0
+          timeOnPage: typeof page.timeOnPage === 'number' ? page.timeOnPage : 0,
+          scrollDepth: page.scrollDepth ? page.scrollDepth : 0,
+          // Display percentage format
+          scrollPercentage: page.scrollDepth ? `${page.scrollDepth}%` : '0%'
         }
       });
       
-      // Check for interactions using different access methods
-      const interactions = page.interactions || [];
-      console.log(`Found ${interactions.length} interactions`);
-      
-      // Process each interaction
-      if (Array.isArray(interactions)) {
-        interactions.forEach((interaction, idx) => {
-          console.log(`  Processing interaction ${idx}: ${interaction.type || 'unknown'}`);
-          totalInteractions++;
+      // Process interactions if they exist
+      if (Array.isArray(page.interactions)) {
+        page.interactions.forEach((interaction, idx) => {
+          // Enhanced formatting for frontend display
+          let displayData = {
+            name: interaction.type || 'event',
+            category: interaction.metadata?.category || 'interaction',
+            url: page.url
+          };
           
-          // Format for frontend
+          // Add element text if available
+          if (interaction.elementText) {
+            displayData.elementText = interaction.elementText;
+          }
+          
+          // Enhanced scroll data for better display
+          if (interaction.type === 'scroll' || interaction.type === 'scroll_depth') {
+            const scrollDepth = interaction.metadata?.scrollDepth || 
+                                interaction.metadata?.raw?.percent || 
+                                interaction.metadata?.raw?.depth || 0;
+            
+            displayData = {
+              ...displayData,
+              scrollDepth: scrollDepth,
+              scrollPercentage: `${scrollDepth}%`,
+              totalScrollDistance: interaction.metadata?.raw?.totalScrollDistance || 0
+            };
+          }
+          
+          // Enhanced click data for better display
+          if (interaction.type === 'generic_click') {
+            displayData = {
+              ...displayData,
+              elementType: interaction.metadata?.raw?.tagName || 'element',
+              elementText: interaction.elementText || interaction.metadata?.raw?.text || 'Click',
+              position: interaction.metadata?.raw?.position || {}
+            };
+          }
+          
+          // Enhanced form data for better display
+          if (interaction.type === 'conversion_contact_form' || interaction.type === 'lead_acquisition_contact') {
+            displayData = {
+              ...displayData,
+              formType: 'contact_form',
+              value: interaction.metadata?.value || 0,
+              formData: interaction.metadata?.formData || {}
+            };
+          }
+          
+          // Include all metadata for completeness
+          if (interaction.metadata) {
+            displayData = {
+              ...displayData,
+              ...interaction.metadata,
+              // Preserve raw data but without unnecessary nesting
+              raw: interaction.metadata.raw || {}
+            };
+          }
+          
+          // Add to session details
           sessionDetails.push({
             id: interaction.eventId || `interaction_${pageIndex}_${idx}_${new Date(interaction.timestamp).getTime()}`,
             type: interaction.type || 'event',
             timestamp: new Date(interaction.timestamp).toISOString(),
-            data: {
-              name: interaction.type || 'event',
-              category: (interaction.metadata && interaction.metadata.category) || 'interaction',
-              url: page.url,
-              elementText: interaction.elementText || '',
-              ...(interaction.metadata || {})
-            }
+            data: displayData
           });
         });
       }
     });
     
     // Add conversion event if it exists
-    if (userData.conversionOccurred && userData.conversionDetails) {
-      console.log(`Adding conversion event: ${userData.conversionDetails.type}`);
-      
+    if (userPath.conversionOccurred && userPath.conversionDetails) {
       sessionDetails.push({
-        id: `conversion_${new Date(userData.conversionDetails.timestamp).getTime()}`,
+        id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
         type: 'conversion',
-        timestamp: new Date(userData.conversionDetails.timestamp).toISOString(),
+        timestamp: new Date(userPath.conversionDetails.timestamp).toISOString(),
         data: {
           name: 'conversion',
           category: 'conversion',
-          conversionType: userData.conversionDetails.type,
-          value: userData.conversionDetails.value,
-          url: userData.conversionDetails.pageUrl
+          conversionType: userPath.conversionDetails.type,
+          value: userPath.conversionDetails.value,
+          valueFormatted: `${userPath.conversionDetails.value || 0}€`,
+          url: userPath.conversionDetails.pageUrl
         }
       });
     }
@@ -1919,7 +1953,6 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
     console.log(`\n===== RISULTATO FINALE =====`);
-    console.log(`Totale interactions trovate: ${totalInteractions}`);
     console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
     console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
     
