@@ -592,6 +592,18 @@ const UserPathSchema = new mongoose.Schema({
   lastActivity: { type: Date, default: Date.now }
 });
 
+const InteractionSchema = new mongoose.Schema({
+  timestamp: { type: Date, default: Date.now },
+  type: { type: String, required: true },
+  eventId: { type: String, required: true, unique: true },
+  elementId: String,
+  elementText: String,
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  }
+}, { _id: true });
+
 const UserPath = mongoose.model('UserPath', UserPathSchema);
 
 const FacebookAudienceSchema = new mongoose.Schema({
