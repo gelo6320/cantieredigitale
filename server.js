@@ -1814,7 +1814,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     console.log(`\n===== INIZIO RECUPERO DETTAGLI SESSIONE =====`);
     console.log(`SessionId: ${sessionId}`);
     
-    // Ottieni la connessione utente
+    // Get user connection
     const connection = await getUserConnection(req);
     
     if (!connection) {
@@ -1824,7 +1824,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       });
     }
     
-    // Inizializza il modello UserPath se non esiste
+    // Make sure the UserPath model exists
     if (!connection.models['UserPath']) {
       // Definizione schema UserPath
       const UserPathSchema = new mongoose.Schema({
@@ -1870,7 +1870,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     const UserPath = connection.model('UserPath');
     
-    // Recupera il percorso utente
+    // Retrieve the user path
     const userPath = await UserPath.findOne({ sessionId });
     
     if (!userPath) {
@@ -1880,61 +1880,56 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
     
-    // Trasforma i dati del userPath nel formato atteso dal frontend
+    // NEW APPROACH: Extract ALL interactions from all pages into a unified timeline
     const sessionDetails = [];
     
-    // Processa le pagine visitate
-    for (let i = 0; i < userPath.path.length; i++) {
-      const page = userPath.path[i];
-      const pageTimestamp = new Date(page.timestamp);
-      
-      // Aggiungi l'evento pageview
+    // First, add page_view events for each path entry
+    userPath.path.forEach((page, pageIndex) => {
+      // Add the main page view entry
       sessionDetails.push({
-        id: `page_${i}_${pageTimestamp.getTime()}`,
+        id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
         type: 'page_view',
-        timestamp: pageTimestamp.toISOString(),
+        timestamp: new Date(page.timestamp).toISOString(),
         data: {
           url: page.url,
           title: page.title || 'Senza titolo',
-          referrer: page.referrer || (i > 0 ? userPath.path[i-1].url : userPath.entryPoint || ''),
+          referrer: page.referrer || '',
           timeOnPage: page.timeOnPage,
           scrollDepth: page.scrollDepth
         }
       });
       
-      // Aggiungi le interazioni della pagina
-      if (page.interactions && page.interactions.length > 0) {
-        for (let j = 0; j < page.interactions.length; j++) {
-          const interaction = page.interactions[j];
-          const interactionTimestamp = new Date(interaction.timestamp);
+      // Extract and add all interactions from this page
+      if (page.interactions && Array.isArray(page.interactions)) {
+        page.interactions.forEach(interaction => {
+          // Skip duplicate pageview events (we already added page_view events above)
+          if (interaction.type === 'pageview' && interaction.metadata?.isNewPage !== true) {
+            return;
+          }
           
-          // Determina il tipo di interazione
-          let interactionType = interaction.type || 'event';
-          
-          // Aggiungi l'interazione ai dettagli della sessione
+          // Format the interaction for frontend
           sessionDetails.push({
-            id: `interaction_${i}_${j}_${interactionTimestamp.getTime()}`,
-            type: interactionType,
-            timestamp: interactionTimestamp.toISOString(),
+            id: interaction.eventId || `interaction_${pageIndex}_${new Date(interaction.timestamp).getTime()}`,
+            type: interaction.type,
+            timestamp: new Date(interaction.timestamp).toISOString(),
             data: {
-              name: interaction.name,
-              category: interaction.category,
+              name: interaction.type,
+              category: interaction.metadata?.raw?.category || 'interaction',
               url: page.url,
-              ...interaction.data
+              elementText: interaction.elementText,
+              ...interaction.metadata
             }
           });
-        }
+        });
       }
-    }
+    });
     
-    // Se ci sono dettagli di conversione, aggiungi un evento di conversione
+    // Add conversion event if it exists
     if (userPath.conversionOccurred && userPath.conversionDetails) {
-      const conversionTimestamp = new Date(userPath.conversionDetails.timestamp);
-      
       sessionDetails.push({
-        id: `conversion_${conversionTimestamp.getTime()}`,
-        type: 'event',
-        timestamp: conversionTimestamp.toISOString(),
+        id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
+        type: 'conversion',
+        timestamp: new Date(userPath.conversionDetails.timestamp).toISOString(),
         data: {
           name: 'conversion',
           category: 'conversion',
@@ -1945,14 +1940,14 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
       });
     }
     
-    // Ordina tutti gli eventi per timestamp
+    // Sort everything by timestamp
     sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
     console.log(`\n===== RISULTATO FINALE =====`);
     console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
     console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
     
-    // Restituisci i dettagli della sessione
+    // Return the session details
     res.status(200).json(sessionDetails);
     
   } catch (error) {
