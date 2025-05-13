@@ -693,7 +693,18 @@ const FacebookAudienceSchema = new mongoose.Schema({
   // Stato di sincronizzazione con Facebook
   syncedToFacebook: { type: Boolean, default: false },
   lastSyncAttempt: Date,
-  syncResult: mongoose.Schema.Types.Mixed
+  syncResult: mongoose.Schema.Types.Mixed,
+  
+  // Nuovo campo per tracciare i dettagli dell'invio a Facebook CAPI
+  facebookCapi: {
+    sent: { type: Boolean, default: false },
+    timestamp: Date,
+    success: Boolean,
+    eventId: String,
+    payload: Object,
+    response: Object,
+    error: Object
+  }
 }, {
   // Opzioni schema per maggiore flessibilità
   strict: false, // Permette campi non definiti nello schema
@@ -3023,15 +3034,6 @@ async function getUserConnection(req) {
           notes: String,
           value: Number,
           currency: String
-        },
-        facebookCapi: {
-          sent: { type: Boolean, default: false },
-          timestamp: Date,
-          success: Boolean,
-          eventId: String,
-          payload: Object,
-          response: Object,
-          error: Object
         },
         tags: [String],
         properties: { type: Map, of: mongoose.Schema.Types.Mixed },
