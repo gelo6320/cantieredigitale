@@ -1826,52 +1826,13 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     // Make sure the UserPath model exists
     if (!connection.models['UserPath']) {
-      // Definizione schema UserPath
-      const UserPathSchema = new mongoose.Schema({
-        sessionId: { type: String, required: true, index: true },
-        userId: { type: String, sparse: true, index: true },
-        fingerprint: { type: String, sparse: true, index: true },
-        path: [{
-          timestamp: Date,
-          url: String,
-          title: String,
-          referrer: String,
-          pageType: { type: String, enum: ['landing', 'transition', 'exit'], default: 'transition' },
-          timeOnPage: Number,
-          scrollDepth: Number,
-          interactions: [{
-            eventId: String,
-            timestamp: Date,
-            type: String,
-            name: String,
-            category: String,
-            data: Object
-          }],
-          exitReason: String
-        }],
-        entryPoint: String,
-        exitPoint: String,
-        duration: Number,
-        totalInteractions: { type: Number, default: 0 },
-        totalPages: { type: Number, default: 0 },
-        conversionOccurred: { type: Boolean, default: false },
-        conversionDetails: {
-          type: { type: String },
-          value: Number,
-          pageUrl: String,
-          timestamp: Date
-        },
-        isActive: { type: Boolean, default: true },
-        lastActivity: { type: Date, default: Date.now }
-      });
-      
       connection.model('UserPath', UserPathSchema);
     }
     
     const UserPath = connection.model('UserPath');
     
-    // Retrieve the user path
-    const userPath = await UserPath.findOne({ sessionId });
+    // Use lean() to get a plain JavaScript object
+    const userPath = await UserPath.findOne({ sessionId }).lean();
     
     if (!userPath) {
       console.log(`Nessun percorso utente trovato per la sessione: ${sessionId}`);
@@ -1880,19 +1841,22 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
     
-    // DIAGNOSTICS: Check if path array is a proper array
-    console.log(`Path è un array? ${Array.isArray(userPath.path)}`);
+    // Convert to raw JSON and back to handle any serialization issues
+    const rawJson = JSON.stringify(userPath);
+    const userData = JSON.parse(rawJson);
     
-    // Extract ALL interactions from all pages into a unified timeline
+    console.log(`Path length after parse: ${userData.path.length}`);
+    
+    // Extract ALL interactions for the timeline
     const sessionDetails = [];
     let totalInteractions = 0;
     
     // Process each page in the path
-    userPath.path.forEach((page, pageIndex) => {
-      // DIAGNOSTICS: Log current page being processed 
+    userData.path.forEach((page, pageIndex) => {
       console.log(`\nProcessing page ${pageIndex}: ${page.url}`);
+      console.log(`Page keys: ${Object.keys(page)}`);
       
-      // Add the page view entry for this path
+      // Add page view entry
       sessionDetails.push({
         id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
         type: 'page_view',
@@ -1901,47 +1865,31 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
           url: page.url,
           title: page.title || 'Senza titolo',
           referrer: page.referrer || '',
-          timeOnPage: page.timeOnPage,
-          scrollDepth: page.scrollDepth
+          timeOnPage: page.timeOnPage || 0,
+          scrollDepth: page.scrollDepth || 0
         }
       });
       
-      // DIAGNOSTICS: Check for interactions array in current page
-      console.log(`Page has interactions? ${page.interactions ? 'Yes' : 'No'}`);
-      console.log(`Interactions is array? ${Array.isArray(page.interactions)}`);
-      if (page.interactions) {
-        console.log(`Number of interactions found: ${page.interactions.length}`);
-        
-        // Log first interaction structure if available
-        if (page.interactions.length > 0) {
-          console.log(`First interaction type: ${page.interactions[0].type}`);
-          console.log(`First interaction keys: ${Object.keys(page.interactions[0])}`);
-        }
-      }
+      // Check for interactions using different access methods
+      const interactions = page.interactions || [];
+      console.log(`Found ${interactions.length} interactions`);
       
-      // Extract and add all interactions from this page
-      if (page.interactions && Array.isArray(page.interactions)) {
-        page.interactions.forEach((interaction, idx) => {
+      // Process each interaction
+      if (Array.isArray(interactions)) {
+        interactions.forEach((interaction, idx) => {
           console.log(`  Processing interaction ${idx}: ${interaction.type || 'unknown'}`);
-          
-          // Skip duplicate pageview events (we already added page_view events above)
-          if (interaction.type === 'pageview' && interaction.metadata?.isNewPage !== true) {
-            console.log(`  Skipping duplicate pageview`);
-            return;
-          }
-          
           totalInteractions++;
           
-          // Format the interaction for frontend
+          // Format for frontend
           sessionDetails.push({
-            id: interaction.eventId || `interaction_${pageIndex}_${new Date(interaction.timestamp).getTime()}`,
+            id: interaction.eventId || `interaction_${pageIndex}_${idx}_${new Date(interaction.timestamp).getTime()}`,
             type: interaction.type || 'event',
             timestamp: new Date(interaction.timestamp).toISOString(),
             data: {
               name: interaction.type || 'event',
-              category: interaction.metadata?.category || 'interaction',
+              category: (interaction.metadata && interaction.metadata.category) || 'interaction',
               url: page.url,
-              elementText: interaction.elementText,
+              elementText: interaction.elementText || '',
               ...(interaction.metadata || {})
             }
           });
@@ -1950,19 +1898,19 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     });
     
     // Add conversion event if it exists
-    if (userPath.conversionOccurred && userPath.conversionDetails) {
-      console.log(`Adding conversion event: ${userPath.conversionDetails.type}`);
+    if (userData.conversionOccurred && userData.conversionDetails) {
+      console.log(`Adding conversion event: ${userData.conversionDetails.type}`);
       
       sessionDetails.push({
-        id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
+        id: `conversion_${new Date(userData.conversionDetails.timestamp).getTime()}`,
         type: 'conversion',
-        timestamp: new Date(userPath.conversionDetails.timestamp).toISOString(),
+        timestamp: new Date(userData.conversionDetails.timestamp).toISOString(),
         data: {
           name: 'conversion',
           category: 'conversion',
-          conversionType: userPath.conversionDetails.type,
-          value: userPath.conversionDetails.value,
-          url: userPath.conversionDetails.pageUrl
+          conversionType: userData.conversionDetails.type,
+          value: userData.conversionDetails.value,
+          url: userData.conversionDetails.pageUrl
         }
       });
     }
