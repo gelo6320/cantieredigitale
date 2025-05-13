@@ -1880,12 +1880,19 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
     
-    // NEW APPROACH: Extract ALL interactions from all pages into a unified timeline
-    const sessionDetails = [];
+    // DIAGNOSTICS: Check if path array is a proper array
+    console.log(`Path è un array? ${Array.isArray(userPath.path)}`);
     
-    // First, add page_view events for each path entry
+    // Extract ALL interactions from all pages into a unified timeline
+    const sessionDetails = [];
+    let totalInteractions = 0;
+    
+    // Process each page in the path
     userPath.path.forEach((page, pageIndex) => {
-      // Add the main page view entry
+      // DIAGNOSTICS: Log current page being processed 
+      console.log(`\nProcessing page ${pageIndex}: ${page.url}`);
+      
+      // Add the page view entry for this path
       sessionDetails.push({
         id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
         type: 'page_view',
@@ -1899,25 +1906,43 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
         }
       });
       
+      // DIAGNOSTICS: Check for interactions array in current page
+      console.log(`Page has interactions? ${page.interactions ? 'Yes' : 'No'}`);
+      console.log(`Interactions is array? ${Array.isArray(page.interactions)}`);
+      if (page.interactions) {
+        console.log(`Number of interactions found: ${page.interactions.length}`);
+        
+        // Log first interaction structure if available
+        if (page.interactions.length > 0) {
+          console.log(`First interaction type: ${page.interactions[0].type}`);
+          console.log(`First interaction keys: ${Object.keys(page.interactions[0])}`);
+        }
+      }
+      
       // Extract and add all interactions from this page
       if (page.interactions && Array.isArray(page.interactions)) {
-        page.interactions.forEach(interaction => {
+        page.interactions.forEach((interaction, idx) => {
+          console.log(`  Processing interaction ${idx}: ${interaction.type || 'unknown'}`);
+          
           // Skip duplicate pageview events (we already added page_view events above)
           if (interaction.type === 'pageview' && interaction.metadata?.isNewPage !== true) {
+            console.log(`  Skipping duplicate pageview`);
             return;
           }
+          
+          totalInteractions++;
           
           // Format the interaction for frontend
           sessionDetails.push({
             id: interaction.eventId || `interaction_${pageIndex}_${new Date(interaction.timestamp).getTime()}`,
-            type: interaction.type,
+            type: interaction.type || 'event',
             timestamp: new Date(interaction.timestamp).toISOString(),
             data: {
-              name: interaction.type,
-              category: interaction.metadata?.raw?.category || 'interaction',
+              name: interaction.type || 'event',
+              category: interaction.metadata?.category || 'interaction',
               url: page.url,
               elementText: interaction.elementText,
-              ...interaction.metadata
+              ...(interaction.metadata || {})
             }
           });
         });
@@ -1926,6 +1951,8 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     // Add conversion event if it exists
     if (userPath.conversionOccurred && userPath.conversionDetails) {
+      console.log(`Adding conversion event: ${userPath.conversionDetails.type}`);
+      
       sessionDetails.push({
         id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
         type: 'conversion',
@@ -1944,6 +1971,7 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
     console.log(`\n===== RISULTATO FINALE =====`);
+    console.log(`Totale interactions trovate: ${totalInteractions}`);
     console.log(`Totale dettagli sessione: ${sessionDetails.length}`);
     console.log(`===== FINE RECUPERO DETTAGLI SESSIONE =====\n`);
     
