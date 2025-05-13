@@ -131,6 +131,15 @@ const VisitSchema = new mongoose.Schema({
   isExitPoint: { type: Boolean, default: false },
   timeOnPage: Number, // in secondi
   scrollDepth: Number, // percentuale
+  facebookCapi: {
+    sent: { type: Boolean, default: false },
+    timestamp: Date,
+    success: Boolean,
+    eventId: String,
+    payload: Object,
+    response: Object,
+    error: Object
+  }
 });
 
 const Visit = mongoose.model('Visit', VisitSchema);
@@ -209,12 +218,22 @@ const ClientSchema = new mongoose.Schema({
     country_code: String
   },
   
-  
   // Progetti associati
   projects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
   
   // Flag amministrativi
   isArchived: { type: Boolean, default: false },
+
+  // Nuovo campo per i dati CAPI Facebook
+  facebookCapi: {
+    sent: { type: Boolean, default: false },
+    timestamp: Date,
+    success: Boolean,
+    eventId: String,
+    payload: Object,
+    response: Object,
+    error: Object
+  }
   
 }, { collection: 'clients', strict: false });
 
@@ -3005,6 +3024,15 @@ async function getUserConnection(req) {
           value: Number,
           currency: String
         },
+        facebookCapi: {
+          sent: { type: Boolean, default: false },
+          timestamp: Date,
+          success: Boolean,
+          eventId: String,
+          payload: Object,
+          response: Object,
+          error: Object
+        },
         tags: [String],
         properties: { type: Map, of: mongoose.Schema.Types.Mixed },
         consent: {
@@ -5508,7 +5536,19 @@ app.post('/api/sales-funnel/move', async (req, res) => {
             }],
             tags: [String],
             properties: { type: Map, of: mongoose.Schema.Types.Mixed },
-            isArchived: { type: Boolean, default: false }
+            location: Object,
+            projects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+            isArchived: { type: Boolean, default: false },
+            // Nuovo campo per il tracciamento CAPI
+            facebookCapi: {
+              sent: { type: Boolean, default: false },
+              timestamp: Date,
+              success: Boolean,
+              eventId: String,
+              payload: Object,
+              response: Object,
+              error: Object
+            }
           }, { collection: 'clients', strict: false });
           
           // Registra il modello
@@ -5520,6 +5560,9 @@ app.post('/api/sales-funnel/move', async (req, res) => {
         
         // Verifica se esiste già un cliente con questo leadId
         const existingClient = await Client.findOne({ leadId: leadId });
+        
+        // Variabile per mantenere il riferimento al cliente per aggiornare i dati CAPI in seguito
+        let client = null;
         
         if (!existingClient) {
           // Prepara i dati del cliente basandosi sul lead
@@ -5533,17 +5576,27 @@ app.post('/api/sales-funnel/move', async (req, res) => {
             fullName: [lead.firstName || '', lead.lastName || ''].filter(Boolean).join(' ') || lead.name || lead.email.split('@')[0],
             value: lead.value || 0,
             service: lead.service || '',
-            leadSource: lead.source || lead.medium || '',  // CORRETTO: usa la fonte effettiva del lead
+            leadSource: lead.source || lead.medium || '',
             campaign: lead.campaign || '',
             medium: lead.medium || '',
-            location: lead.location || {},  // AGGIUNTO: trasferisce i dati sulla posizione
+            location: lead.location || {},
             convertedAt: new Date(),
             consent: lead.consent || {
               marketing: false,
               analytics: false,
               thirdParty: false
             },
-            extendedData: lead.extendedData || {}
+            extendedData: lead.extendedData || {},
+            // Inizializza il campo facebookCapi
+            facebookCapi: {
+              sent: false,
+              timestamp: null,
+              success: null,
+              eventId: null,
+              payload: null,
+              response: null,
+              error: null
+            }
           };
           
           // Crea il nuovo cliente
@@ -5555,12 +5608,28 @@ app.post('/api/sales-funnel/move', async (req, res) => {
             clientId: newClient.clientId,
             message: 'Cliente creato con successo'
           };
+          
+          client = newClient;
         } else {
           // Aggiorna il cliente esistente
           existingClient.updatedAt = new Date();
           existingClient.value = lead.value || existingClient.value;
           existingClient.service = lead.service || existingClient.service;
           existingClient.status = 'active';
+          
+          // Assicurati che il campo facebookCapi esista
+          if (!existingClient.facebookCapi) {
+            existingClient.facebookCapi = {
+              sent: false,
+              timestamp: null,
+              success: null,
+              eventId: null,
+              payload: null,
+              response: null,
+              error: null
+            };
+          }
+          
           await existingClient.save();
           
           clientResult = {
@@ -5568,6 +5637,14 @@ app.post('/api/sales-funnel/move', async (req, res) => {
             clientId: existingClient.clientId,
             message: 'Cliente esistente aggiornato'
           };
+          
+          client = existingClient;
+        }
+        
+        // Salvare l'ID del cliente per poterlo aggiornare con i risultati CAPI dopo
+        // l'invio a Facebook
+        if (client) {
+          clientResult.client = client;
         }
       } catch (clientError) {
         console.error('Errore nella creazione/aggiornamento del cliente:', clientError);
@@ -5579,7 +5656,6 @@ app.post('/api/sales-funnel/move', async (req, res) => {
       }
     }
     
-    // Se è richiesto l'invio a Facebook
     if (sendToFacebook && facebookData) {
       try {
         // Recupera le configurazioni Facebook dell'utente
@@ -5589,6 +5665,9 @@ app.post('/api/sales-funnel/move', async (req, res) => {
         if (!accessToken) {
           throw new Error('Facebook Access Token non configurato');
         }
+        
+        // Timestamp dell'invio
+        const sendTimestamp = new Date();
         
         // Prepara il payload per la CAPI
         const payload = {
@@ -5653,13 +5732,39 @@ app.post('/api/sales-funnel/move', async (req, res) => {
           });
         }
         
+        // Prepara l'oggetto risultato
         facebookResult = {
           success: true,
           eventId: facebookData.eventId,
           response: response.data
         };
+        
+        // NUOVO: Aggiorna il cliente con i dati CAPI se disponibile
+        if (clientResult && clientResult.client) {
+          try {
+            const client = clientResult.client;
+            
+            // Aggiorna il record del cliente con i dati di successo
+            client.facebookCapi = {
+              sent: true,
+              timestamp: sendTimestamp,
+              success: true,
+              eventId: facebookData.eventId,
+              payload: payload,
+              response: response.data
+            };
+            
+            await client.save();
+            console.log(`Record cliente ${client.clientId} aggiornato con dati CAPI`);
+          } catch (clientUpdateError) {
+            console.error('Errore nell\'aggiornamento dei dati CAPI del cliente:', clientUpdateError);
+          }
+        }
       } catch (fbError) {
         console.error(`Errore nell'invio dell'evento ${facebookData.eventName}:`, fbError);
+        
+        // Timestamp dell'errore
+        const errorTimestamp = new Date();
         
         // Registra comunque l'errore nel database
         if (connection.models['FacebookEvent']) {
@@ -5679,19 +5784,43 @@ app.post('/api/sales-funnel/move', async (req, res) => {
           });
         }
         
+        // Prepara l'oggetto risultato di errore
         facebookResult = {
           success: false,
           error: fbError.message || 'Errore sconosciuto',
           details: fbError.response ? fbError.response.data : null
         };
+        
+        // NUOVO: Aggiorna il cliente con i dati di errore CAPI se disponibile
+        if (clientResult && clientResult.client) {
+          try {
+            const client = clientResult.client;
+            
+            // Aggiorna il record del cliente con i dati dell'errore
+            client.facebookCapi = {
+              sent: true,
+              timestamp: errorTimestamp,
+              success: false,
+              eventId: facebookData?.eventId || `error_${Date.now()}`,
+              payload: facebookData ? {
+                eventName: facebookData.eventName,
+                userData: facebookData.userData,
+                customData: facebookData.customData
+              } : null,
+              error: {
+                message: fbError.message,
+                stack: fbError.stack,
+                details: fbError.response ? fbError.response.data : null
+              }
+            };
+            
+            await client.save();
+            console.log(`Record cliente ${client.clientId} aggiornato con dati errore CAPI`);
+          } catch (clientUpdateError) {
+            console.error('Errore nell\'aggiornamento dei dati errore CAPI del cliente:', clientUpdateError);
+          }
+        }
       }
-    } else if (consentError) {
-      // Registra l'errore di consenso
-      facebookResult = {
-        success: false,
-        error: consentError,
-        details: 'Consenso terze parti mancante'
-      };
     }
     
     res.json({
