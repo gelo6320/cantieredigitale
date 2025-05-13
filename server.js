@@ -557,6 +557,18 @@ const WeeklyStatistics = mongoose.model('WeeklyStatistics', WeeklyStatisticsSche
 const MonthlyStatistics = mongoose.model('MonthlyStatistics', MonthlyStatisticsSchema);
 const TotalStatistics = mongoose.model('TotalStatistics', TotalStatisticsSchema);
 
+const InteractionSchema = new mongoose.Schema({
+  timestamp: { type: Date, default: Date.now },
+  type: { type: String, required: true },
+  eventId: { type: String, required: true, unique: true },
+  elementId: String,
+  elementText: String,
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  }
+}, { _id: true });
+
 const UserPathSchema = new mongoose.Schema({
   sessionId: { type: String, required: true, index: true },
   userId: { type: String, sparse: true, index: true },
@@ -591,18 +603,6 @@ const UserPathSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   lastActivity: { type: Date, default: Date.now }
 });
-
-const InteractionSchema = new mongoose.Schema({
-  timestamp: { type: Date, default: Date.now },
-  type: { type: String, required: true },
-  eventId: { type: String, required: true, unique: true },
-  elementId: String,
-  elementText: String,
-  metadata: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
-  }
-}, { _id: true });
 
 const UserPath = mongoose.model('UserPath', UserPathSchema);
 
