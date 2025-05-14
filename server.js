@@ -576,16 +576,27 @@ const WeeklyStatistics = mongoose.model('WeeklyStatistics', WeeklyStatisticsSche
 const MonthlyStatistics = mongoose.model('MonthlyStatistics', MonthlyStatisticsSchema);
 const TotalStatistics = mongoose.model('TotalStatistics', TotalStatisticsSchema);
 
+// Schema Interaction for consolidated events
 const InteractionSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
-  type: { type: String, required: true },
+  type: { 
+    type: String, 
+    required: true,
+    // Add enum for consolidated event types
+    enum: ['form_interaction', 'click', 'video', 'scroll', 'page_visibility', 
+           'time_on_page', 'session_end', 'conversion', 'pageview', 'system']
+  },
   eventId: { type: String, required: true, unique: true },
+  // Fields for click events
   elementId: String,
   elementText: String,
+  // Expand metadata for specific consolidated event types
   metadata: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
-  }
+  },
+  // Store original event type
+  originalEventType: String
 }, { _id: true });
 
 const UserPathSchema = new mongoose.Schema({
@@ -1306,23 +1317,33 @@ app.get('/api/tracciamento/users/:landingPageId', async (req, res) => {
       connection.model('User', UserSchema);
     }
     if (!connection.models['Event']) {
+      // Schema Evento
       const EventSchema = new mongoose.Schema({
-        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
+        eventId: { type: String, required: true, unique: true },
         sessionId: { type: String, required: true, index: true },
         userId: { type: String, sparse: true, index: true },
         eventName: { type: String, required: true },
         eventData: Object,
         timestamp: { type: Date, default: Date.now },
         url: String,
+        rawUrl: String,
         path: String,
         ip: String,
         userAgent: String,
-        location: Object,
+        location: {
+          city: String,
+          region: String,
+          country: String,
+          country_code: String
+        },
         category: { 
           type: String, 
-          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          enum: ['page', 'form_interaction', 'click', 'video', 'scroll', 'page_visibility', 
+                 'time_on_page', 'session_end', 'conversion', 'pageview', 'system', 
+                 'user', 'interaction', 'media', 'error', 'navigation'],
           default: 'interaction'
-        }
+        },
+        originalEventType: String
       });
       
       connection.model('Event', EventSchema);
@@ -1607,23 +1628,33 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
       connection.model('Visit', VisitSchema);
     }
     if (!connection.models['Event']) {
+      // Schema Evento
       const EventSchema = new mongoose.Schema({
-        eventId: { type: String, required: true, unique: true }, // NUOVO: Unique identifier
+        eventId: { type: String, required: true, unique: true },
         sessionId: { type: String, required: true, index: true },
         userId: { type: String, sparse: true, index: true },
         eventName: { type: String, required: true },
         eventData: Object,
         timestamp: { type: Date, default: Date.now },
         url: String,
+        rawUrl: String,
         path: String,
         ip: String,
         userAgent: String,
-        location: Object,
+        location: {
+          city: String,
+          region: String,
+          country: String,
+          country_code: String
+        },
         category: { 
           type: String, 
-          enum: ['page', 'user', 'interaction', 'conversion', 'media', 'form', 'error', 'system', 'navigation'],
+          enum: ['page', 'form_interaction', 'click', 'video', 'scroll', 'page_visibility', 
+                 'time_on_page', 'session_end', 'conversion', 'pageview', 'system', 
+                 'user', 'interaction', 'media', 'error', 'navigation'],
           default: 'interaction'
-        }
+        },
+        originalEventType: String
       });
       
       connection.model('Event', EventSchema);
@@ -1836,7 +1867,7 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
   }
 });
 
-// 4. Endpoint per ottenere i dettagli di una sessione con deduplicazione eventId
+// 4. Endpoint per ottenere i dettagli di una sessione - VERSIONE CORRETTA
 app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -1871,157 +1902,58 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     
     console.log(`\n========== DIAGNOSTIC INFO ==========`);
     console.log(`UserPath trovato con ${userPath.path.length} pagine`);
-    console.log(`UserPath keys: ${Object.keys(userPath).join(', ')}`);
     console.log(`TotalInteractions from document: ${userPath.totalInteractions || 0}`);
-    console.log(`Conversion occurred: ${userPath.conversionOccurred ? 'Yes' : 'No'}`);
     
-    // Extract ALL interactions for the timeline
+    // Estrai solo le interazioni dagli array, senza aggiungere pageview artificiali
     const sessionDetails = [];
     let totalInteractionsExtracted = 0;
     
-    // Process each page in the path
-    userPath.path.forEach((page, pageIndex) => {
-      console.log(`\n----- PAGE ${pageIndex + 1} -----`);
-      console.log(`URL: ${page.url}`);
-      console.log(`Page keys: ${Object.keys(page).join(', ')}`);
-      console.log(`Has interactions array: ${Array.isArray(page.interactions)}`);
-      if (Array.isArray(page.interactions)) {
-        console.log(`Interactions count: ${page.interactions.length}`);
-      }
-      
-      // Add page view entry with enhanced data
-      const pageViewEvent = {
-        id: `page_${pageIndex}_${new Date(page.timestamp).getTime()}`,
-        type: 'page_view',
-        timestamp: new Date(page.timestamp).toISOString(),
-        data: {
-          url: page.url,
-          title: page.title || 'Senza titolo',
-          referrer: page.referrer || '',
-          timeOnPage: typeof page.timeOnPage === 'number' ? page.timeOnPage : 0,
-          scrollDepth: page.scrollDepth ? page.scrollDepth : 0,
-          // Display percentage format
-          scrollPercentage: page.scrollDepth ? `${page.scrollDepth}%` : '0%'
-        }
-      };
-      
-      sessionDetails.push(pageViewEvent);
-      console.log(`Added page_view event: ${JSON.stringify(pageViewEvent.data, null, 2).substring(0, 200)}...`);
-      
-      // Process interactions if they exist
-      if (Array.isArray(page.interactions)) {
-        page.interactions.forEach((interaction, idx) => {
-          console.log(`\n  -- INTERACTION ${idx + 1} --`);
-          console.log(`  Type: ${interaction.type || 'unknown'}`);
-          console.log(`  EventId: ${interaction.eventId || 'none'}`);
-          console.log(`  Interaction keys: ${Object.keys(interaction).join(', ')}`);
-          console.log(`  Has metadata: ${interaction.metadata ? 'Yes' : 'No'}`);
-          
-          if (interaction.metadata) {
-            console.log(`  Metadata keys: ${Object.keys(interaction.metadata).join(', ')}`);
-          }
-          
-          totalInteractionsExtracted++;
-          
-          // Enhanced formatting for frontend display
-          let displayData = {
-            name: interaction.type || 'event',
-            category: interaction.metadata?.category || 'interaction',
-            url: page.url
-          };
-          
-          // Add element text if available
-          if (interaction.elementText) {
-            displayData.elementText = interaction.elementText;
-          }
-          
-          // Enhanced scroll data for better display
-          if (interaction.type === 'scroll' || interaction.type === 'scroll_depth') {
-            const scrollDepth = interaction.metadata?.scrollDepth || 
-                                interaction.metadata?.raw?.percent || 
-                                interaction.metadata?.raw?.depth || 0;
+    // Itera attraverso le pagine per ottenere le interazioni
+    if (userPath.path && userPath.path.length > 0) {
+      userPath.path.forEach((page) => {
+        // Estrai tutte le interazioni da ogni pagina
+        if (Array.isArray(page.interactions)) {
+          page.interactions.forEach((interaction) => {
+            // Estrai l'eventId corretto
+            const eventId = interaction.eventId || 
+                          (interaction._id ? interaction._id.toString() : 
+                          `interaction_${new Date(interaction.timestamp).getTime()}`);
             
-            console.log(`  Scroll depth found: ${scrollDepth}`);
+            // Normalizza il campo type
+            const eventType = interaction.type || 'event';
             
-            displayData = {
-              ...displayData,
-              scrollDepth: scrollDepth,
-              scrollPercentage: `${scrollDepth}%`,
-              totalScrollDistance: interaction.metadata?.raw?.totalScrollDistance || 0
+            // Prepara l'oggetto dati ricco, combinando metadata con i campi originali
+            const richData = {
+              name: interaction.type || 'event',
+              url: page.url,
+              rawUrl: page.rawUrl || page.url,
+              title: page.title || '',
+              ...interaction.metadata, // Includi tutti i campi metadata
+              originalEventType: interaction.originalEventType,
+              category: interaction.metadata?.category || getEventCategory(eventType)
             };
-          }
-          
-          // Enhanced click data for better display
-          if (interaction.type === 'generic_click') {
-            displayData = {
-              ...displayData,
-              elementType: interaction.metadata?.raw?.tagName || 'element',
-              elementText: interaction.elementText || interaction.metadata?.raw?.text || 'Click',
-              position: interaction.metadata?.raw?.position || {}
+            
+            // Includi dati aggiuntivi dall'interazione se disponibili
+            if (interaction.elementId) richData.elementId = interaction.elementId;
+            if (interaction.elementText) richData.elementText = interaction.elementText;
+            
+            // Formatta l'interazione per l'output
+            const interactionEvent = {
+              id: eventId,
+              type: eventType,
+              timestamp: new Date(interaction.timestamp).toISOString(),
+              data: richData
             };
-          }
-          
-          // Enhanced form data for better display
-          if (interaction.type === 'conversion_contact_form' || interaction.type === 'lead_acquisition_contact') {
-            displayData = {
-              ...displayData,
-              formType: 'contact_form',
-              value: interaction.metadata?.value || 0,
-              formData: interaction.metadata?.formData || {}
-            };
-          }
-          
-          // Include all metadata for completeness
-          if (interaction.metadata) {
-            displayData = {
-              ...displayData,
-              ...interaction.metadata,
-              // Preserve raw data but without unnecessary nesting
-              raw: interaction.metadata.raw || {}
-            };
-          }
-          
-          // Add to session details
-          const interactionEvent = {
-            id: interaction.eventId || `interaction_${pageIndex}_${idx}_${new Date(interaction.timestamp).getTime()}`,
-            type: interaction.type || 'event',
-            timestamp: new Date(interaction.timestamp).toISOString(),
-            data: displayData
-          };
-          
-          sessionDetails.push(interactionEvent);
-          console.log(`  Added interaction event: ${interactionEvent.type}, data: ${JSON.stringify(interactionEvent.data).substring(0, 100)}...`);
-        });
-      }
-    });
-    
-    // Add conversion event if it exists
-    if (userPath.conversionOccurred && userPath.conversionDetails) {
-      console.log(`\n----- CONVERSION EVENT -----`);
-      console.log(`Type: ${userPath.conversionDetails.type}`);
-      console.log(`Value: ${userPath.conversionDetails.value || 0}`);
-      console.log(`URL: ${userPath.conversionDetails.pageUrl}`);
-      
-      const conversionEvent = {
-        id: `conversion_${new Date(userPath.conversionDetails.timestamp).getTime()}`,
-        type: 'conversion',
-        timestamp: new Date(userPath.conversionDetails.timestamp).toISOString(),
-        data: {
-          name: 'conversion',
-          category: 'conversion',
-          conversionType: userPath.conversionDetails.type,
-          value: userPath.conversionDetails.value,
-          valueFormatted: `${userPath.conversionDetails.value || 0}€`,
-          url: userPath.conversionDetails.pageUrl
+            
+            sessionDetails.push(interactionEvent);
+            totalInteractionsExtracted++;
+          });
         }
-      };
-      
-      sessionDetails.push(conversionEvent);
-      console.log(`Added conversion event: ${JSON.stringify(conversionEvent.data, null, 2)}`);
+      });
     }
     
-    // Sort everything by timestamp
-    sessionDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    // Ordina per timestamp
+    sessionDetails.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     
     console.log(`\n===== RISULTATO FINALE =====`);
     console.log(`Interazioni estratte: ${totalInteractionsExtracted}`);
@@ -2043,6 +1975,24 @@ app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
     });
   }
 });
+
+// Helper function to determine event category based on event type
+function getEventCategory(eventType) {
+  // Map consolidated event types to categories
+  const categoryMap = {
+    'form_interaction': 'form_interaction',
+    'click': 'click',
+    'video': 'media',
+    'scroll': 'navigation',
+    'page_visibility': 'navigation',
+    'time_on_page': 'navigation',
+    'session_end': 'navigation',
+    'conversion': 'conversion',
+    'pageview': 'page'
+  };
+  
+  return categoryMap[eventType] || 'interaction';
+}
 
 // Endpoint per accedere ai dati delle visite
 app.get('/api/banca-dati/visits', async (req, res) => {
