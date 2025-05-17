@@ -581,10 +581,10 @@ const InteractionSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   type: { 
     type: String, 
-    required: true,
-    // Add enum for consolidated event types
     enum: ['form_interaction', 'click', 'video', 'scroll', 'page_visibility', 
-           'time_on_page', 'session_end', 'conversion', 'pageview', 'system']
+           'time_on_page', 'session_end', 'conversion', 'pageview', 'system', 
+           'user', 'interaction', 'media', 'error', 'navigation', 'user_inactive', 'user_active'],
+    default: 'interaction'
   },
   eventId: { type: String, required: true, unique: true },
   // Fields for click events
