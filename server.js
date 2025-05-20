@@ -309,11 +309,13 @@ const BookingSchema = new mongoose.Schema({
 const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }, // Aggiungi questo campo
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
   config: {
     mongodb_uri: String,
-    access_token: String,
-    meta_pixel_id: String
+    access_token: String,           // Token per Facebook Conversion API (CAPI)
+    marketing_api_token: String,    // NUOVO: Token per Facebook Marketing API 
+    meta_pixel_id: String,          // ID del pixel Facebook
+    fb_account_id: String           // ID dell'account pubblicitario Facebook
   },
   createdAt: { type: Date, default: Date.now }
 });
@@ -586,7 +588,7 @@ const InteractionSchema = new mongoose.Schema({
            'user', 'interaction', 'media', 'error', 'navigation', 'user_inactive', 'user_active'],
     default: 'interaction'
   },
-  eventId: { type: String, required: true, unique: true },
+  eventId: { type: String, required: true },
   // Fields for click events
   elementId: String,
   elementText: String,
@@ -598,6 +600,8 @@ const InteractionSchema = new mongoose.Schema({
   // Store original event type
   originalEventType: String
 }, { _id: true });
+
+InteractionSchema.index({ eventId: 1 }, { unique: true, sparse: true });
 
 const UserPathSchema = new mongoose.Schema({
   sessionId: { type: String, required: true, index: true },
@@ -2829,31 +2833,32 @@ app.get('/api/user/config', async (req, res) => {
     
     const username = req.session.user.username;
     
-    // Cerca l'utente nel database
+    // Busca el usuario en la base de datos
     const user = await Admin.findOne({ username });
     
     if (!user) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Utente non trovato' 
+        message: 'Usuario no encontrado' 
       });
     }
     
-    // Prepara l'oggetto di risposta con i valori delle configurazioni
-    // Nota: non restituiamo direttamente i valori sensibili, ma indichiamo solo se sono configurati
+    // Prepara el objeto de respuesta con los valores de configuración
     res.json({
       success: true,
       config: {
         mongodb_uri: user.config?.mongodb_uri || "",
         access_token: user.config?.access_token || "",
-        meta_pixel_id: user.config?.meta_pixel_id || ""
+        meta_pixel_id: user.config?.meta_pixel_id || "",
+        fb_account_id: user.config?.fb_account_id || "",
+        marketing_api_token: user.config?.marketing_api_token || "" // Nuovo campo
       }
     });
   } catch (error) {
-    console.error('Errore nel recupero delle configurazioni:', error);
+    console.error('Error al recuperar la configuración:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Errore nel recupero delle configurazioni' 
+      message: 'Error al recuperar la configuración' 
     });
   }
 });
@@ -3048,8 +3053,10 @@ async function getUserConfig(username) {
     if (!username) {
       return {
         mongodb_uri: process.env.MONGODB_URI,
-        access_token: process.env.ACCESS_TOKEN,
-        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+        access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
+        marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
+        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
       };
     }
     
@@ -3059,24 +3066,30 @@ async function getUserConfig(username) {
     if (!user) {
       return {
         mongodb_uri: process.env.MONGODB_URI,
-        access_token: process.env.ACCESS_TOKEN,
-        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+        access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
+        marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+        meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
+        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
       };
     }
     
-    // Unisci le configurazioni dell'utente con i valori predefiniti
+    // Combina la configurazione dell'utente con i valori predeterminati
     return {
       mongodb_uri: user.config?.mongodb_uri || process.env.MONGODB_URI,
       access_token: user.config?.access_token || process.env.ACCESS_TOKEN,
-      meta_pixel_id: user.config?.meta_pixel_id || process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+      marketing_api_token: user.config?.marketing_api_token || process.env.MARKETING_API_TOKEN || '',
+      meta_pixel_id: user.config?.meta_pixel_id || process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
+      fb_account_id: user.config?.fb_account_id || process.env.FACEBOOK_ACCOUNT_ID || ''
     };
   } catch (error) {
     console.error('Errore nel recupero delle configurazioni:', error);
-    // Fallback alle configurazioni predefinite
+    // Fallback alla configurazione predeterminata
     return {
       mongodb_uri: process.env.MONGODB_URI,
-      access_token: process.env.ACCESS_TOKEN,
-      meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614'
+      access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
+      marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+      meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
+      fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
     };
   }
 }
@@ -6370,7 +6383,14 @@ app.post('/api/leads/facebook/:id/update', async (req, res) => {
 // Configurazione utente API
 app.post('/api/user/config', async (req, res) => {
   try {
-    const { mongodb_uri, access_token, meta_pixel_id } = req.body;
+    const { 
+      mongodb_uri, 
+      access_token, 
+      meta_pixel_id, 
+      fb_account_id,
+      marketing_api_token // Nuovo campo
+    } = req.body;
+    
     const username = req.session.user.username;
     
     // Verifica che l'utente esista
@@ -6388,6 +6408,8 @@ app.post('/api/user/config', async (req, res) => {
     if (mongodb_uri !== undefined) user.config.mongodb_uri = mongodb_uri;
     if (access_token !== undefined) user.config.access_token = access_token;
     if (meta_pixel_id !== undefined) user.config.meta_pixel_id = meta_pixel_id;
+    if (fb_account_id !== undefined) user.config.fb_account_id = fb_account_id;
+    if (marketing_api_token !== undefined) user.config.marketing_api_token = marketing_api_token; // Nuovo campo
     
     // Salva le modifiche
     await user.save();
@@ -6401,7 +6423,9 @@ app.post('/api/user/config', async (req, res) => {
       config: {
         mongodb_uri: user.config.mongodb_uri ? '(configurato)' : '(non configurato)',
         access_token: user.config.access_token ? '(configurato)' : '(non configurato)',
-        meta_pixel_id: user.config.meta_pixel_id || '(non configurato)'
+        meta_pixel_id: user.config.meta_pixel_id || '(non configurato)',
+        fb_account_id: user.config.fb_account_id ? '(configurato)' : '(non configurato)',
+        marketing_api_token: user.config.marketing_api_token ? '(configurato)' : '(non configurato)' // Nuovo campo
       }
     });
   } catch (error) {
