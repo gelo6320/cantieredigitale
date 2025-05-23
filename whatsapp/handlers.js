@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/handlers.js - VERSIONE CORRETTA
+// 📁 whatsapp/handlers.js - VERSIONE MIGLIORATA
 // ============================================
 const axios = require('axios');
 const config = require('./config');
@@ -8,8 +8,8 @@ class WhatsAppService {
     constructor() {
         this.phoneNumberId = config.whatsapp.phoneNumberId;
         this.accessToken = config.whatsapp.accessToken;
-        this.baseURL = `https://graph.facebook.com/v22.0/${this.phoneNumberId}/messages`;
-        this.apiVersion = 'v22.0';
+        this.baseURL = `https://graph.facebook.com/v17.0/${this.phoneNumberId}/messages`;
+        this.apiVersion = 'v17.0';
         
         // Verifica configurazione
         this.validateConfig();
@@ -168,10 +168,10 @@ class WhatsAppService {
         }
     }
 
+    // ===== METODO MIGLIORATO PER GESTIRE WEBHOOK =====
     extractMessageData(body) {
         try {
-            console.log('📥 [WHATSAPP SERVICE] Estrazione dati messaggio...');
-            console.log('📊 [WHATSAPP SERVICE] Webhook body:', JSON.stringify(body, null, 2));
+            console.log('📥 [WHATSAPP SERVICE] Analisi webhook ricevuto...');
             
             const entry = body.entry?.[0];
             if (!entry) {
@@ -190,14 +190,54 @@ class WhatsAppService {
                 return null;
             }
 
-            const message = changes.value?.messages?.[0];
+            // ===== NUOVO: DISTINGUI TRA MESSAGGI E STATUS =====
+            const webhookValue = changes.value;
+            
+            // Controlla se è un webhook di status (sent, delivered, read)
+            if (webhookValue.statuses && webhookValue.statuses.length > 0) {
+                const status = webhookValue.statuses[0];
+                console.log(`📋 [WHATSAPP SERVICE] Webhook di stato ricevuto: ${status.status}`);
+                console.log(`   📱 Messaggio ID: ${status.id}`);
+                console.log(`   👤 Destinatario: ${status.recipient_id}`);
+                console.log(`   🕐 Timestamp: ${status.timestamp}`);
+                
+                // Gestisci diversi tipi di status
+                switch (status.status) {
+                    case 'sent':
+                        console.log('📤 [WHATSAPP SERVICE] ✅ Messaggio inviato dal server');
+                        break;
+                    case 'delivered':
+                        console.log('📱 [WHATSAPP SERVICE] ✅ Messaggio consegnato al dispositivo');
+                        break;
+                    case 'read':
+                        console.log('👁️ [WHATSAPP SERVICE] ✅ Messaggio letto dall\'utente');
+                        break;
+                    case 'failed':
+                        console.log('❌ [WHATSAPP SERVICE] ⚠️ Invio messaggio fallito');
+                        if (status.errors) {
+                            console.log('📊 [WHATSAPP SERVICE] Dettagli errore:', status.errors);
+                        }
+                        break;
+                    default:
+                        console.log(`📊 [WHATSAPP SERVICE] Status sconosciuto: ${status.status}`);
+                }
+                
+                // Opzionale: Salva statistiche sui delivery status
+                this.handleMessageStatus(status);
+                
+                // Ritorna null perché non è un messaggio in arrivo da processare
+                return null;
+            }
+
+            // Controlla se è un messaggio in arrivo
+            const message = webhookValue.messages?.[0];
             if (!message) {
-                console.log('❌ [WHATSAPP SERVICE] Nessun messaggio trovato nel webhook');
+                console.log('ℹ️ [WHATSAPP SERVICE] Webhook ricevuto ma nessun messaggio o status da processare');
                 return null;
             }
 
             // Estrai contatto se disponibile
-            const contact = changes.value?.contacts?.[0];
+            const contact = webhookValue.contacts?.[0];
             const contactName = contact?.profile?.name || 'Utente sconosciuto';
 
             const messageData = {
@@ -209,7 +249,7 @@ class WhatsAppService {
                 contactName: contactName
             };
 
-            console.log('✅ [WHATSAPP SERVICE] Dati messaggio estratti:');
+            console.log('✅ [WHATSAPP SERVICE] 💬 NUOVO MESSAGGIO ESTRATTO:');
             console.log(`   📱 Da: ${messageData.from} (${contactName})`);
             console.log(`   📝 Testo: "${messageData.text}"`);
             console.log(`   🕐 Timestamp: ${messageData.timestamp}`);
@@ -218,9 +258,32 @@ class WhatsAppService {
             return messageData;
 
         } catch (error) {
-            console.error('❌ [WHATSAPP SERVICE] Errore parsing messaggio:', error.message);
+            console.error('❌ [WHATSAPP SERVICE] Errore parsing webhook:', error.message);
             console.error('📊 [WHATSAPP SERVICE] Body ricevuto:', JSON.stringify(body, null, 2));
             return null;
+        }
+    }
+
+    // ===== NUOVO METODO PER GESTIRE STATUS DEI MESSAGGI =====
+    handleMessageStatus(status) {
+        // Qui puoi implementare la logica per tracciare le statistiche dei messaggi
+        // Ad esempio, salvare in database quando i messaggi vengono letti, etc.
+        
+        try {
+            // Esempio: Salva timestamp di lettura per analytics
+            if (status.status === 'read') {
+                console.log(`📊 [WHATSAPP SERVICE] Messaggio letto dal cliente: ${status.recipient_id}`);
+                // TODO: Salva nel database per analytics
+            }
+            
+            // Esempio: Traccia fallimenti di delivery
+            if (status.status === 'failed') {
+                console.error(`📊 [WHATSAPP SERVICE] Errore delivery per ${status.recipient_id}:`, status.errors);
+                // TODO: Notifica amministratore o retry automatico
+            }
+            
+        } catch (error) {
+            console.error('❌ [WHATSAPP SERVICE] Errore gestione status:', error.message);
         }
     }
 
@@ -321,6 +384,25 @@ class WhatsAppService {
             console.error('❌ [WHATSAPP SERVICE] Errore info numero:', error.message);
             return null;
         }
+    }
+
+    // ===== NUOVO: METODI PER STATISTICHE MESSAGGIO =====
+    
+    // Ottieni statistiche di delivery dei messaggi
+    getMessageDeliveryStats() {
+        // TODO: Implementa recupero statistiche da database
+        return {
+            sent: 0,
+            delivered: 0,
+            read: 0,
+            failed: 0
+        };
+    }
+
+    // Reset contatori (utile per testing)
+    resetStats() {
+        console.log('🔄 [WHATSAPP SERVICE] Reset statistiche messaggi');
+        // TODO: Implementa reset statistiche
     }
 }
 
