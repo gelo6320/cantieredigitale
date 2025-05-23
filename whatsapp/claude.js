@@ -83,6 +83,41 @@ class ClaudeService {
             console.log(`📊 [CLAUDE SERVICE] Response status: ${response.status}`);
             
             let responseText = response.data.content[0].text;
+
+            const dati = conversazione.datiCliente;
+            if (dati.appuntamentoConfermato && dati.nome && dati.telefono && 
+                dati.dataAppuntamento && dati.oraAppuntamento) {
+                
+                console.log('🗓️ [CLAUDE SERVICE] Tentativo salvataggio appuntamento');
+                
+                // Converti la data in un formato utilizzabile
+                const dataAppuntamento = this.parseAppointmentDate(dati.dataAppuntamento, dati.oraAppuntamento);
+                
+                const appointmentData = {
+                    nome: dati.nome,
+                    telefono: dati.telefono,
+                    email: dati.email || '',
+                    data: dataAppuntamento,
+                    ora: dati.oraAppuntamento,
+                    dettagli: `Prenotazione via WhatsApp - ${messaggioUtente}`
+                };
+                
+                const saveResult = await this.saveAppointment(conversazione, appointmentData);
+                
+                if (saveResult.success) {
+                    // Aggiorna la risposta per confermare il salvataggio
+                    responseText = config.bot.processTemplate(
+                        config.bot.templates.appuntamento_salvato, 
+                        {
+                            data_ora: `${dati.dataAppuntamento} alle ${dati.oraAppuntamento}`,
+                            telefono: dati.telefono
+                        }
+                    );
+                    
+                    // Segna l'appuntamento come salvato per evitare duplicati
+                    conversazione.datiCliente.appuntamentoSalvato = true;
+                }
+            }
             
             // ===== POST-PROCESSING DELLA RISPOSTA =====
             
@@ -122,6 +157,36 @@ class ClaudeService {
             
             return config.bot.getFallbackMessage();
         }
+    }
+
+    parseAppointmentDate(giornoStr, oraStr) {
+        const oggi = new Date();
+        let dataAppuntamento = new Date(oggi);
+        
+        // Mappa dei giorni
+        const giorni = {
+            'lunedì': 1, 'martedì': 2, 'mercoledì': 3, 'giovedì': 4, 'venerdì': 5, 'sabato': 6, 'domenica': 0
+        };
+        
+        if (giornoStr === 'domani') {
+            dataAppuntamento.setDate(oggi.getDate() + 1);
+        } else if (giornoStr === 'dopodomani') {
+            dataAppuntamento.setDate(oggi.getDate() + 2);
+        } else if (giorni[giornoStr.toLowerCase()] !== undefined) {
+            const giornoTarget = giorni[giornoStr.toLowerCase()];
+            const giornoOggi = oggi.getDay();
+            let giorniDaAggiungere = (giornoTarget - giornoOggi + 7) % 7;
+            if (giorniDaAggiungere === 0) giorniDaAggiungere = 7; // Prossima settimana
+            dataAppuntamento.setDate(oggi.getDate() + giorniDaAggiungere);
+        }
+        
+        // Imposta l'ora
+        if (oraStr) {
+            const [ora, minuti] = oraStr.split(':');
+            dataAppuntamento.setHours(parseInt(ora), parseInt(minuti || '0'), 0, 0);
+        }
+        
+        return dataAppuntamento;
     }
 
     prepareMessages(conversazione) {
@@ -183,6 +248,70 @@ class ClaudeService {
         }
     }
 
+    async saveAppointment(conversazione, appointmentData) {
+        try {
+            console.log('🗓️ [CLAUDE SERVICE] Salvataggio appuntamento:', appointmentData);
+            
+            // Ottieni la connessione al database dell'utente
+            // Nota: dovrai passare req o trovare un altro modo per ottenere la connessione
+            // Per ora uso una connessione diretta a MongoDB
+            
+            const mongoose = require('mongoose');
+            
+            // Schema per l'appuntamento (se non esiste già)
+            const AppointmentSchema = new mongoose.Schema({
+                sessionId: String,
+                phoneNumber: String,
+                customerName: String,
+                customerEmail: String,
+                appointmentDate: Date,
+                appointmentTime: String,
+                status: { type: String, default: 'confirmed' },
+                source: { type: String, default: 'whatsapp_bot' },
+                notes: String,
+                createdAt: { type: Date, default: Date.now }
+            });
+            
+            // Crea il modello se non esiste
+            let Appointment;
+            try {
+                Appointment = mongoose.model('Appointment');
+            } catch (e) {
+                Appointment = mongoose.model('Appointment', AppointmentSchema);
+            }
+            
+            // Crea il nuovo appuntamento
+            const newAppointment = new Appointment({
+                sessionId: conversazione.sessionId || 'whatsapp_session',
+                phoneNumber: appointmentData.telefono,
+                customerName: appointmentData.nome,
+                customerEmail: appointmentData.email,
+                appointmentDate: appointmentData.data,
+                appointmentTime: appointmentData.ora,
+                status: 'confirmed',
+                source: 'whatsapp_bot',
+                notes: `Appuntamento prenotato via WhatsApp Bot - ${appointmentData.dettagli || ''}`
+            });
+            
+            await newAppointment.save();
+            
+            console.log('✅ [CLAUDE SERVICE] Appuntamento salvato con successo:', newAppointment._id);
+            
+            return {
+                success: true,
+                appointmentId: newAppointment._id,
+                message: 'Appuntamento salvato con successo'
+            };
+            
+        } catch (error) {
+            console.error('❌ [CLAUDE SERVICE] Errore salvataggio appuntamento:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
     // ===== ESTRAZIONE AUTOMATICA DATI UTENTE =====
     extractUserData(conversazione, messaggio, intent) {
         const messaggioLower = messaggio.toLowerCase();
@@ -201,6 +330,34 @@ class ClaudeService {
         if (phoneMatch && !conversazione.datiCliente.telefono) {
             conversazione.datiCliente.telefono = phoneMatch[0];
             console.log(`📱 [CLAUDE SERVICE] Telefono estratto: ${phoneMatch[0]}`);
+        }
+
+        if (intent === 'conferma_appuntamento' || intent === 'data_orario') {
+        
+            // Estrai data dall'appuntamento
+            const dataRegex = /(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|domani|dopodomani)/i;
+            const dataMatch = messaggio.match(dataRegex);
+            if (dataMatch && !conversazione.datiCliente.dataAppuntamento) {
+                conversazione.datiCliente.dataAppuntamento = dataMatch[0];
+                console.log(`📅 [CLAUDE SERVICE] Data appuntamento estratta: ${dataMatch[0]}`);
+            }
+            
+            // Estrai ora dall'appuntamento  
+            const oraRegex = /(?:alle\s+)?(\d{1,2}):?(\d{2})?\s*(?:h)?/i;
+            const oraMatch = messaggio.match(oraRegex);
+            if (oraMatch && !conversazione.datiCliente.oraAppuntamento) {
+                const ora = oraMatch[1];
+                const minuti = oraMatch[2] || '00';
+                conversazione.datiCliente.oraAppuntamento = `${ora}:${minuti}`;
+                console.log(`🕐 [CLAUDE SERVICE] Ora appuntamento estratta: ${ora}:${minuti}`);
+            }
+            
+            // Estrai conferma
+            const confermaRegex = /(confermo|va bene|perfetto|sì|ok)/i;
+            if (confermaRegex.test(messaggio) && !conversazione.datiCliente.appuntamentoConfermato) {
+                conversazione.datiCliente.appuntamentoConfermato = true;
+                console.log('✅ [CLAUDE SERVICE] Appuntamento confermato dal cliente');
+            }
         }
 
         // Estrai nome (euristica semplice)

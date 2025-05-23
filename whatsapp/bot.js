@@ -9,6 +9,8 @@ class WhatsAppBot {
         this.claude = new ClaudeService();
         this.whatsapp = new WhatsAppService();
         this.conversazioni = new Map(); // In produzione usa Redis/Database
+
+        this.mongoConnection = require('mongoose').connection;
     }
 
     // Verifica webhook WhatsApp

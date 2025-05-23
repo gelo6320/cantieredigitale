@@ -131,7 +131,12 @@ const config = {
 
             // MESSAGGI ORARIO
             fuoriOrario: "Siamo fuori orario ma organizziamo una call per domani?",
-            inOrario: "Siamo online! 🟢 Facciamo subito una call?"
+            inOrario: "Siamo online! 🟢 Facciamo subito una call?",
+
+            // NUOVI TEMPLATE PER APPUNTAMENTI
+            richiesta_data_ora: "Perfetto! Quando preferisci la chiamata? Dimmi giorno e orario (es: martedì alle 15:00)",
+            conferma_appuntamento: "Ottimo! Ho prenotato la chiamata per {data_ora}. Ti ricontatterò al numero {telefono}. Confermi?",
+            appuntamento_salvato: "✅ Appuntamento confermato per {data_ora}! Ti chiamerò puntuale. A presto!",
         },
 
         // GESTIONE OBIEZIONI STRUTTURATA
@@ -174,7 +179,12 @@ const config = {
             // SETTORI SPECIFICI
             web: ["sito", "website", "web", "online", "internet"],
             marketing: ["marketing", "pubblicità", "ads", "google", "facebook", "social"],
-            ai: ["ai", "intelligenza artificiale", "bot", "automazione", "chatbot"]
+            ai: ["ai", "intelligenza artificiale", "bot", "automazione", "chatbot"],
+
+            // NUOVI KEYWORDS PER APPUNTAMENTI
+            conferma_appuntamento: ["confermo", "va bene", "perfetto", "sì alla chiamata", "prenoto", "quando", "disponibile"],
+            data_orario: ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "domani", "dopodomani", "oggi", 
+                          "mattina", "pomeriggio", "ore", "alle", "h"],
         },
 
         // CONFIGURAZIONE LEAD QUALIFICATION SEMPLIFICATA
@@ -283,6 +293,16 @@ config.bot.getFallbackMessage = function() {
 // Rileva intent con focus su call
 config.bot.detectIntent = function(message) {
     const messageLower = message.toLowerCase();
+
+    // Priorità per conferma appuntamento
+    if (this.keywords.conferma_appuntamento.some(keyword => messageLower.includes(keyword)) &&
+        this.keywords.data_orario.some(keyword => messageLower.includes(keyword))) {
+        return 'conferma_appuntamento';
+    }
+    
+    if (this.keywords.data_orario.some(keyword => messageLower.includes(keyword))) {
+        return 'data_orario';
+    }
     
     // Priorità alta per interesse chiamata
     if (this.keywords.interesse_call.some(keyword => messageLower.includes(keyword))) {
