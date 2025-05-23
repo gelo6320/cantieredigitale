@@ -920,40 +920,156 @@ app.post('/webhook/whatsapp', (req, res) => {
   }
 });
 
-app.get('/debug-env', (req, res) => {
-  const env = {
-    // WhatsApp
-    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID ? 
-      `✅ ${process.env.WHATSAPP_PHONE_NUMBER_ID}` : '❌ Non configurato',
-    WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN ? 
-      `✅ ${process.env.WHATSAPP_ACCESS_TOKEN.substring(0, 20)}...` : '❌ Non configurato',
-    WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN ? 
-      `✅ ${process.env.WHATSAPP_VERIFY_TOKEN}` : '❌ Non configurato',
+// Aggiungi questo endpoint migliorato al server.js
+
+app.get('/debug-whatsapp', (req, res) => {
+  const diagnostics = {
+    timestamp: new Date().toISOString(),
+    status: 'WHATSAPP BOT DIAGNOSTICS',
     
-    // Claude
-    CLAUDE_API_KEY: process.env.CLAUDE_API_KEY ? 
-      `✅ ${process.env.CLAUDE_API_KEY.substring(0, 20)}...` : '❌ Non configurato',
+    // Verifica variabili d'ambiente critiche
+    environment: {
+      CLAUDE_API_KEY: process.env.CLAUDE_API_KEY ? 
+        `✅ Configurata (${process.env.CLAUDE_API_KEY.substring(0, 15)}...)` : 
+        '❌ NON CONFIGURATA',
+      WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN ? 
+        `✅ Configurata (${process.env.WHATSAPP_ACCESS_TOKEN.substring(0, 15)}...)` : 
+        '❌ NON CONFIGURATA',
+      WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || '❌ NON CONFIGURATA',
+      WHATSAPP_WEBHOOK_TOKEN: process.env.WHATSAPP_WEBHOOK_TOKEN || '❌ NON CONFIGURATA'
+    },
     
-    // Business
-    BUSINESS_NAME: process.env.BUSINESS_NAME || 'Costruzione Digitale (default)',
-    BUSINESS_SECTOR: process.env.BUSINESS_SECTOR || 'Consulenza digitale (default)',
+    // Stato del bot
+    botStatus: {
+      claudeService: whatsappBot && whatsappBot.claude ? '✅ Inizializzato' : '❌ Non inizializzato',
+      whatsappService: whatsappBot && whatsappBot.whatsapp ? '✅ Inizializzato' : '❌ Non inizializzato',
+      conversazioniAttive: whatsappBot ? whatsappBot.getStats().conversazioniAttive : 0,
+      messaggiTotali: whatsappBot ? whatsappBot.getStats().messaggiTotali : 0
+    },
     
-    // Config dal WhatsApp Bot
-    botConfig: {
-      claudeApiKey: whatsappBot.claude.apiKey ? 
-        `✅ ${whatsappBot.claude.apiKey.substring(0, 20)}...` : '❌ Non configurato',
-      whatsappToken: whatsappBot.whatsapp.accessToken ? 
-        `✅ ${whatsappBot.whatsapp.accessToken.substring(0, 20)}...` : '❌ Non configurato',
-      phoneNumberId: whatsappBot.whatsapp.phoneNumberId || '❌ Non configurato'
-    }
+    // Configurazione business
+    businessConfig: {
+      name: process.env.BUSINESS_NAME || 'Costruzione Digitale (default)',
+      sector: process.env.BUSINESS_SECTOR || 'Consulenza digitale (default)',
+      services: process.env.BUSINESS_SERVICES ? process.env.BUSINESS_SERVICES.split(',') : ['Default'],
+      hours: process.env.BUSINESS_HOURS || 'Lun-Ven 9:00-18:00 (default)'
+    },
+    
+    // Test URLs webhook
+    webhookUrls: {
+      verification: `${req.protocol}://${req.get('host')}/webhook/whatsapp`,
+      production: 'https://your-domain.com/webhook/whatsapp'
+    },
+    
+    // Problemi rilevati
+    issues: []
   };
   
-  res.json({
-    status: 'Environment Debug',
-    timestamp: new Date().toISOString(),
-    environment: env,
-    issues: []
-  });
+  // Rileva problemi
+  if (!process.env.CLAUDE_API_KEY) {
+    diagnostics.issues.push({
+      level: 'CRITICO',
+      message: 'CLAUDE_API_KEY non configurata',
+      solution: 'Configura la API key di Claude nel file .env'
+    });
+  }
+  
+  if (!process.env.WHATSAPP_ACCESS_TOKEN) {
+    diagnostics.issues.push({
+      level: 'CRITICO', 
+      message: 'WHATSAPP_ACCESS_TOKEN non configurata',
+      solution: 'Configura il token di accesso WhatsApp nel file .env'
+    });
+  }
+  
+  if (!process.env.WHATSAPP_PHONE_NUMBER_ID) {
+    diagnostics.issues.push({
+      level: 'CRITICO',
+      message: 'WHATSAPP_PHONE_NUMBER_ID non configurata', 
+      solution: 'Configura il Phone Number ID di WhatsApp nel file .env'
+    });
+  }
+  
+  if (!whatsappBot) {
+    diagnostics.issues.push({
+      level: 'CRITICO',
+      message: 'WhatsApp Bot non inizializzato',
+      solution: 'Verificare la configurazione e riavviare il server'
+    });
+  }
+  
+  // Formato HTML per visualizzazione
+  const htmlResponse = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>WhatsApp Bot Diagnostics</title>
+    <style>
+      body { font-family: monospace; margin: 20px; background: #1e1e1e; color: #fff; }
+      .status { margin: 10px 0; }
+      .ok { color: #4CAF50; }
+      .error { color: #f44336; }
+      .warning { color: #ff9800; }
+      .section { margin: 20px 0; padding: 15px; border: 1px solid #333; }
+      .issue { background: #2d1b1b; padding: 10px; margin: 5px 0; border-left: 4px solid #f44336; }
+      pre { background: #2d2d2d; padding: 10px; overflow-x: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>🤖 WhatsApp Bot Diagnostics</h1>
+    <p>Timestamp: ${diagnostics.timestamp}</p>
+    
+    <div class="section">
+      <h2>📋 Variabili d'Ambiente</h2>
+      ${Object.entries(diagnostics.environment).map(([key, value]) => 
+        `<div class="status">${key}: ${value}</div>`
+      ).join('')}
+    </div>
+    
+    <div class="section">
+      <h2>🤖 Stato Bot</h2>
+      ${Object.entries(diagnostics.botStatus).map(([key, value]) => 
+        `<div class="status">${key}: ${value}</div>`
+      ).join('')}
+    </div>
+    
+    <div class="section">
+      <h2>🏢 Configurazione Business</h2>
+      <pre>${JSON.stringify(diagnostics.businessConfig, null, 2)}</pre>
+    </div>
+    
+    <div class="section">
+      <h2>🔗 URLs Webhook</h2>
+      <div>Verifica: ${diagnostics.webhookUrls.verification}</div>
+      <div>Produzione: ${diagnostics.webhookUrls.production}</div>
+    </div>
+    
+    ${diagnostics.issues.length > 0 ? `
+    <div class="section">
+      <h2>⚠️ Problemi Rilevati</h2>
+      ${diagnostics.issues.map(issue => `
+        <div class="issue">
+          <strong>[${issue.level}]</strong> ${issue.message}<br>
+          <small>💡 ${issue.solution}</small>
+        </div>
+      `).join('')}
+    </div>
+    ` : '<div class="section ok"><h2>✅ Nessun problema rilevato</h2></div>'}
+    
+    <div class="section">
+      <h2>📝 Prossimi Passi</h2>
+      <ol>
+        <li>Risolvi tutti i problemi CRITICI</li>
+        <li>Riavvia il server: <code>npm start</code></li>
+        <li>Testa con: <code>curl ${diagnostics.webhookUrls.verification}</code></li>
+        <li>Configura webhook in Facebook Developers</li>
+      </ol>
+    </div>
+  </body>
+  </html>
+  `;
+  
+  res.send(htmlResponse);
 });
 
 // Dashboard stats WhatsApp (opzionale)
