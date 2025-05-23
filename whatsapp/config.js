@@ -1,13 +1,13 @@
 // ============================================
-// 📁 whatsapp/config.js - CALL-FOCUSED BOT
+// 📁 whatsapp/config.js - VERSIONE SEMPLIFICATA
 // ============================================
 
 require('dotenv').config();
 
-console.log('🔧 [WHATSAPP CONFIG] Caricamento configurazioni call-focused...');
+console.log('🔧 [CONFIG] Caricamento configurazione semplificata...');
 
 const config = {
-    // ===== CONFIGURAZIONI API =====
+    // ===== API =====
     whatsapp: {
         phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
         accessToken: process.env.WHATSAPP_ACCESS_TOKEN,
@@ -18,8 +18,8 @@ const config = {
     claude: {
         apiKey: process.env.CLAUDE_API_KEY,
         model: 'claude-sonnet-4-20250514',
-        maxTokens: parseInt(process.env.CLAUDE_MAX_TOKENS) || 80, // RIDOTTO per risposte brevi
-        timeout: parseInt(process.env.CLAUDE_TIMEOUT) || 10000
+        maxTokens: 150, // Risposte brevi
+        timeout: 10000
     },
     
     server: {
@@ -27,333 +27,280 @@ const config = {
         environment: process.env.NODE_ENV || 'development'
     },
 
-    // ===== CONFIGURAZIONI BUSINESS =====
+    // ===== BUSINESS =====
     business: {
-        name: process.env.BUSINESS_NAME || "Costruzione Digitale",
-        settore: process.env.BUSINESS_SECTOR || "Consulenza digitale",
-        servizi: (process.env.BUSINESS_SERVICES || "Sviluppo web,Analytics,Marketing").split(','),
-        orariApertura: process.env.BUSINESS_HOURS || "Lun-Ven 9:00-18:00",
+        name: process.env.BUSINESS_NAME || "Assistente Appuntamenti",
+        settore: "Consulenza",
         telefono: process.env.BUSINESS_PHONE || "+39 123 456 7890",
-        email: process.env.BUSINESS_EMAIL || "info@costruzionedigitale.com",
-        sito: process.env.BUSINESS_WEBSITE || "https://costruzionedigitale.com",
-        indirizzo: process.env.BUSINESS_ADDRESS || "Milano, Italia"
+        email: process.env.BUSINESS_EMAIL || "info@business.com"
     },
 
-    // ===== CONFIGURAZIONE COMPORTAMENTO BOT CALL-FOCUSED =====
+    // ===== BOT SEMPLIFICATO =====
     bot: {
-        // Personalità aggressiva per le chiamate
-        personality: {
-            nome: process.env.BOT_NAME || "Assistente di Costruzione Digitale",
-            tono: "diretto e orientato all'azione",
-            caratteristiche: [
-                "Focalizzato su prenotazioni chiamate",
-                "Diretto e senza giri di parole",
-                "Orientato ai risultati immediati",
-                "Esperto nel creare urgenza"
-            ]
+        name: "Alex",
+        personality: "amichevole, scherzoso, efficiente",
+        
+        // MESSAGGI TEMPLATE
+        messages: {
+            saluto: "Ciao! 😄 Sono Alex, il tuo assistente per gli appuntamenti! Come ti chiami?",
+            
+            chiedi_nome: "Come ti chiami? 😊",
+            chiedi_email: "Perfetto! Qual è la tua email? 📧",
+            chiedi_data: "Ottimo! Per che giorno vorresti l'appuntamento? (es: lunedì, martedì, domani...)",
+            chiedi_ora: "A che ora preferisci? (es: 10:00, 14:30...)",
+            
+            riepilogo: `Perfetto! Ricapitoliamo:
+👤 Nome: {nome}
+📧 Email: {email}
+📅 Data: {data}
+🕐 Ora: {ora}
+
+Tutto giusto? Scrivi "sì" per confermare! ✅`,
+
+            confermato: "🎉 Appuntamento confermato! Ti ricontatteremo per confermare. Grazie {nome}!",
+            
+            errore: "Ops! Qualcosa è andato storto 😅 Riprova o scrivimi di nuovo!",
+            
+            non_capito: "Non ho capito bene... Puoi ripetere? 🤔"
         },
 
-        // Stile di comunicazione ultra-breve
-        comunicazione: {
-            lunghezzaRisposta: "molto brevi (massimo 1 frase + domanda)",
-            domandePerVolta: 1,
-            usoEmoji: "minimo, solo quando necessario",
-            linguaggio: "italiano diretto e colloquiale",
-            evitare: [
-                "spiegazioni lunghe",
-                "troppi dettagli tecnici", 
-                "perdere tempo in chiacchiere",
-                "non proporre la chiamata"
-            ]
-        },
-
-        // OBIETTIVI RIORIENTATI ALLA CHIAMATA
-        obiettivi: [
-            {
-                priorita: 1,
-                descrizione: "PRENOTARE UNA CHIAMATA CONOSCITIVA GRATUITA",
-                azione: "Spingere verso la prenotazione entro 3 messaggi MAX"
-            },
-            {
-                priorita: 2,
-                descrizione: "Raccogliere nome ed email per la chiamata",
-                azione: "Ottenere contatti per organizzare la call"
-            },
-            {
-                priorita: 3,
-                descrizione: "Identificare il bisogno principale velocemente",
-                azione: "Capire cosa serve per personalizzare la proposta di call"
-            },
-            {
-                priorita: 4,
-                descrizione: "Gestire obiezioni alla chiamata",
-                azione: "Rispondere alle resistenze e ri-proporre"
-            },
-            {
-                priorita: 5,
-                descrizione: "Raccogliere contatto anche se dice no",
-                azione: "Almeno email per future opportunità"
-            }
-        ],
-
-        // TEMPLATE CALL-FOCUSED
-        templates: {
-            // SALUTO AGGRESSIVO
-            salutoIniziale: "Ciao! 👋 Ti va una chiamata gratuita di 15 min per vedere come possiamo aiutarti?",
-            
-            salutoRitorno: "Bentornato! Hai pensato alla nostra chiamata gratuita?",
-
-            // PROPOSTE CHIAMATA MULTIPLE
-            proposta_chiamata_rapida: "Perfetto! Ti propongo una call gratuita di 15 min. Quando sei disponibile?",
-            
-            proposta_chiamata_dopo_servizi: "Organizziamo una call veloce per vedere qual è la soluzione migliore per te?",
-            
-            proposta_chiamata_specifica: "Per {bisogno_cliente} ti serve una strategia su misura. Call di 15 min per parlarne?",
-
-            // RICHIESTA CONTATTI
-            richiesta_contatti_per_call: "Perfetto! Per organizzare la chiamata ho bisogno di nome ed email. Puoi condividerli?",
-            
-            richiesta_solo_email: "Ok! Almeno la tua email così ti invio qualche info utile?",
-
-            // DESCRIZIONE SERVIZI BREVE
-            descrizioneServizi: "Facciamo: siti web, marketing digitale e automazioni AI. Ti va una call di 15 min per vedere cosa serve a te?",
-
-            // GESTIONE OBIEZIONI
-            obiezione_tempo: "Solo 15 minuti! Quando sei più libero questa settimana?",
-            obiezione_costo: "È gratuita! Te lo spiego tutto in 15 min. Quando puoi?",
-            obiezione_ci_penso: "Ok! Lasciami almeno la tua email così ti mando qualche info?",
-            obiezione_non_interessato: "Capito. Se cambi idea sono qui!",
-
-            // FOLLOW UP
-            follow_up_dopo_info: "Ti ho dato l'info che cercavi. Ora organizziamo una call per vedere come aiutarti concretamente?",
-            
-            chiusura_con_contatti: "Perfetto! Ti ricontatto presto per organizzare tutto. Grazie {nome}!",
-
-            // MESSAGGI ORARIO
-            fuoriOrario: "Siamo fuori orario ma organizziamo una call per domani?",
-            inOrario: "Siamo online! 🟢 Facciamo subito una call?",
-
-            // NUOVI TEMPLATE PER APPUNTAMENTI
-            richiesta_data_ora: "Perfetto! Quando preferisci la chiamata? Dimmi giorno e orario (es: martedì alle 15:00)",
-            conferma_appuntamento: "Ottimo! Ho prenotato la chiamata per {data_ora}. Ti ricontatterò al numero {telefono}. Confermi?",
-            appuntamento_salvato: "✅ Appuntamento confermato per {data_ora}! Ti chiamerò puntuale. A presto!",
-
-            richiesta_dati_mancanti: "Perfetto {nome}! 👍\n\nPer confermare la chiamata mi serve:\n{dati_mancanti}\n\nPuoi condividermeli?",
-    
-            richiesta_conferma_completa: "Ottimo! Quindi ricapitolando:\n📞 Chiamata con {nome}\n📧 Email: {email}\n📱 Tel: {telefono}\n📅 Data: {data}\n🕐 Ora: {ora}\n\nConfermi tutto?",
-            
-            errore_salvataggio: "Ho tutti i tuoi dati ma c'è stato un problema tecnico nel salvataggio. Ti ricontatto via email a {email} per confermare tutto. Scusa il disagio! 🙏"
-        },
-
-        // GESTIONE OBIEZIONI STRUTTURATA
-        gestione_obiezioni: {
-            "non ho tempo": "Solo 15 minuti! Quando sei più libero?",
-            "ci penso": "Ok! Lasciami almeno la tua email così ti invio qualche info?",
-            "quanto costa": "È gratis! Te lo spiego in 15 min. Quando puoi?",
-            "non sono interessato": "Capito. Se cambi idea sono qui!",
-            "più tardi": "Perfetto! Quando ti ricontatto? Domani?",
-            "non so": "Normal! Per questo serve una call veloce. Oggi o domani?",
-            "ho già": "Ottimo! Vediamo se possiamo migliorare. Call di 15 min?"
-        },
-
-        // MESSAGGI DI FALLBACK BREVI
-        fallbackMessages: [
-            "Scusa il problema tecnico. Ti va una call per parlare dal vivo?",
-            "C'è stato un errore. Meglio una chiamata veloce?",
-            "Problema tecnico. Facciamo una call di 15 min?"
-        ],
-
-        // KEYWORDS AMPLIATE PER INTERCETTARE TUTTO
-        keywords: {
-            saluto: ["ciao", "salve", "buongiorno", "buonasera", "hey", "hello"],
-            servizi: ["servizi", "cosa fate", "cosa offrite", "che servizi", "prezzi", "costi", "aiuto"],
-            contatto: ["contatto", "telefono", "email", "chiamare", "scrivere"],
-            
-            // INTERCETTA INTERESSE CHIAMATA
-            interesse_call: ["si", "sì", "ok", "va bene", "perfetto", "interessante", "dimmi di più", "sono interessato"],
-            disponibilita: ["disponibile", "libero", "posso", "quando", "orario", "domani", "oggi", "settimana"],
-            
-            // INTERCETTA RESISTENZE
-            rifiuto_soft: ["non so", "forse", "ci penso", "più tardi", "non ora", "non ho tempo"],
-            rifiuto_hard: ["no", "non interessato", "non mi interessa", "basta"],
-            
-            // PROBLEMI/BISOGNI
-            problemi: ["problema", "non funziona", "errore", "difficoltà", "aiuto", "bloccato"],
-            urgente: ["urgente", "subito", "immediato", "veloce", "presto"],
-            budget: ["budget", "costo", "prezzo", "spesa", "investimento", "soldi"],
-            
-            // SETTORI SPECIFICI
-            web: ["sito", "website", "web", "online", "internet"],
-            marketing: ["marketing", "pubblicità", "ads", "google", "facebook", "social"],
-            ai: ["ai", "intelligenza artificiale", "bot", "automazione", "chatbot"],
-
-            // NUOVI KEYWORDS PER APPUNTAMENTI
-            conferma_appuntamento: ["confermo", "va bene", "perfetto", "sì alla chiamata", "prenoto", "quando", "disponibile"],
-            data_orario: ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "domani", "dopodomani", "oggi", 
-                          "mattina", "pomeriggio", "ore", "alle", "h"],
-        },
-
-        // CONFIGURAZIONE LEAD QUALIFICATION SEMPLIFICATA
-        qualification: {
-            campiObbligatori: ["nome", "email"], // Solo essenziali per la call
-            campiOpzionali: ["telefono", "bisogno", "urgenza"],
-            leadQualificatoSe: {
-                haEmail: true,
-                haNome: true,
-                haEspresssoInteresse: true
-            }
-        },
-
-        // GESTIONE CONVERSAZIONE VELOCE
-        conversazione: {
-            maxMessaggiInMemoria: 6, // RIDOTTO per conversazioni brevi
-            timeoutInattivita: 15, // RIDOTTO - 15 minuti
-            maxMessaggiSenzaCall: 4, // Dopo 4 messaggi spinge molto di più
-            salvataggeregolareConversazione: true
+        // STEP DEL PROCESSO
+        steps: {
+            START: 'start',
+            NOME: 'nome', 
+            EMAIL: 'email',
+            DATA: 'data',
+            ORA: 'ora',
+            RIEPILOGO: 'riepilogo',
+            CONFERMATO: 'confermato'
         }
     }
 };
 
-// ===== FUNZIONI UTILITY CALL-FOCUSED =====
+// ===== FUNZIONI SEMPLICI =====
 
-// Genera prompt di sistema aggressivo per le chiamate
+// Genera prompt di sistema semplice
 config.bot.generateSystemPrompt = function(conversazione = {}) {
-    const isBusinessHours = this.isBusinessHours();
-    const messaggiScambiati = conversazione.messaggi?.length || 0;
-    const pressione = messaggiScambiati >= this.conversazione.maxMessaggiSenzaCall ? "MOLTO ALTA" : "NORMALE";
-
-    return `Sei ${this.personality.nome} per ${config.business.name}.
-
-🎯 OBIETTIVO PRIMARIO: PRENOTARE CHIAMATA CONOSCITIVA GRATUITA DI 15 MINUTI
-- Proponi la chiamata entro 3 messaggi MAX
-- Se dice di sì → chiedi nome ed email SUBITO
-- Se è vago → chiedi di cosa ha bisogno e ri-proponi call
-- Se dice no → prova gestione obiezione, se non funziona lascia email
-
-🏢 SERVIZI VELOCI:
-${config.business.servizi.join(', ')}
-
-⚡ STRATEGIA CONVERSAZIONE:
-1° messaggio: Proposta chiamata diretta
-2° messaggio: Se non risponde, chiedi di cosa ha bisogno
-3° messaggio: Proponi chiamata specifica per il suo bisogno
-4° messaggio: Gestisci obiezione o chiedi solo email
-
-PRESSIONE ATTUALE: ${pressione}
-MESSAGGI SCAMBIATI: ${messaggiScambiati}/${this.conversazione.maxMessaggiSenzaCall}
-
-💬 USA QUESTE FRASI:
-- "Ti va una call gratuita di 15 min?"
-- "Organizziamo una chiamata veloce?"
-- "Quando sei disponibile per una call?"
-- "Nome ed email per la chiamata?"
-
-🚫 NON FARE MAI:
-- Spiegazioni lunghe senza proporre call
-- Più di 15-20 parole per risposta
-- Dimenticare di spingere verso la chiamata
-
-📊 DATI CLIENTE RACCOLTI:
-${JSON.stringify(conversazione.datiCliente || {}, null, 2)}
-
-🔄 STATO CONVERSAZIONE: ${conversazione.stato || 'nuovo_cliente'}
-⏰ ORARIO: ${isBusinessHours ? 'IN ORARIO - proponi call immediata' : 'FUORI ORARIO - proponi call per domani'}
-
-⚡ REGOLA FONDAMENTALE: Ogni risposta deve spingere verso la chiamata!`;
-};
-
-// Controlla orari lavorativi
-config.bot.isBusinessHours = function() {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentDay = now.getDay();
+    const step = conversazione.currentStep || this.steps.START;
+    const dati = conversazione.datiCliente || {};
     
-    return currentDay >= 1 && currentDay <= 5 && currentHour >= 9 && currentHour < 18;
+    return `Sei ${this.name}, un assistente ${this.personality} per prenotare appuntamenti.
+
+🎯 OBIETTIVO: Raccogliere SOLO questi 4 dati:
+1. Nome
+2. Email  
+3. Data appuntamento
+4. Ora appuntamento
+
+📊 STATO ATTUALE:
+- Step: ${step}
+- Nome: ${dati.nome || 'MANCANTE'}
+- Email: ${dati.email || 'MANCANTE'}
+- Data: ${dati.data || 'MANCANTE'}
+- Ora: ${dati.ora || 'MANCANTE'}
+
+⚡ REGOLE:
+- Chiedi UN dato alla volta in ordine
+- Sii amichevole e usa emoji
+- Risposte BREVI (max 1 frase)
+- Quando hai tutti i dati, fai riepilogo
+- Se conferma con "sì", salva l'appuntamento
+
+💬 USA TONO: amichevole, scherzoso, efficiente
+🚫 NON: spiegare troppo, chiedere dati extra, essere formale`;
 };
 
-// Processa template con placeholder
+// Determina quale messaggio inviare
+config.bot.getNextMessage = function(conversazione, messaggio) {
+    const step = conversazione.currentStep || this.steps.START;
+    const dati = conversazione.datiCliente || {};
+    
+    switch (step) {
+        case this.steps.START:
+            return this.messages.saluto;
+            
+        case this.steps.NOME:
+            if (dati.nome) {
+                return this.messages.chiedi_email;
+            } else {
+                return this.messages.chiedi_nome;
+            }
+            
+        case this.steps.EMAIL:
+            if (dati.email) {
+                return this.messages.chiedi_data;
+            } else {
+                return this.messages.chiedi_email;
+            }
+            
+        case this.steps.DATA:
+            if (dati.data) {
+                return this.messages.chiedi_ora;
+            } else {
+                return this.messages.chiedi_data;
+            }
+            
+        case this.steps.ORA:
+            if (dati.ora) {
+                return this.processTemplate(this.messages.riepilogo, dati);
+            } else {
+                return this.messages.chiedi_ora;
+            }
+            
+        case this.steps.RIEPILOGO:
+            if (messaggio.toLowerCase().includes('sì') || messaggio.toLowerCase().includes('si')) {
+                return this.processTemplate(this.messages.confermato, dati);
+            } else {
+                return "Cosa vuoi modificare? Dimmi il nuovo dato 😊";
+            }
+            
+        default:
+            return this.messages.non_capito;
+    }
+};
+
+// Aggiorna step della conversazione
+config.bot.updateStep = function(conversazione, messaggio) {
+    const step = conversazione.currentStep || this.steps.START;
+    const dati = conversazione.datiCliente || {};
+    
+    switch (step) {
+        case this.steps.START:
+            conversazione.currentStep = this.steps.NOME;
+            break;
+            
+        case this.steps.NOME:
+            if (dati.nome) {
+                conversazione.currentStep = this.steps.EMAIL;
+            }
+            break;
+            
+        case this.steps.EMAIL:
+            if (dati.email) {
+                conversazione.currentStep = this.steps.DATA;
+            }
+            break;
+            
+        case this.steps.DATA:
+            if (dati.data) {
+                conversazione.currentStep = this.steps.ORA;
+            }
+            break;
+            
+        case this.steps.ORA:
+            if (dati.ora) {
+                conversazione.currentStep = this.steps.RIEPILOGO;
+            }
+            break;
+            
+        case this.steps.RIEPILOGO:
+            if (messaggio.toLowerCase().includes('sì') || messaggio.toLowerCase().includes('si')) {
+                conversazione.currentStep = this.steps.CONFERMATO;
+            }
+            break;
+    }
+};
+
+// Estrai dati dal messaggio
+config.bot.extractData = function(conversazione, messaggio) {
+    const step = conversazione.currentStep || this.steps.START;
+    
+    if (!conversazione.datiCliente) {
+        conversazione.datiCliente = {};
+    }
+    
+    const dati = conversazione.datiCliente;
+    
+    switch (step) {
+        case this.steps.NOME:
+            if (!dati.nome && messaggio.length > 1) {
+                // Prendi la prima parola/frase come nome
+                dati.nome = messaggio.trim();
+                console.log(`👤 Nome estratto: ${dati.nome}`);
+            }
+            break;
+            
+        case this.steps.EMAIL:
+            if (!dati.email) {
+                const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+                const emailMatch = messaggio.match(emailRegex);
+                if (emailMatch) {
+                    dati.email = emailMatch[0];
+                    console.log(`📧 Email estratta: ${dati.email}`);
+                }
+            }
+            break;
+            
+        case this.steps.DATA:
+            if (!dati.data) {
+                const dataKeywords = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica', 'domani', 'dopodomani'];
+                const dataFound = dataKeywords.find(d => messaggio.toLowerCase().includes(d));
+                if (dataFound) {
+                    dati.data = dataFound;
+                    console.log(`📅 Data estratta: ${dati.data}`);
+                } else if (messaggio.length > 2) {
+                    // Accetta qualsiasi input come data
+                    dati.data = messaggio.trim();
+                    console.log(`📅 Data estratta: ${dati.data}`);
+                }
+            }
+            break;
+            
+        case this.steps.ORA:
+            if (!dati.ora) {
+                const oraRegex = /(\d{1,2}):?(\d{2})?/;
+                const oraMatch = messaggio.match(oraRegex);
+                if (oraMatch) {
+                    const ora = oraMatch[1];
+                    const minuti = oraMatch[2] || '00';
+                    dati.ora = `${ora}:${minuti}`;
+                    console.log(`🕐 Ora estratta: ${dati.ora}`);
+                }
+            }
+            break;
+    }
+};
+
+// Controlla se appuntamento è completo
+config.bot.isAppointmentComplete = function(conversazione) {
+    const dati = conversazione.datiCliente || {};
+    return dati.nome && dati.email && dati.data && dati.ora;
+};
+
+// Processa template
 config.bot.processTemplate = function(template, data = {}) {
     let processed = template;
     
-    // Sostituisci placeholders business
-    processed = processed.replace(/{business\.(\w+)}/g, (match, prop) => {
-        return config.business[prop] || match;
-    });
-    
-    // Sostituisci placeholders personalizzati
     Object.entries(data).forEach(([key, value]) => {
         const regex = new RegExp(`{${key}}`, 'g');
-        processed = processed.replace(regex, value);
+        processed = processed.replace(regex, value || '');
     });
     
     return processed;
 };
 
-// Fallback message orientato alla call
+// Fallback semplice
 config.bot.getFallbackMessage = function() {
-    const messages = this.fallbackMessages;
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    return this.processTemplate(randomMessage);
+    return this.messages.errore;
 };
 
-// Rileva intent con focus su call
+// Rileva intent semplice
 config.bot.detectIntent = function(message) {
     const messageLower = message.toLowerCase();
-
-    // Priorità per conferma appuntamento
-    if (this.keywords.conferma_appuntamento.some(keyword => messageLower.includes(keyword)) &&
-        this.keywords.data_orario.some(keyword => messageLower.includes(keyword))) {
-        return 'conferma_appuntamento';
+    
+    if (messageLower.includes('ciao') || messageLower.includes('salve') || messageLower.includes('buongiorno')) {
+        return 'saluto';
     }
     
-    if (this.keywords.data_orario.some(keyword => messageLower.includes(keyword))) {
-        return 'data_orario';
+    if (messageLower.includes('sì') || messageLower.includes('si') || messageLower.includes('confermo')) {
+        return 'conferma';
     }
     
-    // Priorità alta per interesse chiamata
-    if (this.keywords.interesse_call.some(keyword => messageLower.includes(keyword))) {
-        return 'interesse_call';
-    }
-    
-    if (this.keywords.disponibilita.some(keyword => messageLower.includes(keyword))) {
-        return 'disponibilita';
-    }
-    
-    if (this.keywords.rifiuto_hard.some(keyword => messageLower.includes(keyword))) {
-        return 'rifiuto_hard';
-    }
-    
-    if (this.keywords.rifiuto_soft.some(keyword => messageLower.includes(keyword))) {
-        return 'rifiuto_soft';
-    }
-    
-    // Altri intent standard
-    for (const [intent, keywords] of Object.entries(this.keywords)) {
-        if (keywords.some(keyword => messageLower.includes(keyword))) {
-            return intent;
-        }
+    if (messageLower.includes('no') || messageLower.includes('annulla')) {
+        return 'rifiuto';
     }
     
     return 'generale';
-};
-
-// Ottieni template obiezione
-config.bot.getObiectionTemplate = function(message) {
-    const messageLower = message.toLowerCase();
-    
-    for (const [obiezione, risposta] of Object.entries(this.gestione_obiezioni)) {
-        if (messageLower.includes(obiezione)) {
-            return risposta;
-        }
-    }
-    
-    return this.templates.proposta_chiamata_rapida;
-};
-
-// Verifica se deve aumentare pressione
-config.bot.shouldIncreasePressure = function(conversazione) {
-    const messaggi = conversazione.messaggi?.length || 0;
-    return messaggi >= this.conversazione.maxMessaggiSenzaCall;
 };
 
 // ===== VALIDAZIONE =====
@@ -364,30 +311,14 @@ const requiredVars = [
     'CLAUDE_API_KEY'
 ];
 
-const missingVars = requiredVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-    console.error('❌ [WHATSAPP CONFIG] ERRORE: Variabili d\'ambiente mancanti:');
-    missingVars.forEach(varName => {
-        console.error(`   - ${varName}`);
-    });
-}
-
 config.validate = function() {
     const errors = [];
     
-    if (!this.whatsapp.phoneNumberId) errors.push('WHATSAPP_PHONE_NUMBER_ID mancante');
-    if (!this.whatsapp.accessToken) errors.push('WHATSAPP_ACCESS_TOKEN mancante');
-    if (!this.whatsapp.webhookToken) errors.push('WHATSAPP_WEBHOOK_TOKEN mancante');
-    if (!this.claude.apiKey) errors.push('CLAUDE_API_KEY mancante');
-    
-    if (this.whatsapp.accessToken && !this.whatsapp.accessToken.startsWith('EAA')) {
-        errors.push('WHATSAPP_ACCESS_TOKEN formato non valido');
-    }
-    
-    if (this.claude.apiKey && !this.claude.apiKey.startsWith('sk-ant-')) {
-        errors.push('CLAUDE_API_KEY formato non valido');
-    }
+    requiredVars.forEach(varName => {
+        if (!process.env[varName]) {
+            errors.push(`${varName} mancante`);
+        }
+    });
     
     return {
         isValid: errors.length === 0,
@@ -395,19 +326,18 @@ config.validate = function() {
     };
 };
 
-// Log configurazioni
-console.log('📋 [WHATSAPP CONFIG] Configurazioni call-focused caricate:');
-console.log(`   🎯 Obiettivo primario: ${config.bot.obiettivi[0].descrizione}`);
-console.log(`   ⚡ Max tokens: ${config.claude.maxTokens} (risposte brevi)`);
-console.log(`   📱 Max messaggi senza call: ${config.bot.conversazione.maxMessaggiSenzaCall}`);
-console.log(`   📧 Campi richiesti: ${config.bot.qualification.campiObbligatori.join(', ')}`);
+// Log
+console.log('📋 [CONFIG] Bot semplificato caricato:');
+console.log(`   🤖 Nome bot: ${config.bot.name}`);
+console.log(`   🎭 Personalità: ${config.bot.personality}`);
+console.log(`   ⚡ Max tokens: ${config.claude.maxTokens}`);
 
 const validation = config.validate();
 if (!validation.isValid) {
-    console.error('❌ [WHATSAPP CONFIG] ERRORI:');
+    console.error('❌ [CONFIG] ERRORI:');
     validation.errors.forEach(error => console.error(`   - ${error}`));
 } else {
-    console.log('✅ [WHATSAPP CONFIG] Bot call-focused pronto!');
+    console.log('✅ [CONFIG] Configurazione valida!');
 }
 
 module.exports = config;
