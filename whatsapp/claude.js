@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/claude.js - VERSIONE SEMPLIFICATA CON CONFIG CENTRALIZZATO
+// 📁 whatsapp/claude.js - VERSIONE CORRETTA
 // ============================================
 const axios = require('axios');
 const config = require('./config');
@@ -46,8 +46,6 @@ class ClaudeService {
                 return config.bot.getFallbackMessage();
             }
 
-            // ===== USA CONFIGURAZIONE CENTRALIZZATA =====
-            
             // Genera il prompt di sistema usando la configurazione
             const systemPrompt = config.bot.generateSystemPrompt(conversazione);
             
@@ -66,7 +64,7 @@ class ClaudeService {
             const requestPayload = {
                 model: this.model,
                 max_tokens: this.maxTokens,
-                system: systemPrompt,  // Generato dalla configurazione
+                system: systemPrompt,
                 messages: messaggi
             };
 
@@ -81,6 +79,10 @@ class ClaudeService {
 
             console.log(`✅ [CLAUDE SERVICE] Risposta ricevuta da Claude API`);
             console.log(`📊 [CLAUDE SERVICE] Response status: ${response.status}`);
+            
+            // ===== FIX: ESTRAI LA RISPOSTA DAL RESPONSE =====
+            let responseText = response.data.content[0].text;
+            console.log(`📝 [CLAUDE SERVICE] Risposta Claude estratta: "${responseText.substring(0, 100)}..."`);
             
             const dati = conversazione.datiCliente;
         
@@ -147,7 +149,7 @@ class ClaudeService {
                     config.bot.templates.fuoriOrario
             });
 
-            console.log(`📤 [CLAUDE SERVICE] Risposta generata: "${responseText.substring(0, 100)}..."`);
+            console.log(`📤 [CLAUDE SERVICE] Risposta processata: "${responseText.substring(0, 100)}..."`);
             
             // ===== AGGIORNA DATI CONVERSAZIONE =====
             this.updateConversationData(conversazione, messaggioUtente, responseText, intent);
@@ -244,7 +246,7 @@ class ClaudeService {
         return messaggi;
     }
 
-    // ===== NUOVA FUNZIONE: AGGIORNA DATI CONVERSAZIONE =====
+    // ===== AGGIORNA DATI CONVERSAZIONE =====
     updateConversationData(conversazione, messaggioUtente, risposta, intent) {
         try {
             // Inizializza datiCliente se non esiste
@@ -268,10 +270,6 @@ class ClaudeService {
     async saveAppointment(conversazione, appointmentData) {
         try {
             console.log('🗓️ [CLAUDE SERVICE] Salvataggio appuntamento:', appointmentData);
-            
-            // Ottieni la connessione al database dell'utente
-            // Nota: dovrai passare req o trovare un altro modo per ottenere la connessione
-            // Per ora uso una connessione diretta a MongoDB
             
             const mongoose = require('mongoose');
             
@@ -340,7 +338,7 @@ class ClaudeService {
             console.log(`📱 [CLAUDE SERVICE] Telefono estratto da WhatsApp: ${conversazione.whatsappNumber}`);
         }
         
-        // Estrai email (codice esistente)
+        // Estrai email
         const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
         const emailMatch = messaggio.match(emailRegex);
         if (emailMatch && !conversazione.datiCliente.email) {
@@ -348,7 +346,7 @@ class ClaudeService {
             console.log(`📧 [CLAUDE SERVICE] Email estratta: ${emailMatch[0]}`);
         }
     
-        // ===== FIX: ESTRAZIONE NOME MIGLIORATA =====
+        // ===== ESTRAZIONE NOME MIGLIORATA =====
         if (!conversazione.datiCliente.nome) {
             // Prima riga del messaggio se contiene solo lettere
             const lines = messaggio.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -370,7 +368,7 @@ class ClaudeService {
             }
         }
     
-        // ===== ESTRAZIONE DATA E ORA (codice esistente migliorato) =====
+        // ===== ESTRAZIONE DATA E ORA =====
         if (intent === 'conferma_appuntamento' || intent === 'data_orario' || 
             messaggioLower.includes('disponibile') || messaggioLower.includes('chiamata')) {
             
