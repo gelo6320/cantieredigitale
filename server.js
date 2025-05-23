@@ -866,13 +866,61 @@ app.get('/api/whatsapp/health', (req, res) => {
 // Verifica webhook WhatsApp
 app.get('/webhook/whatsapp', (req, res) => {
   console.log('📞 [WEBHOOK] Richiesta verifica WhatsApp webhook');
-  whatsappBot.handleWebhookVerification(req, res);
+  console.log('📞 [WEBHOOK] Query params:', req.query);
+  
+  try {
+    // Token di verifica configurato (deve corrispondere a quello configurato in WhatsApp Business)
+    const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'costruzionedigitale2025';
+    
+    // Estrai i parametri dalla query
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    
+    console.log(`📞 [WEBHOOK] Mode: ${mode}, Token: ${token}, Challenge: ${challenge}`);
+    console.log(`📞 [WEBHOOK] Expected token: ${VERIFY_TOKEN}`);
+    
+    // Verifica che il modo sia 'subscribe' e il token corrisponda
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('✅ [WEBHOOK] Verifica WhatsApp webhook riuscita');
+      // Risposta con il challenge per confermare la verifica
+      return res.status(200).send(challenge);
+    } else {
+      console.log('❌ [WEBHOOK] Verifica WhatsApp webhook fallita');
+      console.log(`❌ [WEBHOOK] Mode match: ${mode === 'subscribe'}`);
+      console.log(`❌ [WEBHOOK] Token match: ${token === VERIFY_TOKEN}`);
+      return res.status(403).send('Forbidden: token di verifica non valido');
+    }
+  } catch (error) {
+    console.error('❌ [WEBHOOK] Errore nella verifica del webhook:', error);
+    return res.status(500).send('Errore interno del server');
+  }
 });
 
 // Ricevi messaggi WhatsApp
 app.post('/webhook/whatsapp', (req, res) => {
   console.log('📨 [WEBHOOK] Messaggio WhatsApp ricevuto');
-  whatsappBot.handleIncomingMessage(req, res);
+  console.log('📨 [WEBHOOK] Body:', JSON.stringify(req.body, null, 2));
+  
+  try {
+    // Se hai la classe WhatsAppBot, puoi usarla per processare i messaggi
+    if (whatsappBot && typeof whatsappBot.handleIncomingMessage === 'function') {
+      whatsappBot.handleIncomingMessage(req, res);
+    } else {
+      // Altrimenti, gestisci manualmente o rispondi con successo
+      console.log('📨 [WEBHOOK] WhatsAppBot non disponibile, gestione manuale');
+      
+      // Processa il webhook di WhatsApp qui se necessario
+      // ...
+      
+      // Rispondi sempre con 200 a WhatsApp per evitare retry
+      res.status(200).send('EVENT_RECEIVED');
+    }
+  } catch (error) {
+    console.error('❌ [WEBHOOK] Errore nella gestione del messaggio:', error);
+    // Rispondi comunque con 200 per evitare retry da parte di WhatsApp
+    res.status(200).send('ERROR_HANDLED');
+  }
 });
 
 // Dashboard stats WhatsApp (opzionale)
