@@ -923,6 +923,42 @@ app.post('/webhook/whatsapp', (req, res) => {
   }
 });
 
+app.get('/debug-env', (req, res) => {
+  const env = {
+    // WhatsApp
+    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID ? 
+      `✅ ${process.env.WHATSAPP_PHONE_NUMBER_ID}` : '❌ Non configurato',
+    WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN ? 
+      `✅ ${process.env.WHATSAPP_ACCESS_TOKEN.substring(0, 20)}...` : '❌ Non configurato',
+    WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN ? 
+      `✅ ${process.env.WHATSAPP_VERIFY_TOKEN}` : '❌ Non configurato',
+    
+    // Claude
+    CLAUDE_API_KEY: process.env.CLAUDE_API_KEY ? 
+      `✅ ${process.env.CLAUDE_API_KEY.substring(0, 20)}...` : '❌ Non configurato',
+    
+    // Business
+    BUSINESS_NAME: process.env.BUSINESS_NAME || 'Costruzione Digitale (default)',
+    BUSINESS_SECTOR: process.env.BUSINESS_SECTOR || 'Consulenza digitale (default)',
+    
+    // Config dal WhatsApp Bot
+    botConfig: {
+      claudeApiKey: whatsappBot.claude.apiKey ? 
+        `✅ ${whatsappBot.claude.apiKey.substring(0, 20)}...` : '❌ Non configurato',
+      whatsappToken: whatsappBot.whatsapp.accessToken ? 
+        `✅ ${whatsappBot.whatsapp.accessToken.substring(0, 20)}...` : '❌ Non configurato',
+      phoneNumberId: whatsappBot.whatsapp.phoneNumberId || '❌ Non configurato'
+    }
+  };
+  
+  res.json({
+    status: 'Environment Debug',
+    timestamp: new Date().toISOString(),
+    environment: env,
+    issues: []
+  });
+});
+
 // Dashboard stats WhatsApp (opzionale)
 app.get('/api/whatsapp/stats', (req, res) => {
   const stats = whatsappBot.getStats();
