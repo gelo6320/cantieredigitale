@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/claude.js - FORMATO API CORRETTO
+// 📁 whatsapp/claude.js - VERSIONE SEMPLIFICATA CON CONFIG CENTRALIZZATO
 // ============================================
 const axios = require('axios');
 const config = require('./config');
@@ -9,8 +9,8 @@ class ClaudeService {
         this.apiKey = config.claude.apiKey;
         this.model = config.claude.model;
         this.baseURL = 'https://api.anthropic.com/v1/messages';
-        this.maxTokens = config.claude.maxTokens || 300;
-        this.timeout = config.claude.timeout || 10000;
+        this.maxTokens = config.claude.maxTokens;
+        this.timeout = config.claude.timeout;
         
         // Verifica configurazione
         this.validateConfig();
@@ -32,34 +32,43 @@ class ClaudeService {
         console.log('✅ [CLAUDE SERVICE] Configurazione valida');
         console.log(`   🤖 Modello: ${this.model}`);
         console.log(`   🔑 API Key: ${this.apiKey.substring(0, 15)}...`);
+        console.log(`   🎭 Bot Persona: ${config.bot.personality.nome}`);
+        console.log(`   ⚙️ Max Tokens: ${this.maxTokens}`);
         return true;
     }
 
     async generateResponse(conversazione, messaggioUtente) {
         try {
-            console.log(`🤖 [CLAUDE SERVICE] Generazione risposta per messaggio: "${messaggioUtente}"`);
+            console.log(`🤖 [CLAUDE SERVICE] Generazione risposta per: "${messaggioUtente}"`);
             
             // Verifica configurazione prima di procedere
             if (!this.validateConfig()) {
-                return this.getFallbackResponse('Configurazione non valida');
+                return config.bot.getFallbackMessage();
             }
 
-            const systemPrompt = this.buildSystemPrompt(conversazione);
+            // ===== USA CONFIGURAZIONE CENTRALIZZATA =====
+            
+            // Genera il prompt di sistema usando la configurazione
+            const systemPrompt = config.bot.generateSystemPrompt(conversazione);
+            
+            // Prepara i messaggi 
             const messaggi = this.prepareMessages(conversazione);
 
+            // Rileva intent del messaggio
+            const intent = config.bot.detectIntent(messaggioUtente);
+            console.log(`🎯 [CLAUDE SERVICE] Intent rilevato: ${intent}`);
+
             console.log(`📤 [CLAUDE SERVICE] Invio richiesta a Claude API...`);
-            console.log(`📝 [CLAUDE SERVICE] System prompt: ${systemPrompt.substring(0, 100)}...`);
+            console.log(`📝 [CLAUDE SERVICE] System prompt generato dinamicamente`);
             console.log(`📊 [CLAUDE SERVICE] Messaggi utente: ${messaggi.length}`);
 
-            // FORMATO CORRETTO API CLAUDE - system come parametro separato
+            // FORMATO CORRETTO API CLAUDE
             const requestPayload = {
                 model: this.model,
                 max_tokens: this.maxTokens,
-                system: systemPrompt,  // ← QUESTO È IL FORMATO CORRETTO
-                messages: messaggi     // ← SOLO messaggi user/assistant
+                system: systemPrompt,  // Generato dalla configurazione
+                messages: messaggi
             };
-
-            console.log(`📋 [CLAUDE SERVICE] Payload API:`, JSON.stringify(requestPayload, null, 2));
 
             const response = await axios.post(this.baseURL, requestPayload, {
                 headers: {
@@ -73,8 +82,23 @@ class ClaudeService {
             console.log(`✅ [CLAUDE SERVICE] Risposta ricevuta da Claude API`);
             console.log(`📊 [CLAUDE SERVICE] Response status: ${response.status}`);
             
-            const responseText = response.data.content[0].text;
-            console.log(`📤 [CLAUDE SERVICE] Risposta generata: "${responseText}"`);
+            let responseText = response.data.content[0].text;
+            
+            // ===== POST-PROCESSING DELLA RISPOSTA =====
+            
+            // Processa template se necessario
+            responseText = config.bot.processTemplate(responseText, {
+                intent: intent,
+                business_name: config.business.name,
+                orarioStatus: config.bot.isBusinessHours() ? 
+                    config.bot.templates.inOrario : 
+                    config.bot.templates.fuoriOrario
+            });
+
+            console.log(`📤 [CLAUDE SERVICE] Risposta generata: "${responseText.substring(0, 100)}..."`);
+            
+            // ===== AGGIORNA DATI CONVERSAZIONE =====
+            this.updateConversationData(conversazione, messaggioUtente, responseText, intent);
             
             return responseText;
 
@@ -92,74 +116,21 @@ class ClaudeService {
                 } else if (error.response.status === 429) {
                     console.error('⏱️ [CLAUDE SERVICE] Rate limit raggiunto - riprova più tardi');
                 } else if (error.response.status === 400) {
-                    console.error('📝 [CLAUDE SERVICE] Richiesta non valida - verifica formato messaggio');
-                    console.error('🔍 [CLAUDE SERVICE] Possibili cause:');
-                    console.error('   - Formato messaggi non corretto');
-                    console.error('   - System prompt troppo lungo');
-                    console.error('   - Caratteri non supportati nel testo');
+                    console.error('📝 [CLAUDE SERVICE] Richiesta non valida');
                 }
-            } else if (error.code === 'ECONNABORTED') {
-                console.error('⏰ [CLAUDE SERVICE] Timeout - richiesta troppo lenta');
-            } else {
-                console.error('🌐 [CLAUDE SERVICE] Errore di rete:', error.message);
             }
             
-            return this.getFallbackResponse(error.message);
+            return config.bot.getFallbackMessage();
         }
     }
 
-    buildSystemPrompt(conversazione) {
-        const isBusinessHours = this.isBusinessHours();
-        const statusMessaggio = isBusinessHours ? 
-            "Siamo attualmente disponibili per assistenza immediata." :
-            `Siamo fuori orario (${config.business.orariApertura}). Ti risponderemo al più presto durante l'orario lavorativo.`;
-
-        return `Sei un assistente virtuale professionale per ${config.business.name}, specializzata in ${config.business.settore}.
-
-🏢 INFORMAZIONI AZIENDA:
-- Nome: ${config.business.name}
-- Settore: ${config.business.settore}
-- Servizi: ${config.business.servizi.join(', ')}
-- Orari: ${config.business.orariApertura}
-- Stato: ${statusMessaggio}
-
-🎯 OBIETTIVI PRINCIPALI:
-1. Saluta cordialmente i nuovi clienti
-2. Scopri le loro esigenze ponendo domande specifiche e pertinenti
-3. Qualifica i lead raccogliendo informazioni chiave:
-   - Nome completo
-   - Email di contatto
-   - Tipo di progetto o servizio richiesto
-   - Budget approssimativo
-   - Tempistiche previste
-4. Fornisci informazioni sui nostri servizi quando rilevante
-5. Proponi un appuntamento o una call se il lead è qualificato
-
-💬 STILE DI COMUNICAZIONE:
-- Tono professionale ma amichevole e caldo
-- Risposte brevi e dirette (massimo 2-3 frasi)
-- Fai UNA domanda specifica alla volta
-- Non essere troppo insistente o aggressivo
-- Personalizza le risposte in base al contesto
-- Usa emoji con moderazione per risultare più umano
-
-📊 DATI CLIENTE RACCOLTI:
-${JSON.stringify(conversazione.datiCliente, null, 2)}
-
-🔄 STATO CONVERSAZIONE ATTUALE: ${conversazione.stato}
-
-⏰ ORARIO: ${isBusinessHours ? 'IN ORARIO' : 'FUORI ORARIO'}`;
-    }
-
     prepareMessages(conversazione) {
-        // IMPORTANTE: NON includere system nel array messages
-        // Il system prompt viene passato separatamente nel payload
-        
+        // Prepara messaggi usando la configurazione
         const messaggi = [];
+        const maxMessaggi = config.bot.conversazione.maxMessaggiInMemoria;
 
-        // Aggiungi gli ultimi 10 messaggi per mantenere il contesto
-        // SOLO user e assistant, NO system
-        const recentMessages = conversazione.messaggi.slice(-10);
+        // Aggiungi gli ultimi N messaggi per mantenere il contesto
+        const recentMessages = conversazione.messaggi.slice(-maxMessaggi);
         
         recentMessages.forEach(msg => {
             if (msg.role === 'user' || msg.role === 'assistant') {
@@ -170,7 +141,7 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
             }
         });
 
-        // Se non ci sono messaggi, aggiungi un messaggio vuoto per iniziare
+        // Se non ci sono messaggi, aggiungi messaggio di benvenuto
         if (messaggi.length === 0) {
             messaggi.push({
                 role: 'user',
@@ -178,7 +149,7 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
             });
         }
 
-        // Assicurati che il primo messaggio sia sempre dell'utente
+        // Assicurati che il primo messaggio sia dell'utente
         if (messaggi[0].role !== 'user') {
             messaggi.unshift({
                 role: 'user',
@@ -186,76 +157,168 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
             });
         }
 
-        console.log(`📋 [CLAUDE SERVICE] Messaggi preparati: ${messaggi.length}`);
-        messaggi.forEach((msg, index) => {
-            console.log(`   ${index + 1}. ${msg.role}: ${msg.content.substring(0, 50)}...`);
-        });
-
+        console.log(`📋 [CLAUDE SERVICE] Messaggi preparati: ${messaggi.length} (max: ${maxMessaggi})`);
+        
         return messaggi;
     }
 
-    isBusinessHours() {
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentDay = now.getDay(); // 0 = domenica, 1 = lunedì, ecc.
-        
-        // Lun-Ven (1-5), 9:00-18:00
-        return currentDay >= 1 && currentDay <= 5 && currentHour >= 9 && currentHour < 18;
+    // ===== NUOVA FUNZIONE: AGGIORNA DATI CONVERSAZIONE =====
+    updateConversationData(conversazione, messaggioUtente, risposta, intent) {
+        try {
+            // Inizializza datiCliente se non esiste
+            if (!conversazione.datiCliente) {
+                conversazione.datiCliente = {};
+            }
+
+            // Estrai informazioni in base all'intent e al contenuto
+            this.extractUserData(conversazione, messaggioUtente, intent);
+            
+            // Aggiorna stato conversazione
+            this.updateConversationState(conversazione, intent);
+            
+            console.log(`📊 [CLAUDE SERVICE] Dati conversazione aggiornati:`, conversazione.datiCliente);
+            
+        } catch (error) {
+            console.error('❌ [CLAUDE SERVICE] Errore aggiornamento dati conversazione:', error.message);
+        }
     }
 
-    getFallbackResponse(errorDetails = '') {
-        const fallbackResponses = [
-            "Mi dispiace, sto avendo delle difficoltà tecniche momentanee. Potresti ripetere la tua richiesta?",
-            "Scusami per l'inconveniente tecnico. Riprova tra qualche istante o contattaci direttamente.",
-            "C'è stato un piccolo problema dal mio lato. Puoi riformulare la domanda?",
-            "Mi dispiace, c'è stato un errore temporaneo. Riprova tra poco o scrivici via email."
-        ];
+    // ===== ESTRAZIONE AUTOMATICA DATI UTENTE =====
+    extractUserData(conversazione, messaggio, intent) {
+        const messaggioLower = messaggio.toLowerCase();
         
-        const response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        // Estrai email
+        const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+        const emailMatch = messaggio.match(emailRegex);
+        if (emailMatch && !conversazione.datiCliente.email) {
+            conversazione.datiCliente.email = emailMatch[0];
+            console.log(`📧 [CLAUDE SERVICE] Email estratta: ${emailMatch[0]}`);
+        }
+
+        // Estrai telefono
+        const phoneRegex = /(\+39|0039)?\s?3\d{2}[\s\-]?\d{3}[\s\-]?\d{4}/;
+        const phoneMatch = messaggio.match(phoneRegex);
+        if (phoneMatch && !conversazione.datiCliente.telefono) {
+            conversazione.datiCliente.telefono = phoneMatch[0];
+            console.log(`📱 [CLAUDE SERVICE] Telefono estratto: ${phoneMatch[0]}`);
+        }
+
+        // Estrai nome (euristica semplice)
+        if (intent === 'generale' && !conversazione.datiCliente.nome) {
+            // Se il messaggio contiene "mi chiamo" o "sono"
+            const nomeRegex = /(mi chiamo|sono)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i;
+            const nomeMatch = messaggio.match(nomeRegex);
+            if (nomeMatch) {
+                conversazione.datiCliente.nome = nomeMatch[2];
+                console.log(`👤 [CLAUDE SERVICE] Nome estratto: ${nomeMatch[2]}`);
+            }
+        }
+
+        // Estrai budget (se menzionato)
+        const budgetRegex = /(\d+(?:\.\d{3})*)\s?(?:euro|€)/i;
+        const budgetMatch = messaggio.match(budgetRegex);
+        if (budgetMatch && intent === 'budget') {
+            conversazione.datiCliente.budget = parseInt(budgetMatch[1].replace('.', ''));
+            console.log(`💰 [CLAUDE SERVICE] Budget estratto: ${conversazione.datiCliente.budget}€`);
+        }
+
+        // Estrai servizio di interesse
+        config.business.servizi.forEach(servizio => {
+            if (messaggioLower.includes(servizio.toLowerCase()) && !conversazione.datiCliente.servizioInteresse) {
+                conversazione.datiCliente.servizioInteresse = servizio;
+                console.log(`🎯 [CLAUDE SERVICE] Servizio di interesse: ${servizio}`);
+            }
+        });
+    }
+
+    // ===== AGGIORNA STATO CONVERSAZIONE =====
+    updateConversationState(conversazione, intent) {
+        const dati = conversazione.datiCliente;
         
-        // Log per debug
-        console.log(`🔄 [CLAUDE SERVICE] Utilizzando risposta fallback: "${response}"`);
-        if (errorDetails) {
-            console.log(`🔍 [CLAUDE SERVICE] Dettagli errore: ${errorDetails}`);
+        // Determina nuovo stato in base ai dati raccolti
+        if (dati.email && dati.nome && dati.servizioInteresse) {
+            conversazione.stato = 'lead_qualificato';
+        } else if (dati.email || dati.nome) {
+            conversazione.stato = 'informazioni_parziali';
+        } else if (intent === 'saluto') {
+            conversazione.stato = 'primo_contatto';
+        } else {
+            conversazione.stato = 'in_conversazione';
         }
         
-        return response;
+        console.log(`🔄 [CLAUDE SERVICE] Stato conversazione: ${conversazione.stato}`);
     }
 
-    // Metodo per testare la connessione con formato corretto
+    // ===== METODO TEST SEMPLIFICATO =====
     async testConnection() {
         try {
             console.log('🧪 [CLAUDE SERVICE] Test connessione API...');
             
-            const response = await axios.post(this.baseURL, {
-                model: this.model,
-                max_tokens: 10,
-                system: "Sei un assistente di test.",  // ← System come parametro separato
-                messages: [{ role: 'user', content: 'Test di connessione' }]  // ← Solo user/assistant
-            }, {
-                headers: {
-                    'x-api-key': this.apiKey,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json'
-                },
-                timeout: 5000
-            });
+            // Crea una conversazione di test
+            const testConversazione = {
+                messaggi: [],
+                datiCliente: {},
+                stato: 'test',
+                ultimoMessaggio: new Date()
+            };
 
+            const response = await this.generateResponse(testConversazione, 'Test di connessione');
+            
             console.log('✅ [CLAUDE SERVICE] Test connessione riuscito');
-            console.log(`📤 [CLAUDE SERVICE] Risposta test: "${response.data.content[0].text}"`);
-            return { success: true, message: 'Connessione Claude API funzionante' };
+            console.log(`📤 [CLAUDE SERVICE] Risposta test: "${response.substring(0, 100)}..."`);
+            
+            return { 
+                success: true, 
+                message: 'Connessione Claude API funzionante',
+                sampleResponse: response.substring(0, 100) + '...'
+            };
 
         } catch (error) {
             console.error('❌ [CLAUDE SERVICE] Test connessione fallito:', error.message);
-            if (error.response?.data) {
-                console.error('📊 [CLAUDE SERVICE] Error details:', JSON.stringify(error.response.data, null, 2));
-            }
             return { 
                 success: false, 
                 message: 'Connessione Claude API non funzionante',
-                error: error.response?.data || error.message 
+                error: error.message 
             };
         }
+    }
+
+    // ===== METODI UTILITY =====
+    
+    // Ottieni configurazione corrente del bot
+    getBotConfig() {
+        return {
+            personality: config.bot.personality,
+            business: config.business,
+            isBusinessHours: config.bot.isBusinessHours(),
+            maxTokens: this.maxTokens,
+            model: this.model
+        };
+    }
+
+    // Reset conversazione (per testing)
+    resetConversation(conversazione) {
+        conversazione.messaggi = [];
+        conversazione.datiCliente = {};
+        conversazione.stato = 'nuovo_cliente';
+        conversazione.ultimoMessaggio = new Date();
+        
+        console.log('🔄 [CLAUDE SERVICE] Conversazione resettata');
+        return conversazione;
+    }
+
+    // Verifica se il lead è qualificato
+    isLeadQualified(conversazione) {
+        const dati = conversazione.datiCliente;
+        const configQual = config.bot.qualification;
+        
+        const hasCampiObbligatori = configQual.campiObbligatori.every(campo => 
+            dati[campo] && dati[campo].trim().length > 0
+        );
+        
+        const budgetSufficiente = !dati.budget || dati.budget >= configQual.budgetMinimo;
+        
+        return hasCampiObbligatori && budgetSufficiente;
     }
 }
 
