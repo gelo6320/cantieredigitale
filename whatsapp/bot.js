@@ -44,15 +44,19 @@ class WhatsAppBot {
 
     async processMessage(messageData) {
         const { from: userPhone, text: messageText } = messageData;
-
+    
         try {
-            // Recupera o crea conversazione
+            // ===== FIX: AGGIUNGI NUMERO WHATSAPP ALLA CONVERSAZIONE =====
             let conversazione = this.conversazioni.get(userPhone) || {
                 messaggi: [],
                 datiCliente: {},
                 stato: 'nuovo_cliente',
-                ultimoMessaggio: new Date()
+                ultimoMessaggio: new Date(),
+                whatsappNumber: userPhone  // ← AGGIUNTO
             };
+    
+            // Se non presente, assicurati che sia sempre aggiornato
+            conversazione.whatsappNumber = userPhone;
 
             // Aggiungi messaggio utente
             conversazione.messaggi.push({

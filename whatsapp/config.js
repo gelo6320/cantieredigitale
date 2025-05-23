@@ -137,6 +137,12 @@ const config = {
             richiesta_data_ora: "Perfetto! Quando preferisci la chiamata? Dimmi giorno e orario (es: martedì alle 15:00)",
             conferma_appuntamento: "Ottimo! Ho prenotato la chiamata per {data_ora}. Ti ricontatterò al numero {telefono}. Confermi?",
             appuntamento_salvato: "✅ Appuntamento confermato per {data_ora}! Ti chiamerò puntuale. A presto!",
+
+            richiesta_dati_mancanti: "Perfetto {nome}! 👍\n\nPer confermare la chiamata mi serve:\n{dati_mancanti}\n\nPuoi condividermeli?",
+    
+            richiesta_conferma_completa: "Ottimo! Quindi ricapitolando:\n📞 Chiamata con {nome}\n📧 Email: {email}\n📱 Tel: {telefono}\n📅 Data: {data}\n🕐 Ora: {ora}\n\nConfermi tutto?",
+            
+            errore_salvataggio: "Ho tutti i tuoi dati ma c'è stato un problema tecnico nel salvataggio. Ti ricontatto via email a {email} per confermare tutto. Scusa il disagio! 🙏"
         },
 
         // GESTIONE OBIEZIONI STRUTTURATA

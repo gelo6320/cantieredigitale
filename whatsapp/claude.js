@@ -82,15 +82,19 @@ class ClaudeService {
             console.log(`✅ [CLAUDE SERVICE] Risposta ricevuta da Claude API`);
             console.log(`📊 [CLAUDE SERVICE] Response status: ${response.status}`);
             
-            let responseText = response.data.content[0].text;
-
             const dati = conversazione.datiCliente;
-            if (dati.appuntamentoConfermato && dati.nome && dati.telefono && 
-                dati.dataAppuntamento && dati.oraAppuntamento) {
+        
+            // Controlla se ha tutti i dati per salvare
+            const hasTuttiDatiAppuntamento = dati.appuntamentoConfermato && 
+                                            dati.nome && 
+                                            dati.telefono && 
+                                            dati.dataAppuntamento && 
+                                            dati.oraAppuntamento;
+            
+            // Solo se ha TUTTI i dati, salva l'appuntamento
+            if (hasTuttiDatiAppuntamento && !dati.appuntamentoSalvato) {
+                console.log('🗓️ [CLAUDE SERVICE] Tentativo salvataggio appuntamento - tutti i dati presenti');
                 
-                console.log('🗓️ [CLAUDE SERVICE] Tentativo salvataggio appuntamento');
-                
-                // Converti la data in un formato utilizzabile
                 const dataAppuntamento = this.parseAppointmentDate(dati.dataAppuntamento, dati.oraAppuntamento);
                 
                 const appointmentData = {
@@ -105,7 +109,6 @@ class ClaudeService {
                 const saveResult = await this.saveAppointment(conversazione, appointmentData);
                 
                 if (saveResult.success) {
-                    // Aggiorna la risposta per confermare il salvataggio
                     responseText = config.bot.processTemplate(
                         config.bot.templates.appuntamento_salvato, 
                         {
@@ -114,9 +117,23 @@ class ClaudeService {
                         }
                     );
                     
-                    // Segna l'appuntamento come salvato per evitare duplicati
-                    conversazione.datiCliente.appuntamentoSalvato = true;
+                    dati.appuntamentoSalvato = true;
+                    console.log('✅ [CLAUDE SERVICE] Appuntamento salvato con successo');
+                } else {
+                    console.error('❌ [CLAUDE SERVICE] Errore salvamento appuntamento:', saveResult.error);
+                    // Non modificare la risposta, lascia quella generata da Claude
                 }
+            } else if (dati.nome && dati.email && !hasTuttiDatiAppuntamento) {
+                // Se ha nome ed email ma non tutti i dati dell'appuntamento
+                console.log('⚠️ [CLAUDE SERVICE] Dati parziali - richiede completamento appuntamento');
+                
+                // Sostituisci la risposta con una richiesta per i dati mancanti
+                const datiMancanti = [];
+                if (!dati.telefono) datiMancanti.push('numero di telefono');
+                if (!dati.dataAppuntamento) datiMancanti.push('data preferita');
+                if (!dati.oraAppuntamento) datiMancanti.push('orario preferito');
+                
+                responseText = `Perfetto ${dati.nome}! 👍\n\nPer confermare la chiamata mi serve:\n${datiMancanti.map(d => `• ${d}`).join('\n')}\n\nPuoi condividermeli?`;
             }
             
             // ===== POST-PROCESSING DELLA RISPOSTA =====
@@ -316,25 +333,48 @@ class ClaudeService {
     extractUserData(conversazione, messaggio, intent) {
         const messaggioLower = messaggio.toLowerCase();
         
-        // Estrai email
+        // ===== FIX: ESTRAZIONE TELEFONO DA WHATSAPP =====
+        // Se non ha telefono e stiamo su WhatsApp, usa il numero WhatsApp
+        if (!conversazione.datiCliente.telefono && conversazione.whatsappNumber) {
+            conversazione.datiCliente.telefono = conversazione.whatsappNumber;
+            console.log(`📱 [CLAUDE SERVICE] Telefono estratto da WhatsApp: ${conversazione.whatsappNumber}`);
+        }
+        
+        // Estrai email (codice esistente)
         const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
         const emailMatch = messaggio.match(emailRegex);
         if (emailMatch && !conversazione.datiCliente.email) {
             conversazione.datiCliente.email = emailMatch[0];
             console.log(`📧 [CLAUDE SERVICE] Email estratta: ${emailMatch[0]}`);
         }
-
-        // Estrai telefono
-        const phoneRegex = /(\+39|0039)?\s?3\d{2}[\s\-]?\d{3}[\s\-]?\d{4}/;
-        const phoneMatch = messaggio.match(phoneRegex);
-        if (phoneMatch && !conversazione.datiCliente.telefono) {
-            conversazione.datiCliente.telefono = phoneMatch[0];
-            console.log(`📱 [CLAUDE SERVICE] Telefono estratto: ${phoneMatch[0]}`);
+    
+        // ===== FIX: ESTRAZIONE NOME MIGLIORATA =====
+        if (!conversazione.datiCliente.nome) {
+            // Prima riga del messaggio se contiene solo lettere
+            const lines = messaggio.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length > 0) {
+                const firstLine = lines[0];
+                // Se la prima riga è solo lettere e spazi (probabile nome)
+                if (/^[A-Za-zÀ-ÿ\s]+$/.test(firstLine) && firstLine.length > 1) {
+                    conversazione.datiCliente.nome = firstLine;
+                    console.log(`👤 [CLAUDE SERVICE] Nome estratto dalla prima riga: ${firstLine}`);
+                }
+            }
+            
+            // Metodo esistente come fallback
+            const nomeRegex = /(mi chiamo|sono)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i;
+            const nomeMatch = messaggio.match(nomeRegex);
+            if (nomeMatch && !conversazione.datiCliente.nome) {
+                conversazione.datiCliente.nome = nomeMatch[2];
+                console.log(`👤 [CLAUDE SERVICE] Nome estratto con regex: ${nomeMatch[2]}`);
+            }
         }
-
-        if (intent === 'conferma_appuntamento' || intent === 'data_orario') {
-        
-            // Estrai data dall'appuntamento
+    
+        // ===== ESTRAZIONE DATA E ORA (codice esistente migliorato) =====
+        if (intent === 'conferma_appuntamento' || intent === 'data_orario' || 
+            messaggioLower.includes('disponibile') || messaggioLower.includes('chiamata')) {
+            
+            // Estrai data
             const dataRegex = /(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|domani|dopodomani)/i;
             const dataMatch = messaggio.match(dataRegex);
             if (dataMatch && !conversazione.datiCliente.dataAppuntamento) {
@@ -342,8 +382,8 @@ class ClaudeService {
                 console.log(`📅 [CLAUDE SERVICE] Data appuntamento estratta: ${dataMatch[0]}`);
             }
             
-            // Estrai ora dall'appuntamento  
-            const oraRegex = /(?:alle\s+)?(\d{1,2}):?(\d{2})?\s*(?:h)?/i;
+            // Estrai ora
+            const oraRegex = /(?:alle\s+)?(\d{1,2}):?(\d{2})?\s*(?:h|:00)?/i;
             const oraMatch = messaggio.match(oraRegex);
             if (oraMatch && !conversazione.datiCliente.oraAppuntamento) {
                 const ora = oraMatch[1];
@@ -352,9 +392,11 @@ class ClaudeService {
                 console.log(`🕐 [CLAUDE SERVICE] Ora appuntamento estratta: ${ora}:${minuti}`);
             }
             
-            // Estrai conferma
-            const confermaRegex = /(confermo|va bene|perfetto|sì|ok)/i;
-            if (confermaRegex.test(messaggio) && !conversazione.datiCliente.appuntamentoConfermato) {
+            // Conferma appuntamento
+            const confermaRegex = /(confermo|va bene|perfetto|sì|ok|sono disponibile)/i;
+            if (confermaRegex.test(messaggio) && 
+                conversazione.datiCliente.dataAppuntamento && 
+                conversazione.datiCliente.oraAppuntamento) {
                 conversazione.datiCliente.appuntamentoConfermato = true;
                 console.log('✅ [CLAUDE SERVICE] Appuntamento confermato dal cliente');
             }
@@ -386,6 +428,25 @@ class ClaudeService {
                 console.log(`🎯 [CLAUDE SERVICE] Servizio di interesse: ${servizio}`);
             }
         });
+
+        console.log(`📊 [CLAUDE SERVICE] Stato dati conversazione:`);
+        console.log(`   👤 Nome: ${conversazione.datiCliente.nome || 'MANCANTE'}`);
+        console.log(`   📧 Email: ${conversazione.datiCliente.email || 'MANCANTE'}`);  
+        console.log(`   📱 Telefono: ${conversazione.datiCliente.telefono || 'MANCANTE'}`);
+        console.log(`   📅 Data: ${conversazione.datiCliente.dataAppuntamento || 'MANCANTE'}`);
+        console.log(`   🕐 Ora: ${conversazione.datiCliente.oraAppuntamento || 'MANCANTE'}`);
+        console.log(`   ✅ Confermato: ${conversazione.datiCliente.appuntamentoConfermato || false}`);
+        console.log(`   💾 Salvato: ${conversazione.datiCliente.appuntamentoSalvato || false}`);
+        
+        const completezza = [
+            conversazione.datiCliente.nome,
+            conversazione.datiCliente.telefono, 
+            conversazione.datiCliente.dataAppuntamento,
+            conversazione.datiCliente.oraAppuntamento,
+            conversazione.datiCliente.appuntamentoConfermato
+        ].filter(Boolean).length;
+        
+        console.log(`📈 [CLAUDE SERVICE] Completezza dati: ${completezza}/5 (${Math.round(completezza/5*100)}%)`);
     }
 
     // ===== AGGIORNA STATO CONVERSAZIONE =====
