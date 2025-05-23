@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const compression = require('compression');
+const WhatsAppBot = require('./whatsapp/bot');
 
 // Carica variabili d'ambiente
 dotenv.config();
@@ -96,6 +97,10 @@ app.use((req, res, next) => {
   
   next();
 });
+
+console.log('🤖 Inizializzazione WhatsApp Bot...');
+const whatsappBot = new WhatsAppBot();
+console.log('✅ WhatsApp Bot inizializzato');
 
 // Connessione MongoDB principale
 mongoose.connect(process.env.MONGODB_URI)
@@ -840,6 +845,82 @@ async function getScreenshot(url) {
     return `https://api.screenshotmachine.com?key=${screenshotApiKey}&url=${encodeURIComponent(url)}&dimension=1024x768&format=jpg&cacheLimit=14`;
   }
 }
+
+
+// ========== WHATSAPP BOT ENDPOINTS ==========
+
+// Health check per WhatsApp Bot
+app.get('/api/whatsapp/health', (req, res) => {
+  res.json({
+      status: 'OK',
+      service: 'WhatsApp Bot',
+      timestamp: new Date().toISOString(),
+      stats: whatsappBot.getStats(),
+      business: {
+          name: process.env.BUSINESS_NAME || "Costruzione Digitale",
+          sector: process.env.BUSINESS_SECTOR || "Consulenza digitale"
+      }
+  });
+});
+
+// Verifica webhook WhatsApp
+app.get('/webhook/whatsapp', (req, res) => {
+  console.log('📞 [WEBHOOK] Richiesta verifica WhatsApp webhook');
+  whatsappBot.handleWebhookVerification(req, res);
+});
+
+// Ricevi messaggi WhatsApp
+app.post('/webhook/whatsapp', (req, res) => {
+  console.log('📨 [WEBHOOK] Messaggio WhatsApp ricevuto');
+  whatsappBot.handleIncomingMessage(req, res);
+});
+
+// Dashboard stats WhatsApp (opzionale)
+app.get('/api/whatsapp/stats', (req, res) => {
+  const stats = whatsappBot.getStats();
+  res.json({
+      whatsappStats: stats,
+      systemStats: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          timestamp: new Date().toISOString()
+      },
+      business: {
+          name: process.env.BUSINESS_NAME,
+          sector: process.env.BUSINESS_SECTOR,
+          services: process.env.BUSINESS_SERVICES?.split(',') || []
+      }
+  });
+});
+
+// Endpoint per inviare messaggio manuale (utile per testing)
+app.post('/api/whatsapp/send', async (req, res) => {
+  try {
+      const { phone, message } = req.body;
+      
+      if (!phone || !message) {
+          return res.status(400).json({
+              status: 'error',
+              message: 'phone e message sono obbligatori'
+          });
+      }
+      
+      const success = await whatsappBot.whatsapp.sendMessage(phone, message);
+      
+      res.json({
+          status: success ? 'success' : 'error',
+          message: success ? 'Messaggio inviato' : 'Errore invio messaggio'
+      });
+  } catch (error) {
+      console.error('❌ [API] Errore invio messaggio manuale:', error);
+      res.status(500).json({
+          status: 'error', 
+          message: 'Errore interno del server'
+      });
+  }
+});
+
+// ========== FINE WHATSAPP ENDPOINTS ==========
 
 // ----------------------------------------------------------------
 // ENDPOINT RICERCA
