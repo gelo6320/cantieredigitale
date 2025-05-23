@@ -149,16 +149,15 @@ const VisitSchema = new mongoose.Schema({
 
 const Visit = mongoose.model('Visit', VisitSchema);
 
-// Schema per i client
 const ClientSchema = new mongoose.Schema({
   // Identificatori
-  leadId: { type: String, required: true, unique: true }, // ID del lead originale
-  clientId: { type: String, required: true, unique: true }, // ID unico del cliente
+  leadId: { type: String, required: true, unique: true }, // unique: true crea automaticamente un indice
+  clientId: { type: String, required: true, unique: true }, // unique: true crea automaticamente un indice
   
   // Dati personali
   firstName: String,
   lastName: String,
-  email: { type: String, required: true, index: true },
+  email: { type: String, required: true }, // Rimosso index: true per evitare duplicati
   phone: String,
   fullName: String,
   
@@ -174,11 +173,11 @@ const ClientSchema = new mongoose.Schema({
   // Date importanti
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  convertedAt: { type: Date, default: Date.now }, // Data di conversione da lead a cliente
+  convertedAt: { type: Date, default: Date.now },
   
   // Origine
-  leadSource: String, // Form, booking, facebook, etc.
-  originalSource: String, // Dettaglio della fonte (google, facebook, referral, etc.)
+  leadSource: String,
+  originalSource: String,
   campaign: String,
   medium: String,
   
@@ -229,7 +228,7 @@ const ClientSchema = new mongoose.Schema({
   // Flag amministrativi
   isArchived: { type: Boolean, default: false },
 
-  // Nuovo campo per i dati CAPI Facebook
+  // Campo per i dati CAPI Facebook
   facebookCapi: {
     sent: { type: Boolean, default: false },
     timestamp: Date,
@@ -242,10 +241,8 @@ const ClientSchema = new mongoose.Schema({
   
 }, { collection: 'clients', strict: false });
 
-// Crea indici per prestazioni migliori
-ClientSchema.index({ email: 1 });
-ClientSchema.index({ clientId: 1 });
-ClientSchema.index({ leadId: 1 });
+// Crea SOLO gli indici necessari che non sono già coperti da unique: true
+ClientSchema.index({ email: 1 }); // Mantieni solo questo per le query
 ClientSchema.index({ createdAt: 1 });
 ClientSchema.index({ updatedAt: 1 });
 
@@ -6933,7 +6930,6 @@ app.get('*.html', (req, res) => {
   res.redirect(301, urlWithoutExt);
 });
 
-// Route di fallback per SPA
 app.get('*', (req, res) => {
   // Ottieni il percorso richiesto
   let filePath = req.path;
@@ -6975,8 +6971,68 @@ app.get('*', (req, res) => {
     }
   }
   
-  // Restituisci 404 se nessun file è stato trovato
-  res.status(404).sendFile(path.join(__dirname, 'www', '404.html'));
+  // GESTIONE 404 SENZA FILE ESTERNO
+  res.status(404).send(`
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>404 - Pagina Non Trovata</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-align: center;
+            }
+            .container {
+                padding: 2rem;
+                max-width: 600px;
+            }
+            .error-code {
+                font-size: 8rem;
+                font-weight: bold;
+                margin: 0;
+                opacity: 0.8;
+            }
+            .error-message {
+                font-size: 1.5rem;
+                margin: 1rem 0 2rem 0;
+            }
+            .home-button {
+                display: inline-block;
+                padding: 12px 30px;
+                background: rgba(255,255,255,0.2);
+                color: white;
+                text-decoration: none;
+                border-radius: 50px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                border: 2px solid rgba(255,255,255,0.3);
+            }
+            .home-button:hover {
+                background: rgba(255,255,255,0.3);
+                transform: translateY(-2px);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-message">Pagina Non Trovata</h2>
+            <p>La pagina che stai cercando non esiste.</p>
+            <a href="/" class="home-button">Torna alla Home</a>
+        </div>
+    </body>
+    </html>
+  `);
 });
 
 // ===== INIZIALIZZAZIONE SERVER =====
