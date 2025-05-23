@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/claude.js - VERSIONE CORRETTA
+// 📁 whatsapp/claude.js - FORMATO API CORRETTO
 // ============================================
 const axios = require('axios');
 const config = require('./config');
@@ -45,15 +45,23 @@ class ClaudeService {
             }
 
             const systemPrompt = this.buildSystemPrompt(conversazione);
-            const messaggi = this.prepareMessages(conversazione, systemPrompt);
+            const messaggi = this.prepareMessages(conversazione);
 
             console.log(`📤 [CLAUDE SERVICE] Invio richiesta a Claude API...`);
+            console.log(`📝 [CLAUDE SERVICE] System prompt: ${systemPrompt.substring(0, 100)}...`);
+            console.log(`📊 [CLAUDE SERVICE] Messaggi utente: ${messaggi.length}`);
 
-            const response = await axios.post(this.baseURL, {
+            // FORMATO CORRETTO API CLAUDE - system come parametro separato
+            const requestPayload = {
                 model: this.model,
                 max_tokens: this.maxTokens,
-                messages: messaggi
-            }, {
+                system: systemPrompt,  // ← QUESTO È IL FORMATO CORRETTO
+                messages: messaggi     // ← SOLO messaggi user/assistant
+            };
+
+            console.log(`📋 [CLAUDE SERVICE] Payload API:`, JSON.stringify(requestPayload, null, 2));
+
+            const response = await axios.post(this.baseURL, requestPayload, {
                 headers: {
                     'x-api-key': this.apiKey,
                     'anthropic-version': '2023-06-01',
@@ -63,6 +71,7 @@ class ClaudeService {
             });
 
             console.log(`✅ [CLAUDE SERVICE] Risposta ricevuta da Claude API`);
+            console.log(`📊 [CLAUDE SERVICE] Response status: ${response.status}`);
             
             const responseText = response.data.content[0].text;
             console.log(`📤 [CLAUDE SERVICE] Risposta generata: "${responseText}"`);
@@ -75,7 +84,7 @@ class ClaudeService {
             // Log dettagliato degli errori
             if (error.response) {
                 console.error('📊 [CLAUDE SERVICE] Status:', error.response.status);
-                console.error('📊 [CLAUDE SERVICE] Data:', error.response.data);
+                console.error('📊 [CLAUDE SERVICE] Data:', JSON.stringify(error.response.data, null, 2));
                 
                 // Errori specifici
                 if (error.response.status === 401) {
@@ -84,6 +93,10 @@ class ClaudeService {
                     console.error('⏱️ [CLAUDE SERVICE] Rate limit raggiunto - riprova più tardi');
                 } else if (error.response.status === 400) {
                     console.error('📝 [CLAUDE SERVICE] Richiesta non valida - verifica formato messaggio');
+                    console.error('🔍 [CLAUDE SERVICE] Possibili cause:');
+                    console.error('   - Formato messaggi non corretto');
+                    console.error('   - System prompt troppo lungo');
+                    console.error('   - Caratteri non supportati nel testo');
                 }
             } else if (error.code === 'ECONNABORTED') {
                 console.error('⏰ [CLAUDE SERVICE] Timeout - richiesta troppo lenta');
@@ -138,18 +151,45 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
 ⏰ ORARIO: ${isBusinessHours ? 'IN ORARIO' : 'FUORI ORARIO'}`;
     }
 
-    prepareMessages(conversazione, systemPrompt) {
-        // Prepara i messaggi per Claude, limitando la cronologia
-        const messaggi = [
-            { role: 'system', content: systemPrompt }
-        ];
+    prepareMessages(conversazione) {
+        // IMPORTANTE: NON includere system nel array messages
+        // Il system prompt viene passato separatamente nel payload
+        
+        const messaggi = [];
 
         // Aggiungi gli ultimi 10 messaggi per mantenere il contesto
+        // SOLO user e assistant, NO system
         const recentMessages = conversazione.messaggi.slice(-10);
-        messaggi.push(...recentMessages.map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
-        })));
+        
+        recentMessages.forEach(msg => {
+            if (msg.role === 'user' || msg.role === 'assistant') {
+                messaggi.push({
+                    role: msg.role,
+                    content: msg.content
+                });
+            }
+        });
+
+        // Se non ci sono messaggi, aggiungi un messaggio vuoto per iniziare
+        if (messaggi.length === 0) {
+            messaggi.push({
+                role: 'user',
+                content: 'Ciao'
+            });
+        }
+
+        // Assicurati che il primo messaggio sia sempre dell'utente
+        if (messaggi[0].role !== 'user') {
+            messaggi.unshift({
+                role: 'user',
+                content: 'Ciao'
+            });
+        }
+
+        console.log(`📋 [CLAUDE SERVICE] Messaggi preparati: ${messaggi.length}`);
+        messaggi.forEach((msg, index) => {
+            console.log(`   ${index + 1}. ${msg.role}: ${msg.content.substring(0, 50)}...`);
+        });
 
         return messaggi;
     }
@@ -182,7 +222,7 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
         return response;
     }
 
-    // Metodo per testare la connessione
+    // Metodo per testare la connessione con formato corretto
     async testConnection() {
         try {
             console.log('🧪 [CLAUDE SERVICE] Test connessione API...');
@@ -190,7 +230,8 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
             const response = await axios.post(this.baseURL, {
                 model: this.model,
                 max_tokens: 10,
-                messages: [{ role: 'user', content: 'Test di connessione' }]
+                system: "Sei un assistente di test.",  // ← System come parametro separato
+                messages: [{ role: 'user', content: 'Test di connessione' }]  // ← Solo user/assistant
             }, {
                 headers: {
                     'x-api-key': this.apiKey,
@@ -201,10 +242,14 @@ ${JSON.stringify(conversazione.datiCliente, null, 2)}
             });
 
             console.log('✅ [CLAUDE SERVICE] Test connessione riuscito');
+            console.log(`📤 [CLAUDE SERVICE] Risposta test: "${response.data.content[0].text}"`);
             return { success: true, message: 'Connessione Claude API funzionante' };
 
         } catch (error) {
             console.error('❌ [CLAUDE SERVICE] Test connessione fallito:', error.message);
+            if (error.response?.data) {
+                console.error('📊 [CLAUDE SERVICE] Error details:', JSON.stringify(error.response.data, null, 2));
+            }
             return { 
                 success: false, 
                 message: 'Connessione Claude API non funzionante',
