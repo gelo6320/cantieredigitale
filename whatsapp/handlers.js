@@ -8,8 +8,8 @@ class WhatsAppService {
     constructor() {
         this.phoneNumberId = config.whatsapp.phoneNumberId;
         this.accessToken = config.whatsapp.accessToken;
-        this.baseURL = `https://graph.facebook.com/v17.0/${this.phoneNumberId}/messages`;
-        this.apiVersion = 'v17.0';
+        this.baseURL = `https://graph.facebook.com/v22.0/${this.phoneNumberId}/messages`;
+        this.apiVersion = 'v22.0';
         
         // Verifica configurazione
         this.validateConfig();

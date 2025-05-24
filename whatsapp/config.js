@@ -18,7 +18,7 @@ const config = {
     claude: {
         apiKey: process.env.CLAUDE_API_KEY,
         model: 'claude-sonnet-4-20250514',
-        maxTokens: 200,
+        maxTokens: 80,
         timeout: 10000
     },
     
