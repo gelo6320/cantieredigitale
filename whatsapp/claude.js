@@ -100,9 +100,13 @@ class ClaudeService {
                 conversazione.datiCliente = {};
                 return config.bot.messages.chiedi_nome;
             }
-            if (dati.nome) {
+            if (dati.nome && dati.nomeCompleto) {
                 conversazione.currentStep = config.bot.steps.EMAIL;
                 return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
+            }
+            if (dati.nome && !dati.nomeCompleto) {
+                conversazione.currentStep = config.bot.steps.COGNOME;
+                return config.bot.messages.chiedi_cognome;
             }
             return config.bot.messages.chiedi_nome;
         }
@@ -119,6 +123,21 @@ class ClaudeService {
                 return config.bot.messages.chiedi_data;
             }
             return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
+        }
+
+        // STEP COGNOME - Raccolta cognome
+        if (step === config.bot.steps.COGNOME) {
+            if (intent === 'ricomincia') {
+                conversazione.currentStep = config.bot.steps.NOME;
+                conversazione.datiCliente = {};
+                return config.bot.messages.chiedi_nome;
+            }
+            if (dati.cognome) {
+                dati.nome = `${dati.nome} ${dati.cognome}`;
+                conversazione.currentStep = config.bot.steps.EMAIL;
+                return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
+            }
+            return config.bot.messages.chiedi_cognome;
         }
 
         // STEP DATA - Raccolta data

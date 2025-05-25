@@ -53,6 +53,7 @@ const config = {
             START: 'start',
             INTERESSE: 'interesse',
             NOME: 'nome', 
+            COGNOME: 'cognome',
             EMAIL: 'email',
             DATA: 'data',
             ORA: 'ora',
@@ -85,6 +86,7 @@ const config = {
             interesse_confermato: "Perfetto! Per organizzare tutto, ho bisogno di qualche info. Come ti chiami? 📝",
             
             chiedi_nome: "Come ti chiami? 📝",
+            chiedi_cognome: "E il cognome? 📝",
             chiedi_email: "Ciao {nome}! La tua email? 📧", 
             chiedi_data: "Che giorno va bene? (lunedì, martedì, oggi...)",
             chiedi_ora: "A che ora? (es. 15:00, mattina, pomeriggio) 🕐",
@@ -140,11 +142,23 @@ config.bot.extractData = function(conversazione, messaggio) {
     
     switch (step) {
         case this.steps.NOME:
-            if (messaggio.length >= 1) {
-                dati.nome = messaggio.trim();
-                console.log(`👤 Nome estratto: ${dati.nome}`);
+        if (messaggio.length >= 1) {
+            const nomeCompleto = messaggio.trim();
+            const parole = nomeCompleto.split(/\s+/);
+            
+            if (parole.length >= 2) {
+                // Nome e cognome presenti
+                dati.nome = nomeCompleto;
+                dati.nomeCompleto = true;
+                console.log(`👤 Nome completo estratto: ${dati.nome}`);
+            } else if (parole.length === 1) {
+                // Solo nome, serve cognome
+                dati.nome = nomeCompleto;
+                dati.nomeCompleto = false;
+                console.log(`👤 Solo nome estratto: ${dati.nome} - serve cognome`);
             }
-            break;
+        }
+        break;
             
         case this.steps.EMAIL:
             const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
@@ -152,6 +166,13 @@ config.bot.extractData = function(conversazione, messaggio) {
             if (emailMatch) {
                 dati.email = emailMatch[0];
                 console.log(`📧 Email estratta: ${dati.email}`);
+            }
+            break;
+
+            case this.steps.COGNOME:
+            if (messaggio.length >= 1) {
+                dati.cognome = messaggio.trim();
+                console.log(`👤 Cognome estratto: ${dati.cognome}`);
             }
             break;
             
@@ -176,44 +197,40 @@ config.bot.extractData = function(conversazione, messaggio) {
 // Normalizza data colloquiale in formato standard
 config.bot.normalizeDate = function(dateText) {
     const oggi = new Date();
-    const domani = new Date(oggi);
-    domani.setDate(oggi.getDate() + 1);
-    
     const dateTextLower = dateText.toLowerCase().trim();
     
     if (dateTextLower.includes('oggi')) {
-        return oggi.toISOString().split('T')[0]; // YYYY-MM-DD
+        return oggi.toISOString().split('T')[0];
     }
     if (dateTextLower.includes('domani')) {
-        return domani.toISOString().split('T')[0]; // YYYY-MM-DD
+        const domani = new Date(oggi);
+        domani.setDate(oggi.getDate() + 1);
+        return domani.toISOString().split('T')[0];
     }
     
-    // Prova a parsare date come "15/01", "lunedì", etc
-    // Per ora restituisce il testo originale, si può migliorare
-    return dateText;
+    // Giorni della settimana
+    const giorni = {
+        'lunedì': 1, 'martedì': 2, 'mercoledì': 3, 'giovedì': 4, 
+        'venerdì': 5, 'sabato': 6, 'domenica': 0
+    };
+    
+    for (const [giorno, numeroGiorno] of Object.entries(giorni)) {
+        if (dateTextLower.includes(giorno)) {
+            const prossimoGiorno = new Date(oggi);
+            const diff = (numeroGiorno + 7 - oggi.getDay()) % 7;
+            prossimoGiorno.setDate(oggi.getDate() + (diff === 0 ? 7 : diff));
+            return prossimoGiorno.toISOString().split('T')[0];
+        }
+    }
+    
+    return dateText; // Fallback
 };
 
 // Normalizza ora colloquiale in formato 24h
 config.bot.normalizeTime = function(timeText) {
     const timeTextLower = timeText.toLowerCase().trim();
     
-    // Mappature comuni
-    const timeMap = {
-        'mattina': '09:00',
-        'mattino': '09:00',
-        'pomeriggio': '14:00',
-        'sera': '18:00',
-        'pranzo': '12:00'
-    };
-    
-    // Controlla mappature dirette
-    for (const [key, value] of Object.entries(timeMap)) {
-        if (timeTextLower.includes(key)) {
-            return value;
-        }
-    }
-    
-    // Gestisce "10 di mattina", "3 del pomeriggio", etc
+    // Prima controlla numeri con contesto (es. "10 di mattina")
     const numberMatch = timeTextLower.match(/(\d{1,2})/);
     if (numberMatch) {
         let hour = parseInt(numberMatch[1]);
@@ -227,6 +244,21 @@ config.bot.normalizeTime = function(timeText) {
         }
         // Se solo numero, assumiamo formato 24h
         return `${hour.toString().padStart(2, '0')}:00`;
+    }
+    
+    // POI mappature senza numeri
+    const timeMap = {
+        'mattina': '09:00',
+        'mattino': '09:00', 
+        'pomeriggio': '14:00',
+        'sera': '18:00',
+        'pranzo': '12:00'
+    };
+    
+    for (const [key, value] of Object.entries(timeMap)) {
+        if (timeTextLower === key) { // ← Cambiato da includes a ===
+            return value;
+        }
     }
     
     // Se già in formato HH:MM, restituisce così
