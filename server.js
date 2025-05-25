@@ -98,10 +98,6 @@ app.use((req, res, next) => {
   next();
 });
 
-console.log('🤖 Inizializzazione WhatsApp Bot...');
-const whatsappBot = new WhatsAppBot();
-console.log('✅ WhatsApp Bot inizializzato');
-
 // Connessione MongoDB principale
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -321,6 +317,8 @@ const AdminSchema = new mongoose.Schema({
   },
   createdAt: { type: Date, default: Date.now }
 });
+
+const Booking = mongoose.model('Booking', BookingSchema);
 
 // Schema per il consenso ai cookie
 const CookieConsentSchema = new mongoose.Schema({
@@ -760,6 +758,16 @@ const CalendarEventSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
+
+const FormData = mongoose.model('FormData', FormDataSchema);
+const Admin = mongoose.model('Admin', AdminSchema);
+const CookieConsent = mongoose.model('CookieConsent', CookieConsentSchema);
+const FacebookLead = mongoose.model('FacebookLead', FacebookLeadSchema);
+const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
+
+console.log('🤖 Inizializzazione WhatsApp Bot...');
+const whatsappBot = new WhatsAppBot();
+console.log('✅ WhatsApp Bot inizializzato');
 
 // Funzione per ottenere metrics di PageSpeed Insights
 async function getPageSpeedMetrics(url) {
@@ -3372,14 +3380,6 @@ app.delete('/api/sites/:id', async (req, res) => {
     res.status(500).json({ success: false, message: 'Errore nell\'eliminazione del sito', error: error.message });
   }
 });
-
-// Modelli principali
-const FormData = mongoose.model('FormData', FormDataSchema);
-const Admin = mongoose.model('Admin', AdminSchema);
-const CookieConsent = mongoose.model('CookieConsent', CookieConsentSchema);
-const Booking = mongoose.model('Booking', BookingSchema);
-const FacebookLead = mongoose.model('FacebookLead', FacebookLeadSchema);
-const FacebookEvent = mongoose.model('FacebookEvent', FacebookEventSchema);
 
 // ===== FUNZIONI UTILITY =====
 
