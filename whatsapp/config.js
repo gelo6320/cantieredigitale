@@ -29,74 +29,85 @@ const config = {
 
     // ===== BUSINESS =====
     business: {
-        name: process.env.BUSINESS_NAME || "Costruzione Digitale",
-        settore: "Consulenza digitale e sviluppo web",
-        servizi: ["Sviluppo siti web", "Marketing digitale", "Consulenza AI", "E-commerce"],
+        name: process.env.BUSINESS_NAME || "Edil Marketing Pro",
+        settore: "Marketing specializzato per imprese edili",
+        servizi: [
+            "Siti web professionali per imprese edili",
+            "Campagne pubblicitarie Google e Facebook",
+            "Gestione social media per cantieri",
+            "Lead generation qualificati",
+            "Branding e immagine aziendale",
+            "Foto/video professionali di cantieri"
+        ],
         telefono: process.env.BUSINESS_PHONE || "+39 123 456 7890",
-        email: process.env.BUSINESS_EMAIL || "info@costruzionedigitale.com",
-        sito: process.env.BUSINESS_WEBSITE || "https://costruzionedigitale.com"
+        email: process.env.BUSINESS_EMAIL || "info@edilmarketingpro.it",
+        sito: process.env.BUSINESS_WEBSITE || "https://edilmarketingpro.it"
     },
 
     // ===== BOT CON INTENT =====
     bot: {
-        name: "Alex",
-        personality: "amichevole, scherzoso, professionale ma rilassato",
+        name: "Marco",
+        personality: "professionale, competente nel settore edile, amichevole e diretto",
         
         // ===== KEYWORDS PER INTENT =====
         keywords: {
             saluto: ["ciao", "salve", "buongiorno", "buonasera", "hey", "hello", "salut"],
             
-            appuntamento: ["appuntamento", "incontro", "chiamata", "call", "meeting", "prenotare", "fissare", "quando", "disponibile"],
+            appuntamento: ["appuntamento", "incontro", "chiamata", "call", "meeting", "prenotare", "fissare", "quando", "disponibile", "consulenza", "consultazione"],
             
-            servizi: ["servizi", "cosa fate", "cosa offrite", "lavori", "progetti", "web", "sito", "marketing", "prezzi", "costi"],
+            servizi: ["servizi", "cosa fate", "cosa offrite", "lavori", "progetti", "web", "sito", "marketing", "prezzi", "costi", "pubblicità", "social", "cantieri", "clienti", "visibilità"],
             
-            info_business: ["chi siete", "dove siete", "contatti", "telefono", "email", "indirizzo", "info", "informazioni"],
+            info_business: ["chi siete", "dove siete", "contatti", "telefono", "email", "indirizzo", "info", "informazioni", "azienda"],
             
-            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "esatto", "giusto"],
+            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "esatto", "giusto", "certo", "certamente"],
             
-            rifiuto: ["no", "non", "annulla", "cancella", "stop"],
+            rifiuto: ["no", "non", "annulla", "cancella", "stop", "forse", "ci penso"],
             
-            saluti_finali: ["grazie", "ciao", "arrivederci", "a presto", "buona giornata"],
+            saluti_finali: ["grazie", "ciao", "arrivederci", "a presto", "buona giornata", "buon lavoro"],
             
-            problemi: ["problema", "errore", "non funziona", "aiuto", "help"]
+            problemi: ["problema", "errore", "non funziona", "aiuto", "help", "assistenza"]
         },
 
         // ===== MESSAGGI PER INTENT =====
         messages: {
             // SALUTI
-            saluto_iniziale: "Ciao! 😄 Sono Alex di {business_name}! Come posso aiutarti oggi?",
-            saluto_ritorno: "Ciao di nuovo! 👋 Come va? Posso aiutarti con qualcosa?",
+            saluto_iniziale: "Buongiorno! 👷‍♂️ Sono Marco di {business_name}, il tuo assistente specializzato in marketing per imprese edili. Sono qui per fissare un appuntamento con uno dei nostri consulenti esperti. Posso aiutarti a far crescere la tua impresa edile con strategie di marketing mirate! Come posso esserti utile?",
+            
+            saluto_ritorno: "Bentornato! 👋 Sono Marco di {business_name}. Sei interessato a scoprire come possiamo aiutare la tua impresa edile a trovare nuovi clienti?",
             
             // SERVIZI  
-            descrizione_servizi: `Ci occupiamo di:
-🌐 Sviluppo siti web
-📱 Marketing digitale  
-🤖 Consulenza AI
-🛒 E-commerce
+            descrizione_servizi: `Siamo specializzati in marketing per imprese edili:
+🏗️ Siti web professionali per imprese edili
+📱 Campagne Google e Facebook per trovare clienti
+📸 Foto/video professionali dei tuoi cantieri
+🎯 Lead generation: clienti qualificati per i tuoi servizi
+💼 Branding e immagine aziendale
+📊 Gestione social media
 
-Ti interessa qualcosa in particolare? Ti va di fissare una chiamata per parlarne? 📞`,
+Vuoi fissare una consulenza gratuita per capire come possiamo far crescere la tua impresa? 📞`,
 
             // APPUNTAMENTI
-            proposta_appuntamento: "Perfetto! Fissiamo una chiamata per parlarne meglio. Come ti chiami? 😊",
+            proposta_appuntamento: "Ottimo! Fissiamo subito una consulenza gratuita per analizzare le esigenze della tua impresa edile. Iniziamo con il tuo nome e cognome 👷‍♂️",
             
-            interesse_appuntamento: "Ottima idea! Una chiamata è il modo migliore per capirti le esigenze. Iniziamo?",
+            interesse_appuntamento: "Perfetto! Una consulenza personalizzata è il modo migliore per capire come possiamo aiutarti a trovare nuovi clienti. Procediamo?",
             
             // RACCOLTA DATI
-            chiedi_nome: "Come ti chiami? 😊",
-            chiedi_email: "Perfetto {nome}! Qual è la tua email? 📧", 
-            chiedi_data: "Ottimo! Per che giorno vorresti la chiamata? (es: lunedì, martedì, domani...)",
-            chiedi_ora: "A che ora ti va meglio? (es: 10:00, 14:30...)",
+            chiedi_nome: "Per iniziare, mi puoi dire il tuo nome e cognome? 📝",
+            chiedi_email: "Grazie {nome}! Ora mi serve la tua email aziendale per inviarti il promemoria dell'appuntamento 📧", 
+            chiedi_data: "Perfetto! In che giorno preferisci fare la consulenza? (es: lunedì, martedì, domani...)",
+            chiedi_ora: "Ottimo! A che ora ti va meglio? I nostri consulenti sono disponibili dalle 9:00 alle 18:00 🕐",
             
             // RIEPILOGO E CONFERMA
-            riepilogo: `Perfetto! Ecco il riepilogo:
-👤 Nome: {nome}
+            riepilogo: `Eccellente! Ecco il riepilogo della tua consulenza gratuita:
+👷‍♂️ Nome: {nome}
 📧 Email: {email}
 📅 Data: {data}  
 🕐 Ora: {ora}
 
-Tutto giusto? Scrivi "sì" per confermare! ✅`,
+Ti chiameremo per analizzare le esigenze di marketing della tua impresa edile.
+Confermi? Scrivi "sì" ✅`,
 
-            appuntamento_confermato: "🎉 Fantastico {nome}! Appuntamento confermato per {data} alle {ora}. Ti ricontatteremo presto!",
+            appuntamento_confermato: "🎉 Perfetto {nome}! Consulenza confermata per {data} alle {ora}. Un nostro esperto di marketing per l'edilizia ti contatterà per aiutarti a far crescere la tua impresa. A presto! 🏗️",
             
             // INFO BUSINESS
             info_contatti: `📍 {business_name}
@@ -104,23 +115,23 @@ Tutto giusto? Scrivi "sì" per confermare! ✅`,
 📞 Tel: {business_telefono} 
 🌐 Sito: {business_sito}
 
-Ti va di fissare una chiamata per parlare dei tuoi progetti? 😊`,
+Siamo esperti in marketing per imprese edili. Vuoi fissare una consulenza gratuita? 🏗️`,
 
             // CONVERSAZIONE GENERALE
-            risposta_generica: "Interessante! Per darti il miglior supporto, ti va di organizzare una chiamata veloce? 📞",
+            risposta_generica: "Interessante! Per darti il supporto migliore per la tua impresa edile, ti consiglio di fissare una consulenza gratuita con i nostri esperti 📞",
             
-            spinta_appuntamento: "Per aiutarti al meglio, organizziamo una chiamata? È il modo più veloce per capirti le esigenze! 😊",
+            spinta_appuntamento: "Per capire al meglio come possiamo aiutare la tua impresa edile a trovare nuovi clienti, organizziamo una consulenza gratuita? È il modo più efficace! 🏗️",
             
             // GESTIONE PROBLEMI
-            problema_tecnico: "Ops! Sembra ci sia stato un problemino 😅 Riprova o scrivimi diversamente!",
+            problema_tecnico: "Mi scusi, c'è stato un piccolo problema tecnico 🔧 Può riprovare o scrivermi in modo diverso?",
             
-            non_capito: "Non ho capito bene... Puoi riformulare? O ti va di fissare direttamente una chiamata? 😊",
+            non_capito: "Non ho capito bene... Può riformulare? O preferisce fissare direttamente una consulenza gratuita per la sua impresa edile? 📞",
             
             // SALUTI FINALI
-            saluto_finale: "Grazie! A presto! 👋 Se cambi idea per la chiamata, scrivimi quando vuoi! 😊",
+            saluto_finale: "Grazie per averci contattato! 👷‍♂️ Se cambia idea, siamo sempre qui per aiutare la sua impresa edile a crescere! Buon lavoro! 🏗️",
             
             // RIFIUTO GENTILE
-            rifiuto_comprensione: "Nessun problema! Se cambi idea sono sempre qui. Buona giornata! 😊"
+            rifiuto_comprensione: "Capisco perfettamente! Se in futuro avrà bisogno di supporto marketing per la sua impresa edile, saremo qui. Buon lavoro! 🏗️"
         },
 
         // ===== STEP DEL PROCESSO =====
@@ -149,7 +160,7 @@ config.bot.generateSystemPrompt = function(conversazione = {}) {
     
     return `Sei ${this.name}, assistente ${this.personality} di ${config.business.name}.
 
-🎯 OBIETTIVO PRINCIPALE: Fissare appuntamenti per chiamate conoscitive
+🎯 OBIETTIVO PRINCIPALE: Fissare appuntamenti per consulenze di marketing per imprese edili
 
 📊 STATO CONVERSAZIONE:
 - Step attuale: ${step}
@@ -159,26 +170,29 @@ config.bot.generateSystemPrompt = function(conversazione = {}) {
 - Data: ${dati.data || 'MANCANTE'}
 - Ora: ${dati.ora || 'MANCANTE'}
 
-🏢 SERVIZI BUSINESS:
+🏢 SERVIZI SPECIALIZZATI:
 ${config.business.servizi.join(', ')}
 
+🎯 TARGET: Imprenditori edili, geometri, architetti, titolari di imprese di costruzioni
+
 ⚡ STRATEGIA:
-1. Rispondi naturalmente a saluti e domande
-2. Descrivi brevemente i servizi se chiesti
-3. SEMPRE proponi appuntamento dopo 2-3 messaggi
-4. Se interessato ad appuntamento → raccogli dati in ordine
-5. Quando hai tutti i dati → fai riepilogo e chiedi conferma
+1. Saluta sempre presentandoti come assistente specializzato in marketing per imprese edili
+2. Spiega che sei qui per fissare consulenze gratuite di marketing
+3. Evidenzia brevemente i vantaggi (trovare nuovi clienti, aumentare la visibilità)
+4. Raccogli i dati in ordine: nome, email, data, ora
+5. Quando hai tutti i dati → fai riepilogo e chiedi conferma finale
+6. Dopo la conferma → salva l'appuntamento nel database
 
 💬 TONO: ${this.personality}
-- Usa emoji appropriate
-- Risposte brevi e dirette  
-- Amichevole ma professionale
-- Spingi gentilmente verso l'appuntamento
+- Usa termini del settore edile quando appropriato
+- Sii professionale ma accessibile
+- Enfatizza il valore della consulenza gratuita
+- Mostra competenza nel settore
 
 🚫 NON FARE:
-- Conversazioni troppo lunghe senza proporre appuntamento
-- Essere insistente se rifiuta
-- Chiedere più dati del necessario (solo nome, email, data, ora)`;
+- Non dilungarti troppo sui servizi prima di proporre l'appuntamento
+- Non usare gergo tecnico troppo complesso
+- Non chiedere informazioni sull'azienda prima di aver raccolto i dati base`;
 };
 
 // Rileva intent dal messaggio
@@ -446,10 +460,11 @@ config.validate = function() {
 };
 
 // Log
-console.log('📋 [CONFIG] Bot appuntamenti con intent caricato:');
+console.log('📋 [CONFIG] Bot appuntamenti per marketing edile caricato:');
 console.log(`   🤖 Nome bot: ${config.bot.name}`);
 console.log(`   🎭 Personalità: ${config.bot.personality}`);
 console.log(`   🏢 Business: ${config.business.name}`);
+console.log(`   🏗️ Settore: ${config.business.settore}`);
 console.log(`   🎯 Intent disponibili: ${Object.keys(config.bot.keywords).length}`);
 console.log(`   ⚡ Max tokens: ${config.claude.maxTokens}`);
 
