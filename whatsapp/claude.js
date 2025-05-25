@@ -52,14 +52,17 @@ class ClaudeService {
         
         // STEP START - Prima interazione
         if (step === config.bot.steps.START) {
-            if (intent === 'saluto' || intent === 'appuntamento') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                return config.bot.messages.saluto;
-            }
-            if (intent === 'servizi') {
-                return config.bot.messages.servizi;
+            if (intent === 'conferma') {
+                conversazione.currentStep = config.bot.steps.INTERESSE;
+                return config.bot.messages.interesse_confermato;
             }
             return config.bot.messages.saluto;
+        }
+        
+        // STEP INTERESSE - Confermato interesse
+        if (step === config.bot.steps.INTERESSE) {
+            conversazione.currentStep = config.bot.steps.NOME;
+            return config.bot.messages.chiedi_nome;
         }
 
         // STEP NOME - Raccolta nome

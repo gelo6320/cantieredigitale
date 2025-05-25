@@ -12,6 +12,10 @@ const config = {
         webhookToken: process.env.WHATSAPP_WEBHOOK_TOKEN,
         verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || process.env.WHATSAPP_WEBHOOK_TOKEN
     },
+
+    database: {
+        mongoUrl: process.env.MONGODB_URI_BOOKING || process.env.MONGODB_URI || 'mongodb://localhost:27017/appointments'
+    },
     
     claude: {
         apiKey: process.env.CLAUDE_API_KEY,
@@ -51,6 +55,7 @@ const config = {
         // STEP DEL PROCESSO
         steps: {
             START: 'start',
+            INTERESSE: 'interesse',
             NOME: 'nome', 
             EMAIL: 'email',
             DATA: 'data',
@@ -71,35 +76,34 @@ const config = {
 
         // MESSAGGI
         messages: {
-            saluto: "Ciao! 👋 Sono Sofia di Costruzione Digitale, agenzia specializzata nel marketing per imprese edili. Sono qui per fissarti una consulenza gratuita con i nostri esperti. Ti va bene?",
+            saluto: "Ciao! 👋 Sono Sofia di Costruzione Digitale. Aiutiamo imprese edili a trovare nuovi clienti online. Vuoi una consulenza gratuita? 🏗️",
             
-            servizi: `I nostri servizi per imprese edili:
-🏗️ Siti web professionali
-🎯 Lead generation clienti qualificati  
-📱 Campagne Google e Facebook
-📊 Gestione social media
-💼 Branding aziendale
-
-Vuoi una consulenza gratuita? 📞`,
-
-            chiedi_nome: "Perfetto! Come ti chiami? 📝",
-            chiedi_email: "Grazie {nome}! Qual è la tua email? 📧", 
-            chiedi_data: "Ottimo! In che giorno preferisci la consulenza? (lunedì, martedì, mercoledì...)",
-            chiedi_ora: "Perfetto! A che ora ti va meglio? (9:00-18:00) 🕐",
+            servizi: `Cosa facciamo per le imprese edili:
+        🏗️ Siti web che convertono
+        🎯 Lead generation Facebook/Google  
+        📱 Social media management
+        💼 Branding professionale
+        
+        Fissiamo una call gratuita? 📞`,
+        
+            interesse_confermato: "Perfetto! Per organizzare tutto, ho bisogno di qualche info. Come ti chiami? 📝",
             
-            riepilogo: `Ecco il riepilogo della tua consulenza:
-👤 Nome: {nome}
-📧 Email: {email} 
-📅 Data: {data}
-🕐 Ora: {ora}
-
-✅ Confermi? Scrivi "sì" per confermare`,
-
-            confermato: "🎉 Perfetto {nome}! Consulenza confermata per {data} alle {ora}. Ti ricontatteremo presto! 🏗️",
+            chiedi_nome: "Come ti chiami? 📝",
+            chiedi_email: "Ciao {nome}! La tua email? 📧", 
+            chiedi_data: "Che giorno va bene? (lunedì, martedì, oggi...)",
+            chiedi_ora: "A che ora? (es. 15:00, mattina, pomeriggio) 🕐",
             
-            errore: "Mi scusi, non ho capito. Può ripetere?",
+            riepilogo: `Consulenza confermata:
+        👤 {nome}
+        📧 {email} 
+        📅 {data} alle {ora}
+        
+        Tutto ok? Scrivi "sì" per confermare ✅`,
+        
+            confermato: "🎉 Fatto! Ti chiameremo {data} alle {ora}. A presto {nome}! 🏗️",
             
-            rifiuto_finale: "Capisco! Se cambi idea, sono sempre qui. Buona giornata! 👋"
+            errore: "Non ho capito... puoi ripetere? 😅",
+            rifiuto_finale: "Ok, nessun problema! Se cambi idea, scrivimi. Ciao! 👋"
         }
     }
 };
@@ -132,6 +136,11 @@ config.bot.processTemplate = function(template, data = {}) {
 config.bot.extractData = function(conversazione, messaggio) {
     const step = conversazione.currentStep;
     const dati = conversazione.datiCliente;
+    
+    // NON estrarre dati nei step START e INTERESSE
+    if (step === this.steps.START || step === this.steps.INTERESSE) {
+        return;
+    }
     
     switch (step) {
         case this.steps.NOME:
