@@ -13,33 +13,43 @@ class ClaudeService {
         this.setupDatabase();
     }
 
-    // Setup database
+    // Setup database - usa schema esistente dal server principale
     async setupDatabase() {
         try {
-            if (mongoose.connection.readyState === 0) {
-                await mongoose.connect(config.database.mongoUrl);
-                console.log('✅ [DATABASE] Connesso a MongoDB');
-            }
+            // Il database è già connesso nel server principale
+            console.log('✅ [DATABASE] Uso connessione esistente');
             
-            // Schema semplice per appuntamenti
-            const appointmentSchema = new mongoose.Schema({
-                nome: String,
-                email: String,
-                telefono: String,
-                data: String,
-                ora: String,
-                business: { type: String, default: config.business.name },
-                createdAt: { type: Date, default: Date.now }
-            });
-            
+            // Usa lo schema BookingSchema esistente dal server principale
             try {
-                this.Appointment = mongoose.model('Appointment');
+                this.Booking = mongoose.model('Booking');
+                console.log('✅ [DATABASE] Schema Booking trovato');
             } catch (e) {
-                this.Appointment = mongoose.model('Appointment', appointmentSchema);
+                // Se il modello non esiste, crealo (fallback)
+                const bookingSchema = new mongoose.Schema({
+                    name: { type: String, required: true },
+                    email: { type: String, required: true },
+                    phone: { type: String, required: true },
+                    message: String,
+                    bookingDate: { type: String, required: true },
+                    bookingTime: { type: String, required: true },
+                    bookingTimestamp: { type: Date, required: true },
+                    status: { 
+                        type: String, 
+                        enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
+                        default: 'confirmed' 
+                    },
+                    value: { type: Number, default: 0 },
+                    service: { type: String, default: 'Consulenza Marketing' },
+                    source: { type: String, default: 'WhatsApp Bot' },
+                    createdAt: { type: Date, default: Date.now }
+                });
+                
+                this.Booking = mongoose.model('Booking', bookingSchema);
+                console.log('✅ [DATABASE] Schema Booking creato');
             }
             
         } catch (error) {
-            console.error('❌ [DATABASE] Errore connessione:', error.message);
+            console.error('❌ [DATABASE] Errore setup:', error.message);
         }
     }
 
@@ -172,27 +182,40 @@ class ClaudeService {
             
             console.log('🗓️ [CLAUDE] Salvataggio appuntamento...');
             
-            const appointment = new this.Appointment({
-                nome: dati.nome,
+            // Crea data timestamp per bookingTimestamp
+            const now = new Date();
+            
+            // Usa lo schema BookingSchema esistente
+            const booking = new this.Booking({
+                name: dati.nome,
                 email: dati.email,
-                telefono: conversazione.whatsappNumber,
-                data: dati.data,
-                ora: dati.ora,
-                business: config.business.name
+                phone: conversazione.whatsappNumber,
+                message: `Appuntamento fissato tramite WhatsApp Bot per consulenza marketing`,
+                bookingDate: dati.data,
+                bookingTime: dati.ora,
+                bookingTimestamp: now,
+                status: 'confirmed',
+                value: 0, // Consultazione gratuita
+                service: 'Consulenza Marketing per Imprese Edili',
+                source: 'WhatsApp Bot - Costruzione Digitale',
+                viewed: false
             });
             
-            await appointment.save();
+            const savedBooking = await booking.save();
             
-            console.log(`✅ [CLAUDE] Appuntamento salvato: ${appointment._id}`);
+            console.log(`✅ [CLAUDE] Appuntamento salvato: ${savedBooking._id}`);
             console.log(`   👤 Nome: ${dati.nome}`);
             console.log(`   📧 Email: ${dati.email}`);
             console.log(`   📅 Data: ${dati.data}`);
             console.log(`   🕐 Ora: ${dati.ora}`);
+            console.log(`   📱 Telefono: ${conversazione.whatsappNumber}`);
+            console.log(`   🏢 Servizio: Consulenza Marketing per Imprese Edili`);
             
-            return { success: true, id: appointment._id };
+            return { success: true, id: savedBooking._id };
             
         } catch (error) {
             console.error('❌ [CLAUDE] Errore salvataggio:', error.message);
+            console.error('❌ [CLAUDE] Stack:', error.stack);
             return { success: false, error: error.message };
         }
     }
