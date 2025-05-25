@@ -312,12 +312,16 @@ Rispondi ora come Sofia:`;
             
             const now = new Date();
             
+            // Normalizza la data in formato standard
+            const normalizedDate = config.bot.normalizeDate(dati.data);
+            console.log(`📅 [CLAUDE] Data normalizzata: "${dati.data}" → "${normalizedDate}"`);
+            
             const booking = new this.Booking({
                 name: dati.nome,
                 email: dati.email,
                 phone: conversazione.whatsappNumber,
                 message: `Consulenza marketing imprese edili - Appuntamento fissato tramite WhatsApp Bot Sofia`,
-                bookingDate: dati.data,
+                bookingDate: normalizedDate,
                 bookingTime: dati.ora,
                 bookingTimestamp: now,
                 status: 'confirmed',
