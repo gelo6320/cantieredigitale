@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/config.js - CONFIGURAZIONE SEMPLIFICATA
+// 📁 whatsapp/config.js - CONFIGURAZIONE AI-ENHANCED
 // ============================================
 
 require('dotenv').config();
@@ -20,8 +20,8 @@ const config = {
     claude: {
         apiKey: process.env.CLAUDE_API_KEY,
         model: 'claude-sonnet-4-20250514',
-        maxTokens: 150,
-        timeout: 10000
+        maxTokens: 300,
+        timeout: 15000
     },
     
     server: {
@@ -29,30 +29,52 @@ const config = {
         environment: process.env.NODE_ENV || 'development'
     },
 
-    // ===== BUSINESS =====
+    // ===== BUSINESS INFO DETTAGLIATA =====
     business: {
         name: "Costruzione Digitale",
-        settore: "Marketing per imprese edili",
-        servizi: [
-            "Siti web per imprese edili",
-            "Lead generation qualificati", 
-            "Campagne Google e Facebook",
-            "Gestione social media",
-            "Branding aziendale"
-        ],
+        settore: "Marketing specializzato per imprese edili",
+        fondatore: "Oleg Bolonniy",
+        metodo: "Metodo chiavi in mano per scalare il fatturato in 30 giorni",
+        
+        servizi: {
+            principale: "Sistema completo di marketing digitale per imprese edili",
+            pilastri: [
+                "Analisi approfondita del mercato locale e della concorrenza",
+                "Campagne pubblicitarie ottimizzate per clienti di alto profilo", 
+                "Sistema di conversione automatizzato che trasforma contatti in contratti"
+            ],
+            vantaggi: [
+                "Abbattimento dei costi pubblicitari con targeting avanzato",
+                "Triplicazione del valore clienti tramite analisi dati",
+                "Zero competenze tecniche richieste",
+                "Sistema facile e automatizzato",
+                "Completamente scalabile e tracciabile"
+            ]
+        },
+        
+        risultati: {
+            tempi: "Primi contatti qualificati in 7-10 giorni",
+            crescita: "Aumento fatturato 20-40% entro 30 giorni",
+            garanzia: "30 giorni soddisfatti o rimborsati"
+        },
+        
+        copertura: "Tutta Italia, dal Nord al Sud",
+        
         telefono: process.env.BUSINESS_PHONE || "+39 123 456 7890",
-        email: process.env.BUSINESS_EMAIL || "info@costruzionedigitale.it"
+        email: process.env.BUSINESS_EMAIL || "info@costruzionedigitale.it",
+        sito: "https://www.costruzionedigitale.com"
     },
 
-    // ===== BOT SEMPLIFICATO =====
+    // ===== BOT AI CONFIGURATION =====
     bot: {
         name: "Sofia",
+        personality: "assistente esperta e professionale, diretta ma cordiale",
         
-        // STEP DEL PROCESSO
+        // STEP DEL PROCESSO (mantenuti per tracciamento)
         steps: {
             START: 'start',
-            INTERESSE: 'interesse',
-            NOME: 'nome', 
+            INTERESSE: 'interesse', 
+            NOME: 'nome',
             COGNOME: 'cognome',
             EMAIL: 'email',
             DATA: 'data',
@@ -61,54 +83,58 @@ const config = {
             CONFERMATO: 'confermato'
         },
 
-        // PAROLE CHIAVE PER INTENT
+        // PAROLE CHIAVE PER INTENT DETECTION
         keywords: {
-            saluto: ["ciao", "salve", "buongiorno", "buonasera", "hey"],
-            appuntamento: ["appuntamento", "incontro", "consulenza", "prenotare", "fissare"],
-            servizi: ["servizi", "cosa fate", "marketing", "prezzi", "web", "sito"],
-            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "conferma"],
-            rifiuto: ["no", "non", "annulla", "cancella"],
-            ricomincia: ["ricomincia", "riparti", "da capo"]
+            saluto: ["ciao", "salve", "buongiorno", "buonasera", "hey", "pronto"],
+            appuntamento: ["appuntamento", "incontro", "consulenza", "prenotare", "fissare", "call", "telefonata"],
+            servizi: ["servizi", "cosa fate", "marketing", "prezzi", "web", "sito", "pubblicità", "social", "lead"],
+            prezzi: ["prezzo", "costo", "quanto", "tariffa", "investimento", "budget"],
+            risultati: ["risultati", "garanzie", "funziona", "tempo", "quando", "efficace"],
+            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "conferma", "esatto"],
+            rifiuto: ["no", "non", "annulla", "cancella", "non interessato"],
+            ricomincia: ["ricomincia", "riparti", "da capo", "riprendi"],
+            dubbi: ["ma", "però", "dubbio", "sicuro", "davvero", "veramente"]
         },
 
-        // MESSAGGI
-        messages: {
-            saluto: "Ciao! 👋 Sono Sofia di Costruzione Digitale. Aiutiamo imprese edili a trovare nuovi clienti online. Vuoi una consulenza gratuita? 🏗️",
-            
-            servizi: `Cosa facciamo per le imprese edili:
-        🏗️ Siti web che convertono
-        🎯 Lead generation Facebook/Google  
-        📱 Social media management
-        💼 Branding professionale
-        
-        Fissiamo una call gratuita? 📞`,
-        
-            interesse_confermato: "Perfetto! Per organizzare tutto, ho bisogno di qualche info. Come ti chiami? 📝",
-            
-            chiedi_nome: "Come ti chiami? 📝",
-            chiedi_cognome: "E il cognome? 📝",
-            chiedi_email: "Ciao {nome}! La tua email? 📧", 
-            chiedi_data: "Che giorno va bene? (lunedì, martedì, oggi...)",
-            chiedi_ora: "A che ora? (es. 15:00, mattina, pomeriggio) 🕐",
-            
-            riepilogo: `Consulenza confermata:
-        👤 {nome}
-        📧 {email} 
-        📅 {data} alle {ora}
-        
-        Tutto ok? Scrivi "sì" per confermare ✅`,
-        
-            confermato: "🎉 Fatto! Ti chiameremo {data} alle {ora}. A presto {nome}! 🏗️",
-            
-            errore: "Non ho capito... puoi ripetere? 😅",
-            rifiuto_finale: "Ok, nessun problema! Se cambi idea, scrivimi. Ciao! 👋"
-        }
+        // SYSTEM PROMPT PER CLAUDE
+        systemPrompt: `Sei Sofia, assistente virtuale di Costruzione Digitale, agenzia di marketing specializzata per imprese edili.
+
+INFORMAZIONI AZIENDA:
+- Fondatore: Oleg Bolonniy
+- Metodo: "Chiavi in mano" per scalare fatturato imprese edili in 30 giorni
+- Servizi: Sistema completo marketing digitale (analisi mercato, campagne ottimizzate, conversione automatizzata)
+- Risultati: Primi contatti in 7-10 giorni, +20-40% fatturato in 30 giorni
+- Garanzia: 30 giorni soddisfatti o rimborsati
+- Copertura: Tutta Italia
+- Vantaggi: Zero competenze richieste, tutto automatizzato, costi ridotti, risultati tracciabili
+
+TUO OBIETTIVO: Fissare appuntamenti di consulenza gratuita con imprenditori edili.
+
+PERSONALITÀ: Professionale ma cordiale, diretta, competente. Usa emoji con parsimonia.
+
+REGOLE:
+1. Mantieni conversazioni naturali ma orientate all'obiettivo
+2. Rispondi sempre a domande sui servizi con informazioni specifiche
+3. Segui gli step di raccolta dati quando necessario
+4. Non inventare informazioni non fornite
+5. Se non sai qualcosa, proponi la consulenza per approfondire
+6. Usa un linguaggio da imprenditore a imprenditore, professionale ma accessibile
+
+STEP PROCESSO (da seguire quando il cliente è interessato):
+1. START → Presentazione e verifica interesse
+2. INTERESSE → Raccolta nome
+3. NOME/COGNOME → Raccolta nome completo  
+4. EMAIL → Raccolta email
+5. DATA → Raccolta data preferita
+6. ORA → Raccolta ora preferita
+7. RIEPILOGO → Conferma finale
+8. CONFERMATO → Appuntamento fissato`
     }
 };
 
-// ===== FUNZIONI SEMPLICI =====
+// ===== FUNZIONI AI-ENHANCED =====
 
-// Rileva intent dal messaggio
+// Rileva intent dal messaggio (semplificato - ora Claude gestisce la logica principale)
 config.bot.detectIntent = function(message) {
     const messageLower = message.toLowerCase();
     
@@ -121,44 +147,28 @@ config.bot.detectIntent = function(message) {
     return 'generale';
 };
 
-// Sostituisce variabili nel template
-config.bot.processTemplate = function(template, data = {}) {
-    let processed = template;
-    Object.entries(data).forEach(([key, value]) => {
-        processed = processed.replace(new RegExp(`{${key}}`, 'g'), value || '');
-    });
-    return processed;
-};
-
-// Estrae dati dal messaggio
+// Estrae dati dal messaggio (mantenuto per backup, ma Claude può sovrascrivere)
 config.bot.extractData = function(conversazione, messaggio) {
     const step = conversazione.currentStep;
     const dati = conversazione.datiCliente;
     
-    // NON estrarre dati nei step START e INTERESSE
-    if (step === this.steps.START) {
-        return;
-    }
-    
     switch (step) {
         case this.steps.NOME:
-        if (messaggio.length >= 1) {
-            const nomeCompleto = messaggio.trim();
-            const parole = nomeCompleto.split(/\s+/);
-            
-            if (parole.length >= 2) {
-                // Nome e cognome presenti
-                dati.nome = nomeCompleto;
-                dati.nomeCompleto = true;
-                console.log(`👤 Nome completo estratto: ${dati.nome}`);
-            } else if (parole.length === 1) {
-                // Solo nome, serve cognome
-                dati.nome = nomeCompleto;
-                dati.nomeCompleto = false;
-                console.log(`👤 Solo nome estratto: ${dati.nome} - serve cognome`);
+            if (messaggio.length >= 1) {
+                const nomeCompleto = messaggio.trim();
+                const parole = nomeCompleto.split(/\s+/);
+                
+                if (parole.length >= 2) {
+                    dati.nome = nomeCompleto;
+                    dati.nomeCompleto = true;
+                    console.log(`👤 Nome completo estratto: ${dati.nome}`);
+                } else if (parole.length === 1) {
+                    dati.nome = nomeCompleto;
+                    dati.nomeCompleto = false;
+                    console.log(`👤 Solo nome estratto: ${dati.nome}`);
+                }
             }
-        }
-        break;
+            break;
             
         case this.steps.EMAIL:
             const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
@@ -169,32 +179,32 @@ config.bot.extractData = function(conversazione, messaggio) {
             }
             break;
 
-            case this.steps.COGNOME:
+        case this.steps.COGNOME:
             if (messaggio.length >= 1) {
                 dati.cognome = messaggio.trim();
                 console.log(`👤 Cognome estratto: ${dati.cognome}`);
             }
             break;
             
-            case this.steps.DATA:
-                if (messaggio.length >= 1) {
-                    const rawDate = messaggio.trim();
-                    dati.data = this.normalizeDate(rawDate);
-                    console.log(`📅 Data estratta: ${rawDate} → ${dati.data}`);
-                }
-                break;
-                
-            case this.steps.ORA:
-                if (messaggio.length >= 1) {
-                    const rawTime = messaggio.trim();
-                    dati.ora = this.normalizeTime(rawTime);
-                    console.log(`🕐 Ora estratta: ${rawTime} → ${dati.ora}`);
-                }
-                break;
+        case this.steps.DATA:
+            if (messaggio.length >= 1) {
+                const rawDate = messaggio.trim();
+                dati.data = this.normalizeDate(rawDate);
+                console.log(`📅 Data estratta: ${rawDate} → ${dati.data}`);
+            }
+            break;
+            
+        case this.steps.ORA:
+            if (messaggio.length >= 1) {
+                const rawTime = messaggio.trim();
+                dati.ora = this.normalizeTime(rawTime);
+                console.log(`🕐 Ora estratta: ${rawTime} → ${dati.ora}`);
+            }
+            break;
     }
 };
 
-// Normalizza data colloquiale in formato standard
+// Normalizza data (mantenuto)
 config.bot.normalizeDate = function(dateText) {
     const oggi = new Date();
     const dateTextLower = dateText.toLowerCase().trim();
@@ -208,7 +218,6 @@ config.bot.normalizeDate = function(dateText) {
         return domani.toISOString().split('T')[0];
     }
     
-    // Giorni della settimana
     const giorni = {
         'lunedì': 1, 'martedì': 2, 'mercoledì': 3, 'giovedì': 4, 
         'venerdì': 5, 'sabato': 6, 'domenica': 0
@@ -223,14 +232,13 @@ config.bot.normalizeDate = function(dateText) {
         }
     }
     
-    return dateText; // Fallback
+    return dateText;
 };
 
-// Normalizza ora colloquiale in formato 24h
+// Normalizza ora (mantenuto)
 config.bot.normalizeTime = function(timeText) {
     const timeTextLower = timeText.toLowerCase().trim();
     
-    // Prima controlla numeri con contesto (es. "10 di mattina")
     const numberMatch = timeTextLower.match(/(\d{1,2})/);
     if (numberMatch) {
         let hour = parseInt(numberMatch[1]);
@@ -242,11 +250,9 @@ config.bot.normalizeTime = function(timeText) {
             if (hour < 12) hour += 12;
             return `${hour.toString().padStart(2, '0')}:00`;
         }
-        // Se solo numero, assumiamo formato 24h
         return `${hour.toString().padStart(2, '0')}:00`;
     }
     
-    // POI mappature senza numeri
     const timeMap = {
         'mattina': '09:00',
         'mattino': '09:00', 
@@ -256,20 +262,19 @@ config.bot.normalizeTime = function(timeText) {
     };
     
     for (const [key, value] of Object.entries(timeMap)) {
-        if (timeTextLower === key) { // ← Cambiato da includes a ===
+        if (timeTextLower === key) {
             return value;
         }
     }
     
-    // Se già in formato HH:MM, restituisce così
     if (/^\d{1,2}:\d{2}$/.test(timeTextLower)) {
         return timeTextLower;
     }
     
-    return timeText; // Fallback
+    return timeText;
 };
 
-// Controlla se appuntamento è completo
+// Verifica se dati appuntamento sono completi
 config.bot.isComplete = function(conversazione) {
     const dati = conversazione.datiCliente;
     return dati.nome && dati.email && dati.data && dati.ora;

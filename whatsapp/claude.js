@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/claude.js - LOGICA SEMPLIFICATA
+// 📁 whatsapp/claude.js - SERVIZIO AI-ENHANCED
 // ============================================
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -25,15 +25,12 @@ class ClaudeService {
                 useUnifiedTopology: true
             });
             
-            // Aspetta che la connessione sia stabilita
             await this.bookingConnection.asPromise();
             console.log('✅ [DATABASE] Connesso al database booking');
     
-            // Ottieni il modello Booking dalla connessione principale per copiare lo schema
             let BookingModel;
             try {
                 BookingModel = mongoose.model('Booking');
-                // Registra il modello sulla connessione booking
                 this.Booking = this.bookingConnection.model('Booking', BookingModel.schema);
                 console.log('✅ [DATABASE] Schema Booking registrato sulla connessione booking');
             } catch (error) {
@@ -54,161 +51,253 @@ class ClaudeService {
                 await this.setupDatabase();
             }
             
-            console.log(`🤖 [CLAUDE] Generazione risposta per: "${messaggioUtente}"`);
+            console.log(`🤖 [CLAUDE] Generazione risposta AI per: "${messaggioUtente}"`);
             
-            // 1. Rileva intent
-            const intent = config.bot.detectIntent(messaggioUtente);
-            console.log(`🎯 [CLAUDE] Intent: ${intent}`);
+            // Costruisci il prompt contestuale
+            const prompt = this.buildContextualPrompt(conversazione, messaggioUtente);
             
-            // 2. Estrai dati se necessario
-            config.bot.extractData(conversazione, messaggioUtente);
+            // Chiama l'API di Claude
+            const claudeResponse = await this.callClaudeAPI(prompt);
             
-            // 3. Ottieni risposta
-            const risposta = this.getResponse(conversazione, intent);
+            // Processa la risposta e aggiorna lo stato della conversazione
+            const processedResponse = this.processClaudeResponse(claudeResponse, conversazione, messaggioUtente);
             
-            console.log(`📤 [CLAUDE] Risposta: "${risposta}"`);
-            return risposta;
+            console.log(`📤 [CLAUDE] Risposta AI: "${processedResponse.message}"`);
+            console.log(`📊 [CLAUDE] Nuovo step: ${conversazione.currentStep}`);
+            
+            return processedResponse.message;
 
         } catch (error) {
-            console.error('❌ [CLAUDE] Errore:', error.message);
-            return config.bot.messages.errore;
+            console.error('❌ [CLAUDE] Errore AI:', error.message);
+            return this.getFallbackResponse(conversazione);
         }
     }
 
-    getResponse(conversazione, intent) {
+    buildContextualPrompt(conversazione, messaggioUtente) {
+        const dati = conversazione.datiCliente;
         const step = conversazione.currentStep;
+        const storicoMessaggi = conversazione.messaggi.slice(-6); // Ultimi 6 messaggi per contesto
+        
+        let storicoString = "";
+        if (storicoMessaggi.length > 0) {
+            storicoString = "\nStorico conversazione recente:\n" + 
+                storicoMessaggi.map(msg => `${msg.role === 'user' ? 'Cliente' : 'Sofia'}: ${msg.content}`).join('\n');
+        }
+
+        const prompt = `${config.bot.systemPrompt}
+
+STATO CONVERSAZIONE:
+- Step attuale: ${step}
+- Dati raccolti: ${JSON.stringify(dati, null, 2)}
+- Dati mancanti: ${this.getMissingData(dati)}
+
+${storicoString}
+
+MESSAGGIO CLIENTE: "${messaggioUtente}"
+
+ISTRUZIONI SPECIFICHE:
+1. Se è il primo messaggio (step START), presenta l'azienda e verifica l'interesse
+2. Se il cliente chiede informazioni sui servizi, rispondi in modo dettagliato usando le info aziendali
+3. Se il cliente è interessato ma mancano dati, chiedi il prossimo dato necessario
+4. Se tutti i dati sono raccolti, proponi il riepilogo per conferma
+5. Mantieni un tono professionale ma cordiale
+6. Risposte massimo 2-3 frasi per mantenere la conversazione fluida
+
+IMPORTANTE: Alla fine della tua risposta, includi su una riga separata:
+NEXT_STEP: [nuovo_step]
+EXTRACTED_DATA: {json_con_eventuali_dati_estratti}
+
+Rispondi ora come Sofia:`;
+
+        return prompt;
+    }
+
+    getMissingData(dati) {
+        const required = ['nome', 'email', 'data', 'ora'];
+        const missing = required.filter(field => !dati[field]);
+        return missing.length > 0 ? missing.join(', ') : 'nessuno';
+    }
+
+    async callClaudeAPI(prompt) {
+        try {
+            const response = await axios.post(this.baseURL, {
+                model: this.model,
+                max_tokens: config.claude.maxTokens,
+                messages: [{
+                    role: 'user',
+                    content: prompt
+                }]
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json',
+                    'anthropic-version': '2023-06-01'
+                },
+                timeout: config.claude.timeout
+            });
+
+            return response.data.content[0].text;
+
+        } catch (error) {
+            console.error('❌ [CLAUDE] Errore API Claude:', error.message);
+            
+            if (error.response?.data) {
+                console.error('📊 [CLAUDE] Dettagli errore:', error.response.data);
+            }
+            
+            throw new Error(`Claude API error: ${error.message}`);
+        }
+    }
+
+    processClaudeResponse(claudeResponse, conversazione, messaggioUtente) {
+        // Estrai la risposta principale e i metadata
+        const lines = claudeResponse.split('\n');
+        let message = '';
+        let nextStep = null;
+        let extractedData = {};
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            if (line.startsWith('NEXT_STEP:')) {
+                nextStep = line.replace('NEXT_STEP:', '').trim();
+            } else if (line.startsWith('EXTRACTED_DATA:')) {
+                try {
+                    const dataStr = line.replace('EXTRACTED_DATA:', '').trim();
+                    if (dataStr && dataStr !== '{}') {
+                        extractedData = JSON.parse(dataStr);
+                    }
+                } catch (e) {
+                    console.warn('⚠️ [CLAUDE] Errore parsing extracted data:', e.message);
+                }
+            } else if (!line.startsWith('NEXT_STEP:') && !line.startsWith('EXTRACTED_DATA:')) {
+                message += line + '\n';
+            }
+        }
+
+        message = message.trim();
+
+        // Aggiorna lo step se specificato
+        if (nextStep && config.bot.steps[nextStep.toUpperCase()]) {
+            conversazione.currentStep = config.bot.steps[nextStep.toUpperCase()];
+        }
+
+        // Aggiorna i dati estratti
+        Object.assign(conversazione.datiCliente, extractedData);
+
+        // Fallback: usa anche l'estrazione tradizionale come backup
+        config.bot.extractData(conversazione, messaggioUtente);
+
+        // Normalizza i dati quando necessario
+        this.normalizeExtractedData(conversazione);
+
+        // Logica speciale per completamento step
+        this.handleStepCompletion(conversazione);
+
+        return { message, nextStep, extractedData };
+    }
+
+    normalizeExtractedData(conversazione) {
         const dati = conversazione.datiCliente;
         
-        // STEP START - Prima interazione
-        if (step === config.bot.steps.START) {
-            if (intent === 'conferma') {
-                conversazione.currentStep = config.bot.steps.INTERESSE;
-                return config.bot.messages.interesse_confermato;
-            }
-            return config.bot.messages.saluto;
+        // Normalizza nome completo
+        if (dati.nome && !dati.nomeCompleto) {
+            const parole = dati.nome.trim().split(/\s+/);
+            dati.nomeCompleto = parole.length >= 2;
         }
         
-        // STEP INTERESSE - Confermato interesse
-        if (step === config.bot.steps.INTERESSE) {
-            // Se il messaggio contiene già un nome, estrailo subito
-            config.bot.extractData(conversazione, messaggioUtente);
+        // Normalizza date e orari se presenti
+        if (dati.data && conversazione.currentStep === config.bot.steps.DATA) {
+            dati.data = config.bot.normalizeDate(dati.data);
+        }
+        
+        if (dati.ora && conversazione.currentStep === config.bot.steps.ORA) {
+            dati.ora = config.bot.normalizeTime(dati.ora);
+        }
+    }
+
+    handleStepCompletion(conversazione) {
+        const dati = conversazione.datiCliente;
+        const step = conversazione.currentStep;
+
+        // Auto-avanzamento degli step quando i dati sono completi
+        switch (step) {
+            case config.bot.steps.NOME:
+                if (dati.nome && dati.nomeCompleto) {
+                    conversazione.currentStep = config.bot.steps.EMAIL;
+                } else if (dati.nome && !dati.nomeCompleto) {
+                    conversazione.currentStep = config.bot.steps.COGNOME;
+                }
+                break;
+
+            case config.bot.steps.COGNOME:
+                if (dati.cognome) {
+                    dati.nome = `${dati.nome} ${dati.cognome}`;
+                    dati.nomeCompleto = true;
+                    conversazione.currentStep = config.bot.steps.EMAIL;
+                }
+                break;
+
+            case config.bot.steps.EMAIL:
+                if (dati.email) {
+                    conversazione.currentStep = config.bot.steps.DATA;
+                }
+                break;
+
+            case config.bot.steps.DATA:
+                if (dati.data) {
+                    conversazione.currentStep = config.bot.steps.ORA;
+                }
+                break;
+
+            case config.bot.steps.ORA:
+                if (dati.ora) {
+                    conversazione.currentStep = config.bot.steps.RIEPILOGO;
+                }
+                break;
+
+            case config.bot.steps.RIEPILOGO:
+                // La conferma viene gestita nel prossimo messaggio
+                break;
+        }
+
+        // Salva appuntamento se confermato
+        if (step === config.bot.steps.RIEPILOGO && this.isConfirmationMessage(conversazione.messaggi[conversazione.messaggi.length - 1]?.content)) {
+            conversazione.currentStep = config.bot.steps.CONFERMATO;
+            this.saveAppointment(conversazione);
+        }
+    }
+
+    isConfirmationMessage(message) {
+        if (!message) return false;
+        const confirmWords = ['sì', 'si', 'ok', 'va bene', 'perfetto', 'confermo', 'conferma', 'esatto', 'giusto'];
+        const messageLower = message.toLowerCase();
+        return confirmWords.some(word => messageLower.includes(word));
+    }
+
+    getFallbackResponse(conversazione) {
+        const step = conversazione.currentStep;
+        
+        // Risposte di fallback semplici in base allo step
+        switch (step) {
+            case config.bot.steps.START:
+                return "Ciao! Sono Sofia di Costruzione Digitale. Aiutiamo imprese edili a trovare nuovi clienti online. Ti interessa una consulenza gratuita? 🏗️";
             
-            // Se abbiamo estratto un nome completo, salta al passo successivo
-            if (dati.nome && dati.nomeCompleto) {
-                conversazione.currentStep = config.bot.steps.EMAIL;
-                return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
-            }
-            // Se abbiamo solo il nome, chiedi cognome
-            if (dati.nome && dati.nomeCompleto === false) {
-                conversazione.currentStep = config.bot.steps.COGNOME;
-                return config.bot.messages.chiedi_cognome;
-            }
-            // Altrimenti passa a step nome e chiedi il nome
-            conversazione.currentStep = config.bot.steps.NOME;
-            return config.bot.messages.chiedi_nome;
+            case config.bot.steps.NOME:
+                return "Come ti chiami? 📝";
+                
+            case config.bot.steps.EMAIL:
+                return "Perfetto! Ora la tua email? 📧";
+                
+            case config.bot.steps.DATA:
+                return "Che giorno va bene per la consulenza?";
+                
+            case config.bot.steps.ORA:
+                return "E a che ora preferisci? 🕐";
+                
+            default:
+                return "Mi dispiace, c'è stato un problemino. Puoi ripetere? 😅";
         }
-
-        // STEP NOME - Raccolta nome
-        if (step === config.bot.steps.NOME) {
-            if (intent === 'ricomincia') {
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            if (dati.nome && dati.nomeCompleto) {
-                conversazione.currentStep = config.bot.steps.EMAIL;
-                return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
-            }
-            if (dati.nome && dati.nomeCompleto === false) {
-                conversazione.currentStep = config.bot.steps.COGNOME;
-                return config.bot.messages.chiedi_cognome;
-            }
-            return config.bot.messages.chiedi_nome;
-        }
-
-        // STEP EMAIL - Raccolta email  
-        if (step === config.bot.steps.EMAIL) {
-            if (intent === 'ricomincia') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            if (dati.email) {
-                conversazione.currentStep = config.bot.steps.DATA;
-                return config.bot.messages.chiedi_data;
-            }
-            return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
-        }
-
-        // STEP COGNOME - Raccolta cognome
-        if (step === config.bot.steps.COGNOME) {
-            if (intent === 'ricomincia') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            if (dati.cognome) {
-                dati.nome = `${dati.nome} ${dati.cognome}`;
-                conversazione.currentStep = config.bot.steps.EMAIL;
-                return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
-            }
-            return config.bot.messages.chiedi_cognome;
-        }
-
-        // STEP DATA - Raccolta data
-        if (step === config.bot.steps.DATA) {
-            if (intent === 'ricomincia') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            if (dati.data) {
-                conversazione.currentStep = config.bot.steps.ORA;
-                return config.bot.messages.chiedi_ora;
-            }
-            return config.bot.messages.chiedi_data;
-        }
-
-        // STEP ORA - Raccolta ora
-        if (step === config.bot.steps.ORA) {
-            if (intent === 'ricomincia') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            if (dati.ora) {
-                // PASSAGGIO AUTOMATICO A RIEPILOGO
-                conversazione.currentStep = config.bot.steps.RIEPILOGO;
-                return config.bot.processTemplate(config.bot.messages.riepilogo, dati);
-            }
-            return config.bot.messages.chiedi_ora;
-        }
-
-        // STEP RIEPILOGO - Conferma finale
-        if (step === config.bot.steps.RIEPILOGO) {
-            if (intent === 'conferma') {
-                conversazione.currentStep = config.bot.steps.CONFERMATO;
-                this.saveAppointment(conversazione);
-                return config.bot.processTemplate(config.bot.messages.confermato, dati);
-            }
-            if (intent === 'rifiuto') {
-                return config.bot.messages.rifiuto_finale;
-            }
-            if (intent === 'ricomincia') {
-                conversazione.currentStep = config.bot.steps.NOME;
-                conversazione.datiCliente = {};
-                return config.bot.messages.chiedi_nome;
-            }
-            // Se non è una conferma, ripeti il riepilogo
-            return config.bot.processTemplate(config.bot.messages.riepilogo, dati);
-        }
-
-        // STEP CONFERMATO - Fine conversazione
-        if (step === config.bot.steps.CONFERMATO) {
-            return "Grazie! Ti ricontatteremo presto per la consulenza. 🏗️";
-        }
-
-        // Fallback
-        return config.bot.messages.errore;
     }
 
     async saveAppointment(conversazione) {
@@ -217,22 +306,20 @@ class ClaudeService {
             
             console.log('🗓️ [CLAUDE] Salvataggio appuntamento...');
             
-            // Crea data timestamp per bookingTimestamp
             const now = new Date();
             
-            // Usa lo schema BookingSchema esistente
             const booking = new this.Booking({
                 name: dati.nome,
                 email: dati.email,
                 phone: conversazione.whatsappNumber,
-                message: `Appuntamento fissato tramite WhatsApp Bot per consulenza marketing`,
+                message: `Consulenza marketing imprese edili - Appuntamento fissato tramite WhatsApp Bot Sofia`,
                 bookingDate: dati.data,
                 bookingTime: dati.ora,
                 bookingTimestamp: now,
                 status: 'confirmed',
                 value: 0, // Consultazione gratuita
-                service: 'Consulenza Marketing per Imprese Edili',
-                source: 'WhatsApp Bot - Costruzione Digitale',
+                service: 'Consulenza Marketing Digitale - Metodo Chiavi in Mano',
+                source: 'WhatsApp Bot Sofia - Costruzione Digitale',
                 viewed: false
             });
             
@@ -244,7 +331,7 @@ class ClaudeService {
             console.log(`   📅 Data: ${dati.data}`);
             console.log(`   🕐 Ora: ${dati.ora}`);
             console.log(`   📱 Telefono: ${conversazione.whatsappNumber}`);
-            console.log(`   🏢 Servizio: Consulenza Marketing per Imprese Edili`);
+            console.log(`   🏢 Servizio: Consulenza Marketing Digitale`);
             
             return { success: true, id: savedBooking._id };
             
@@ -257,14 +344,21 @@ class ClaudeService {
 
     async testConnection() {
         try {
-            console.log('🧪 [CLAUDE] Test connessione...');
+            console.log('🧪 [CLAUDE] Test connessione API...');
             
             if (!this.apiKey) {
                 throw new Error('CLAUDE_API_KEY mancante');
             }
+
+            // Test semplice dell'API
+            const testResponse = await this.callClaudeAPI('Rispondi solo "OK" se ricevi questo messaggio.');
             
-            console.log('✅ [CLAUDE] Configurazione OK');
-            return { success: true, message: 'Claude configurato correttamente' };
+            if (testResponse && testResponse.includes('OK')) {
+                console.log('✅ [CLAUDE] API Claude funzionante');
+                return { success: true, message: 'Claude API connessa e funzionante' };
+            } else {
+                throw new Error('Risposta API non valida');
+            }
 
         } catch (error) {
             console.error('❌ [CLAUDE] Test fallito:', error.message);
