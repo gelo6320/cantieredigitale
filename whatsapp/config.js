@@ -21,7 +21,7 @@ const config = {
     },
 
     database: {
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/appointments'
+        mongoUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017/appointments'
     },
     
     server: {
@@ -135,7 +135,7 @@ config.bot.extractData = function(conversazione, messaggio) {
     
     switch (step) {
         case this.steps.NOME:
-            if (messaggio.length > 1) {
+            if (messaggio.length >= 1) {
                 dati.nome = messaggio.trim();
                 console.log(`👤 Nome estratto: ${dati.nome}`);
             }
@@ -151,14 +151,14 @@ config.bot.extractData = function(conversazione, messaggio) {
             break;
             
         case this.steps.DATA:
-            if (messaggio.length > 2) {
+            if (messaggio.length >= 1) {
                 dati.data = messaggio.trim();
                 console.log(`📅 Data estratta: ${dati.data}`);
             }
             break;
             
         case this.steps.ORA:
-            if (messaggio.length > 2) {
+            if (messaggio.length >= 1) {
                 dati.ora = messaggio.trim();
                 console.log(`🕐 Ora estratta: ${dati.ora}`);
             }
