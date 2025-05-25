@@ -265,6 +265,10 @@ Rispondi ora come Sofia:`;
         if (step === config.bot.steps.RIEPILOGO && this.isConfirmationMessage(conversazione.messaggi[conversazione.messaggi.length - 1]?.content)) {
             conversazione.currentStep = config.bot.steps.CONFERMATO;
             this.saveAppointment(conversazione);
+        } else if (step === config.bot.steps.CONFERMATO && this.isConfirmationMessage(conversazione.messaggi[conversazione.messaggi.length - 1]?.content) && !conversazione.appointmentSaved) {
+            // Salva appuntamento anche se già nello step CONFERMATO ma non ancora salvato
+            this.saveAppointment(conversazione);
+            conversazione.appointmentSaved = true;
         }
     }
 
