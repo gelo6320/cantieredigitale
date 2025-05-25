@@ -19,37 +19,13 @@ class ClaudeService {
             // Il database è già connesso nel server principale
             console.log('✅ [DATABASE] Uso connessione esistente');
             
-            // Usa lo schema BookingSchema esistente dal server principale
-            try {
-                this.Booking = mongoose.model('Booking');
-                console.log('✅ [DATABASE] Schema Booking trovato');
-            } catch (e) {
-                // Se il modello non esiste, crealo (fallback)
-                const bookingSchema = new mongoose.Schema({
-                    name: { type: String, required: true },
-                    email: { type: String, required: true },
-                    phone: { type: String, required: true },
-                    message: String,
-                    bookingDate: { type: String, required: true },
-                    bookingTime: { type: String, required: true },
-                    bookingTimestamp: { type: Date, required: true },
-                    status: { 
-                        type: String, 
-                        enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
-                        default: 'confirmed' 
-                    },
-                    value: { type: Number, default: 0 },
-                    service: { type: String, default: 'Consulenza Marketing' },
-                    source: { type: String, default: 'WhatsApp Bot' },
-                    createdAt: { type: Date, default: Date.now }
-                });
-                
-                this.Booking = mongoose.model('Booking', bookingSchema);
-                console.log('✅ [DATABASE] Schema Booking creato');
-            }
+            // Usa SEMPRE il modello Booking esistente dal server principale
+            this.Booking = mongoose.model('Booking');
+            console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
             
         } catch (error) {
             console.error('❌ [DATABASE] Errore setup:', error.message);
+            console.error('❌ [DATABASE] Il modello Booking deve esistere nel server principale');
         }
     }
 
