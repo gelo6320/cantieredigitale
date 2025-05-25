@@ -15,8 +15,12 @@ class ClaudeService {
 
     // Setup database - usa schema esistente dal server principale
     setupDatabase() {
-        // Il database è già connesso nel server principale
-        console.log('✅ [DATABASE] Uso connessione esistente');
+        // Verifica se esiste connessione a MONGODB_URI_BOOKING
+        if (config.database.mongoUrl.includes('booking') || process.env.MONGODB_URI_BOOKING) {
+            console.log('✅ [DATABASE] Usando database booking dedicato');
+        } else {
+            console.log('✅ [DATABASE] Uso connessione esistente');
+        }
         
         // Usa SEMPRE il modello Booking esistente dal server principale
         this.Booking = mongoose.model('Booking');

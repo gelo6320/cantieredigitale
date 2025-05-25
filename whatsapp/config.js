@@ -23,10 +23,6 @@ const config = {
         maxTokens: 150,
         timeout: 10000
     },
-
-    database: {
-        mongoUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017/appointments'
-    },
     
     server: {
         port: process.env.PORT || 3000,
@@ -159,20 +155,86 @@ config.bot.extractData = function(conversazione, messaggio) {
             }
             break;
             
-        case this.steps.DATA:
-            if (messaggio.length >= 1) {
-                dati.data = messaggio.trim();
-                console.log(`📅 Data estratta: ${dati.data}`);
-            }
-            break;
-            
-        case this.steps.ORA:
-            if (messaggio.length >= 1) {
-                dati.ora = messaggio.trim();
-                console.log(`🕐 Ora estratta: ${dati.ora}`);
-            }
-            break;
+            case this.steps.DATA:
+                if (messaggio.length >= 1) {
+                    const rawDate = messaggio.trim();
+                    dati.data = this.normalizeDate(rawDate);
+                    console.log(`📅 Data estratta: ${rawDate} → ${dati.data}`);
+                }
+                break;
+                
+            case this.steps.ORA:
+                if (messaggio.length >= 1) {
+                    const rawTime = messaggio.trim();
+                    dati.ora = this.normalizeTime(rawTime);
+                    console.log(`🕐 Ora estratta: ${rawTime} → ${dati.ora}`);
+                }
+                break;
     }
+};
+
+// Normalizza data colloquiale in formato standard
+config.bot.normalizeDate = function(dateText) {
+    const oggi = new Date();
+    const domani = new Date(oggi);
+    domani.setDate(oggi.getDate() + 1);
+    
+    const dateTextLower = dateText.toLowerCase().trim();
+    
+    if (dateTextLower.includes('oggi')) {
+        return oggi.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+    if (dateTextLower.includes('domani')) {
+        return domani.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+    
+    // Prova a parsare date come "15/01", "lunedì", etc
+    // Per ora restituisce il testo originale, si può migliorare
+    return dateText;
+};
+
+// Normalizza ora colloquiale in formato 24h
+config.bot.normalizeTime = function(timeText) {
+    const timeTextLower = timeText.toLowerCase().trim();
+    
+    // Mappature comuni
+    const timeMap = {
+        'mattina': '09:00',
+        'mattino': '09:00',
+        'pomeriggio': '14:00',
+        'sera': '18:00',
+        'pranzo': '12:00'
+    };
+    
+    // Controlla mappature dirette
+    for (const [key, value] of Object.entries(timeMap)) {
+        if (timeTextLower.includes(key)) {
+            return value;
+        }
+    }
+    
+    // Gestisce "10 di mattina", "3 del pomeriggio", etc
+    const numberMatch = timeTextLower.match(/(\d{1,2})/);
+    if (numberMatch) {
+        let hour = parseInt(numberMatch[1]);
+        
+        if (timeTextLower.includes('mattina') || timeTextLower.includes('mattino')) {
+            return `${hour.toString().padStart(2, '0')}:00`;
+        }
+        if (timeTextLower.includes('pomeriggio') || timeTextLower.includes('sera')) {
+            if (hour < 12) hour += 12;
+            return `${hour.toString().padStart(2, '0')}:00`;
+        }
+        // Se solo numero, assumiamo formato 24h
+        return `${hour.toString().padStart(2, '0')}:00`;
+    }
+    
+    // Se già in formato HH:MM, restituisce così
+    if (/^\d{1,2}:\d{2}$/.test(timeTextLower)) {
+        return timeTextLower;
+    }
+    
+    return timeText; // Fallback
 };
 
 // Controlla se appuntamento è completo
