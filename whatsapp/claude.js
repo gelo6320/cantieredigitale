@@ -14,21 +14,41 @@ class ClaudeService {
     }
 
     // Setup database - usa schema esistente dal server principale
-    setupDatabase() {
-        // Verifica se esiste connessione a MONGODB_URI_BOOKING
-        if (config.database.mongoUrl.includes('booking') || process.env.MONGODB_URI_BOOKING) {
-            console.log('✅ [DATABASE] Usando database booking dedicato');
-        } else {
-            console.log('✅ [DATABASE] Uso connessione esistente');
+    async setupDatabase() {
+        try {
+            // URL del database booking
+            const bookingDBUrl = process.env.MONGODB_URI_BOOKING || config.database.mongoUrl;
+            
+            // Controlla se mongoose è già connesso
+            if (mongoose.connection.readyState === 0) {
+                console.log('🔗 [DATABASE] Connessione al database booking...');
+                await mongoose.connect(bookingDBUrl, {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true
+                });
+                console.log('✅ [DATABASE] Connesso al database booking');
+            } else {
+                console.log('✅ [DATABASE] Usa connessione esistente');
+            }
+    
+            // Usa SEMPRE il modello Booking esistente dal server principale
+            this.Booking = mongoose.model('Booking');
+            console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
+            
+        } catch (error) {
+            console.error('❌ [DATABASE] Errore setup:', error.message);
+            console.error('❌ [DATABASE] Assicurati che il server principale sia avviato e il modello Booking sia definito');
+            throw error;
         }
-        
-        // Usa SEMPRE il modello Booking esistente dal server principale
-        this.Booking = mongoose.model('Booking');
-        console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
     }
 
     async generateResponse(conversazione, messaggioUtente) {
         try {
+            // Assicurati che il database sia pronto
+            if (!this.Booking) {
+                await this.setupDatabase();
+            }
+            
             console.log(`🤖 [CLAUDE] Generazione risposta per: "${messaggioUtente}"`);
             
             // 1. Rileva intent
