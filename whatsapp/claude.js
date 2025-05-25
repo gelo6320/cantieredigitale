@@ -129,7 +129,7 @@ Rispondi ora come Sofia:`;
                 }]
             }, {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    'x-api-key': this.apiKey,
                     'Content-Type': 'application/json',
                     'anthropic-version': '2023-06-01'
                 },
