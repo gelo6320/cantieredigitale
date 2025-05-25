@@ -14,19 +14,13 @@ class ClaudeService {
     }
 
     // Setup database - usa schema esistente dal server principale
-    async setupDatabase() {
-        try {
-            // Il database è già connesso nel server principale
-            console.log('✅ [DATABASE] Uso connessione esistente');
-            
-            // Usa SEMPRE il modello Booking esistente dal server principale
-            this.Booking = mongoose.model('Booking');
-            console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
-            
-        } catch (error) {
-            console.error('❌ [DATABASE] Errore setup:', error.message);
-            console.error('❌ [DATABASE] Il modello Booking deve esistere nel server principale');
-        }
+    setupDatabase() {
+        // Il database è già connesso nel server principale
+        console.log('✅ [DATABASE] Uso connessione esistente');
+        
+        // Usa SEMPRE il modello Booking esistente dal server principale
+        this.Booking = mongoose.model('Booking');
+        console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
     }
 
     async generateResponse(conversazione, messaggioUtente) {
