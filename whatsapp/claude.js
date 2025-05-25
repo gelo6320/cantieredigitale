@@ -90,6 +90,20 @@ class ClaudeService {
         
         // STEP INTERESSE - Confermato interesse
         if (step === config.bot.steps.INTERESSE) {
+            // Se il messaggio contiene già un nome, estrailo subito
+            config.bot.extractData(conversazione, messaggioUtente);
+            
+            // Se abbiamo estratto un nome completo, salta al passo successivo
+            if (dati.nome && dati.nomeCompleto) {
+                conversazione.currentStep = config.bot.steps.EMAIL;
+                return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
+            }
+            // Se abbiamo solo il nome, chiedi cognome
+            if (dati.nome && dati.nomeCompleto === false) {
+                conversazione.currentStep = config.bot.steps.COGNOME;
+                return config.bot.messages.chiedi_cognome;
+            }
+            // Altrimenti passa a step nome e chiedi il nome
             conversazione.currentStep = config.bot.steps.NOME;
             return config.bot.messages.chiedi_nome;
         }
