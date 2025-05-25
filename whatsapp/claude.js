@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/claude.js - CON SISTEMA INTENT
+// 📁 whatsapp/claude.js - CON SISTEMA INTENT CORRETTO
 // ============================================
 const axios = require('axios');
 const config = require('./config');
@@ -26,11 +26,53 @@ class ClaudeService {
             // 2. Estrai dati dal messaggio se necessario
             config.bot.extractData(conversazione, messaggioUtente);
             
-            // 3. Aggiorna step basato su intent
+            // 🆕 3. DEBUG STATO CONVERSAZIONE
+            config.bot.debugConversationState(conversazione);
+            
+            // 4. Aggiorna step basato su intent
             config.bot.updateStepByIntent(conversazione, messaggioUtente, intent);
             
-            // 4. Ottieni risposta basata su intent e step
+            // 5. Ottieni risposta basata su intent e step
             let risposta = config.bot.getResponseByIntent(conversazione, messaggioUtente, intent);
+            
+            // ===== GESTIONE RIEPILOGO AUTOMATICO MIGLIORATA =====
+            
+            // 🆕 Se abbiamo tutti i dati ma siamo ancora nell'ORA step, verifica prima del riepilogo
+            if (conversazione.currentStep === config.bot.steps.ORA && 
+                config.bot.isAppointmentComplete(conversazione) &&
+                config.bot.canShowRiepilogo(conversazione)) {
+                
+                console.log('📋 [CLAUDE] Passaggio automatico a RIEPILOGO');
+                conversazione.currentStep = config.bot.steps.RIEPILOGO;
+                risposta = config.bot.processTemplate(
+                    config.bot.messages.riepilogo, 
+                    conversazione.datiCliente
+                );
+            }
+            
+            // ===== 🆕 VALIDAZIONE DATI PRIMA DEL RIEPILOGO =====
+            
+            // Se siamo in RIEPILOGO ma mancano dati, torna alla raccolta
+            if (conversazione.currentStep === config.bot.steps.RIEPILOGO && 
+                !config.bot.isAppointmentComplete(conversazione)) {
+                
+                console.log('⚠️ [CLAUDE] Dati incompleti durante riepilogo, tornando alla raccolta');
+                
+                const dati = conversazione.datiCliente;
+                if (!dati.nome) {
+                    conversazione.currentStep = config.bot.steps.NOME;
+                    risposta = config.bot.messages.chiedi_nome;
+                } else if (!dati.email) {
+                    conversazione.currentStep = config.bot.steps.EMAIL;
+                    risposta = config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
+                } else if (!dati.data) {
+                    conversazione.currentStep = config.bot.steps.DATA;
+                    risposta = config.bot.messages.chiedi_data;
+                } else if (!dati.ora) {
+                    conversazione.currentStep = config.bot.steps.ORA;
+                    risposta = config.bot.messages.chiedi_ora;
+                }
+            }
             
             // ===== GESTIONE APPUNTAMENTO COMPLETO =====
             
@@ -54,19 +96,6 @@ class ClaudeService {
                 }
             }
             
-            // ===== RIEPILOGO AUTOMATICO =====
-            
-            // Se abbiamo tutti i dati ma siamo ancora nell'ORA step, mostra riepilogo
-            if (conversazione.currentStep === config.bot.steps.ORA && 
-                config.bot.isAppointmentComplete(conversazione)) {
-                
-                conversazione.currentStep = config.bot.steps.RIEPILOGO;
-                risposta = config.bot.processTemplate(
-                    config.bot.messages.riepilogo, 
-                    conversazione.datiCliente
-                );
-            }
-            
             // ===== USO CLAUDE PER RISPOSTE COMPLESSE =====
             
             // Solo per conversazioni generali o quando serve più intelligenza
@@ -79,9 +108,12 @@ class ClaudeService {
                 }
             }
             
+            // ===== 🆕 LOGGING MIGLIORATO =====
             console.log(`📤 [CLAUDE] Risposta finale: "${risposta}"`);
-            console.log(`📊 [CLAUDE] Step: ${conversazione.currentStep}`);
+            console.log(`📊 [CLAUDE] Step finale: ${conversazione.currentStep}`);
             console.log(`📊 [CLAUDE] Dati raccolti:`, conversazione.datiCliente);
+            console.log(`🎯 [CLAUDE] Intent: ${intent}`);
+            console.log(`✅ [CLAUDE] Appuntamento completo: ${config.bot.isAppointmentComplete(conversazione)}`);
             
             return risposta;
 
@@ -284,9 +316,78 @@ class ClaudeService {
         }
     }
 
+    // ===== 🆕 NUOVO METODO PER GESTIRE MODIFICHE =====
+    handleDataModification(conversazione, campo, nuovoValore) {
+        try {
+            console.log(`✏️ [CLAUDE] Modifica ${campo}: "${nuovoValore}"`);
+            
+            // Valida e salva il nuovo valore
+            switch (campo) {
+                case 'nome':
+                    if (nuovoValore && nuovoValore.length > 1) {
+                        conversazione.datiCliente.nome = nuovoValore;
+                        console.log(`✅ [CLAUDE] Nome aggiornato: ${nuovoValore}`);
+                        return true;
+                    }
+                    break;
+                    
+                case 'email':
+                    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+                    if (emailRegex.test(nuovoValore)) {
+                        conversazione.datiCliente.email = nuovoValore;
+                        console.log(`✅ [CLAUDE] Email aggiornata: ${nuovoValore}`);
+                        return true;
+                    }
+                    break;
+                    
+                case 'data':
+                    if (nuovoValore && nuovoValore.length > 2) {
+                        conversazione.datiCliente.data = nuovoValore;
+                        console.log(`✅ [CLAUDE] Data aggiornata: ${nuovoValore}`);
+                        return true;
+                    }
+                    break;
+                    
+                case 'ora':
+                    if (nuovoValore && (nuovoValore.includes(':') || nuovoValore.includes('mattina') || nuovoValore.includes('pomeriggio'))) {
+                        conversazione.datiCliente.ora = nuovoValore;
+                        console.log(`✅ [CLAUDE] Ora aggiornata: ${nuovoValore}`);
+                        return true;
+                    }
+                    break;
+            }
+            
+            console.log(`❌ [CLAUDE] Valore non valido per ${campo}: "${nuovoValore}"`);
+            return false;
+            
+        } catch (error) {
+            console.error(`❌ [CLAUDE] Errore modifica ${campo}:`, error.message);
+            return false;
+        }
+    }
+
+    // ===== 🆕 METODO PER RILEVARE INTENZIONE DI MODIFICA =====
+    detectModificationIntent(messaggio, conversazione) {
+        const messageLower = messaggio.toLowerCase();
+        
+        // Parole chiave per modifiche
+        const modificaKeywords = ['cambia', 'modifica', 'sbagliato', 'sbagliata', 'correggi', 'nuovo', 'nuova'];
+        const hasModificaKeyword = modificaKeywords.some(word => messageLower.includes(word));
+        
+        if (hasModificaKeyword) {
+            // Cerca quale campo vuole modificare
+            if (messageLower.includes('nome')) return 'modifica_nome';
+            if (messageLower.includes('email') || messageLower.includes('mail')) return 'modifica_email';
+            if (messageLower.includes('data') || messageLower.includes('giorno')) return 'modifica_data';
+            if (messageLower.includes('ora') || messageLower.includes('orario')) return 'modifica_ora';
+        }
+        
+        return null;
+    }
+
     // ===== UTILITY METHODS =====
 
-    // Analizza completezza conversazione
+    // 🆕 ANALIZZA COMPLETEZZA CONVERSAZIONE (MIGLIORATO)
     analyzeConversation(conversazione) {
         const dati = conversazione.datiCliente || {};
         const step = conversazione.currentStep || config.bot.steps.START;
@@ -301,25 +402,58 @@ class ClaudeService {
         
         const completenessPercentage = Object.values(completeness).filter(Boolean).length / 4 * 100;
         
+        // 🆕 Analisi qualità dati
+        const dataQuality = {
+            nome: dati.nome ? (dati.nome.length > 1 && !dati.nome.includes('@')) : false,
+            email: dati.email ? /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(dati.email) : false,
+            data: dati.data ? dati.data.length > 2 : false,
+            ora: dati.ora ? (dati.ora.includes(':') || dati.ora.length > 2) : false
+        };
+        
         return {
             step: step,
             completeness: completeness,
+            dataQuality: dataQuality,
             completenessPercentage: Math.round(completenessPercentage),
             isComplete: config.bot.isAppointmentComplete(conversazione),
+            isValidData: Object.values(dataQuality).every(Boolean),
             messageCount: messaggi,
-            data: dati
+            data: dati,
+            // 🆕 Suggerimenti per miglioramenti
+            suggestions: this.generateSuggestions(completeness, dataQuality, step)
         };
+    }
+
+    // 🆕 GENERA SUGGERIMENTI
+    generateSuggestions(completeness, dataQuality, step) {
+        const suggestions = [];
+        
+        if (!completeness.nome) suggestions.push('Raccogliere nome cliente');
+        if (!completeness.email) suggestions.push('Raccogliere email cliente');
+        if (!completeness.data) suggestions.push('Raccogliere data appuntamento');
+        if (!completeness.ora) suggestions.push('Raccogliere ora appuntamento');
+        
+        if (completeness.email && !dataQuality.email) suggestions.push('Validare formato email');
+        if (completeness.nome && !dataQuality.nome) suggestions.push('Validare nome cliente');
+        
+        if (step === config.bot.steps.RIEPILOGO && !Object.values(dataQuality).every(Boolean)) {
+            suggestions.push('Validare tutti i dati prima della conferma');
+        }
+        
+        return suggestions;
     }
 
     // Reset conversazione mantenendo WhatsApp number
     resetConversation(conversazione) {
         const whatsappNumber = conversazione.whatsappNumber;
+        const contactName = conversazione.contactName;
         
         conversazione.messaggi = [];
         conversazione.datiCliente = {};
         conversazione.currentStep = config.bot.steps.START;
         conversazione.ultimoMessaggio = new Date();
         conversazione.whatsappNumber = whatsappNumber; // Mantieni numero
+        conversazione.contactName = contactName; // Mantieni nome contatto
         
         console.log('🔄 [CLAUDE] Conversazione resettata');
         return conversazione;
@@ -344,6 +478,38 @@ class ClaudeService {
         });
         
         return stats;
+    }
+
+    // 🆕 METODO PER VALIDARE DATI INSERITI
+    validateUserInput(campo, valore) {
+        switch (campo) {
+            case 'nome':
+                return valore && valore.length > 1 && !/\d/.test(valore);
+            case 'email':
+                return /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(valore);
+            case 'data':
+                return valore && valore.length > 2;
+            case 'ora':
+                return valore && (valore.includes(':') || valore.includes('mattina') || valore.includes('pomeriggio'));
+            default:
+                return false;
+        }
+    }
+
+    // 🆕 OTTIENI MESSAGGI DI ERRORE PERSONALIZZATI
+    getValidationErrorMessage(campo) {
+        switch (campo) {
+            case 'nome':
+                return "Il nome deve contenere almeno 2 caratteri e non può contenere numeri. Riprova! 📝";
+            case 'email':
+                return "L'email non sembra valida. Inserisci un formato corretto (es: nome@azienda.it) 📧";
+            case 'data':
+                return "La data deve essere più specifica. Prova con 'lunedì', 'martedì' o una data precisa 📅";
+            case 'ora':
+                return "L'ora deve essere nel formato 'HH:MM' o specificare 'mattina'/'pomeriggio' 🕐";
+            default:
+                return "C'è stato un problema con il dato inserito. Riprova! 🔄";
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 // ============================================
-// 📁 whatsapp/config.js - BOT APPUNTAMENTI CON INTENT
+// 📁 whatsapp/config.js - BOT APPUNTAMENTI CON INTENT CORRETTO
 // ============================================
 
 require('dotenv').config();
@@ -49,7 +49,7 @@ const config = {
         name: "Marco",
         personality: "professionale, competente nel settore edile, amichevole e diretto",
         
-        // ===== KEYWORDS PER INTENT =====
+        // ===== KEYWORDS PER INTENT (AGGIORNATE) =====
         keywords: {
             saluto: ["ciao", "salve", "buongiorno", "buonasera", "hey", "hello", "salut"],
             
@@ -59,16 +59,24 @@ const config = {
             
             info_business: ["chi siete", "dove siete", "contatti", "telefono", "email", "indirizzo", "info", "informazioni", "azienda"],
             
-            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "esatto", "giusto", "certo", "certamente"],
+            conferma: ["sì", "si", "ok", "va bene", "perfetto", "confermo", "esatto", "giusto", "certo", "certamente", "conferma"],
             
             rifiuto: ["no", "non", "annulla", "cancella", "stop", "forse", "ci penso"],
+            
+            // 🆕 NUOVI INTENT PER MODIFICHE
+            modifica_nome: ["nome", "cambia nome", "modifica nome", "sbagliato nome", "nome è sbagliato", "il nome"],
+            modifica_email: ["email", "mail", "cambia email", "modifica email", "sbagliata email", "email sbagliata", "la mail", "l'email"],
+            modifica_data: ["data", "giorno", "cambia data", "modifica data", "sbagliata data", "data sbagliata", "la data", "il giorno"],
+            modifica_ora: ["ora", "orario", "cambia ora", "modifica ora", "sbagliata ora", "ora sbagliata", "l'ora", "l'orario"],
+            
+            ricomincia: ["ricomincia", "restart", "ricominciamo", "riparti", "ricomincio", "da capo", "rifare"],
             
             saluti_finali: ["grazie", "ciao", "arrivederci", "a presto", "buona giornata", "buon lavoro"],
             
             problemi: ["problema", "errore", "non funziona", "aiuto", "help", "assistenza"]
         },
 
-        // ===== MESSAGGI PER INTENT =====
+        // ===== MESSAGGI PER INTENT (AGGIORNATI) =====
         messages: {
             // SALUTI
             saluto_iniziale: "Buongiorno! 👷‍♂️ Sono Marco di {business_name}, il tuo assistente specializzato in marketing per imprese edili. Sono qui per fissare un appuntamento con uno dei nostri consulenti esperti. Posso aiutarti a far crescere la tua impresa edile con strategie di marketing mirate! Come posso esserti utile?",
@@ -97,7 +105,7 @@ Vuoi fissare una consulenza gratuita per capire come possiamo far crescere la tu
             chiedi_data: "Perfetto! In che giorno preferisci fare la consulenza? (es: lunedì, martedì, domani...)",
             chiedi_ora: "Ottimo! A che ora ti va meglio? I nostri consulenti sono disponibili dalle 9:00 alle 18:00 🕐",
             
-            // RIEPILOGO E CONFERMA
+            // 🆕 RIEPILOGO E CONFERMA MIGLIORATI
             riepilogo: `Eccellente! Ecco il riepilogo della tua consulenza gratuita:
 👷‍♂️ Nome: {nome}
 📧 Email: {email}
@@ -105,9 +113,26 @@ Vuoi fissare una consulenza gratuita per capire come possiamo far crescere la tu
 🕐 Ora: {ora}
 
 Ti chiameremo per analizzare le esigenze di marketing della tua impresa edile.
-Confermi? Scrivi "sì" ✅`,
+
+✅ Scrivi "sì" per confermare
+✏️ Oppure dimmi cosa vuoi modificare (es: "cambia email", "modifica data")`,
 
             appuntamento_confermato: "🎉 Perfetto {nome}! Consulenza confermata per {data} alle {ora}. Un nostro esperto di marketing per l'edilizia ti contatterà per aiutarti a far crescere la tua impresa. A presto! 🏗️",
+            
+            // 🆕 MESSAGGI PER MODIFICHE SPECIFICHE
+            quale_modifica: `Cosa vuoi modificare? Puoi dirmi:
+✏️ "Nome" - per cambiare il nome
+✏️ "Email" - per cambiare l'email  
+✏️ "Data" - per cambiare il giorno
+✏️ "Ora" - per cambiare l'orario
+🔄 "Ricomincia" - per ripartire da capo`,
+
+            modifica_confermata_nome: "Perfetto! Dimmi il nuovo nome e cognome: ",
+            modifica_confermata_email: "Perfetto! Dimmi la nuova email: ",
+            modifica_confermata_data: "Perfetto! Dimmi il nuovo giorno: ",
+            modifica_confermata_ora: "Perfetto! Dimmi la nuova ora: ",
+            
+            modifica_completata: "✅ Aggiornato! Ecco il nuovo riepilogo:",
             
             // INFO BUSINESS
             info_contatti: `📍 {business_name}
@@ -127,11 +152,20 @@ Siamo esperti in marketing per imprese edili. Vuoi fissare una consulenza gratui
             
             non_capito: "Non ho capito bene... Può riformulare? O preferisce fissare direttamente una consulenza gratuita per la sua impresa edile? 📞",
             
+            non_capito_riepilogo: `Non ho capito cosa vuoi modificare. Puoi essere più specifico?
+✏️ Scrivi "nome", "email", "data" o "ora"
+✅ Oppure "sì" per confermare tutto`,
+            
             // SALUTI FINALI
             saluto_finale: "Grazie per averci contattato! 👷‍♂️ Se cambia idea, siamo sempre qui per aiutare la sua impresa edile a crescere! Buon lavoro! 🏗️",
             
             // RIFIUTO GENTILE
-            rifiuto_comprensione: "Capisco perfettamente! Se in futuro avrà bisogno di supporto marketing per la sua impresa edile, saremo qui. Buon lavoro! 🏗️"
+            rifiuto_comprensione: "Capisco perfettamente! Se in futuro avrà bisogno di supporto marketing per la sua impresa edile, saremo qui. Buon lavoro! 🏗️",
+            
+            // 🆕 MESSAGGI AGGIUNTIVI
+            dati_incompleti: "Mancano ancora alcuni dati. Continuiamo la raccolta dati per completare l'appuntamento! 📝",
+            
+            ricomincia_messaggio: "Ricominciamo da capo! 🔄 "
         },
 
         // ===== STEP DEL PROCESSO =====
@@ -150,7 +184,7 @@ Siamo esperti in marketing per imprese edili. Vuoi fissare una consulenza gratui
     }
 };
 
-// ===== FUNZIONI CON INTENT =====
+// ===== FUNZIONI CON INTENT (AGGIORNATE) =====
 
 // Genera prompt di sistema intelligente
 config.bot.generateSystemPrompt = function(conversazione = {}) {
@@ -211,10 +245,61 @@ config.bot.detectIntent = function(message) {
     return 'generale';
 };
 
-// Ottieni messaggio basato su intent e step
+// 🆕 OTTIENI MESSAGGIO BASATO SU INTENT E STEP (AGGIORNATO)
 config.bot.getResponseByIntent = function(conversazione, messaggio, intent) {
     const step = conversazione.currentStep || this.steps.START;
     const dati = conversazione.datiCliente || {};
+    
+    // 🆕 GESTIONE SPECIALE PER STEP RIEPILOGO
+    if (step === this.steps.RIEPILOGO) {
+        
+        // Conferma definitiva
+        if (intent === 'conferma') {
+            return this.processTemplate(this.messages.appuntamento_confermato, dati);
+        }
+        
+        // 🆕 Richieste di modifica specifiche
+        if (intent === 'modifica_nome') {
+            conversazione.currentStep = this.steps.NOME;
+            conversazione.datiCliente.nome = null; // Reset dato
+            return this.messages.modifica_confermata_nome;
+        }
+        
+        if (intent === 'modifica_email') {
+            conversazione.currentStep = this.steps.EMAIL;
+            conversazione.datiCliente.email = null; // Reset dato
+            return this.messages.modifica_confermata_email;
+        }
+        
+        if (intent === 'modifica_data') {
+            conversazione.currentStep = this.steps.DATA;
+            conversazione.datiCliente.data = null; // Reset dato
+            return this.messages.modifica_confermata_data;
+        }
+        
+        if (intent === 'modifica_ora') {
+            conversazione.currentStep = this.steps.ORA;
+            conversazione.datiCliente.ora = null; // Reset dato
+            return this.messages.modifica_confermata_ora;
+        }
+        
+        // 🆕 Ricomincia da capo
+        if (intent === 'ricomincia') {
+            conversazione.currentStep = this.steps.NOME;
+            conversazione.datiCliente = {}; // Reset tutti i dati
+            return this.messages.ricomincia_messaggio + this.messages.chiedi_nome;
+        }
+        
+        // 🆕 Gestione rifiuto con opzioni
+        if (intent === 'rifiuto') {
+            return this.messages.rifiuto_comprensione;
+        }
+        
+        // 🆕 Se non capisce, offri opzioni specifiche
+        return this.messages.quale_modifica;
+    }
+    
+    // ===== RESTO DELLA LOGICA ESISTENTE =====
     
     // Se stiamo raccogliendo dati specifici, continua il flusso
     if (step === this.steps.NOME && !dati.nome) {
@@ -229,15 +314,8 @@ config.bot.getResponseByIntent = function(conversazione, messaggio, intent) {
     if (step === this.steps.ORA && !dati.ora) {
         return this.messages.chiedi_ora;
     }
-    if (step === this.steps.RIEPILOGO) {
-        if (intent === 'conferma') {
-            return this.processTemplate(this.messages.appuntamento_confermato, dati);
-        } else {
-            return "Cosa vuoi modificare? Dimmi il nuovo dato 😊";
-        }
-    }
     
-    // Gestione intent specifici
+    // Gestione intent specifici...
     switch (intent) {
         case 'saluto':
             return conversazione.messaggi?.length > 0 ? 
@@ -273,6 +351,12 @@ config.bot.getResponseByIntent = function(conversazione, messaggio, intent) {
         case 'problemi':
             return this.messages.problema_tecnico;
             
+        // 🆕 Gestione modifiche durante la raccolta dati
+        case 'ricomincia':
+            conversazione.currentStep = this.steps.NOME;
+            conversazione.datiCliente = {};
+            return this.messages.ricomincia_messaggio + this.messages.chiedi_nome;
+            
         default:
             // Per messaggi generali, dopo 2-3 scambi proponi appuntamento
             const messaggiCount = conversazione.messaggi?.length || 0;
@@ -284,7 +368,7 @@ config.bot.getResponseByIntent = function(conversazione, messaggio, intent) {
     }
 };
 
-// Aggiorna step basato su intent
+// 🆕 AGGIORNA STEP BASATO SU INTENT (AGGIORNATO)
 config.bot.updateStepByIntent = function(conversazione, messaggio, intent) {
     const step = conversazione.currentStep || this.steps.START;
     const dati = conversazione.datiCliente || {};
@@ -331,11 +415,14 @@ config.bot.updateStepByIntent = function(conversazione, messaggio, intent) {
             break;
             
         case this.steps.RIEPILOGO:
+            // 🆕 GESTIONE MIGLIORATA PER RIEPILOGO
             if (intent === 'conferma') {
                 conversazione.currentStep = this.steps.CONFERMATO;
             } else if (intent === 'rifiuto') {
                 conversazione.currentStep = this.steps.RIFIUTATO;
             }
+            // Le modifiche specifiche sono gestite in getResponseByIntent
+            // Non cambiamo step qui per le modifiche
             break;
     }
     
@@ -419,6 +506,19 @@ config.bot.isAppointmentComplete = function(conversazione) {
     return dati.nome && dati.email && dati.data && dati.ora;
 };
 
+// 🆕 NUOVA FUNZIONE PER VALIDARE DATI PRIMA DEL RIEPILOGO
+config.bot.canShowRiepilogo = function(conversazione) {
+    const dati = conversazione.datiCliente || {};
+    const hasAllData = dati.nome && dati.email && dati.data && dati.ora;
+    
+    if (!hasAllData) {
+        console.log('⚠️ [CONFIG] Dati incompleti per riepilogo:', dati);
+        return false;
+    }
+    
+    return true;
+};
+
 // Processa template
 config.bot.processTemplate = function(template, data = {}) {
     let processed = template;
@@ -434,6 +534,15 @@ config.bot.processTemplate = function(template, data = {}) {
 // Fallback intelligente
 config.bot.getFallbackMessage = function() {
     return this.messages.problema_tecnico;
+};
+
+// 🆕 FUNZIONE DI DEBUG PER STATO CONVERSAZIONE
+config.bot.debugConversationState = function(conversazione) {
+    console.log(`🔍 [CONFIG] DEBUG STATO CONVERSAZIONE:`);
+    console.log(`   🔄 Step: ${conversazione.currentStep}`);
+    console.log(`   📋 Dati: ${JSON.stringify(conversazione.datiCliente)}`);
+    console.log(`   💬 Messaggi: ${conversazione.messaggi?.length || 0}`);
+    console.log(`   ✅ Completo: ${this.isAppointmentComplete(conversazione)}`);
 };
 
 // ===== VALIDAZIONE =====
