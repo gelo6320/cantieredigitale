@@ -104,7 +104,7 @@ class ClaudeService {
                 conversazione.currentStep = config.bot.steps.EMAIL;
                 return config.bot.processTemplate(config.bot.messages.chiedi_email, dati);
             }
-            if (dati.nome && !dati.nomeCompleto) {
+            if (dati.nome && dati.nomeCompleto === false) {
                 conversazione.currentStep = config.bot.steps.COGNOME;
                 return config.bot.messages.chiedi_cognome;
             }
