@@ -16,28 +16,33 @@ class ClaudeService {
     // Setup database - usa schema esistente dal server principale
     async setupDatabase() {
         try {
-            // URL del database booking
             const bookingDBUrl = process.env.MONGODB_URI_BOOKING || config.database.mongoUrl;
             
-            // Controlla se mongoose è già connesso
-            if (mongoose.connection.readyState === 0) {
-                console.log('🔗 [DATABASE] Connessione al database booking...');
-                await mongoose.connect(bookingDBUrl, {
-                    useNewUrlParser: true,
-                    useUnifiedTopology: true
-                });
-                console.log('✅ [DATABASE] Connesso al database booking');
-            } else {
-                console.log('✅ [DATABASE] Usa connessione esistente');
-            }
+            console.log(`🔗 [DATABASE] Connessione dedicata al database booking: ${bookingDBUrl}`);
+            
+            this.bookingConnection = mongoose.createConnection(bookingDBUrl, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            
+            // Aspetta che la connessione sia stabilita
+            await this.bookingConnection.asPromise();
+            console.log('✅ [DATABASE] Connesso al database booking');
     
-            // Usa SEMPRE il modello Booking esistente dal server principale
-            this.Booking = mongoose.model('Booking');
-            console.log('✅ [DATABASE] Schema Booking esistente utilizzato');
+            // Ottieni il modello Booking dalla connessione principale per copiare lo schema
+            let BookingModel;
+            try {
+                BookingModel = mongoose.model('Booking');
+                // Registra il modello sulla connessione booking
+                this.Booking = this.bookingConnection.model('Booking', BookingModel.schema);
+                console.log('✅ [DATABASE] Schema Booking registrato sulla connessione booking');
+            } catch (error) {
+                console.error('❌ [DATABASE] Modello Booking non trovato nella connessione principale');
+                throw new Error('Server principale non avviato o modello Booking non definito');
+            }
             
         } catch (error) {
             console.error('❌ [DATABASE] Errore setup:', error.message);
-            console.error('❌ [DATABASE] Assicurati che il server principale sia avviato e il modello Booking sia definito');
             throw error;
         }
     }
