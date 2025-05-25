@@ -136,7 +136,7 @@ config.bot.extractData = function(conversazione, messaggio) {
     const dati = conversazione.datiCliente;
     
     // NON estrarre dati nei step START e INTERESSE
-    if (step === this.steps.START || step === this.steps.INTERESSE) {
+    if (step === this.steps.START) {
         return;
     }
     
