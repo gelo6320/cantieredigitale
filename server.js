@@ -13,7 +13,6 @@ const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const compression = require('compression');
-const WhatsAppBot = require('./whatsapp/bot');
 
 // Carica variabili d'ambiente
 dotenv.config();
