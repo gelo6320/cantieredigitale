@@ -1104,7 +1104,12 @@ app.get('/api/calendar/events', async (req, res) => {
         end: end,
         status: booking.status || 'pending',
         eventType: 'appointment',
-        description: booking.message || `Appuntamento con ${booking.name}`,
+        description: [
+          booking.message || `Appuntamento con ${booking.name}`,
+          booking.website ? `Sito web: ${booking.website}` : null,
+          booking.facebookPage ? `Facebook: ${booking.facebookPage}` : null,
+          booking.businessInfo?.notes ? `Note business: ${booking.businessInfo.notes}` : null
+        ].filter(Boolean).join('\n'),
         location: 'Ufficio',
         isBooking: true,
         bookingId: booking._id,
