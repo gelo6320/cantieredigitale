@@ -1080,7 +1080,7 @@ app.get('/api/calendar/events', async (req, res) => {
     
     // Trasforma i booking in formato CalendarEvent
     const bookingEvents = bookings.map(booking => {
-      const start = new Date(booking.bookingTimestamp);
+      const start = new Date(`${booking.bookingDate}T${booking.bookingTime}:00`);
       const end = new Date(start);
       end.setHours(start.getHours() + 1); // Durata default 1 ora
       
@@ -1093,8 +1093,7 @@ app.get('/api/calendar/events', async (req, res) => {
         status: booking.status || 'pending',
         eventType: 'appointment',
         description: booking.message || `Appuntamento con ${booking.name}`,
-        location: 'Ufficio', // Default location for booking
-        // Metadati aggiuntivi per identificare che proviene da booking
+        location: 'Ufficio',
         isBooking: true,
         bookingId: booking._id,
         customerName: booking.name,
@@ -1156,24 +1155,30 @@ app.put('/api/calendar/events/:id', async (req, res) => {
         return res.status(404).json({ success: false, message: 'Prenotazione non trovata' });
       }
       
-      // Aggiorna i campi del booking
-      if (start) booking.bookingTimestamp = new Date(start);
+      if (start) {
+        const newDate = new Date(start);
+        booking.bookingDate = newDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        booking.bookingTime = newDate.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+        // Opzionalmente aggiorna anche bookingTimestamp se necessario
+        booking.bookingTimestamp = newDate;
+      }
       if (status) booking.status = status;
       if (description) booking.message = description;
       booking.updatedAt = new Date();
       
       await booking.save();
       
-      // Restituisci in formato CalendarEvent
-      const endTime = new Date(booking.bookingTimestamp);
-      endTime.setHours(endTime.getHours() + 1);
+      // Restituisci in formato CalendarEvent usando i campi corretti
+      const eventStart = new Date(`${booking.bookingDate}T${booking.bookingTime}:00`);
+      const eventEnd = new Date(eventStart);
+      eventEnd.setHours(eventStart.getHours() + 1);
       
       const updatedEvent = {
         id: booking._id.toString(),
         _id: booking._id,
         title: `${booking.name} - ${booking.service || 'Appuntamento'}`,
-        start: booking.bookingTimestamp,
-        end: endTime,
+        start: eventStart,
+        end: eventEnd,
         status: booking.status,
         eventType: 'appointment',
         description: booking.message,
