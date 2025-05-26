@@ -1050,31 +1050,179 @@ app.get('/api/calendar/events', async (req, res) => {
       connection.model('CalendarEvent', CalendarEventSchema);
     }
     
+    // Se il modello Booking non esiste nella connessione, crealo
+    if (!connection.models['Booking']) {
+      connection.model('Booking', BookingSchema);
+    }
+    
     const CalendarEvent = connection.model('CalendarEvent');
+    const Booking = connection.model('Booking');
     
-    // Filtri opzionali
-    let filter = {};
+    // Filtri opzionali per date
+    let eventFilter = {};
+    let bookingFilter = {};
     
-    // Filtro per date (opzionale)
     if (req.query.startDate && req.query.endDate) {
-      filter.start = { 
+      eventFilter.start = { 
+        $gte: new Date(req.query.startDate),
+        $lte: new Date(req.query.endDate)
+      };
+      bookingFilter.bookingTimestamp = {
         $gte: new Date(req.query.startDate),
         $lte: new Date(req.query.endDate)
       };
     }
     
-    // Recupera gli eventi
-    const events = await CalendarEvent.find(filter).sort({ start: 1 });
+    // Recupera eventi calendario e prenotazioni in parallelo
+    const [calendarEvents, bookings] = await Promise.all([
+      CalendarEvent.find(eventFilter).sort({ start: 1 }),
+      Booking.find(bookingFilter).sort({ bookingTimestamp: 1 })
+    ]);
+    
+    // Trasforma i booking in formato CalendarEvent
+    const bookingEvents = bookings.map(booking => {
+      const start = new Date(booking.bookingTimestamp);
+      const end = new Date(start);
+      end.setHours(start.getHours() + 1); // Durata default 1 ora
+      
+      return {
+        id: booking._id.toString(),
+        _id: booking._id,
+        title: `${booking.name} - ${booking.service || 'Appuntamento'}`,
+        start: start,
+        end: end,
+        status: booking.status || 'pending',
+        eventType: 'appointment',
+        description: booking.message || `Appuntamento con ${booking.name}`,
+        location: 'Ufficio', // Default location for booking
+        // Metadati aggiuntivi per identificare che proviene da booking
+        isBooking: true,
+        bookingId: booking._id,
+        customerName: booking.name,
+        customerEmail: booking.email,
+        customerPhone: booking.phone,
+        service: booking.service,
+        source: booking.source,
+        createdAt: booking.createdAt,
+        updatedAt: booking.updatedAt || booking.createdAt
+      };
+    });
+    
+    // Combina eventi calendario e prenotazioni
+    const allEvents = [...calendarEvents, ...bookingEvents];
+    
+    // Ordina per data di inizio
+    allEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
     
     res.json({
       success: true,
-      data: events
+      data: allEvents
     });
   } catch (error) {
     console.error("Errore nel recupero degli eventi del calendario:", error);
     res.status(500).json({ 
       success: false, 
       message: 'Errore nel recupero degli eventi', 
+      error: error.message 
+    });
+  }
+});
+
+// API per aggiornare un evento del calendario (inclusi booking)
+app.put('/api/calendar/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, start, end, status, eventType, location, description, isBooking } = req.body;
+    
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+    
+    // Se è un booking, aggiorna la collezione Booking
+    if (isBooking) {
+      if (!connection.models['Booking']) {
+        connection.model('Booking', BookingSchema);
+      }
+      
+      const Booking = connection.model('Booking');
+      const booking = await Booking.findById(id);
+      
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Prenotazione non trovata' });
+      }
+      
+      // Aggiorna i campi del booking
+      if (start) booking.bookingTimestamp = new Date(start);
+      if (status) booking.status = status;
+      if (description) booking.message = description;
+      booking.updatedAt = new Date();
+      
+      await booking.save();
+      
+      // Restituisci in formato CalendarEvent
+      const endTime = new Date(booking.bookingTimestamp);
+      endTime.setHours(endTime.getHours() + 1);
+      
+      const updatedEvent = {
+        id: booking._id.toString(),
+        _id: booking._id,
+        title: `${booking.name} - ${booking.service || 'Appuntamento'}`,
+        start: booking.bookingTimestamp,
+        end: endTime,
+        status: booking.status,
+        eventType: 'appointment',
+        description: booking.message,
+        location: 'Ufficio',
+        isBooking: true
+      };
+      
+      res.json({
+        success: true,
+        data: updatedEvent,
+        message: 'Prenotazione aggiornata con successo'
+      });
+    } else {
+      // Gestione normale per CalendarEvent
+      if (!connection.models['CalendarEvent']) {
+        connection.model('CalendarEvent', CalendarEventSchema);
+      }
+      
+      const CalendarEvent = connection.model('CalendarEvent');
+      const event = await CalendarEvent.findById(id);
+      
+      if (!event) {
+        return res.status(404).json({ success: false, message: 'Evento non trovato' });
+      }
+      
+      // Aggiorna i campi
+      if (title) event.title = title;
+      if (start) event.start = new Date(start);
+      if (end) event.end = new Date(end);
+      if (status) event.status = status;
+      if (eventType) event.eventType = eventType;
+      if (location !== undefined) event.location = location;
+      if (description !== undefined) event.description = description;
+      event.updatedAt = new Date();
+      
+      await event.save();
+      
+      res.json({
+        success: true,
+        data: event,
+        message: 'Evento aggiornato con successo'
+      });
+    }
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento dell\'evento:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nell\'aggiornamento dell\'evento', 
       error: error.message 
     });
   }
