@@ -858,6 +858,932 @@ async function getScreenshot(url) {
   }
 }
 
+// ============================================
+// ENDPOINT API PER CHAT DATABASE
+// ============================================
+
+// ========== CHAT DATABASE ENDPOINTS ==========
+
+// 1. Ottieni statistiche generali delle chat
+app.get('/api/chat/stats', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const dbStats = await whatsappBot.getDatabaseStats();
+    const botStats = whatsappBot.getStats();
+    
+    res.json({
+      status: 'success',
+      data: {
+        database: dbStats,
+        bot: botStats,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore recupero statistiche:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nel recupero delle statistiche',
+      error: error.message
+    });
+  }
+});
+
+// 2. Lista conversazioni recenti
+app.get('/api/chat/conversations', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { 
+      limit = 50, 
+      status = null, 
+      page = 1,
+      phone = null,
+      from = null,
+      to = null 
+    } = req.query;
+
+    let conversations;
+    
+    if (phone) {
+      // Cerca per numero di telefono specifico
+      conversations = await whatsappBot.chatDB.getConversationsByPhone(phone);
+    } else {
+      // Lista generale con filtri
+      const query = {};
+      if (status) query.status = status;
+      
+      conversations = await whatsappBot.chatDB.getRecentConversations(
+        parseInt(limit), 
+        status
+      );
+    }
+
+    // Filtra per data se richiesto
+    if (from || to) {
+      conversations = conversations.filter(conv => {
+        const startTime = new Date(conv.startTime);
+        if (from && startTime < new Date(from)) return false;
+        if (to && startTime > new Date(to)) return false;
+        return true;
+      });
+    }
+
+    // Paginazione semplice
+    const startIndex = (parseInt(page) - 1) * parseInt(limit);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedConversations = conversations.slice(startIndex, endIndex);
+
+    res.json({
+      status: 'success',
+      data: {
+        conversations: paginatedConversations,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: conversations.length,
+          hasMore: endIndex < conversations.length
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore recupero conversazioni:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nel recupero delle conversazioni',
+      error: error.message
+    });
+  }
+});
+
+// 3. Ottieni conversazione specifica con tutti i messaggi
+app.get('/api/chat/conversations/:conversationId', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { conversationId } = req.params;
+    const { includeMetadata = false } = req.query;
+
+    const fullConversation = await whatsappBot.chatDB.getFullConversation(conversationId);
+    
+    if (!fullConversation) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Conversazione non trovata'
+      });
+    }
+
+    // Opzionalmente rimuovi metadata sensibili
+    let messages = fullConversation.messages;
+    if (!includeMetadata) {
+      messages = messages.map(msg => ({
+        messageId: msg.messageId,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        aiGenerated: msg.aiGenerated,
+        delivered: msg.delivered,
+        responseTime: msg.responseTime
+      }));
+    }
+
+    res.json({
+      status: 'success',
+      data: {
+        conversation: fullConversation.conversation,
+        messages: messages,
+        summary: {
+          totalMessages: messages.length,
+          userMessages: messages.filter(m => m.role === 'user').length,
+          botMessages: messages.filter(m => m.role === 'assistant').length,
+          avgResponseTime: fullConversation.conversation.stats?.avgResponseTime || 0,
+          duration: fullConversation.conversation.totalDuration || 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore recupero conversazione:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nel recupero della conversazione',
+      error: error.message
+    });
+  }
+});
+
+// 4. Cerca conversazioni per cliente (numero di telefono)
+app.get('/api/chat/customer/:phone', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { phone } = req.params;
+    const { includeMessages = false } = req.query;
+
+    const conversations = await whatsappBot.chatDB.getConversationsByPhone(phone);
+    
+    if (conversations.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Nessuna conversazione trovata per questo numero'
+      });
+    }
+
+    let result = conversations;
+
+    // Se richiesto, includi anche i messaggi
+    if (includeMessages === 'true') {
+      result = await Promise.all(conversations.map(async (conv) => {
+        const fullConv = await whatsappBot.chatDB.getFullConversation(conv.conversationId);
+        return {
+          ...conv.toObject(),
+          messages: fullConv ? fullConv.messages : []
+        };
+      }));
+    }
+
+    res.json({
+      status: 'success',
+      data: {
+        customer: {
+          phone,
+          totalConversations: conversations.length,
+          activeConversations: conversations.filter(c => c.status === 'active').length,
+          completedConversations: conversations.filter(c => c.status === 'completed').length
+        },
+        conversations: result
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore ricerca cliente:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nella ricerca del cliente',
+      error: error.message
+    });
+  }
+});
+
+// 5. Esporta conversazione in formato JSON
+app.get('/api/chat/export/:conversationId', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { conversationId } = req.params;
+    const { format = 'json' } = req.query;
+
+    const exportData = await whatsappBot.chatDB.exportConversation(conversationId);
+    
+    if (!exportData) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Conversazione non trovata per esportazione'
+      });
+    }
+
+    if (format === 'json') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="conversation_${conversationId}.json"`);
+      res.json(exportData);
+    } else if (format === 'txt') {
+      // Formato testo semplice
+      let textContent = `CONVERSAZIONE: ${conversationId}\n`;
+      textContent += `ESPORTATA: ${exportData.exportedAt}\n`;
+      textContent += `CLIENTE: ${exportData.conversation.cliente.nome || exportData.conversation.cliente.contactName}\n`;
+      textContent += `TELEFONO: ${exportData.conversation.cliente.telefono}\n`;
+      textContent += `STATO: ${exportData.conversation.status}\n`;
+      textContent += `DURATA: ${exportData.conversation.totalDuration || 0} minuti\n`;
+      textContent += `\n${'='.repeat(50)}\n\n`;
+
+      exportData.messages.forEach(msg => {
+        const timestamp = new Date(msg.timestamp).toLocaleString('it-IT');
+        const speaker = msg.role === 'user' ? 'CLIENTE' : 'BOT';
+        textContent += `[${timestamp}] ${speaker}: ${msg.content}\n\n`;
+      });
+
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="conversation_${conversationId}.txt"`);
+      res.send(textContent);
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: 'Formato non supportato. Usa "json" o "txt"'
+      });
+    }
+  } catch (error) {
+    console.error('[CHAT API] Errore esportazione:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nell\'esportazione della conversazione',
+      error: error.message
+    });
+  }
+});
+
+// 6. Aggiorna stato conversazione
+app.patch('/api/chat/conversations/:conversationId', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { conversationId } = req.params;
+    const allowedFields = ['status', 'priority', 'tags', 'quality'];
+    
+    const updateData = {};
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        updateData[key] = req.body[key];
+      }
+    });
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Nessun campo valido da aggiornare'
+      });
+    }
+
+    const updatedConversation = await whatsappBot.chatDB.updateConversation(
+      conversationId, 
+      updateData
+    );
+
+    if (!updatedConversation) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Conversazione non trovata'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      message: 'Conversazione aggiornata con successo',
+      data: updatedConversation
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore aggiornamento conversazione:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nell\'aggiornamento della conversazione',
+      error: error.message
+    });
+  }
+});
+
+// 7. Dashboard overview per amministratori
+app.get('/api/chat/dashboard', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { period = '7d' } = req.query;
+    
+    // Calcola date per il periodo
+    const now = new Date();
+    const startDate = new Date();
+    
+    switch (period) {
+      case '24h':
+        startDate.setDate(now.getDate() - 1);
+        break;
+      case '7d':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      default:
+        startDate.setDate(now.getDate() - 7);
+    }
+
+    // Statistiche database generali
+    const generalStats = await whatsappBot.getDatabaseStats();
+    
+    // Statistiche bot correnti
+    const botStats = whatsappBot.getStats();
+    
+    // Conversazioni del periodo
+    const recentConversations = await whatsappBot.chatDB.getRecentConversations(100);
+    const periodConversations = recentConversations.filter(conv => 
+      new Date(conv.startTime) >= startDate
+    );
+
+    // Metriche del periodo
+    const periodMetrics = {
+      totalConversations: periodConversations.length,
+      completedConversations: periodConversations.filter(c => c.status === 'completed').length,
+      activeConversations: periodConversations.filter(c => c.status === 'active').length,
+      avgDuration: periodConversations.reduce((sum, c) => sum + (c.totalDuration || 0), 0) / (periodConversations.length || 1),
+      conversionRate: periodConversations.length > 0 
+        ? (periodConversations.filter(c => c.risultato === 'appointment_booked').length / periodConversations.length * 100) 
+        : 0
+    };
+
+    // Top 5 conversazioni più lunghe del periodo
+    const topConversations = periodConversations
+      .sort((a, b) => (b.totalDuration || 0) - (a.totalDuration || 0))
+      .slice(0, 5)
+      .map(conv => ({
+        conversationId: conv.conversationId,
+        cliente: conv.cliente.nome || conv.cliente.contactName,
+        telefono: conv.cliente.telefono,
+        durata: conv.totalDuration,
+        status: conv.status,
+        risultato: conv.risultato
+      }));
+
+    res.json({
+      status: 'success',
+      data: {
+        period: {
+          from: startDate.toISOString(),
+          to: now.toISOString(),
+          label: period
+        },
+        generalStats,
+        botStats,
+        periodMetrics,
+        topConversations,
+        summary: {
+          healthScore: calculateHealthScore(botStats, generalStats),
+          recommendations: generateRecommendations(periodMetrics, botStats)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT API] Errore dashboard:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore nel recupero dei dati dashboard',
+      error: error.message
+    });
+  }
+});
+
+// 8. Cleanup conversazioni archiviate
+app.post('/api/chat/cleanup', async (req, res) => {
+  try {
+    if (!whatsappBot || !whatsappBot.chatDB) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Chat database non disponibile'
+      });
+    }
+
+    const { daysOld = 30, dryRun = false } = req.body;
+
+    if (dryRun) {
+      // Simula il cleanup senza effettuarlo
+      const { ChatConversation } = require('./whatsapp/chatManager');
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - parseInt(daysOld));
+      
+      const toArchive = await ChatConversation.find({
+        lastActivity: { $lt: cutoffDate },
+        status: { $in: ['abandoned', 'completed'] }
+      });
+
+      res.json({
+        status: 'success',
+        message: 'Simulazione cleanup completata',
+        data: {
+          conversationsToArchive: toArchive.length,
+          daysOld: parseInt(daysOld),
+          executed: false,
+          preview: toArchive.slice(0, 10).map(conv => ({
+            conversationId: conv.conversationId,
+            lastActivity: conv.lastActivity,
+            status: conv.status
+          }))
+        }
+      });
+    } else {
+      // Esegui il cleanup reale
+      const result = await whatsappBot.chatDB.cleanupOldConversations(parseInt(daysOld));
+      
+      res.json({
+        status: 'success',
+        message: 'Cleanup completato con successo',
+        data: {
+          archivedConversations: result ? result.nModified : 0,
+          daysOld: parseInt(daysOld),
+          executed: true
+        }
+      });
+    }
+  } catch (error) {
+    console.error('[CHAT API] Errore cleanup:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Errore durante il cleanup',
+      error: error.message
+    });
+  }
+});
+
+// ========== FUNZIONI HELPER ==========
+
+function calculateHealthScore(botStats, generalStats) {
+  let score = 100;
+  
+  // Penalizza per errori
+  if (botStats.erroriAI > 0) {
+    score -= Math.min(20, botStats.erroriAI * 2);
+  }
+  
+  if (botStats.database && botStats.database.erroriDB > 0) {
+    score -= Math.min(15, botStats.database.erroriDB * 3);
+  }
+  
+  // Premia per conversion rate alto
+  if (botStats.conversionRate > 50) {
+    score += 10;
+  } else if (botStats.conversionRate < 20) {
+    score -= 10;
+  }
+  
+  // Premia per success rate alto
+  if (botStats.successRate > 95) {
+    score += 5;
+  } else if (botStats.successRate < 80) {
+    score -= 15;
+  }
+  
+  return Math.max(0, Math.min(100, score));
+}
+
+function generateRecommendations(periodMetrics, botStats) {
+  const recommendations = [];
+  
+  if (periodMetrics.conversionRate < 30) {
+    recommendations.push({
+      type: 'warning',
+      message: 'Tasso di conversione basso. Considera di ottimizzare i prompt del bot.',
+      priority: 'high'
+    });
+  }
+  
+  if (botStats.erroriAI > 5) {
+    recommendations.push({
+      type: 'error',
+      message: 'Troppi errori AI rilevati. Verifica la configurazione di Claude.',
+      priority: 'critical'
+    });
+  }
+  
+  if (botStats.tempoRispostaMediaMs > 5000) {
+    recommendations.push({
+      type: 'info',
+      message: 'Tempi di risposta elevati. Considera di ottimizzare le chiamate API.',
+      priority: 'medium'
+    });
+  }
+  
+  if (periodMetrics.activeConversations > periodMetrics.completedConversations * 2) {
+    recommendations.push({
+      type: 'warning',
+      message: 'Molte conversazioni attive non completate. Verifica il follow-up.',
+      priority: 'medium'
+    });
+  }
+  
+  return recommendations;
+}
+
+// Aggiungi questi endpoint al tuo server.js
+
+// ===== ENDPOINT WHATSAPP BUSINESS API =====
+
+// Endpoint per inviare messaggi WhatsApp
+app.post('/api/whatsapp/send-message', async (req, res) => {
+  try {
+    const { to, message, conversationId } = req.body;
+    
+    if (!to || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Numero destinatario e messaggio sono richiesti' 
+      });
+    }
+
+    // Verifica autenticazione
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+
+    // Ottieni configurazione utente
+    const username = req.session.user.username;
+    const userConfig = await getUserConfig(username);
+    
+    if (!userConfig.whatsapp_access_token || !userConfig.whatsapp_phone_number_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione WhatsApp mancante' 
+      });
+    }
+
+    // Sanifica messaggio
+    const sanitizedMessage = message
+      .replace(/[\u2000-\u200F\u2028-\u202F]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 4096);
+
+    // Payload per Graph API v22.0
+    const payload = {
+      messaging_product: 'whatsapp',
+      to: to,
+      text: { body: sanitizedMessage }
+    };
+
+    // Invia messaggio tramite Graph API
+    const response = await axios.post(
+      `https://graph.facebook.com/v22.0/${userConfig.whatsapp_phone_number_id}/messages`,
+      payload,
+      {
+        headers: {
+          'Authorization': `Bearer ${userConfig.whatsapp_access_token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      }
+    );
+
+    console.log(`📤 [WHATSAPP API] Messaggio inviato a ${to}: "${sanitizedMessage}"`);
+    
+    // Log dell'invio per tracking
+    if (response.data.messages?.[0]?.id) {
+      console.log(`📊 [WHATSAPP API] Message ID: ${response.data.messages[0].id}`);
+    }
+
+    // Salva messaggio nel database chat se disponibile
+    if (conversationId) {
+      try {
+        // Ottieni connessione utente per salvare il messaggio
+        const connection = await getUserConnection(req);
+        
+        if (connection && connection.models['ChatMessage']) {
+          const ChatMessage = connection.model('ChatMessage');
+          
+          await ChatMessage.create({
+            messageId: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            conversationId,
+            role: 'assistant',
+            content: sanitizedMessage,
+            timestamp: new Date(),
+            delivered: true,
+            metadata: {
+              sentBy: username,
+              whatsappMessageId: response.data.messages?.[0]?.id,
+              sentManually: true
+            }
+          });
+          
+          console.log(`💾 [WHATSAPP API] Messaggio salvato nel database per conversazione: ${conversationId}`);
+        }
+      } catch (dbError) {
+        console.error('❌ [WHATSAPP API] Errore salvataggio messaggio nel DB:', dbError);
+        // Non blocchiamo la risposta se il salvataggio DB fallisce
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Messaggio inviato con successo',
+      messageId: response.data.messages?.[0]?.id,
+      data: response.data
+    });
+
+  } catch (error) {
+    console.error('❌ [WHATSAPP API] Errore invio messaggio:', error);
+    
+    let errorMessage = 'Errore nell\'invio del messaggio';
+    let errorCode = 500;
+    
+    if (error.response?.data?.error) {
+      const apiError = error.response.data.error;
+      errorMessage = apiError.message || errorMessage;
+      
+      // Gestisci errori specifici di WhatsApp
+      if (apiError.code === 131026) {
+        errorMessage = 'Numero non registrato su WhatsApp';
+        errorCode = 400;
+      } else if (apiError.code === 100) {
+        errorMessage = 'Token di accesso non valido';
+        errorCode = 401;
+      } else if (apiError.code === 131047) {
+        errorMessage = 'Messaggio non consegnato - utente potrebbe aver bloccato il numero';
+        errorCode = 400;
+      }
+    }
+
+    res.status(errorCode).json({ 
+      success: false, 
+      message: errorMessage,
+      error: error.response?.data || error.message
+    });
+  }
+});
+
+// Endpoint per ottenere il profilo WhatsApp Business
+app.get('/api/whatsapp/profile', async (req, res) => {
+  try {
+    // Verifica autenticazione
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+
+    // Ottieni configurazione utente
+    const username = req.session.user.username;
+    const userConfig = await getUserConfig(username);
+    
+    if (!userConfig.whatsapp_access_token || !userConfig.whatsapp_phone_number_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione WhatsApp mancante' 
+      });
+    }
+
+    // Ottieni info account WhatsApp Business
+    const response = await axios.get(
+      `https://graph.facebook.com/v22.0/${userConfig.whatsapp_phone_number_id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${userConfig.whatsapp_access_token}`
+        },
+        timeout: 10000
+      }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        phone_number: response.data.display_phone_number,
+        verified_name: response.data.verified_name,
+        name: response.data.name,
+        id: response.data.id,
+        status: 'connected'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ [WHATSAPP API] Errore recupero profilo:', error);
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero del profilo WhatsApp',
+      error: error.response?.data || error.message
+    });
+  }
+});
+
+// Endpoint per testare la connessione WhatsApp
+app.get('/api/whatsapp/test-connection', async (req, res) => {
+  try {
+    // Verifica autenticazione
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+
+    // Ottieni configurazione utente
+    const username = req.session.user.username;
+    const userConfig = await getUserConfig(username);
+    
+    if (!userConfig.whatsapp_access_token || !userConfig.whatsapp_phone_number_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione WhatsApp mancante. Configura WHATSAPP_ACCESS_TOKEN e WHATSAPP_PHONE_NUMBER_ID nelle impostazioni.' 
+      });
+    }
+
+    // Test connessione
+    const response = await axios.get(
+      `https://graph.facebook.com/v22.0/${userConfig.whatsapp_phone_number_id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${userConfig.whatsapp_access_token}`
+        },
+        timeout: 10000
+      }
+    );
+
+    console.log('✅ [WHATSAPP API] Test connessione riuscito');
+    
+    res.json({
+      success: true,
+      message: 'Connessione WhatsApp Business API attiva',
+      data: {
+        phone_number: response.data.display_phone_number,
+        verified_name: response.data.verified_name,
+        account_name: response.data.name,
+        status: 'connected'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ [WHATSAPP API] Test connessione fallito:', error);
+    
+    let errorMessage = 'Connessione WhatsApp Business API fallita';
+    let suggestion = '';
+
+    if (error.response?.data?.error) {
+      const apiError = error.response.data.error;
+      errorMessage = apiError.message;
+      
+      if (apiError.code === 100) {
+        suggestion = 'Verifica WHATSAPP_ACCESS_TOKEN nelle impostazioni';
+      } else if (apiError.code === 190) {
+        suggestion = 'Token scaduto o non valido';
+      } else if (apiError.code === 803) {
+        suggestion = 'Verifica WHATSAPP_PHONE_NUMBER_ID nelle impostazioni';
+      }
+    } else if (error.code === 'ENOTFOUND') {
+      suggestion = 'Verifica connessione internet';
+    }
+
+    res.status(400).json({ 
+      success: false, 
+      message: errorMessage,
+      suggestion: suggestion,
+      error: error.response?.data || error.message
+    });
+  }
+});
+
+// Endpoint per ottenere statistiche WhatsApp
+app.get('/api/whatsapp/stats', async (req, res) => {
+  try {
+    // Verifica autenticazione
+    if (!req.session || !req.session.isAuthenticated) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Non autorizzato' 
+      });
+    }
+
+    // Ottieni statistiche dal chat database
+    const stats = await getWhatsAppStats(req);
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error) {
+    console.error('❌ [WHATSAPP API] Errore recupero statistiche:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero delle statistiche WhatsApp' 
+    });
+  }
+});
+
+// Funzione helper per ottenere statistiche WhatsApp
+async function getWhatsAppStats(req) {
+  try {
+    // Ottieni la connessione utente per accedere al chat database
+    const connection = await getUserConnection(req);
+    
+    if (!connection || !connection.models['ChatConversation']) {
+      return {
+        totalConversations: 0,
+        activeConversations: 0,
+        completedConversations: 0,
+        totalMessages: 0,
+        avgResponseTime: 0,
+        conversionRate: 0
+      };
+    }
+
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
+    
+    // Calcola statistiche
+    const totalConversations = await ChatConversation.countDocuments();
+    const activeConversations = await ChatConversation.countDocuments({ status: 'active' });
+    const completedConversations = await ChatConversation.countDocuments({ status: 'completed' });
+    const totalMessages = await ChatMessage.countDocuments();
+    
+    // Calcola conversion rate
+    const appointmentBookings = await ChatConversation.countDocuments({ 
+      risultato: 'appointment_booked' 
+    });
+    const conversionRate = totalConversations > 0 ? 
+      (appointmentBookings / totalConversations * 100) : 0;
+
+    // Calcola tempo di risposta medio
+    const avgResponseTimeResult = await ChatMessage.aggregate([
+      { $match: { role: 'assistant', responseTime: { $exists: true, $gt: 0 } } },
+      { $group: { _id: null, avgTime: { $avg: '$responseTime' } } }
+    ]);
+    
+    const avgResponseTime = avgResponseTimeResult.length > 0 ? 
+      Math.round(avgResponseTimeResult[0].avgTime) : 0;
+
+    return {
+      totalConversations,
+      activeConversations,
+      completedConversations,
+      totalMessages,
+      avgResponseTime,
+      conversionRate: Math.round(conversionRate * 100) / 100
+    };
+    
+  } catch (error) {
+    console.error('❌ [WHATSAPP STATS] Errore calcolo statistiche:', error);
+    return {
+      totalConversations: 0,
+      activeConversations: 0,
+      completedConversations: 0,
+      totalMessages: 0,
+      avgResponseTime: 0,
+      conversionRate: 0
+    };
+  }
+}
+
 // ========== FINE WHATSAPP ENDPOINTS ==========
 
 // ----------------------------------------------------------------
@@ -3198,7 +4124,7 @@ app.get('/api/user/config', async (req, res) => {
       });
     }
     
-    // Prepara el objeto de respuesta con los valores de configuración
+    // Prepara el objeto de respuesta con los valores de configuración incluyendo WhatsApp
     res.json({
       success: true,
       config: {
@@ -3206,7 +4132,11 @@ app.get('/api/user/config', async (req, res) => {
         access_token: user.config?.access_token || "",
         meta_pixel_id: user.config?.meta_pixel_id || "",
         fb_account_id: user.config?.fb_account_id || "",
-        marketing_api_token: user.config?.marketing_api_token || "" // Nuovo campo
+        marketing_api_token: user.config?.marketing_api_token || "",
+        whatsapp_access_token: user.config?.whatsapp_access_token || "",
+        whatsapp_phone_number_id: user.config?.whatsapp_phone_number_id || "",
+        whatsapp_webhook_token: user.config?.whatsapp_webhook_token || "",
+        whatsapp_verify_token: user.config?.whatsapp_verify_token || ""
       }
     });
   } catch (error) {
@@ -3400,10 +4330,14 @@ async function getUserConfig(username) {
     if (!username) {
       return {
         mongodb_uri: process.env.MONGODB_URI,
-        access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
-        marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+        access_token: process.env.ACCESS_TOKEN,
+        marketing_api_token: process.env.MARKETING_API_TOKEN || '',
         meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
-        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
+        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || '',
+        whatsapp_access_token: process.env.WHATSAPP_ACCESS_TOKEN || '',
+        whatsapp_phone_number_id: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+        whatsapp_webhook_token: process.env.WHATSAPP_WEBHOOK_TOKEN || '',
+        whatsapp_verify_token: process.env.WHATSAPP_VERIFY_TOKEN || ''
       };
     }
     
@@ -3413,10 +4347,14 @@ async function getUserConfig(username) {
     if (!user) {
       return {
         mongodb_uri: process.env.MONGODB_URI,
-        access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
-        marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+        access_token: process.env.ACCESS_TOKEN,
+        marketing_api_token: process.env.MARKETING_API_TOKEN || '',
         meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
-        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
+        fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || '',
+        whatsapp_access_token: process.env.WHATSAPP_ACCESS_TOKEN || '',
+        whatsapp_phone_number_id: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+        whatsapp_webhook_token: process.env.WHATSAPP_WEBHOOK_TOKEN || '',
+        whatsapp_verify_token: process.env.WHATSAPP_VERIFY_TOKEN || ''
       };
     }
     
@@ -3426,17 +4364,25 @@ async function getUserConfig(username) {
       access_token: user.config?.access_token || process.env.ACCESS_TOKEN,
       marketing_api_token: user.config?.marketing_api_token || process.env.MARKETING_API_TOKEN || '',
       meta_pixel_id: user.config?.meta_pixel_id || process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
-      fb_account_id: user.config?.fb_account_id || process.env.FACEBOOK_ACCOUNT_ID || ''
+      fb_account_id: user.config?.fb_account_id || process.env.FACEBOOK_ACCOUNT_ID || '',
+      whatsapp_access_token: user.config?.whatsapp_access_token || process.env.WHATSAPP_ACCESS_TOKEN || '',
+      whatsapp_phone_number_id: user.config?.whatsapp_phone_number_id || process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+      whatsapp_webhook_token: user.config?.whatsapp_webhook_token || process.env.WHATSAPP_WEBHOOK_TOKEN || '',
+      whatsapp_verify_token: user.config?.whatsapp_verify_token || process.env.WHATSAPP_VERIFY_TOKEN || ''
     };
   } catch (error) {
-    console.error('Errore nel recupero delle configurazioni:', error);
+    console.error('Errore nel recupero delle configurazioni WhatsApp:', error);
     // Fallback alla configurazione predeterminata
     return {
       mongodb_uri: process.env.MONGODB_URI,
-      access_token: process.env.ACCESS_TOKEN,                     // Per CAPI
-      marketing_api_token: process.env.MARKETING_API_TOKEN || '', // Nuovo token per Marketing API
+      access_token: process.env.ACCESS_TOKEN,
+      marketing_api_token: process.env.MARKETING_API_TOKEN || '',
       meta_pixel_id: process.env.FACEBOOK_PIXEL_ID || '1543790469631614',
-      fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || ''
+      fb_account_id: process.env.FACEBOOK_ACCOUNT_ID || '',
+      whatsapp_access_token: process.env.WHATSAPP_ACCESS_TOKEN || '',
+      whatsapp_phone_number_id: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+      whatsapp_webhook_token: process.env.WHATSAPP_WEBHOOK_TOKEN || '',
+      whatsapp_verify_token: process.env.WHATSAPP_VERIFY_TOKEN || ''
     };
   }
 }
@@ -6735,7 +7681,11 @@ app.post('/api/user/config', async (req, res) => {
       access_token, 
       meta_pixel_id, 
       fb_account_id,
-      marketing_api_token // Nuovo campo
+      marketing_api_token,
+      whatsapp_access_token,
+      whatsapp_phone_number_id,
+      whatsapp_webhook_token,
+      whatsapp_verify_token
     } = req.body;
     
     const username = req.session.user.username;
@@ -6756,7 +7706,11 @@ app.post('/api/user/config', async (req, res) => {
     if (access_token !== undefined) user.config.access_token = access_token;
     if (meta_pixel_id !== undefined) user.config.meta_pixel_id = meta_pixel_id;
     if (fb_account_id !== undefined) user.config.fb_account_id = fb_account_id;
-    if (marketing_api_token !== undefined) user.config.marketing_api_token = marketing_api_token; // Nuovo campo
+    if (marketing_api_token !== undefined) user.config.marketing_api_token = marketing_api_token;
+    if (whatsapp_access_token !== undefined) user.config.whatsapp_access_token = whatsapp_access_token;
+    if (whatsapp_phone_number_id !== undefined) user.config.whatsapp_phone_number_id = whatsapp_phone_number_id;
+    if (whatsapp_webhook_token !== undefined) user.config.whatsapp_webhook_token = whatsapp_webhook_token;
+    if (whatsapp_verify_token !== undefined) user.config.whatsapp_verify_token = whatsapp_verify_token;
     
     // Salva le modifiche
     await user.save();
@@ -6772,7 +7726,11 @@ app.post('/api/user/config', async (req, res) => {
         access_token: user.config.access_token ? '(configurato)' : '(non configurato)',
         meta_pixel_id: user.config.meta_pixel_id || '(non configurato)',
         fb_account_id: user.config.fb_account_id ? '(configurato)' : '(non configurato)',
-        marketing_api_token: user.config.marketing_api_token ? '(configurato)' : '(non configurato)' // Nuovo campo
+        marketing_api_token: user.config.marketing_api_token ? '(configurato)' : '(non configurato)',
+        whatsapp_access_token: user.config.whatsapp_access_token ? '(configurato)' : '(non configurato)',
+        whatsapp_phone_number_id: user.config.whatsapp_phone_number_id ? '(configurato)' : '(non configurato)',
+        whatsapp_webhook_token: user.config.whatsapp_webhook_token ? '(configurato)' : '(non configurato)',
+        whatsapp_verify_token: user.config.whatsapp_verify_token ? '(configurato)' : '(non configurato)'
       }
     });
   } catch (error) {
