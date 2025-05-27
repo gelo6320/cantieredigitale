@@ -918,6 +918,18 @@ const ChatConversationSchema = new mongoose.Schema({
     default: 'active'
   },
   currentStep: String,
+
+  botControl: {
+    isPaused: { type: Boolean, default: false },        // Bot in pausa per questa conversazione
+    pausedAt: Date,                                      // Quando è stato messo in pausa
+    pausedBy: String,                                    // Chi l'ha messo in pausa (username)
+    pauseReason: String,                                 // Motivo della pausa
+    resumedAt: Date,                                     // Quando è stato riattivato
+    resumedBy: String,                                   // Chi l'ha riattivato
+    manualTakeoverAt: Date,                             // Quando è iniziata la gestione manuale
+    lastBotResponse: Date,                              // Ultima risposta automatica del bot
+    manualResponsesCount: { type: Number, default: 0 }  // Contatore risposte manuali
+},
   
   // Timing
   startTime: { type: Date, default: Date.now },
@@ -1023,6 +1035,225 @@ const registerChatModels = (connection) => {
 // ============================================
 
 // ========== CHAT DATABASE ENDPOINTS ==========
+
+app.post('/api/whatsapp/pause-bot/:conversationId', async (req, res) => {
+  try {
+      const { conversationId } = req.params;
+      const { reason } = req.body;
+      const username = req.session.user.username;
+      
+      if (!conversationId) {
+          return res.status(400).json({
+              success: false,
+              message: 'ID conversazione richiesto'
+          });
+      }
+
+      // Ottieni la connessione utente
+      const connection = await getUserConnection(req);
+      
+      if (!connection) {
+          return res.status(503).json({
+              success: false,
+              message: 'Database non disponibile'
+          });
+      }
+
+      registerChatModels(connection);
+      const ChatConversation = connection.model('ChatConversation');
+
+      // Aggiorna la conversazione
+      const updatedConversation = await ChatConversation.findOneAndUpdate(
+          { conversationId },
+          {
+              $set: {
+                  'botControl.isPaused': true,
+                  'botControl.pausedAt': new Date(),
+                  'botControl.pausedBy': username,
+                  'botControl.pauseReason': reason || 'Gestione manuale',
+                  'botControl.manualTakeoverAt': new Date(),
+                  lastActivity: new Date(),
+                  updatedAt: new Date()
+              }
+          },
+          { new: true }
+      );
+
+      if (!updatedConversation) {
+          return res.status(404).json({
+              success: false,
+              message: 'Conversazione non trovata'
+          });
+      }
+
+      console.log(`⏸️ [BOT CONTROL] Bot messo in pausa per ${conversationId} da ${username}`);
+
+      res.json({
+          success: true,
+          message: 'Bot messo in pausa per questa conversazione',
+          data: {
+              conversationId,
+              pausedBy: username,
+              pausedAt: new Date(),
+              reason: reason || 'Gestione manuale'
+          }
+      });
+
+  } catch (error) {
+      console.error('❌ [BOT CONTROL] Errore pausa bot:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Errore nel mettere in pausa il bot',
+          error: error.message
+      });
+  }
+});
+
+// Endpoint per riattivare il bot per una conversazione specifica
+app.post('/api/whatsapp/resume-bot/:conversationId', async (req, res) => {
+  try {
+      const { conversationId } = req.params;
+      const username = req.session.user.username;
+      
+      if (!conversationId) {
+          return res.status(400).json({
+              success: false,
+              message: 'ID conversazione richiesto'
+          });
+      }
+
+      // Ottieni la connessione utente
+      const connection = await getUserConnection(req);
+      
+      if (!connection) {
+          return res.status(503).json({
+              success: false,
+              message: 'Database non disponibile'
+          });
+      }
+
+      registerChatModels(connection);
+      const ChatConversation = connection.model('ChatConversation');
+
+      // Aggiorna la conversazione
+      const updatedConversation = await ChatConversation.findOneAndUpdate(
+          { conversationId },
+          {
+              $set: {
+                  'botControl.isPaused': false,
+                  'botControl.resumedAt': new Date(),
+                  'botControl.resumedBy': username,
+                  lastActivity: new Date(),
+                  updatedAt: new Date()
+              }
+          },
+          { new: true }
+      );
+
+      if (!updatedConversation) {
+          return res.status(404).json({
+              success: false,
+              message: 'Conversazione non trovata'
+          });
+      }
+
+      console.log(`▶️ [BOT CONTROL] Bot riattivato per ${conversationId} da ${username}`);
+
+      res.json({
+          success: true,
+          message: 'Bot riattivato per questa conversazione',
+          data: {
+              conversationId,
+              resumedBy: username,
+              resumedAt: new Date()
+          }
+      });
+
+  } catch (error) {
+      console.error('❌ [BOT CONTROL] Errore riattivazione bot:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Errore nel riattivare il bot',
+          error: error.message
+      });
+  }
+});
+
+// Endpoint per ottenere lo stato del bot per una conversazione
+app.get('/api/whatsapp/bot-status/:conversationId', async (req, res) => {
+  try {
+      const { conversationId } = req.params;
+      
+      // Ottieni la connessione utente
+      const connection = await getUserConnection(req);
+      
+      if (!connection) {
+          return res.status(503).json({
+              success: false,
+              message: 'Database non disponibile'
+          });
+      }
+
+      registerChatModels(connection);
+      const ChatConversation = connection.model('ChatConversation');
+
+      const conversation = await ChatConversation.findOne({ conversationId });
+
+      if (!conversation) {
+          return res.status(404).json({
+              success: false,
+              message: 'Conversazione non trovata'
+          });
+      }
+
+      res.json({
+          success: true,
+          data: {
+              conversationId,
+              botControl: conversation.botControl || {
+                  isPaused: false,
+                  pausedAt: null,
+                  pausedBy: null,
+                  resumedAt: null,
+                  resumedBy: null
+              }
+          }
+      });
+
+  } catch (error) {
+      console.error('❌ [BOT CONTROL] Errore stato bot:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Errore nel recupero dello stato bot',
+          error: error.message
+      });
+  }
+});
+
+// 3. AGGIUNGI funzione helper per tracciare risposta manuale
+async function trackManualResponse(conversationId, username, connection) {
+  try {
+      registerChatModels(connection);
+      const ChatConversation = connection.model('ChatConversation');
+
+      await ChatConversation.updateOne(
+          { conversationId },
+          {
+              $inc: { 'botControl.manualResponsesCount': 1 },
+              $set: {
+                  'botControl.lastManualResponse': new Date(),
+                  'botControl.lastManualResponseBy': username,
+                  lastActivity: new Date(),
+                  updatedAt: new Date()
+              }
+          }
+      );
+
+      console.log(`✋ [BOT CONTROL] Risposta manuale tracciata per ${conversationId} da ${username}`);
+  } catch (error) {
+      console.error('❌ [BOT CONTROL] Errore tracking risposta manuale:', error);
+  }
+}
 
 // 1. Ottieni statistiche generali delle chat
 app.get('/api/chat/stats', async (req, res) => {
@@ -1939,7 +2170,7 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
       }
     );
 
-    console.log(`📤 [WHATSAPP API] Messaggio inviato a ${to}: "${sanitizedMessage}"`);
+    console.log(`📤 [WHATSAPP API] Messaggio MANUALE inviato a ${to}: "${sanitizedMessage}" da ${username}`);
     
     // Salva messaggio nel database chat se disponibile
     if (conversationId) {
@@ -1960,41 +2191,56 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
             timestamp: new Date(),
             delivered: true,
             whatsappMessageId: response.data.messages?.[0]?.id,
+            aiGenerated: false,  // IMPORTANTE: Non è generato dall'AI
             metadata: {
               sentBy: username,
-              sentManually: true
+              sentManually: true,
+              isManualResponse: true  // NUOVO: Flag per risposta manuale
             }
           });
           
-          // Aggiorna la conversazione
-          await ChatConversation.findOneAndUpdate(
-            { conversationId },
-            { 
-              lastActivity: new Date(),
-              updatedAt: new Date(),
-              $inc: { 
-                'stats.totalMessages': 1,
-                'stats.botMessages': 1 
-              }
-            }
-          );
+          // NUOVO: Traccia risposta manuale e aggiorna controlli bot
+          await trackManualResponse(conversationId, username, connection);
           
-          console.log(`💾 [WHATSAPP API] Messaggio salvato nel database per conversazione: ${conversationId}`);
+          // NUOVO: Se il bot non era già in pausa, mettilo automaticamente in pausa
+          // per evitare conflitti tra risposte manuali e automatiche
+          const conversation = await ChatConversation.findOne({ conversationId });
+          if (conversation && !conversation.botControl?.isPaused) {
+            await ChatConversation.updateOne(
+              { conversationId },
+              {
+                $set: {
+                  'botControl.isPaused': true,
+                  'botControl.pausedAt': new Date(),
+                  'botControl.pausedBy': username,
+                  'botControl.pauseReason': 'Auto-pausa per risposta manuale',
+                  'botControl.manualTakeoverAt': new Date(),
+                  lastActivity: new Date(),
+                  updatedAt: new Date()
+                }
+              }
+            );
+            
+            console.log(`⏸️ [WHATSAPP API] Bot auto-messo in pausa per conversazione ${conversationId} (risposta manuale)`);
+          }
+          
+          console.log(`💾 [WHATSAPP API] Messaggio manuale salvato nel database per conversazione: ${conversationId}`);
         }
       } catch (dbError) {
-        console.error('❌ [WHATSAPP API] Errore salvataggio messaggio nel DB:', dbError);
+        console.error('❌ [WHATSAPP API] Errore salvataggio messaggio manuale nel DB:', dbError);
       }
     }
 
     res.json({
       success: true,
-      message: 'Messaggio inviato con successo',
+      message: 'Messaggio manuale inviato con successo',
       messageId: response.data.messages?.[0]?.id,
-      data: response.data
+      data: response.data,
+      manualResponse: true  // NUOVO: Flag per identificare risposta manuale
     });
 
   } catch (error) {
-    console.error('❌ [WHATSAPP API] Errore invio messaggio:', error);
+    console.error('❌ [WHATSAPP API] Errore invio messaggio manuale:', error);
     
     let errorMessage = 'Errore nell\'invio del messaggio';
     let errorCode = 500;
@@ -2018,6 +2264,110 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
       error: error.response?.data || error.message
     });
   }
+});
+
+// 7. IMPLEMENTA funzione trackManualResponse (da aggiungere dopo gli altri endpoint)
+
+async function trackManualResponse(conversationId, username, connection) {
+    try {
+        registerChatModels(connection);
+        const ChatConversation = connection.model('ChatConversation');
+
+        const result = await ChatConversation.updateOne(
+            { conversationId },
+            {
+                $inc: { 'botControl.manualResponsesCount': 1 },
+                $set: {
+                    'botControl.lastManualResponse': new Date(),
+                    'botControl.lastManualResponseBy': username,
+                    lastActivity: new Date(),
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        if (result.matchedCount > 0) {
+            console.log(`✋ [BOT CONTROL] Risposta manuale tracciata per ${conversationId} da ${username}`);
+        } else {
+            console.warn(`⚠️ [BOT CONTROL] Conversazione ${conversationId} non trovata per tracking`);
+        }
+    } catch (error) {
+        console.error('❌ [BOT CONTROL] Errore tracking risposta manuale:', error);
+    }
+}
+
+// 8. AGGIUNGI endpoint per ottenere statistiche controllo bot
+
+app.get('/api/whatsapp/bot-control-stats', async (req, res) => {
+    try {
+        // Ottieni la connessione utente
+        const connection = await getUserConnection(req);
+        
+        if (!connection) {
+            return res.status(503).json({
+                success: false,
+                message: 'Database non disponibile'
+            });
+        }
+
+        registerChatModels(connection);
+        const ChatConversation = connection.model('ChatConversation');
+
+        // Statistiche aggregate
+        const stats = await ChatConversation.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalConversations: { $sum: 1 },
+                    pausedConversations: {
+                        $sum: { $cond: [{ $eq: ['$botControl.isPaused', true] }, 1, 0] }
+                    },
+                    manualTakeovers: {
+                        $sum: { $cond: [{ $gt: ['$botControl.manualResponsesCount', 0] }, 1, 0] }
+                    },
+                    totalManualResponses: { $sum: '$botControl.manualResponsesCount' },
+                    avgManualResponses: { $avg: '$botControl.manualResponsesCount' }
+                }
+            }
+        ]);
+
+        // Lista conversazioni in pausa
+        const pausedConversations = await ChatConversation.find({
+            'botControl.isPaused': true,
+            status: 'active'
+        }).select('conversationId cliente.nome cliente.telefono botControl').limit(10);
+
+        const result = stats[0] || {
+            totalConversations: 0,
+            pausedConversations: 0,
+            manualTakeovers: 0,
+            totalManualResponses: 0,
+            avgManualResponses: 0
+        };
+
+        res.json({
+            success: true,
+            data: {
+                ...result,
+                pausedConversations: pausedConversations.map(conv => ({
+                    conversationId: conv.conversationId,
+                    clientName: conv.cliente?.nome || 'Sconosciuto',
+                    phone: conv.cliente?.telefono,
+                    pausedBy: conv.botControl?.pausedBy,
+                    pausedAt: conv.botControl?.pausedAt,
+                    reason: conv.botControl?.pauseReason
+                }))
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ [BOT CONTROL] Errore statistiche controllo bot:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Errore nel recupero delle statistiche',
+            error: error.message
+        });
+    }
 });
 
 // Endpoint per ottenere il profilo WhatsApp Business
