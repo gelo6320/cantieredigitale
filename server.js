@@ -964,7 +964,7 @@ const ChatConversationSchema = new mongoose.Schema({
   },
   
   // Metadati tecnici
-  isProactive: { type: Boolean, default: false },
+  isProactive: { type: Boolean, default: false }, // NUOVO CAMPO
   sessionId: String,
   fingerprint: String,
   deviceInfo: Object,
@@ -986,7 +986,7 @@ const ChatConversationSchema = new mongoose.Schema({
   // Audit trail
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  createdBy: { type: String, default: 'WhatsApp Bot' },
+  createdBy: { type: String, default: 'WhatsApp Bot' }, // Aggiorna questo campo
   version: { type: Number, default: 1 }
 });
 
@@ -1743,7 +1743,153 @@ function generateRecommendations(periodMetrics, botStats) {
 
 // ===== ENDPOINT WHATSAPP BUSINESS API =====
 
-// Endpoint per inviare messaggi WhatsApp
+// Endpoint per iniziare una nuova conversazione
+app.post('/api/whatsapp/start-conversation', async (req, res) => {
+  try {
+    const { phone, name } = req.body;
+    
+    if (!phone) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Numero di telefono richiesto' 
+      });
+    }
+
+    // Ottieni configurazione utente
+    const username = req.session.user.username;
+    const userConfig = await getUserConfig(username);
+    
+    if (!userConfig.whatsapp_access_token || !userConfig.whatsapp_phone_number_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Configurazione WhatsApp mancante nelle impostazioni utente' 
+      });
+    }
+
+    // Ottieni la connessione utente per il database chat
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database non disponibile o non configurato correttamente'
+      });
+    }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
+
+    // Normalizza il numero di telefono
+    let normalizedPhone = phone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+    
+    // Controlla se esiste già una conversazione attiva con questo numero
+    const existingConversation = await ChatConversation.findOne({
+      $or: [
+        { 'cliente.telefono': phone },
+        { 'cliente.telefono': normalizedPhone },
+        { 'cliente.whatsappNumber': phone },
+        { 'cliente.whatsappNumber': normalizedPhone },
+        { 'cliente.normalizedNumber': normalizedPhone }
+      ],
+      status: { $in: ['active', 'completed'] } // Non includere quelle abbandonate o bloccate
+    }).sort({ lastActivity: -1 });
+
+    let conversation;
+    let messages = [];
+
+    if (existingConversation) {
+      // Se esiste già una conversazione, restituiscila
+      conversation = existingConversation;
+      
+      // Recupera i messaggi esistenti
+      messages = await ChatMessage.find({ 
+        conversationId: existingConversation.conversationId 
+      }).sort({ timestamp: 1 }).lean();
+      
+      console.log(`📱 [WHATSAPP] Conversazione esistente trovata: ${conversation.conversationId}`);
+    } else {
+      // Crea una nuova conversazione
+      const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      conversation = new ChatConversation({
+        conversationId,
+        cliente: {
+          nome: name || 'Nuovo Contatto',
+          telefono: phone,
+          whatsappNumber: normalizedPhone,
+          normalizedNumber: normalizedPhone,
+          contactName: name || 'Nuovo Contatto'
+        },
+        status: 'active',
+        startTime: new Date(),
+        lastActivity: new Date(),
+        stats: {
+          totalMessages: 0,
+          userMessages: 0,
+          botMessages: 0,
+          avgResponseTime: 0,
+          completionRate: 0
+        },
+        isProactive: true, // Segnala che è una conversazione iniziata proattivamente
+        tags: ['manual_start'],
+        priority: 'medium'
+      });
+      
+      await conversation.save();
+      
+      console.log(`📱 [WHATSAPP] Nuova conversazione creata: ${conversationId} per ${phone}`);
+      
+      // Crea un messaggio di sistema per indicare l'inizio della conversazione
+      const systemMessage = new ChatMessage({
+        messageId: `system_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        conversationId,
+        role: 'system',
+        content: `Conversazione iniziata con ${name || phone}`,
+        timestamp: new Date(),
+        isFirstContact: true,
+        metadata: {
+          initiatedBy: username,
+          type: 'conversation_start'
+        }
+      });
+      
+      await systemMessage.save();
+      messages = [systemMessage];
+    }
+
+    // Prepara la risposta nel formato ConversationDetails
+    const response = {
+      conversation: conversation.toObject(),
+      messages: messages,
+      summary: {
+        totalMessages: messages.length,
+        userMessages: messages.filter(m => m.role === 'user').length,
+        botMessages: messages.filter(m => m.role === 'assistant').length,
+        avgResponseTime: conversation.stats?.avgResponseTime || 0,
+        duration: conversation.totalDuration || 0
+      }
+    };
+
+    res.json({
+      success: true,
+      message: existingConversation ? 'Conversazione esistente recuperata' : 'Nuova conversazione creata',
+      data: response
+    });
+
+  } catch (error) {
+    console.error('❌ [WHATSAPP] Errore nella creazione della conversazione:', error);
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nella creazione della conversazione',
+      error: error.message
+    });
+  }
+});
+
 app.post('/api/whatsapp/send-message', async (req, res) => {
   try {
     const { to, message, conversationId } = req.body;
@@ -1803,7 +1949,9 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
         if (connection) {
           registerChatModels(connection);
           const ChatMessage = connection.model('ChatMessage');
+          const ChatConversation = connection.model('ChatConversation');
           
+          // Salva il messaggio
           await ChatMessage.create({
             messageId: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             conversationId,
@@ -1811,12 +1959,25 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
             content: sanitizedMessage,
             timestamp: new Date(),
             delivered: true,
+            whatsappMessageId: response.data.messages?.[0]?.id,
             metadata: {
               sentBy: username,
-              whatsappMessageId: response.data.messages?.[0]?.id,
               sentManually: true
             }
           });
+          
+          // Aggiorna la conversazione
+          await ChatConversation.findOneAndUpdate(
+            { conversationId },
+            { 
+              lastActivity: new Date(),
+              updatedAt: new Date(),
+              $inc: { 
+                'stats.totalMessages': 1,
+                'stats.botMessages': 1 
+              }
+            }
+          );
           
           console.log(`💾 [WHATSAPP API] Messaggio salvato nel database per conversazione: ${conversationId}`);
         }
