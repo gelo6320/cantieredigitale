@@ -863,6 +863,151 @@ async function getScreenshot(url) {
   }
 }
 
+// Schemi per WhatsApp Chat Database
+const ChatMessageSchema = new mongoose.Schema({
+  messageId: { type: String, required: true, unique: true },
+  conversationId: { type: String, required: true, index: true },
+  role: { 
+    type: String, 
+    enum: ['user', 'assistant', 'system'], 
+    required: true 
+  },
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  
+  // Metadati specifici per WhatsApp
+  whatsappMessageId: String,
+  whatsappTimestamp: Date,
+  
+  // Metadati AI
+  aiGenerated: { type: Boolean, default: false },
+  responseTime: Number, // tempo di risposta AI in ms
+  promptTokens: Number,
+  responseTokens: Number,
+  
+  // Status del messaggio
+  delivered: { type: Boolean, default: false },
+  read: { type: Boolean, default: false },
+  failed: { type: Boolean, default: false },
+  failureReason: String,
+  
+  // Metadati extra
+  isFirstContact: { type: Boolean, default: false },
+  triggerredStep: String,
+  metadata: { type: Object, default: {} }
+});
+
+const ChatConversationSchema = new mongoose.Schema({
+  conversationId: { type: String, required: true, unique: true },
+  
+  // Informazioni cliente
+  cliente: {
+    nome: String,
+    email: String,
+    telefono: { type: String, required: true, index: true },
+    whatsappNumber: String,
+    normalizedNumber: String,
+    contactName: String,
+    fonte: String
+  },
+  
+  // Stato conversazione
+  status: {
+    type: String,
+    enum: ['active', 'completed', 'abandoned', 'blocked', 'archived'],
+    default: 'active'
+  },
+  currentStep: String,
+  
+  // Timing
+  startTime: { type: Date, default: Date.now },
+  lastActivity: { type: Date, default: Date.now },
+  endTime: Date,
+  totalDuration: Number, // in minuti
+  
+  // Statistiche conversazione
+  stats: {
+    totalMessages: { type: Number, default: 0 },
+    userMessages: { type: Number, default: 0 },
+    botMessages: { type: Number, default: 0 },
+    avgResponseTime: { type: Number, default: 0 },
+    completionRate: { type: Number, default: 0 }
+  },
+  
+  // Dati raccolti durante la conversazione
+  datiRaccolti: {
+    nome: String,
+    email: String,
+    data: String,
+    ora: String,
+    sitoWeb: String,
+    paginaFacebook: String,
+    note: String
+  },
+  
+  // Risultato finale
+  risultato: {
+    type: String,
+    enum: ['appointment_booked', 'lead_qualified', 'not_interested', 'incomplete', 'error'],
+    default: 'incomplete'
+  },
+  
+  appointmentSaved: { type: Boolean, default: false },
+  appointmentId: String,
+  
+  // Classificazione e tags
+  tags: [String],
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium'
+  },
+  
+  // Metadati tecnici
+  isProactive: { type: Boolean, default: false },
+  sessionId: String,
+  fingerprint: String,
+  deviceInfo: Object,
+  location: {
+    city: String,
+    region: String,
+    country: String,
+    ip: String
+  },
+  
+  // Valutazione qualità
+  quality: {
+    score: { type: Number, min: 1, max: 5 },
+    feedback: String,
+    reviewedBy: String,
+    reviewedAt: Date
+  },
+  
+  // Audit trail
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  createdBy: { type: String, default: 'WhatsApp Bot' },
+  version: { type: Number, default: 1 }
+});
+
+// Indici per performance
+ChatConversationSchema.index({ 'cliente.telefono': 1 });
+ChatConversationSchema.index({ 'cliente.normalizedNumber': 1 });
+ChatConversationSchema.index({ status: 1, lastActivity: -1 });
+ChatConversationSchema.index({ startTime: -1 });
+ChatConversationSchema.index({ risultato: 1 });
+
+ChatMessageSchema.index({ conversationId: 1, timestamp: 1 });
+ChatMessageSchema.index({ role: 1, timestamp: -1 });
+
+// Pre-save middleware per aggiornare updatedAt
+ChatConversationSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+console.log('📱 [WHATSAPP] Schemi Chat definiti nel server principale');
+
 // ============================================
 // ENDPOINT API PER CHAT DATABASE
 // ============================================
@@ -872,21 +1017,29 @@ async function getScreenshot(url) {
 // 1. Ottieni statistiche generali delle chat
 app.get('/api/chat/stats', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
 
-    const dbStats = await whatsappBot.getDatabaseStats();
-    const botStats = whatsappBot.getStats();
+    // Registra i modelli chat
+    registerChatModels(connection);
     
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
+
+    // Calcola statistiche database
+    const dbStats = await getWhatsAppStats(req);
+
     res.json({
       status: 'success',
       data: {
         database: dbStats,
-        bot: botStats,
         timestamp: new Date().toISOString()
       }
     });
@@ -903,12 +1056,20 @@ app.get('/api/chat/stats', async (req, res) => {
 // 2. Lista conversazioni recenti
 app.get('/api/chat/conversations', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
 
     const { 
       limit = 50, 
@@ -919,46 +1080,44 @@ app.get('/api/chat/conversations', async (req, res) => {
       to = null 
     } = req.query;
 
-    let conversations;
+    let query = {};
     
+    // Filtri
+    if (status) query.status = status;
     if (phone) {
-      // Cerca per numero di telefono specifico
-      conversations = await whatsappBot.chatDB.getConversationsByPhone(phone);
-    } else {
-      // Lista generale con filtri
-      const query = {};
-      if (status) query.status = status;
-      
-      conversations = await whatsappBot.chatDB.getRecentConversations(
-        parseInt(limit), 
-        status
-      );
+      query.$or = [
+        { 'cliente.telefono': phone },
+        { 'cliente.whatsappNumber': phone },
+        { 'cliente.normalizedNumber': phone }
+      ];
     }
-
-    // Filtra per data se richiesto
     if (from || to) {
-      conversations = conversations.filter(conv => {
-        const startTime = new Date(conv.startTime);
-        if (from && startTime < new Date(from)) return false;
-        if (to && startTime > new Date(to)) return false;
-        return true;
-      });
+      query.startTime = {};
+      if (from) query.startTime.$gte = new Date(from);
+      if (to) query.startTime.$lte = new Date(to);
     }
 
-    // Paginazione semplice
-    const startIndex = (parseInt(page) - 1) * parseInt(limit);
-    const endIndex = startIndex + parseInt(limit);
-    const paginatedConversations = conversations.slice(startIndex, endIndex);
+    // Paginazione
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const [conversations, total] = await Promise.all([
+      ChatConversation.find(query)
+        .sort({ lastActivity: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      ChatConversation.countDocuments(query)
+    ]);
 
     res.json({
       status: 'success',
       data: {
-        conversations: paginatedConversations,
+        conversations,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
-          total: conversations.length,
-          hasMore: endIndex < conversations.length
+          total,
+          hasMore: (skip + conversations.length) < total
         }
       }
     });
@@ -975,29 +1134,44 @@ app.get('/api/chat/conversations', async (req, res) => {
 // 3. Ottieni conversazione specifica con tutti i messaggi
 app.get('/api/chat/conversations/:conversationId', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
 
     const { conversationId } = req.params;
     const { includeMetadata = false } = req.query;
 
-    const fullConversation = await whatsappBot.chatDB.getFullConversation(conversationId);
+    // Recupera conversazione e messaggi in parallelo
+    const [conversation, messages] = await Promise.all([
+      ChatConversation.findOne({ conversationId }).lean(),
+      ChatMessage.find({ conversationId })
+        .sort({ timestamp: 1 })
+        .lean()
+    ]);
     
-    if (!fullConversation) {
+    if (!conversation) {
       return res.status(404).json({
         status: 'error',
         message: 'Conversazione non trovata'
       });
     }
 
-    // Opzionalmente rimuovi metadata sensibili
-    let messages = fullConversation.messages;
+    // Filtra metadata se richiesto
+    let processedMessages = messages;
     if (!includeMetadata) {
-      messages = messages.map(msg => ({
+      processedMessages = messages.map(msg => ({
         messageId: msg.messageId,
         role: msg.role,
         content: msg.content,
@@ -1011,14 +1185,14 @@ app.get('/api/chat/conversations/:conversationId', async (req, res) => {
     res.json({
       status: 'success',
       data: {
-        conversation: fullConversation.conversation,
-        messages: messages,
+        conversation,
+        messages: processedMessages,
         summary: {
           totalMessages: messages.length,
           userMessages: messages.filter(m => m.role === 'user').length,
           botMessages: messages.filter(m => m.role === 'assistant').length,
-          avgResponseTime: fullConversation.conversation.stats?.avgResponseTime || 0,
-          duration: fullConversation.conversation.totalDuration || 0
+          avgResponseTime: conversation.stats?.avgResponseTime || 0,
+          duration: conversation.totalDuration || 0
         }
       }
     });
@@ -1035,17 +1209,33 @@ app.get('/api/chat/conversations/:conversationId', async (req, res) => {
 // 4. Cerca conversazioni per cliente (numero di telefono)
 app.get('/api/chat/customer/:phone', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
 
     const { phone } = req.params;
     const { includeMessages = false } = req.query;
 
-    const conversations = await whatsappBot.chatDB.getConversationsByPhone(phone);
+    // Cerca conversazioni per questo numero
+    const conversations = await ChatConversation.find({
+      $or: [
+        { 'cliente.telefono': phone },
+        { 'cliente.whatsappNumber': phone },
+        { 'cliente.normalizedNumber': phone }
+      ]
+    }).sort({ startTime: -1 }).lean();
     
     if (conversations.length === 0) {
       return res.status(404).json({
@@ -1059,10 +1249,13 @@ app.get('/api/chat/customer/:phone', async (req, res) => {
     // Se richiesto, includi anche i messaggi
     if (includeMessages === 'true') {
       result = await Promise.all(conversations.map(async (conv) => {
-        const fullConv = await whatsappBot.chatDB.getFullConversation(conv.conversationId);
+        const messages = await ChatMessage.find({ 
+          conversationId: conv.conversationId 
+        }).sort({ timestamp: 1 }).lean();
+        
         return {
-          ...conv.toObject(),
-          messages: fullConv ? fullConv.messages : []
+          ...conv,
+          messages
         };
       }));
     }
@@ -1089,27 +1282,46 @@ app.get('/api/chat/customer/:phone', async (req, res) => {
   }
 });
 
-// 5. Esporta conversazione in formato JSON
 app.get('/api/chat/export/:conversationId', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
 
     const { conversationId } = req.params;
     const { format = 'json' } = req.query;
 
-    const exportData = await whatsappBot.chatDB.exportConversation(conversationId);
+    // Recupera conversazione e messaggi
+    const [conversation, messages] = await Promise.all([
+      ChatConversation.findOne({ conversationId }).lean(),
+      ChatMessage.find({ conversationId }).sort({ timestamp: 1 }).lean()
+    ]);
     
-    if (!exportData) {
+    if (!conversation) {
       return res.status(404).json({
         status: 'error',
         message: 'Conversazione non trovata per esportazione'
       });
     }
+
+    const exportData = {
+      conversation,
+      messages,
+      exportedAt: new Date(),
+      exportVersion: '1.0'
+    };
 
     if (format === 'json') {
       res.setHeader('Content-Type', 'application/json');
@@ -1119,13 +1331,13 @@ app.get('/api/chat/export/:conversationId', async (req, res) => {
       // Formato testo semplice
       let textContent = `CONVERSAZIONE: ${conversationId}\n`;
       textContent += `ESPORTATA: ${exportData.exportedAt}\n`;
-      textContent += `CLIENTE: ${exportData.conversation.cliente.nome || exportData.conversation.cliente.contactName}\n`;
-      textContent += `TELEFONO: ${exportData.conversation.cliente.telefono}\n`;
-      textContent += `STATO: ${exportData.conversation.status}\n`;
-      textContent += `DURATA: ${exportData.conversation.totalDuration || 0} minuti\n`;
+      textContent += `CLIENTE: ${conversation.cliente.nome || conversation.cliente.contactName}\n`;
+      textContent += `TELEFONO: ${conversation.cliente.telefono}\n`;
+      textContent += `STATO: ${conversation.status}\n`;
+      textContent += `DURATA: ${conversation.totalDuration || 0} minuti\n`;
       textContent += `\n${'='.repeat(50)}\n\n`;
 
-      exportData.messages.forEach(msg => {
+      messages.forEach(msg => {
         const timestamp = new Date(msg.timestamp).toLocaleString('it-IT');
         const speaker = msg.role === 'user' ? 'CLIENTE' : 'BOT';
         textContent += `[${timestamp}] ${speaker}: ${msg.content}\n\n`;
@@ -1153,12 +1365,20 @@ app.get('/api/chat/export/:conversationId', async (req, res) => {
 // 6. Aggiorna stato conversazione
 app.patch('/api/chat/conversations/:conversationId', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
 
     const { conversationId } = req.params;
     const allowedFields = ['status', 'priority', 'tags', 'quality'];
@@ -1177,9 +1397,16 @@ app.patch('/api/chat/conversations/:conversationId', async (req, res) => {
       });
     }
 
-    const updatedConversation = await whatsappBot.chatDB.updateConversation(
-      conversationId, 
-      updateData
+    const updatedConversation = await ChatConversation.findOneAndUpdate(
+      { conversationId },
+      { 
+        $set: {
+          ...updateData,
+          lastActivity: new Date(),
+          updatedAt: new Date()
+        }
+      },
+      { new: true, runValidators: true }
     );
 
     if (!updatedConversation) {
@@ -1207,12 +1434,20 @@ app.patch('/api/chat/conversations/:conversationId', async (req, res) => {
 // 7. Dashboard overview per amministratori
 app.get('/api/chat/dashboard', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
+
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
 
     const { period = '7d' } = req.query;
     
@@ -1234,31 +1469,29 @@ app.get('/api/chat/dashboard', async (req, res) => {
         startDate.setDate(now.getDate() - 7);
     }
 
-    // Statistiche database generali
-    const generalStats = await whatsappBot.getDatabaseStats();
-    
-    // Statistiche bot correnti
-    const botStats = whatsappBot.getStats();
-    
-    // Conversazioni del periodo
-    const recentConversations = await whatsappBot.chatDB.getRecentConversations(100);
-    const periodConversations = recentConversations.filter(conv => 
-      new Date(conv.startTime) >= startDate
-    );
+    // Statistiche del periodo e generali
+    const [recentConversations, generalStats] = await Promise.all([
+      ChatConversation.find({
+        startTime: { $gte: startDate }
+      }).sort({ startTime: -1 }).lean(),
+      
+      // USA LA FUNZIONE ESISTENTE invece dell'aggregazione manuale
+      getWhatsAppStats(req)
+    ]);
 
     // Metriche del periodo
     const periodMetrics = {
-      totalConversations: periodConversations.length,
-      completedConversations: periodConversations.filter(c => c.status === 'completed').length,
-      activeConversations: periodConversations.filter(c => c.status === 'active').length,
-      avgDuration: periodConversations.reduce((sum, c) => sum + (c.totalDuration || 0), 0) / (periodConversations.length || 1),
-      conversionRate: periodConversations.length > 0 
-        ? (periodConversations.filter(c => c.risultato === 'appointment_booked').length / periodConversations.length * 100) 
+      totalConversations: recentConversations.length,
+      completedConversations: recentConversations.filter(c => c.status === 'completed').length,
+      activeConversations: recentConversations.filter(c => c.status === 'active').length,
+      avgDuration: recentConversations.reduce((sum, c) => sum + (c.totalDuration || 0), 0) / (recentConversations.length || 1),
+      conversionRate: recentConversations.length > 0 
+        ? (recentConversations.filter(c => c.risultato === 'appointment_booked').length / recentConversations.length * 100) 
         : 0
     };
 
     // Top 5 conversazioni più lunghe del periodo
-    const topConversations = periodConversations
+    const topConversations = recentConversations
       .sort((a, b) => (b.totalDuration || 0) - (a.totalDuration || 0))
       .slice(0, 5)
       .map(conv => ({
@@ -1270,6 +1503,10 @@ app.get('/api/chat/dashboard', async (req, res) => {
         risultato: conv.risultato
       }));
 
+    // USA LE FUNZIONI ESISTENTI per health score e raccomandazioni
+    const healthScore = calculateHealthScore(periodMetrics, generalStats);
+    const recommendations = generateRecommendations(periodMetrics, generalStats);
+
     res.json({
       status: 'success',
       data: {
@@ -1278,13 +1515,13 @@ app.get('/api/chat/dashboard', async (req, res) => {
           to: now.toISOString(),
           label: period
         },
-        generalStats,
-        botStats,
+        generalStats, // Ora usa il risultato di getWhatsAppStats()
         periodMetrics,
         topConversations,
+        // AGGIUNGI LA SEZIONE SUMMARY con le funzioni esistenti
         summary: {
-          healthScore: calculateHealthScore(botStats, generalStats),
-          recommendations: generateRecommendations(periodMetrics, botStats)
+          healthScore,
+          recommendations
         }
       }
     });
@@ -1298,28 +1535,53 @@ app.get('/api/chat/dashboard', async (req, res) => {
   }
 });
 
-// 8. Cleanup conversazioni archiviate
 app.post('/api/chat/cleanup', async (req, res) => {
   try {
-    if (!whatsappBot || !whatsappBot.chatDB) {
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
       return res.status(503).json({
         status: 'error',
-        message: 'Chat database non disponibile'
+        message: 'Database non disponibile o non configurato correttamente'
       });
     }
 
+    // Registra i modelli chat
+    registerChatModels(connection);
+    
+    const ChatConversation = connection.model('ChatConversation');
+
     const { daysOld = 30, dryRun = false } = req.body;
+
+    console.log(`🧹 [CLEANUP] Avvio cleanup - ${daysOld} giorni, dryRun: ${dryRun}`);
+
+    // Calcola data di cutoff
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - parseInt(daysOld));
+    
+    console.log(`🧹 [CLEANUP] Data cutoff: ${cutoffDate.toISOString()}`);
 
     if (dryRun) {
       // Simula il cleanup senza effettuarlo
-      const { ChatConversation } = require('./whatsapp/chatManager');
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - parseInt(daysOld));
+      console.log('🧹 [CLEANUP] Modalità DRY RUN - nessuna modifica effettuata');
       
       const toArchive = await ChatConversation.find({
         lastActivity: { $lt: cutoffDate },
         status: { $in: ['abandoned', 'completed'] }
-      });
+      }).lean();
+
+      console.log(`🧹 [CLEANUP] Trovate ${toArchive.length} conversazioni da archiviare`);
+
+      // Preview delle prime 10 conversazioni
+      const preview = toArchive.slice(0, 10).map(conv => ({
+        conversationId: conv.conversationId,
+        lastActivity: conv.lastActivity,
+        status: conv.status,
+        cliente: conv.cliente?.nome || conv.cliente?.contactName || 'Sconosciuto',
+        telefono: conv.cliente?.telefono || 'N/A',
+        daysSinceLastActivity: Math.floor((Date.now() - new Date(conv.lastActivity).getTime()) / (1000 * 60 * 60 * 24))
+      }));
 
       res.json({
         status: 'success',
@@ -1327,34 +1589,75 @@ app.post('/api/chat/cleanup', async (req, res) => {
         data: {
           conversationsToArchive: toArchive.length,
           daysOld: parseInt(daysOld),
+          cutoffDate: cutoffDate.toISOString(),
           executed: false,
-          preview: toArchive.slice(0, 10).map(conv => ({
-            conversationId: conv.conversationId,
-            lastActivity: conv.lastActivity,
-            status: conv.status
-          }))
+          preview,
+          summary: {
+            abandoned: toArchive.filter(c => c.status === 'abandoned').length,
+            completed: toArchive.filter(c => c.status === 'completed').length
+          }
         }
       });
     } else {
       // Esegui il cleanup reale
-      const result = await whatsappBot.chatDB.cleanupOldConversations(parseInt(daysOld));
+      console.log('🧹 [CLEANUP] Esecuzione cleanup reale...');
+      
+      // Prima conta quante ne troverà
+      const countToArchive = await ChatConversation.countDocuments({
+        lastActivity: { $lt: cutoffDate },
+        status: { $in: ['abandoned', 'completed'] }
+      });
+
+      console.log(`🧹 [CLEANUP] ${countToArchive} conversazioni da archiviare`);
+
+      if (countToArchive === 0) {
+        return res.json({
+          status: 'success',
+          message: 'Nessuna conversazione da archiviare',
+          data: {
+            archivedConversations: 0,
+            daysOld: parseInt(daysOld),
+            cutoffDate: cutoffDate.toISOString(),
+            executed: true
+          }
+        });
+      }
+
+      // Esegui l'aggiornamento
+      const result = await ChatConversation.updateMany(
+        {
+          lastActivity: { $lt: cutoffDate },
+          status: { $in: ['abandoned', 'completed'] }
+        },
+        {
+          $set: { 
+            status: 'archived',
+            updatedAt: new Date()
+          }
+        }
+      );
+
+      console.log(`🧹 [CLEANUP] Cleanup completato: ${result.modifiedCount} conversazioni archiviate`);
       
       res.json({
         status: 'success',
         message: 'Cleanup completato con successo',
         data: {
-          archivedConversations: result ? result.nModified : 0,
+          archivedConversations: result.modifiedCount || 0,
+          matchedConversations: result.matchedCount || 0,
           daysOld: parseInt(daysOld),
+          cutoffDate: cutoffDate.toISOString(),
           executed: true
         }
       });
     }
   } catch (error) {
-    console.error('[CHAT API] Errore cleanup:', error);
+    console.error('❌ [CLEANUP] Errore durante il cleanup:', error);
     res.status(500).json({
       status: 'error',
       message: 'Errore durante il cleanup',
-      error: error.message
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -1428,12 +1731,10 @@ function generateRecommendations(periodMetrics, botStats) {
   return recommendations;
 }
 
-// Aggiungi questi endpoint al tuo server.js
-
 // ===== ENDPOINT WHATSAPP BUSINESS API =====
 
 // Endpoint per inviare messaggi WhatsApp
-app.post('/api/whatsapp/send-message', async (req, res) => {
+app.post('/api/whatsapp/send-message', isAuthenticated, async (req, res) => {
   try {
     const { to, message, conversationId } = req.body;
     
@@ -1444,14 +1745,6 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
       });
     }
 
-    // Verifica autenticazione
-    if (!req.session || !req.session.isAuthenticated) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Non autorizzato' 
-      });
-    }
-
     // Ottieni configurazione utente
     const username = req.session.user.username;
     const userConfig = await getUserConfig(username);
@@ -1459,7 +1752,7 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
     if (!userConfig.whatsapp_access_token || !userConfig.whatsapp_phone_number_id) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Configurazione WhatsApp mancante' 
+        message: 'Configurazione WhatsApp mancante nelle impostazioni utente' 
       });
     }
 
@@ -1492,18 +1785,13 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
 
     console.log(`📤 [WHATSAPP API] Messaggio inviato a ${to}: "${sanitizedMessage}"`);
     
-    // Log dell'invio per tracking
-    if (response.data.messages?.[0]?.id) {
-      console.log(`📊 [WHATSAPP API] Message ID: ${response.data.messages[0].id}`);
-    }
-
     // Salva messaggio nel database chat se disponibile
     if (conversationId) {
       try {
-        // Ottieni connessione utente per salvare il messaggio
         const connection = await getUserConnection(req);
         
-        if (connection && connection.models['ChatMessage']) {
+        if (connection) {
+          registerChatModels(connection);
           const ChatMessage = connection.model('ChatMessage');
           
           await ChatMessage.create({
@@ -1524,7 +1812,6 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
         }
       } catch (dbError) {
         console.error('❌ [WHATSAPP API] Errore salvataggio messaggio nel DB:', dbError);
-        // Non blocchiamo la risposta se il salvataggio DB fallisce
       }
     }
 
@@ -1545,16 +1832,12 @@ app.post('/api/whatsapp/send-message', async (req, res) => {
       const apiError = error.response.data.error;
       errorMessage = apiError.message || errorMessage;
       
-      // Gestisci errori specifici di WhatsApp
       if (apiError.code === 131026) {
         errorMessage = 'Numero non registrato su WhatsApp';
         errorCode = 400;
       } else if (apiError.code === 100) {
         errorMessage = 'Token di accesso non valido';
         errorCode = 401;
-      } else if (apiError.code === 131047) {
-        errorMessage = 'Messaggio non consegnato - utente potrebbe aver bloccato il numero';
-        errorCode = 400;
       }
     }
 
@@ -1622,17 +1905,8 @@ app.get('/api/whatsapp/profile', async (req, res) => {
 });
 
 // Endpoint per testare la connessione WhatsApp
-app.get('/api/whatsapp/test-connection', async (req, res) => {
+app.get('/api/whatsapp/test-connection', isAuthenticated, async (req, res) => {
   try {
-    // Verifica autenticazione
-    if (!req.session || !req.session.isAuthenticated) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Non autorizzato' 
-      });
-    }
-
-    // Ottieni configurazione utente
     const username = req.session.user.username;
     const userConfig = await getUserConfig(username);
     
@@ -1681,11 +1955,7 @@ app.get('/api/whatsapp/test-connection', async (req, res) => {
         suggestion = 'Verifica WHATSAPP_ACCESS_TOKEN nelle impostazioni';
       } else if (apiError.code === 190) {
         suggestion = 'Token scaduto o non valido';
-      } else if (apiError.code === 803) {
-        suggestion = 'Verifica WHATSAPP_PHONE_NUMBER_ID nelle impostazioni';
       }
-    } else if (error.code === 'ENOTFOUND') {
-      suggestion = 'Verifica connessione internet';
     }
 
     res.status(400).json({ 
@@ -1698,24 +1968,38 @@ app.get('/api/whatsapp/test-connection', async (req, res) => {
 });
 
 // Endpoint per ottenere statistiche WhatsApp
-app.get('/api/whatsapp/stats', async (req, res) => {
+app.get('/api/whatsapp/stats', isAuthenticated, async (req, res) => {
   try {
-    // Verifica autenticazione
-    if (!req.session || !req.session.isAuthenticated) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Non autorizzato' 
+    // Ottieni la connessione utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.json({
+        success: true,
+        data: {
+          totalConversations: 0,
+          activeConversations: 0,
+          completedConversations: 0,
+          totalMessages: 0,
+          avgResponseTime: 0,
+          conversionRate: 0
+        }
       });
     }
 
-    // Ottieni statistiche dal chat database
-    const stats = await getWhatsAppStats(req);
+    // Registra i modelli chat
+    registerChatModels(connection);
     
+    const ChatConversation = connection.model('ChatConversation');
+    const ChatMessage = connection.model('ChatMessage');
+    
+    // Calcola statistiche
+    const stats = await getWhatsAppStats(req);
+
     res.json({
       success: true,
       data: stats
     });
-
   } catch (error) {
     console.error('❌ [WHATSAPP API] Errore recupero statistiche:', error);
     res.status(500).json({ 
@@ -1724,6 +2008,8 @@ app.get('/api/whatsapp/stats', async (req, res) => {
     });
   }
 });
+
+console.log('✅ [WHATSAPP] Endpoint configurati per accesso diretto al database');
 
 // Funzione helper per ottenere statistiche WhatsApp
 async function getWhatsAppStats(req) {
