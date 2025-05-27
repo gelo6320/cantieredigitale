@@ -1008,6 +1008,16 @@ ChatConversationSchema.pre('save', function(next) {
 
 console.log('📱 [WHATSAPP] Schemi Chat definiti nel server principale');
 
+const registerChatModels = (connection) => {
+  if (!connection.models['ChatMessage']) {
+    connection.model('ChatMessage', ChatMessageSchema);
+  }
+  if (!connection.models['ChatConversation']) {
+    connection.model('ChatConversation', ChatConversationSchema);
+  }
+};
+
+
 // ============================================
 // ENDPOINT API PER CHAT DATABASE
 // ============================================
