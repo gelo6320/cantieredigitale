@@ -1734,7 +1734,7 @@ function generateRecommendations(periodMetrics, botStats) {
 // ===== ENDPOINT WHATSAPP BUSINESS API =====
 
 // Endpoint per inviare messaggi WhatsApp
-app.post('/api/whatsapp/send-message', isAuthenticated, async (req, res) => {
+app.post('/api/whatsapp/send-message', async (req, res) => {
   try {
     const { to, message, conversationId } = req.body;
     
@@ -1905,7 +1905,7 @@ app.get('/api/whatsapp/profile', async (req, res) => {
 });
 
 // Endpoint per testare la connessione WhatsApp
-app.get('/api/whatsapp/test-connection', isAuthenticated, async (req, res) => {
+app.get('/api/whatsapp/test-connection', async (req, res) => {
   try {
     const username = req.session.user.username;
     const userConfig = await getUserConfig(username);
@@ -1968,7 +1968,7 @@ app.get('/api/whatsapp/test-connection', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint per ottenere statistiche WhatsApp
-app.get('/api/whatsapp/stats', isAuthenticated, async (req, res) => {
+app.get('/api/whatsapp/stats', async (req, res) => {
   try {
     // Ottieni la connessione utente
     const connection = await getUserConnection(req);
