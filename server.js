@@ -487,7 +487,8 @@ const BaseStatisticsSchema = {
   conversions: {
     total: { type: Number, default: 0 },
     byType: { type: Object, default: {} },
-    bySource: { type: Object, default: {} }
+    bySource: { type: Object, default: {} },
+    byUrl: { type: Object, default: {} }
   },
   conversionRate: { type: Number, default: 0 },
   funnel: {
