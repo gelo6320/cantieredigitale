@@ -4005,26 +4005,39 @@ app.get('/api/marketing/campaigns', async (req, res) => {
       const adSetsWithRealLeads = await Promise.all(campaign.adSets.map(async (adSet) => {
         const adsWithRealLeads = await Promise.all(adSet.ads.map(async (ad) => {
           const realLeads = await getRealLeadsForCampaign(connection, ad.id);
+          
+          // NUOVO: Ricalcola costPerLead con lead reali
+          const costPerLeadReal = realLeads > 0 && ad.spend > 0 ? ad.spend / realLeads : 0;
+          
           return {
             ...ad,
-            realLeads
+            realLeads,
+            costPerLead: costPerLeadReal // Aggiorna con il calcolo basato sui lead reali
           };
         }));
         
         const adSetRealLeads = adsWithRealLeads.reduce((sum, ad) => sum + ad.realLeads, 0);
         
+        // NUOVO: Ricalcola costPerLead dell'adset con lead reali aggregati
+        const adSetCostPerLeadReal = adSetRealLeads > 0 && adSet.spend > 0 ? adSet.spend / adSetRealLeads : 0;
+        
         return {
           ...adSet,
           realLeads: adSetRealLeads,
+          costPerLead: adSetCostPerLeadReal, // Aggiorna con il calcolo basato sui lead reali
           ads: adsWithRealLeads
         };
       }));
       
       const totalRealLeads = adSetsWithRealLeads.reduce((sum, adSet) => sum + adSet.realLeads, 0);
       
+      // NUOVO: Ricalcola costPerLead della campagna con lead reali aggregati
+      const campaignCostPerLeadReal = totalRealLeads > 0 && campaign.spend > 0 ? campaign.spend / totalRealLeads : 0;
+      
       return {
         ...campaign,
         realLeads: totalRealLeads,
+        costPerLead: campaignCostPerLeadReal, // Aggiorna con il calcolo basato sui lead reali
         adSets: adSetsWithRealLeads
       };
     }));
