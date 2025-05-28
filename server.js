@@ -4049,7 +4049,6 @@ app.get('/api/marketing/overview', async (req, res) => {
     
     if (!FB_MARKETING_TOKEN || !FB_ACCOUNT_ID) {
       console.warn('[Marketing Overview] Token marketing o account ID mancanti, uso dati mock');
-      return res.json(getMockOverviewData(timeRange));
     }
 
     const { since, until } = convertTimeRangeToDateRange(timeRange);
@@ -4076,8 +4075,6 @@ app.get('/api/marketing/overview', async (req, res) => {
       res.json(overviewData);
     } catch (fbError) {
       console.error('[Marketing Overview] Errore Facebook API:', fbError.message);
-      // Fallback a dati mock in caso di errore Facebook
-      res.json(getMockOverviewData(timeRange));
     }
   } catch (error) {
     console.error('[Marketing Overview] Errore generale:', error);
