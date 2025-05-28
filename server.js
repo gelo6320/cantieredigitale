@@ -3977,14 +3977,13 @@ app.get('/api/marketing/campaigns', async (req, res) => {
   try {
     const { timeRange = '30d' } = req.query;
     
-    // Ottieni i dati dalle API di marketing (funzione esistente)
+    // Ottieni i dati dalle API di marketing (ora funzionante)
     const campaigns = await getMarketingCampaignsFromFacebook(timeRange, req);
     
     // Ottieni la connessione utente per i lead reali
     const connection = await getUserConnection(req);
     
     if (!connection) {
-      // Se non c'è connessione, restituisci le campagne senza lead reali
       const campaignsWithZeroRealLeads = campaigns.map(campaign => ({
         ...campaign,
         realLeads: 0,
@@ -4003,9 +4002,7 @@ app.get('/api/marketing/campaigns', async (req, res) => {
     
     // Aggiungi lead reali per ogni livello
     const campaignsWithRealLeads = await Promise.all(campaigns.map(async (campaign) => {
-      // Per ogni adset nella campagna
       const adSetsWithRealLeads = await Promise.all(campaign.adSets.map(async (adSet) => {
-        // Per ogni ad nell'adset
         const adsWithRealLeads = await Promise.all(adSet.ads.map(async (ad) => {
           const realLeads = await getRealLeadsForCampaign(connection, ad.id);
           return {
@@ -4014,7 +4011,6 @@ app.get('/api/marketing/campaigns', async (req, res) => {
           };
         }));
         
-        // Calcola i lead reali totali per l'adset
         const adSetRealLeads = adsWithRealLeads.reduce((sum, ad) => sum + ad.realLeads, 0);
         
         return {
@@ -4024,7 +4020,6 @@ app.get('/api/marketing/campaigns', async (req, res) => {
         };
       }));
       
-      // Calcola i lead reali totali per la campagna
       const totalRealLeads = adSetsWithRealLeads.reduce((sum, adSet) => sum + adSet.realLeads, 0);
       
       return {
@@ -4041,6 +4036,246 @@ app.get('/api/marketing/campaigns', async (req, res) => {
   }
 });
 
+async function getMarketingCampaignsFromFacebook(timeRange, req) {
+  try {
+    // Ottieni configurazione utente
+    const userConfig = await getUserConfig(req.session.user.username);
+    const FB_MARKETING_TOKEN = userConfig.marketing_api_token || '';
+    const FB_ACCOUNT_ID = userConfig.fb_account_id || '';
+    
+    if (!FB_MARKETING_TOKEN || !FB_ACCOUNT_ID) {
+      console.warn('ATTENZIONE: Token marketing o account ID mancanti');
+      return [];
+    }
+
+    const { since, until } = convertTimeRangeToDateRange(timeRange);
+    
+    // 1. Ottieni campagne
+    const campaignsResponse = await axios.get(
+      `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/campaigns`,
+      {
+        params: {
+          access_token: FB_MARKETING_TOKEN,
+          fields: 'id,name,status,daily_budget,lifetime_budget',
+          limit: 50
+        }
+      }
+    );
+    
+    const campaigns = campaignsResponse.data.data || [];
+    
+    // 2. Ottieni insights per campagne
+    const campaignInsightsResponse = await axios.get(
+      `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/insights`,
+      {
+        params: {
+          access_token: FB_MARKETING_TOKEN,
+          time_range: JSON.stringify({ since, until }),
+          level: 'campaign',
+          fields: 'campaign_id,campaign_name,impressions,clicks,spend,actions,conversions',
+          limit: 50
+        }
+      }
+    );
+    
+    const campaignInsights = campaignInsightsResponse.data.data || [];
+    
+    // 3. Ottieni AdSets per ogni campagna
+    const result = [];
+    
+    for (const campaign of campaigns) {
+      const campaignInsight = campaignInsights.find(i => i.campaign_id === campaign.id) || {};
+      const campaignMetrics = calculateMetrics(campaignInsight);
+      
+      // Ottieni AdSets per questa campagna
+      const adSetsResponse = await axios.get(
+        `https://graph.facebook.com/v22.0/${campaign.id}/adsets`,
+        {
+          params: {
+            access_token: FB_MARKETING_TOKEN,
+            fields: 'id,name,status,daily_budget,lifetime_budget',
+            limit: 50
+          }
+        }
+      );
+      
+      const adSets = adSetsResponse.data.data || [];
+      
+      // Ottieni insights per AdSets
+      const adSetInsightsResponse = await axios.get(
+        `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/insights`,
+        {
+          params: {
+            access_token: FB_MARKETING_TOKEN,
+            time_range: JSON.stringify({ since, until }),
+            level: 'adset',
+            fields: 'adset_id,adset_name,impressions,clicks,spend,actions,conversions',
+            filtering: [{
+              field: 'campaign.id',
+              operator: 'EQUAL',
+              value: campaign.id
+            }],
+            limit: 50
+          }
+        }
+      );
+      
+      const adSetInsights = adSetInsightsResponse.data.data || [];
+      
+      // Processa AdSets
+      const processedAdSets = [];
+      
+      for (const adSet of adSets) {
+        const adSetInsight = adSetInsights.find(i => i.adset_id === adSet.id) || {};
+        const adSetMetrics = calculateMetrics(adSetInsight);
+        
+        // Ottieni Ads per questo AdSet
+        const adsResponse = await axios.get(
+          `https://graph.facebook.com/v22.0/${adSet.id}/ads`,
+          {
+            params: {
+              access_token: FB_MARKETING_TOKEN,
+              fields: 'id,name,status',
+              limit: 50
+            }
+          }
+        );
+        
+        const ads = adsResponse.data.data || [];
+        
+        // Ottieni insights per Ads
+        const adInsightsResponse = await axios.get(
+          `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/insights`,
+          {
+            params: {
+              access_token: FB_MARKETING_TOKEN,
+              time_range: JSON.stringify({ since, until }),
+              level: 'ad',
+              fields: 'ad_id,ad_name,impressions,clicks,spend,actions,conversions',
+              filtering: [{
+                field: 'adset.id',
+                operator: 'EQUAL',
+                value: adSet.id
+              }],
+              limit: 50
+            }
+          }
+        );
+        
+        const adInsights = adInsightsResponse.data.data || [];
+        
+        // Processa Ads
+        const processedAds = ads.map(ad => {
+          const adInsight = adInsights.find(i => i.ad_id === ad.id) || {};
+          const adMetrics = calculateMetrics(adInsight);
+          
+          return {
+            id: ad.id,
+            name: ad.name,
+            status: ad.status,
+            dailyBudget: 0,
+            ...adMetrics
+          };
+        });
+        
+        processedAdSets.push({
+          id: adSet.id,
+          name: adSet.name,
+          status: adSet.status,
+          dailyBudget: adSet.daily_budget ? parseInt(adSet.daily_budget) / 100 : 0,
+          ...adSetMetrics,
+          ads: processedAds
+        });
+      }
+      
+      result.push({
+        id: campaign.id,
+        name: campaign.name,
+        status: campaign.status,
+        dailyBudget: campaign.daily_budget ? parseInt(campaign.daily_budget) / 100 : 0,
+        ...campaignMetrics,
+        adSets: processedAdSets
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Errore nel recupero delle campagne Facebook:', error);
+    throw error;
+  }
+}
+
+function convertTimeRangeToDateRange(timeRange) {
+  const now = new Date();
+  let since = new Date();
+  
+  switch(timeRange) {
+    case '7d':
+      since.setDate(now.getDate() - 7);
+      break;
+    case '30d':
+      since.setDate(now.getDate() - 30);
+      break;
+    case '90d':
+      since.setDate(now.getDate() - 90);
+      break;
+    default:
+      since.setDate(now.getDate() - 7);
+  }
+  
+  const sinceStr = since.toISOString().split('T')[0];
+  const untilStr = now.toISOString().split('T')[0];
+  
+  return { since: sinceStr, until: untilStr };
+}
+
+function calculateMetrics(data) {
+  const impressions = parseInt(data.impressions) || 0;
+  const clicks = parseInt(data.clicks) || 0;
+  const spend = parseFloat(data.spend) || 0;
+  
+  // Estrai lead e conversioni dalle actions
+  let leads = 0;
+  let conversions = 0;
+  
+  if (data.actions && Array.isArray(data.actions)) {
+    data.actions.forEach(action => {
+      if (action.action_type === 'lead') {
+        leads += parseFloat(action.value) || 0;
+      } else if (
+        action.action_type === 'purchase' || 
+        action.action_type === 'complete_registration' ||
+        action.action_type === 'offsite_conversion'
+      ) {
+        conversions += parseFloat(action.value) || 0;
+      }
+    });
+  }
+  
+  const ctr = clicks > 0 && impressions > 0 ? clicks / impressions * 100 : 0;
+  const cpc = clicks > 0 && spend > 0 ? spend / clicks : 0;
+  const costPerLead = leads > 0 && spend > 0 ? spend / leads : 0;
+  const costPerConversion = conversions > 0 && spend > 0 ? spend / conversions : 0;
+  
+  // Stima ROAS (personalizzare in base al valore reale)
+  const estimatedValue = conversions * 100; // 100€ per conversione
+  const roas = spend > 0 ? estimatedValue / spend : 0;
+  
+  return {
+    impressions,
+    clicks,
+    ctr,
+    cpc,
+    spend,
+    leads,
+    realLeads: 0, // Sarà calcolato dopo
+    costPerLead,
+    conversions,
+    costPerConversion,
+    roas
+  };
+}
+
 async function getRealLeadsForCampaign(connection, adId) {
   try {
     if (!connection.models['Lead']) {
@@ -4049,14 +4284,22 @@ async function getRealLeadsForCampaign(connection, adId) {
     
     const Lead = connection.model('Lead');
     
-    // Conta i lead che hanno utm_source uguale all'ad ID
+    // CORREZIONE: Cerca i lead che hanno utm_source uguale all'ad ID
+    // Il campo utm_source può essere in diversi posti nel documento
     const count = await Lead.countDocuments({
       $or: [
+        // Campo utmSource diretto
         { utmSource: adId },
-        { 'extendedData.utmParams.utm_source': adId }
+        // In extendedData.utmParams.utm_source
+        { 'extendedData.utmParams.utm_source': adId },
+        // In extendedData.formData.utm_source (se presente)
+        { 'extendedData.formData.utm_source': adId },
+        // Campo source se corrisponde all'adId
+        { source: adId }
       ]
     });
     
+    console.log(`Lead reali trovati per ad ${adId}: ${count}`);
     return count || 0;
   } catch (error) {
     console.error('Errore nel conteggio dei lead reali:', error);
