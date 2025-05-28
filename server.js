@@ -3973,6 +3973,97 @@ app.get('/api/tracciamento/sessions/:userId', async (req, res) => {
   }
 });
 
+app.get('/api/marketing/campaigns', async (req, res) => {
+  try {
+    const { timeRange = '30d' } = req.query;
+    
+    // Ottieni i dati dalle API di marketing (funzione esistente)
+    const campaigns = await getMarketingCampaignsFromFacebook(timeRange, req);
+    
+    // Ottieni la connessione utente per i lead reali
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      // Se non c'è connessione, restituisci le campagne senza lead reali
+      const campaignsWithZeroRealLeads = campaigns.map(campaign => ({
+        ...campaign,
+        realLeads: 0,
+        adSets: campaign.adSets.map(adSet => ({
+          ...adSet,
+          realLeads: 0,
+          ads: adSet.ads.map(ad => ({
+            ...ad,
+            realLeads: 0
+          }))
+        }))
+      }));
+      
+      return res.json(campaignsWithZeroRealLeads);
+    }
+    
+    // Aggiungi lead reali per ogni livello
+    const campaignsWithRealLeads = await Promise.all(campaigns.map(async (campaign) => {
+      // Per ogni adset nella campagna
+      const adSetsWithRealLeads = await Promise.all(campaign.adSets.map(async (adSet) => {
+        // Per ogni ad nell'adset
+        const adsWithRealLeads = await Promise.all(adSet.ads.map(async (ad) => {
+          const realLeads = await getRealLeadsForCampaign(connection, ad.id);
+          return {
+            ...ad,
+            realLeads
+          };
+        }));
+        
+        // Calcola i lead reali totali per l'adset
+        const adSetRealLeads = adsWithRealLeads.reduce((sum, ad) => sum + ad.realLeads, 0);
+        
+        return {
+          ...adSet,
+          realLeads: adSetRealLeads,
+          ads: adsWithRealLeads
+        };
+      }));
+      
+      // Calcola i lead reali totali per la campagna
+      const totalRealLeads = adSetsWithRealLeads.reduce((sum, adSet) => sum + adSet.realLeads, 0);
+      
+      return {
+        ...campaign,
+        realLeads: totalRealLeads,
+        adSets: adSetsWithRealLeads
+      };
+    }));
+    
+    res.json(campaignsWithRealLeads);
+  } catch (error) {
+    console.error('Errore nel recupero delle campagne:', error);
+    res.status(500).json({ error: 'Errore nel recupero delle campagne' });
+  }
+});
+
+async function getRealLeadsForCampaign(connection, adId) {
+  try {
+    if (!connection.models['Lead']) {
+      return 0;
+    }
+    
+    const Lead = connection.model('Lead');
+    
+    // Conta i lead che hanno utm_source uguale all'ad ID
+    const count = await Lead.countDocuments({
+      $or: [
+        { utmSource: adId },
+        { 'extendedData.utmParams.utm_source': adId }
+      ]
+    });
+    
+    return count || 0;
+  } catch (error) {
+    console.error('Errore nel conteggio dei lead reali:', error);
+    return 0;
+  }
+}
+
 // 4. Endpoint per ottenere i dettagli di una sessione - VERSIONE CORRETTA
 app.get('/api/tracciamento/sessions/details/:sessionId', async (req, res) => {
   try {
