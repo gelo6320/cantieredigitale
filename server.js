@@ -5065,6 +5065,7 @@ async function getUserConnection(req) {
         source: String,
         medium: String,
         campaign: String,
+        utmSource: String,
         formType: { type: String, required: true },
         status: {
           type: String,
