@@ -4036,6 +4036,58 @@ app.get('/api/marketing/campaigns', async (req, res) => {
   }
 });
 
+app.get('/api/marketing/overview', async (req, res) => {
+  try {
+    const { timeRange = '30d' } = req.query;
+    
+    console.log(`[Marketing Overview] Richiesta per timeRange: ${timeRange}`);
+    
+    // Ottieni configurazione utente
+    const userConfig = await getUserConfig(req.session.user.username);
+    const FB_MARKETING_TOKEN = userConfig.marketing_api_token || '';
+    const FB_ACCOUNT_ID = userConfig.fb_account_id || '';
+    
+    if (!FB_MARKETING_TOKEN || !FB_ACCOUNT_ID) {
+      console.warn('[Marketing Overview] Token marketing o account ID mancanti, uso dati mock');
+      return res.json(getMockOverviewData(timeRange));
+    }
+
+    const { since, until } = convertTimeRangeToDateRange(timeRange);
+    
+    try {
+      // Richiesta all'API di Facebook per insights account-level
+      const response = await axios.get(
+        `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/insights`,
+        {
+          params: {
+            access_token: FB_MARKETING_TOKEN,
+            time_range: JSON.stringify({ since, until }),
+            level: 'account',
+            time_increment: 1, // Dati giornalieri
+            fields: 'date_start,impressions,clicks,spend,actions,action_values,cost_per_action_type',
+            timeout: 30000
+          }
+        }
+      );
+      
+      const overviewData = transformToMarketingOverview(response.data, timeRange);
+      console.log(`[Marketing Overview] Dati trasformati con successo`);
+      
+      res.json(overviewData);
+    } catch (fbError) {
+      console.error('[Marketing Overview] Errore Facebook API:', fbError.message);
+      // Fallback a dati mock in caso di errore Facebook
+      res.json(getMockOverviewData(timeRange));
+    }
+  } catch (error) {
+    console.error('[Marketing Overview] Errore generale:', error);
+    res.status(500).json({ 
+      error: 'Errore nel recupero dell\'overview marketing',
+      details: error.message 
+    });
+  }
+});
+
 async function getMarketingCampaignsFromFacebook(timeRange, req) {
   try {
     // Ottieni configurazione utente
