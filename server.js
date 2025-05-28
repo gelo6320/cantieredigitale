@@ -4036,6 +4036,136 @@ app.get('/api/marketing/campaigns', async (req, res) => {
   }
 });
 
+// Aggiungi questa funzione prima della definizione dell'endpoint
+function transformToMarketingOverview(responseData, timeRange) {
+  try {
+    console.log(`[transformToMarketingOverview] Trasformazione dati per timeRange: ${timeRange}`);
+    
+    // Se non ci sono dati, restituisci struttura vuota
+    if (!responseData || !responseData.data || responseData.data.length === 0) {
+      console.log('[transformToMarketingOverview] Nessun dato trovato, restituisco struttura vuota');
+      return createEmptyOverview(timeRange);
+    }
+    
+    const data = responseData.data;
+    console.log(`[transformToMarketingOverview] Processando ${data.length} record`);
+    
+    // Ordina per data
+    data.sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
+    
+    // Estrai le date e inizializza gli array
+    const dates = data.map(item => {
+      const date = new Date(item.date_start);
+      return date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+    });
+    
+    const leads = [];
+    const conversions = [];
+    const roas = [];
+    
+    let totalLeads = 0;
+    let totalConversions = 0;
+    let totalSpend = 0;
+    let totalRevenue = 0;
+    
+    // Processa ogni giorno
+    data.forEach(dayData => {
+      // Estrai lead dalle actions
+      let dayLeads = 0;
+      let dayConversions = 0;
+      let dayRevenue = 0;
+      
+      if (dayData.actions && Array.isArray(dayData.actions)) {
+        dayData.actions.forEach(action => {
+          if (action.action_type === 'lead') {
+            dayLeads += parseInt(action.value) || 0;
+          } else if (action.action_type === 'purchase' || 
+                     action.action_type === 'complete_registration' ||
+                     action.action_type === 'offsite_conversion') {
+            dayConversions += parseInt(action.value) || 0;
+          }
+        });
+      }
+      
+      // Estrai revenue dalle action_values
+      if (dayData.action_values && Array.isArray(dayData.action_values)) {
+        dayData.action_values.forEach(actionValue => {
+          if (actionValue.action_type === 'purchase' || 
+              actionValue.action_type === 'offsite_conversion') {
+            dayRevenue += parseFloat(actionValue.value) || 0;
+          }
+        });
+      }
+      
+      const daySpend = parseFloat(dayData.spend) || 0;
+      const dayRoas = daySpend > 0 ? dayRevenue / daySpend : 0;
+      
+      leads.push(dayLeads);
+      conversions.push(dayConversions);
+      roas.push(dayRoas);
+      
+      totalLeads += dayLeads;
+      totalConversions += dayConversions;
+      totalSpend += daySpend;
+      totalRevenue += dayRevenue;
+    });
+    
+    const averageRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+    
+    const result = {
+      dates,
+      leads,
+      conversions,
+      roas,
+      totalLeads,
+      totalConversions,
+      averageRoas: Number(averageRoas.toFixed(2))
+    };
+    
+    console.log(`[transformToMarketingOverview] Trasformazione completata:`, {
+      totalLeads: result.totalLeads,
+      totalConversions: result.totalConversions,
+      averageRoas: result.averageRoas,
+      daysProcessed: dates.length
+    });
+    
+    return result;
+    
+  } catch (error) {
+    console.error('[transformToMarketingOverview] Errore durante la trasformazione:', error);
+    return createEmptyOverview(timeRange);
+  }
+}
+
+function createEmptyOverview(timeRange) {
+  // Crea date vuote in base al timeRange
+  const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+  const dates = [];
+  const leads = [];
+  const conversions = [];
+  const roas = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    dates.push(date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }));
+    leads.push(0);
+    conversions.push(0);
+    roas.push(0);
+  }
+  
+  return {
+    dates,
+    leads,
+    conversions,
+    roas,
+    totalLeads: 0,
+    totalConversions: 0,
+    averageRoas: 0
+  };
+}
+
+// SOSTITUISCI l'endpoint esistente con questo:
 app.get('/api/marketing/overview', async (req, res) => {
   try {
     const { timeRange = '30d' } = req.query;
@@ -4048,12 +4178,15 @@ app.get('/api/marketing/overview', async (req, res) => {
     const FB_ACCOUNT_ID = userConfig.fb_account_id || '';
     
     if (!FB_MARKETING_TOKEN || !FB_ACCOUNT_ID) {
-      console.warn('[Marketing Overview] Token marketing o account ID mancanti, uso dati mock');
+      console.warn('[Marketing Overview] Token marketing o account ID mancanti, restituisco dati vuoti');
+      return res.json(createEmptyOverview(timeRange));
     }
 
     const { since, until } = convertTimeRangeToDateRange(timeRange);
     
     try {
+      console.log(`[Marketing Overview] Chiamata Facebook API per account ${FB_ACCOUNT_ID}`);
+      
       // Richiesta all'API di Facebook per insights account-level
       const response = await axios.get(
         `https://graph.facebook.com/v22.0/act_${FB_ACCOUNT_ID}/insights`,
@@ -4063,21 +4196,34 @@ app.get('/api/marketing/overview', async (req, res) => {
             time_range: JSON.stringify({ since, until }),
             level: 'account',
             time_increment: 1, // Dati giornalieri
-            fields: 'date_start,impressions,clicks,spend,actions,action_values,cost_per_action_type',
-            timeout: 30000
-          }
+            fields: 'date_start,impressions,clicks,spend,actions,action_values,cost_per_action_type'
+          },
+          timeout: 25000 // Ridotto a 25 secondi
         }
       );
       
+      console.log(`[Marketing Overview] Risposta Facebook API ricevuta`);
       const overviewData = transformToMarketingOverview(response.data, timeRange);
-      console.log(`[Marketing Overview] Dati trasformati con successo`);
       
       res.json(overviewData);
+      
     } catch (fbError) {
       console.error('[Marketing Overview] Errore Facebook API:', fbError.message);
+      
+      // IMPORTANTE: Restituisci una risposta anche in caso di errore
+      if (fbError.response && fbError.response.status === 400) {
+        console.log('[Marketing Overview] Errore configurazione Facebook, restituisco dati vuoti');
+      } else {
+        console.log('[Marketing Overview] Timeout o errore rete Facebook, restituisco dati vuoti');
+      }
+      
+      return res.json(createEmptyOverview(timeRange));
     }
+    
   } catch (error) {
     console.error('[Marketing Overview] Errore generale:', error);
+    
+    // Assicurati di restituire sempre una risposta
     res.status(500).json({ 
       error: 'Errore nel recupero dell\'overview marketing',
       details: error.message 
