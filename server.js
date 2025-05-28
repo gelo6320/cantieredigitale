@@ -3256,7 +3256,7 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
     // Raccogli i dati delle URL da visitsByUrl e uniqueVisitorsByUrl
     const landingPages = [];
     let lastUpdated = new Date();
-
+    
     for (const stat of relevantStats) {
       // Verifica che visitsByUrl esista e sia un oggetto
       if (stat.visitsByUrl && typeof stat.visitsByUrl === 'object') {
@@ -3269,12 +3269,20 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
             ? (stat.uniqueVisitorsByUrl[url] || 0)
             : 0;
           
+          // Ottieni le conversioni per questa URL
+          const conversions = stat.conversions && stat.conversions.byUrl && typeof stat.conversions.byUrl === 'object'
+            ? (stat.conversions.byUrl[url] || 0)
+            : 0;
+          
+          // Calcola il tasso di conversione
+          const conversionRate = uniqueVisitors > 0 ? (conversions / uniqueVisitors) * 100 : 0;
+          
           landingPages.push({
             url,
             title: url, // Potremmo migliorare questo in futuro recuperando i titoli effettivi
             totalVisits: Number(visits),
             uniqueUsers: Number(uniqueVisitors),
-            conversionRate: 0, // Sarà calcolato dopo
+            conversionRate: Number(conversionRate.toFixed(2)), // Arrotonda a 2 decimali
             lastAccess: stat.lastUpdated || stat.date || new Date()
           });
         }
