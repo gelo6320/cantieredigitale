@@ -1030,6 +1030,123 @@ const registerChatModels = (connection) => {
   }
 };
 
+// API per ottenere tutti gli utenti (solo admin)
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    // Verifica che l'utente sia admin
+    if (!req.session?.user?.role || req.session.user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Accesso negato - Solo amministratori' 
+      });
+    }
+
+    const users = await Admin.find({}, 'username role createdAt').sort({ username: 1 });
+    
+    res.json({
+      success: true,
+      data: users
+    });
+  } catch (error) {
+    console.error('Errore nel recupero degli utenti:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel recupero degli utenti' 
+    });
+  }
+});
+
+// API per switch utente (solo admin)
+app.post('/api/admin/switch-user', async (req, res) => {
+  try {
+    const { targetUsername } = req.body;
+    
+    // Verifica che l'utente corrente sia admin
+    if (!req.session?.user?.role || req.session.user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Accesso negato - Solo amministratori' 
+      });
+    }
+
+    // Se non c'è originalAdmin, salva l'admin corrente
+    if (!req.session.originalAdmin) {
+      req.session.originalAdmin = {
+        id: req.session.user.id,
+        username: req.session.user.username,
+        role: req.session.user.role
+      };
+    }
+
+    // Trova l'utente target
+    const targetUser = await Admin.findOne({ username: targetUsername });
+    if (!targetUser) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Utente non trovato' 
+      });
+    }
+
+    // Recupera le configurazioni del target user
+    const targetUserConfig = await getUserConfig(targetUsername);
+
+    // Aggiorna la sessione
+    req.session.user = {
+      id: targetUser._id,
+      username: targetUser.username,
+      role: targetUser.role || 'user'
+    };
+    req.session.userConfig = targetUserConfig;
+    req.session.isImpersonating = true;
+
+    res.json({
+      success: true,
+      message: `Ora stai operando come ${targetUsername}`,
+      user: req.session.user,
+      originalAdmin: req.session.originalAdmin
+    });
+  } catch (error) {
+    console.error('Errore nel cambio utente:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel cambio utente' 
+    });
+  }
+});
+
+// API per tornare all'admin originale
+app.post('/api/admin/restore-admin', async (req, res) => {
+  try {
+    if (!req.session?.originalAdmin) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nessun admin originale salvato' 
+      });
+    }
+
+    // Recupera le configurazioni dell'admin originale
+    const originalAdminConfig = await getUserConfig(req.session.originalAdmin.username);
+
+    // Ripristina la sessione dell'admin originale
+    req.session.user = req.session.originalAdmin;
+    req.session.userConfig = originalAdminConfig;
+    req.session.isImpersonating = false;
+    delete req.session.originalAdmin;
+
+    res.json({
+      success: true,
+      message: 'Ripristinato profilo amministratore',
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error('Errore nel ripristino admin:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Errore nel ripristino admin' 
+    });
+  }
+});
+
 
 // ============================================
 // ENDPOINT API PER CHAT DATABASE
