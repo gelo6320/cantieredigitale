@@ -22,8 +22,6 @@ const {
 } = require('../models/statistics');
 const { UserPath, Session, User } = require('../models');
 
-const log = createModuleLogger('ANALYTICS_SERVICE');
-
 // ================================================================
 // SCHEMA ANALYTICS AVANZATE
 // ================================================================
