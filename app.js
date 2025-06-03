@@ -5,7 +5,7 @@ const compression = require('compression');
 // Importa configurazioni
 const { 
   corsMiddleware,
-  sessionConfig, 
+  sessionMiddleware,
   connectDatabase 
 } = require('./config');
 
@@ -46,7 +46,7 @@ app.use(require('cookie-parser')());
 app.use(corsMiddleware);
 
 // Configurazione sessione
-app.use(sessionConfig);
+app.use(sessionMiddleware);
 
 // Middleware per proteggere le route CRM
 app.use((req, res, next) => {
