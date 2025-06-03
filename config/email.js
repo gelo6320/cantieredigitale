@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 
 // Configura Nodemailer per l'invio di email
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
   secure: process.env.EMAIL_SECURE === 'true',
