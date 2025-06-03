@@ -4,7 +4,7 @@ const compression = require('compression');
 
 // Importa configurazioni
 const { 
-  corsConfig, 
+  corsMiddleware,
   sessionConfig, 
   connectDatabase 
 } = require('./config');
@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(require('cookie-parser')());
 
 // Configurazione CORS
-app.use(corsConfig);
+app.use(corsMiddleware);
 
 // Configurazione sessione
 app.use(sessionConfig);
