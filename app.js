@@ -13,7 +13,7 @@ const {
 const { 
   checkCookieConsent, 
   checkApiAuth, 
-  fbclidMiddleware 
+  facebookTrackingMiddleware 
 } = require('./middleware');
 
 // Importa tutte le route
@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware per catturare fbclid e inviare PageView alla CAPI
-app.use(fbclidMiddleware);
+app.use(facebookTrackingMiddleware);
 
 // Applica i middleware
 app.use(checkCookieConsent);
