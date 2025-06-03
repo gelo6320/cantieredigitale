@@ -3376,20 +3376,23 @@ app.get('/api/tracciamento/landing-pages-stats', async (req, res) => {
     
     for (const stat of relevantStats) {
       // Verifica che visitsByUrl esista e sia un oggetto
-      if (stat.visitsByUrl && typeof stat.visitsByUrl === 'object') {
-        console.log(`Elaborazione statistiche con ${Object.keys(stat.visitsByUrl).length} URL`);
-        
-        // Processa ogni URL
-        for (const [url, visits] of Object.entries(stat.visitsByUrl)) {
-          // Ottieni i visitatori unici, con fallback a 0 se non disponibili
-          const uniqueVisitors = stat.uniqueVisitorsByUrl && typeof stat.uniqueVisitorsByUrl === 'object' 
-            ? (stat.uniqueVisitorsByUrl[url] || 0)
-            : 0;
+      if (stat.visitsByUrl && Array.isArray(stat.visitsByUrl)) {
+        console.log(`Elaborazione statistiche con ${stat.visitsByUrl.length} URL`);
+        for (const visitData of stat.visitsByUrl) {
+          const url = visitData.url;
+          const visits = visitData.count || 0;
           
-          // Ottieni le conversioni per questa URL
-          const conversions = stat.conversions && stat.conversions.byUrl && typeof stat.conversions.byUrl === 'object'
-            ? (stat.conversions.byUrl[url] || 0)
-            : 0;
+          // Ottieni i visitatori unici dalla nuova struttura array
+          const uniqueVisitorsData = stat.uniqueVisitorsByUrl && Array.isArray(stat.uniqueVisitorsByUrl) 
+            ? stat.uniqueVisitorsByUrl.find(item => item.url === url)
+            : null;
+          const uniqueVisitors = uniqueVisitorsData ? uniqueVisitorsData.count : 0;
+          
+          // Ottieni le conversioni dalla nuova struttura array
+          const conversionsData = stat.conversions && stat.conversions.byUrl && Array.isArray(stat.conversions.byUrl)
+            ? stat.conversions.byUrl.find(item => item.url === url)
+            : null;
+          const conversions = conversionsData ? conversionsData.count : 0;
           
           // Calcola il tasso di conversione
           const conversionRate = uniqueVisitors > 0 ? (conversions / uniqueVisitors) * 100 : 0;
