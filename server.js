@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const app = require('./app');
-const { createInitialAdmin } = require('./utils');
 const { connectionManager } = require('./utils');
 
 const PORT = process.env.PORT || 3000;
@@ -10,9 +9,6 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server principale in esecuzione sulla porta ${PORT}`);
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  
-  // Crea utente admin iniziale (solo al primo avvio)
-  createInitialAdmin();
 });
 
 // Gestione corretta dell'arresto del server
