@@ -1,5 +1,6 @@
 const express = require('express');
 const { getUserConnection, getEventCategory } = require('../utils');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 

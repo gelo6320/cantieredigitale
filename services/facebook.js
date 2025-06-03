@@ -1,5 +1,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const { getUserConfig } = require('../utils/userHelpers');
 
 // Funzione per inviare eventi a Facebook
 async function sendFacebookConversionEvent(eventName, userData, customData = {}, req) {
