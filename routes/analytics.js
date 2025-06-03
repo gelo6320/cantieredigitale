@@ -18,8 +18,6 @@ const {
   Analytics 
 } = require('../services/analyticsService');
 
-const log = createModuleLogger('ANALYTICS_ROUTES');
-
 /**
  * GET /api/analytics/dashboard
  * Ottiene dashboard completa analytics per oggi
