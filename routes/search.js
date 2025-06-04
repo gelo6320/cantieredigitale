@@ -35,6 +35,9 @@ router.get('/global-search', async (req, res) => {
     // 1. CONTATTI / LEADS - Search in leads (contacts)
     await searchInLeads(connection, searchRegex, searchResults, limit);
     
+    // 1.1 SALES FUNNEL - Same data as leads but for funnel section
+    await searchInSalesFunnel(connection, searchRegex, searchResults, limit);
+    
     // 2. CALENDAR - Search in calendar events
     await searchInCalendar(connection, searchRegex, searchResults, limit);
     
@@ -144,7 +147,79 @@ async function searchInLeads(connection, searchRegex, searchResults, limit) {
   }
 }
 
-// Helper function to search in calendar events
+// Helper function to search in leads for sales funnel
+async function searchInSalesFunnel(connection, searchRegex, searchResults, limit) {
+  try {
+    if (!connection.models['Lead']) {
+      console.log('Lead model not found for sales funnel search');
+      return;
+    }
+    
+    const LeadModel = connection.models['Lead'];
+    console.log('Using Lead model for sales funnel search');
+    
+    // Same filter as contacts but for funnel
+    const leadsFilter = {
+      $or: [
+        // Try firstName + lastName
+        {
+          $and: [
+            { firstName: { $exists: true } },
+            { lastName: { $exists: true } },
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { $concat: ["$firstName", " ", "$lastName"] },
+                  regex: searchRegex
+                }
+              }
+            }
+          ]
+        },
+        // Try name field
+        { name: searchRegex },
+        // Try email
+        { email: searchRegex },
+        // Try phone
+        { phone: searchRegex },
+        // Try firstName alone
+        { firstName: searchRegex },
+        // Try lastName alone
+        { lastName: searchRegex }
+      ]
+    };
+    
+    const leads = await LeadModel.find(leadsFilter)
+      .sort({ createdAt: -1 })
+      .limit(Math.min(parseInt(limit) || 3, 3)); // Limit to 3 for funnel to not duplicate too much
+    
+    if (leads.length > 0) {
+      leads.forEach(lead => {
+        const leadName = 
+          (lead.firstName && lead.lastName) 
+            ? `${lead.firstName} ${lead.lastName}`
+            : lead.name || (lead.email ? lead.email.split('@')[0] : 'Lead');
+        
+        searchResults.push({
+          id: lead._id.toString(),
+          leadId: lead.leadId,
+          name: leadName,
+          email: lead.email,
+          phone: lead.phone,
+          section: "Sales Funnel",
+          sectionPath: "/sales-funnel",
+          createdAt: lead.createdAt,
+          type: lead.formType || 'lead',
+          status: lead.status,
+          value: lead.value,
+          service: lead.service
+        });
+      });
+    }
+  } catch (error) {
+    console.error('Error searching in sales funnel:', error);
+  }
+}
 async function searchInCalendar(connection, searchRegex, searchResults, limit) {
   try {
     if (!connection.models['CalendarEvent']) {
@@ -353,7 +428,22 @@ async function searchInClients(connection, searchRegex, searchResults, limit) {
         { lastName: searchRegex },
         { fullName: searchRegex },
         { email: searchRegex },
-        { phone: searchRegex }
+        { phone: searchRegex },
+        // Search for full name combination
+        {
+          $and: [
+            { firstName: { $exists: true } },
+            { lastName: { $exists: true } },
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { $concat: ["$firstName", " ", "$lastName"] },
+                  regex: searchRegex
+                }
+              }
+            }
+          ]
+        }
       ]
     };
     
@@ -404,12 +494,48 @@ async function searchInAudiences(connection, searchRegex, searchResults, limit) 
         { phone: searchRegex },
         { firstName: searchRegex },
         { lastName: searchRegex },
+        // Search for full name combination
+        {
+          $and: [
+            { firstName: { $exists: true } },
+            { lastName: { $exists: true } },
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { $concat: ["$firstName", " ", "$lastName"] },
+                  regex: searchRegex
+                }
+              }
+            }
+          ]
+        },
         { 'location.city': searchRegex },
         { 'location.region': searchRegex },
         // Also search in conversions array
         { 'conversions.metadata.formData.firstName': searchRegex },
         { 'conversions.metadata.formData.lastName': searchRegex },
-        { 'conversions.metadata.formData.email': searchRegex }
+        { 'conversions.metadata.formData.email': searchRegex },
+        // Search for full name in conversions
+        {
+          $and: [
+            { 'conversions.metadata.formData.firstName': { $exists: true } },
+            { 'conversions.metadata.formData.lastName': { $exists: true } },
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { 
+                    $concat: [
+                      { $arrayElemAt: ["$conversions.metadata.formData.firstName", -1] }, 
+                      " ", 
+                      { $arrayElemAt: ["$conversions.metadata.formData.lastName", -1] }
+                    ]
+                  },
+                  regex: searchRegex
+                }
+              }
+            }
+          ]
+        }
       ]
     };
     
