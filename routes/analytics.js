@@ -768,23 +768,69 @@ async function generateComparativeInsights(periodKey, period, connection) {
  * @returns {string} - Chiave periodo
  */
 function generatePeriodKey(date, period) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  
-  switch (period) {
-    case 'daily':
-      return `${year}-${month}-${day}`;
-    case 'weekly':
-      const weekNumber = Math.ceil((date.getDate() + new Date(year, date.getMonth(), 1).getDay()) / 7);
-      return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
-    case 'monthly':
-      return `${year}-${month}`;
-    case 'yearly':
-      return `${year}`;
-    default:
-      return `${year}-${month}-${day}`;
+    // Gestione input sicura
+    let workingDate;
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      workingDate = new Date();
+      console.warn('generatePeriodKey: Invalid date provided, using current date');
+    } else {
+      workingDate = new Date(date); // Clone per evitare modifiche
+    }
+    
+    // Debug dettagliato
+    console.log('🔍 generatePeriodKey DEBUG:', {
+      inputDate: date ? date.toString() : 'null/undefined',
+      workingDate: workingDate.toString(),
+      workingDateISO: workingDate.toISOString(),
+      period: period
+    });
+    
+    // Calcolo con verifica
+    const year = workingDate.getFullYear();
+    const monthZeroBased = workingDate.getMonth(); // 0-11
+    const monthOneBased = monthZeroBased + 1;      // 1-12
+    const monthString = monthOneBased.toString().padStart(2, '0');
+    const day = workingDate.getDate();
+    
+    // Debug calcolo mese
+    console.log('🔍 Month calculation:', {
+      monthZeroBased: monthZeroBased,
+      monthOneBased: monthOneBased,
+      monthString: monthString,
+      expectedForJune: '06',
+      isJune: monthString === '06'
+    });
+    
+    let result;
+    switch (period) {
+      case 'daily':
+        const dayString = day.toString().padStart(2, '0');
+        result = `${year}-${monthString}-${dayString}`;
+        break;
+      case 'weekly':
+        const startOfYear = new Date(year, 0, 1);
+        const dayOfYear = Math.floor((workingDate - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
+        const weekNumber = Math.ceil(dayOfYear / 7);
+        result = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+        break;
+      case 'monthly':
+        result = `${year}-${monthString}`;
+        break;
+      case 'yearly':
+        result = `${year}`;
+        break;
+      default:
+        result = `${year}-${monthString}-${day.toString().padStart(2, '0')}`;
+    }
+    
+    console.log('🔍 generatePeriodKey RESULT:', {
+      period: period,
+      result: result,
+      expectedForJune2025: '2025-06',
+      isCorrectForJune: result === '2025-06' && period === 'monthly'
+    });
+    
+    return result;
   }
-}
 
 module.exports = router;

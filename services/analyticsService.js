@@ -285,6 +285,196 @@ AnalyticsSchema.index({ periodKey: 1 });
 AnalyticsSchema.index({ 'engagement.overallScore': -1 });
 AnalyticsSchema.index({ 'predictions.conversionPropensity.nextWeekPrediction': -1 });
 
+AnalyticsSchema.methods.generateInsights = function() {
+  const functionName = 'Analytics.generateInsights';
+  log.enter(functionName, { periodKey: this.periodKey });
+
+  const insights = [];
+
+  try {
+    // Insight engagement
+    if (this.engagement?.overallScore > 80) {
+      insights.push({
+        type: 'positive',
+        category: 'engagement',
+        title: 'Engagement eccellente',
+        message: `Score di engagement eccellente: ${this.engagement.overallScore}/100`,
+        priority: 'high',
+        action: 'Mantieni le strategie attuali'
+      });
+    } else if (this.engagement?.overallScore < 40) {
+      insights.push({
+        type: 'warning',
+        category: 'engagement',
+        title: 'Engagement basso',
+        message: `Score di engagement basso: ${this.engagement.overallScore}/100`,
+        priority: 'high',
+        action: 'Rivedi la strategia di contenuto e UX'
+      });
+    } else if (this.engagement?.overallScore >= 40) {
+      insights.push({
+        type: 'info',
+        category: 'engagement',
+        title: 'Engagement moderato',
+        message: `Score di engagement nella media: ${this.engagement.overallScore}/100`,
+        priority: 'medium',
+        action: 'Considera ottimizzazioni per migliorare l\'engagement'
+      });
+    }
+
+    // Insight patterns temporali
+    const hourlyData = this.temporalPatterns?.hourlyDistribution || [];
+    if (hourlyData.length > 0) {
+      const peakHour = hourlyData.reduce((max, current, index) => 
+        current.visits > hourlyData[max].visits ? index : max, 0);
+      
+      if (hourlyData[peakHour].visits > 0) {
+        insights.push({
+          type: 'info',
+          category: 'temporal',
+          title: 'Picco di traffico identificato',
+          message: `Picco di traffico alle ${peakHour.toString().padStart(2, '0')}:00 con ${hourlyData[peakHour].visits} visite`,
+          priority: 'medium',
+          action: 'Pianifica contenuti per quest\'orario'
+        });
+      }
+    }
+
+    // Insight heatmap comportamentale
+    const hotspots = this.behavioralHeatmap?.interactionHotspots || [];
+    if (hotspots.length > 0) {
+      const topHotspot = hotspots[0];
+      insights.push({
+        type: 'info',
+        category: 'behavior',
+        title: 'Elemento top performer',
+        message: `Elemento più interattivo: ${topHotspot.elementType} con ${topHotspot.interactions} interazioni`,
+        priority: 'medium',
+        action: 'Ottimizza elementi simili per migliorare l\'interazione'
+      });
+    }
+
+    // Insight scroll behavior
+    const scrollBehavior = this.behavioralHeatmap?.scrollBehavior;
+    if (scrollBehavior?.completionRate < 30) {
+      insights.push({
+        type: 'warning',
+        category: 'content',
+        title: 'Bassa completion rate',
+        message: `Solo ${scrollBehavior.completionRate}% degli utenti legge fino in fondo`,
+        priority: 'high',
+        action: 'Considera di spostare contenuto importante più in alto'
+      });
+    } else if (scrollBehavior?.completionRate > 70) {
+      insights.push({
+        type: 'positive',
+        category: 'content',
+        title: 'Alta completion rate',
+        message: `${scrollBehavior.completionRate}% degli utenti legge fino in fondo`,
+        priority: 'low',
+        action: 'Mantieni la struttura del contenuto attuale'
+      });
+    }
+
+    // Insight scroll velocità
+    if (scrollBehavior?.fastScrollers > 60) {
+      insights.push({
+        type: 'warning',
+        category: 'content',
+        title: 'Troppi scroll veloci',
+        message: `${scrollBehavior.fastScrollers}% degli utenti scorre velocemente`,
+        priority: 'medium',
+        action: 'Aggiungi elementi che catturino l\'attenzione per rallentare lo scroll'
+      });
+    }
+
+    // Insight predizioni conversioni
+    if (this.predictions?.conversionPropensity?.nextWeekPrediction > 0) {
+      const prediction = this.predictions.conversionPropensity.nextWeekPrediction;
+      const confidence = this.predictions.conversionPropensity.confidence || 0;
+      
+      insights.push({
+        type: 'prediction',
+        category: 'conversion',
+        title: 'Previsione conversioni',
+        message: `Previsione conversioni prossimo periodo: ${prediction.toFixed(1)}% (confidenza: ${confidence}%)`,
+        priority: confidence > 70 ? 'high' : 'medium',
+        action: 'Monitora le performance e aggiusta le strategie di conversione'
+      });
+    }
+
+    // Insight confidence score
+    if (this.confidence < 50) {
+      insights.push({
+        type: 'warning',
+        category: 'data',
+        title: 'Bassa affidabilità dati',
+        message: `Livello di confidenza: ${this.confidence}% - raccogliere più dati`,
+        priority: 'medium',
+        action: 'Aumenta il campione di dati per analisi più accurate'
+      });
+    }
+
+    // Insight sample size
+    if (this.sampleSize < 20) {
+      insights.push({
+        type: 'warning',
+        category: 'data',
+        title: 'Campione limitato',
+        message: `Solo ${this.sampleSize} sessioni analizzate`,
+        priority: 'medium',
+        action: 'Aumenta il traffico per analisi più rappresentative'
+      });
+    }
+
+    // Insight top source performance
+    const topSource = this.engagement?.bySource?.[0];
+    if (topSource && this.engagement.bySource.length > 1) {
+      insights.push({
+        type: 'info',
+        category: 'acquisition',
+        title: 'Fonte di traffico migliore',
+        message: `${topSource.source} ha il miglior engagement: ${topSource.score}/100`,
+        priority: 'medium',
+        action: 'Investi di più in questa fonte di traffico'
+      });
+    }
+
+    // Insight device performance
+    const mobileScore = this.engagement?.byDevice?.mobile?.score || 0;
+    const desktopScore = this.engagement?.byDevice?.desktop?.score || 0;
+    if (mobileScore > 0 && desktopScore > 0) {
+      const scoreDiff = Math.abs(mobileScore - desktopScore);
+      if (scoreDiff > 20) {
+        const better = mobileScore > desktopScore ? 'mobile' : 'desktop';
+        const worse = mobileScore > desktopScore ? 'desktop' : 'mobile';
+        insights.push({
+          type: 'warning',
+          category: 'device',
+          title: 'Gap performance device',
+          message: `Performance ${better} significativamente migliore di ${worse} (${scoreDiff} punti di differenza)`,
+          priority: 'high',
+          action: `Ottimizza l'esperienza per ${worse}`
+        });
+      }
+    }
+
+    log.info(functionName, 'Insights generati', {
+      periodKey: this.periodKey,
+      insightsCount: insights.length,
+      categories: insights.map(i => i.category)
+    });
+
+    log.exit(functionName, { success: true, insightsCount: insights.length });
+    return insights;
+
+  } catch (error) {
+    log.error(functionName, 'Errore generazione insights', error);
+    log.exit(functionName, { success: false, error: true });
+    return [];
+  }
+};
+
 // ================================================================
 // SCHEMA SESSIONI E USER PATHS
 // ================================================================
