@@ -28,9 +28,28 @@ async function getUserConnection(req) {
     // Get or create connection
     const connection = await connectionManager.getConnection(username, mongodb_uri);
     
-    // Register all your models here
+    // Import all schemas
+    const { 
+      FormDataSchema, 
+      BookingSchema, 
+      FacebookEventSchema, 
+      FacebookLeadSchema,
+      FacebookAudienceSchema,
+      DailyStatisticsSchema,
+      WeeklyStatisticsSchema,
+      MonthlyStatisticsSchema,
+      TotalStatisticsSchema,
+      ChatMessageSchema,
+      ChatConversationSchema,
+      ProjectSchema,
+      CalendarEventSchema,
+      ClientSchema,
+      VisitSchema
+    } = require('../models');
+    
+    // Register LEADS model (main contacts/leads)
     if (!connection.models['Lead']) {
-      console.log("[getUserConnection] Accessing leads collection");
+      console.log("[getUserConnection] Registering Lead model");
       
       const LeadSchema = new mongoose.Schema({
         leadId: { type: String, required: true, unique: true },
@@ -87,21 +106,37 @@ async function getUserConnection(req) {
       });
       
       connection.model('Lead', LeadSchema);
-      console.log("[getUserConnection] Leads collection accessed successfully");
+      console.log("[getUserConnection] Lead model registered successfully");
     }
     
-    // For backwards compatibility, register the old models if needed
-    const { 
-      FormDataSchema, 
-      BookingSchema, 
-      FacebookEventSchema, 
-      FacebookLeadSchema,
-      DailyStatisticsSchema,
-      WeeklyStatisticsSchema,
-      MonthlyStatisticsSchema,
-      TotalStatisticsSchema
-    } = require('../models');
+    // Register CALENDAR model
+    if (!connection.models['CalendarEvent']) {
+      console.log("[getUserConnection] Registering CalendarEvent model");
+      connection.model('CalendarEvent', CalendarEventSchema);
+    }
     
+    // Register PROJECT model
+    if (!connection.models['Project']) {
+      console.log("[getUserConnection] Registering Project model");
+      connection.model('Project', ProjectSchema);
+    }
+    
+    // Register WHATSAPP CHAT models
+    if (!connection.models['ChatConversation']) {
+      console.log("[getUserConnection] Registering WhatsApp Chat models");
+      connection.model('ChatConversation', ChatConversationSchema);
+      connection.model('ChatMessage', ChatMessageSchema);
+    }
+    
+    // Register BANCA DATI models
+    if (!connection.models['Visit']) {
+      console.log("[getUserConnection] Registering Banca Dati models");
+      connection.model('Visit', VisitSchema);
+      connection.model('Client', ClientSchema);
+      connection.model('FacebookAudience', FacebookAudienceSchema);
+    }
+    
+    // Register LEGACY models for backwards compatibility
     if (!connection.models['FormData']) {
       console.log("[getUserConnection] Registering legacy models");
       connection.model('FormData', FormDataSchema);
@@ -111,27 +146,22 @@ async function getUserConnection(req) {
       console.log("[getUserConnection] Legacy models registered");
     }
     
-    // Register statistics models if they don't exist
+    // Register STATISTICS models
     if (!connection.models['DailyStatistics']) {
+      console.log("[getUserConnection] Registering statistics models");
       connection.model('DailyStatistics', DailyStatisticsSchema);
-    }
-    
-    if (!connection.models['WeeklyStatistics']) {
       connection.model('WeeklyStatistics', WeeklyStatisticsSchema);
-    }
-    
-    if (!connection.models['MonthlyStatistics']) {
       connection.model('MonthlyStatistics', MonthlyStatisticsSchema);
-    }
-    
-    if (!connection.models['TotalStatistics']) {
       connection.model('TotalStatistics', TotalStatisticsSchema);
     }
     
+    // Register analytics models
     const { registerAnalyticsModels } = require('../services/analyticsService');
     registerAnalyticsModels(connection);
     
-    console.log("[getUserConnection] Connection and models ready");
+    console.log("[getUserConnection] All models registered successfully:");
+    console.log("Available models:", Object.keys(connection.models));
+    
     return connection;
   } catch (error) {
     console.error('[getUserConnection] ERROR:', error);
@@ -187,7 +217,7 @@ async function getUserConfig(username) {
       whatsapp_verify_token: user.config?.whatsapp_verify_token || process.env.WHATSAPP_VERIFY_TOKEN || ''
     };
   } catch (error) {
-    console.error('Errore nel recupero delle configurazioni WhatsApp:', error);
+    console.error('Errore nel recupero delle configurazioni:', error);
     // Fallback alla configurazione predeterminata
     return {
       mongodb_uri: process.env.MONGODB_URI,
