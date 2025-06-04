@@ -25,55 +25,47 @@ const { getUserConnection } = require('../utils');
  * Ottiene dashboard completa analytics per oggi
  */
 router.get('/dashboard', async (req, res) => {
-  const functionName = 'GET /api/analytics/dashboard';
-  log.enter(functionName, {
-    userAgent: req.headers['user-agent']?.substring(0, 50) + '...'
-  });
-
-  try {
-    // Ottieni la connessione dell'utente
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
-      });
-    }
-
-    // Genera analytics per oggi se non esistono
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const periodKey = today.toISOString().split('T')[0];
-
-    let analytics = await getAnalytics(periodKey, 'daily', connection);
-    
-    if (!analytics) {
-      log.info(functionName, 'Analytics non trovate, generazione nuove', { periodKey });
-      analytics = await updateTodayAnalytics(connection);
-    }
-
-    // Genera insights automatici
-    const insights = analytics.generateInsights ? analytics.generateInsights() : [];
-
-    // Aggiungi metriche di comparazione (settimana scorsa)
-    const lastWeek = new Date(today);
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    const lastWeekKey = lastWeek.toISOString().split('T')[0];
-    const lastWeekAnalytics = await getAnalytics(lastWeekKey, 'daily', connection);
-
-    const comparison = lastWeekAnalytics ? {
-      engagementChange: analytics.engagement.overallScore - lastWeekAnalytics.engagement.overallScore,
-      confidenceChange: analytics.confidence - lastWeekAnalytics.confidence,
-      sampleSizeChange: analytics.sampleSize - lastWeekAnalytics.sampleSize
-    } : null;
-
-    const dashboard = {
-      currentPeriod: {
-        periodKey,
-        period: 'daily',
-        analytics
-      },
+    const functionName = 'GET /api/analytics/dashboard';
+    log.enter(functionName, {
+      userAgent: req.headers['user-agent']?.substring(0, 50) + '...'
+    });
+  
+    try {
+      const connection = await getUserConnection(req);
+      
+      if (!connection) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Database non disponibile o non configurato correttamente' 
+        });
+      }
+  
+      // MODIFICA: Genera analytics per il mese corrente invece di oggi
+      const today = new Date();
+      const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1); // Primo giorno del mese
+      const periodKey = generatePeriodKey(currentMonth, 'monthly'); // CAMBIATO: era 'daily'
+  
+      let analytics = await getAnalytics(periodKey, 'monthly', connection); // CAMBIATO: era 'daily'
+      
+      if (!analytics) {
+        log.info(functionName, 'Analytics non trovate, generazione nuove', { periodKey });
+        // MODIFICA: Genera analytics per tutto il mese corrente
+        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        analytics = await generateAdvancedAnalytics(currentMonth, nextMonth, 'monthly', connection);
+      }
+  
+      // Aggiungi metriche di comparazione (mese scorso invece di settimana scorsa)
+      const lastMonth = new Date(currentMonth);
+      lastMonth.setMonth(lastMonth.getMonth() - 1); // CAMBIATO: era -7 giorni
+      const lastMonthKey = generatePeriodKey(lastMonth, 'monthly'); // CAMBIATO: era 'daily'
+      const lastMonthAnalytics = await getAnalytics(lastMonthKey, 'monthly', connection); // CAMBIATO: era 'daily'
+  
+      const dashboard = {
+        currentPeriod: {
+          periodKey,
+          period: 'monthly', // CAMBIATO: era 'daily'
+          analytics
+        },
       insights,
       comparison,
       summary: {
@@ -113,7 +105,7 @@ router.get('/dashboard', async (req, res) => {
  */
 router.get('/engagement', async (req, res) => {
   const functionName = 'GET /api/analytics/engagement';
-  const { period = 'daily', days = 7 } = req.query;
+  const { period = 'monthly', days = 30 } = req.query;
   
   log.enter(functionName, { period, days });
 
@@ -199,7 +191,7 @@ router.get('/engagement', async (req, res) => {
  */
 router.get('/heatmap', async (req, res) => {
   const functionName = 'GET /api/analytics/heatmap';
-  const { period = 'daily', date } = req.query;
+  const { period = 'monthly', date } = req.query;
   
   log.enter(functionName, { period, date });
 
@@ -294,7 +286,7 @@ router.get('/heatmap', async (req, res) => {
  */
 router.get('/temporal', async (req, res) => {
   const functionName = 'GET /api/analytics/temporal';
-  const { period = 'weekly', weeks = 4 } = req.query;
+  const { period = 'monthly', weeks = 4 } = req.query;
   
   log.enter(functionName, { period, weeks });
 
@@ -435,7 +427,7 @@ router.get('/temporal', async (req, res) => {
  */
 router.post('/generate', async (req, res) => {
   const functionName = 'POST /api/analytics/generate';
-  const { startDate, endDate, period = 'daily', force = false } = req.body;
+  const { startDate, endDate, period = 'monthly', force = false } = req.body;
   
   log.enter(functionName, { startDate, endDate, period, force });
 
@@ -526,7 +518,7 @@ router.post('/generate', async (req, res) => {
 router.get('/insights/:periodKey', async (req, res) => {
   const functionName = 'GET /api/analytics/insights/:periodKey';
   const { periodKey } = req.params;
-  const { period = 'daily' } = req.query;
+  const { period = 'monthly' } = req.query;
   
   log.enter(functionName, { periodKey, period });
 
