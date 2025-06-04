@@ -4,7 +4,7 @@ const { getUserConfig, Admin } = require('../utils');
 const router = express.Router();
 
 // API per ottenere le configurazioni utente
-router.get('/config', async (req, res) => {
+router.get('/user/config', async (req, res) => {
   try {
     // Verifica autenticazione
     if (!req.session || !req.session.isAuthenticated) {
@@ -51,7 +51,7 @@ router.get('/config', async (req, res) => {
 });
 
 // Configurazione utente API
-router.post('/config', async (req, res) => {
+router.post('/user/config', async (req, res) => {
   try {
     const { 
       mongodb_uri, 
