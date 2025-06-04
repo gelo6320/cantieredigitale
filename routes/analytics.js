@@ -60,12 +60,39 @@ router.get('/dashboard', async (req, res) => {
       const lastMonthKey = generatePeriodKey(lastMonth, 'monthly'); // CAMBIATO: era 'daily'
       const lastMonthAnalytics = await getAnalytics(lastMonthKey, 'monthly', connection); // CAMBIATO: era 'daily'
   
-      const dashboard = {
-        currentPeriod: {
-          periodKey,
-          period: 'monthly', // CAMBIATO: era 'daily'
-          analytics
+      const insights = analytics.generateInsights ? analytics.generateInsights() : [];
+
+    // Calcola metriche di comparazione
+    let comparison = null;
+    if (lastMonthAnalytics) {
+      const currentScore = analytics.engagement?.overallScore || 0;
+      const previousScore = lastMonthAnalytics.engagement?.overallScore || 0;
+      const scoreDiff = currentScore - previousScore;
+      
+      comparison = {
+        previous: {
+          periodKey: lastMonthKey,
+          score: previousScore
         },
+        current: {
+          periodKey,
+          score: currentScore
+        },
+        change: {
+          value: scoreDiff,
+          percentage: previousScore > 0 ? ((scoreDiff / previousScore) * 100).toFixed(1) : 0,
+          trend: scoreDiff > 0 ? 'up' : scoreDiff < 0 ? 'down' : 'stable'
+        }
+      };
+    }
+    
+    // Ora l'oggetto dashboard può usare insights e comparison
+    const dashboard = {
+      currentPeriod: {
+        periodKey,
+        period: 'monthly',
+        analytics
+      },
       insights,
       comparison,
       summary: {
