@@ -17,6 +17,7 @@ const {
   updateTodayAnalytics,
   Analytics 
 } = require('../services/analyticsService');
+const { log } = require('../utils/logger');
 
 /**
  * GET /api/analytics/dashboard

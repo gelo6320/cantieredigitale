@@ -21,6 +21,7 @@ const {
   TotalStatistics 
 } = require('../models/statistics');
 const { UserPath, Session, User } = require('../models');
+const { log } = require('../utils/logger');
 
 // ================================================================
 // SCHEMA ANALYTICS AVANZATE

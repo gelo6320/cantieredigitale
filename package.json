@@ -24,7 +24,8 @@
     "mongoose": "^8.13.0",
     "nodemailer": "^6.10.0",
     "papaparse": "^5.5.2",
-    "purgecss": "^7.0.2"
+    "purgecss": "^7.0.2",
+    "winston": "^3.17.0"
   },
   "description": ""
 }
