@@ -334,6 +334,28 @@ const SessionSchema = new mongoose.Schema({
   originalUtmParams: Object // UTM params originali della prima pageview
 });
 
+const InteractionSchema = new mongoose.Schema({
+  timestamp: { type: Date, default: Date.now },
+  type: { 
+    type: String, 
+    enum: ['form_interaction', 'click', 'video', 'scroll', 'page_visibility', 
+           'time_on_page', 'session_end', 'conversion', 'pageview', 'system', 
+           'user', 'interaction', 'media', 'error', 'navigation', 'user_inactive', 'user_active'],
+    default: 'interaction'
+  },
+  eventId: { type: String, required: true },
+  // Fields for click events
+  elementId: String,
+  elementText: String,
+  // Expand metadata for specific consolidated event types
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  // Store original event type
+  originalEventType: String
+}, { _id: true });
+
 const UserPathSchema = new mongoose.Schema({
   sessionId: { type: String, required: true, index: true },
   userId: { type: String, sparse: true, index: true },
