@@ -31,7 +31,7 @@ router.use('/api/projects', projectsRouter);
 router.use('/api/sales-funnel', salesFunnelRouter);
 router.use('/api/sites', sitesRouter);
 router.use('/api/tracciamento', trackingRouter);
-router.use('/api/user', usersRouter);
+router.use('/api', usersRouter);
 router.use('/api/whatsapp', whatsappRouter);
 router.use('/api/banca-dati', bankDataRouter);
 router.use('/api', searchRouter);
