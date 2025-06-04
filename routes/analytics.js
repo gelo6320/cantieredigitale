@@ -18,6 +18,7 @@ const {
   Analytics 
 } = require('../services/analyticsService');
 const { log } = require('../utils/logger');
+const { getUserConnection } = require('../utils');
 
 /**
  * GET /api/analytics/dashboard
@@ -30,16 +31,26 @@ router.get('/dashboard', async (req, res) => {
   });
 
   try {
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
     // Genera analytics per oggi se non esistono
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const periodKey = today.toISOString().split('T')[0];
 
-    let analytics = await getAnalytics(periodKey, 'daily');
+    let analytics = await getAnalytics(periodKey, 'daily', connection);
     
     if (!analytics) {
       log.info(functionName, 'Analytics non trovate, generazione nuove', { periodKey });
-      analytics = await updateTodayAnalytics();
+      analytics = await updateTodayAnalytics(connection);
     }
 
     // Genera insights automatici
@@ -49,7 +60,7 @@ router.get('/dashboard', async (req, res) => {
     const lastWeek = new Date(today);
     lastWeek.setDate(lastWeek.getDate() - 7);
     const lastWeekKey = lastWeek.toISOString().split('T')[0];
-    const lastWeekAnalytics = await getAnalytics(lastWeekKey, 'daily');
+    const lastWeekAnalytics = await getAnalytics(lastWeekKey, 'daily', connection);
 
     const comparison = lastWeekAnalytics ? {
       engagementChange: analytics.engagement.overallScore - lastWeekAnalytics.engagement.overallScore,
@@ -107,15 +118,26 @@ router.get('/engagement', async (req, res) => {
   log.enter(functionName, { period, days });
 
   try {
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
     const endDate = new Date();
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - parseInt(days));
 
-    // Recupera analytics per il periodo
-    const analyticsData = await Analytics.findByDateRange(startDate, endDate, period);
-
-    // Calcola trend engagement
-    const engagementTrend = await Analytics.getEngagementTrend(parseInt(days));
+    // Recupera analytics per il periodo usando la connessione
+    const Analytics = connection.model('Analytics');
+    const analyticsData = await Analytics.find({
+      date: { $gte: startDate, $lte: endDate },
+      period: period
+    }).sort({ date: 1 }).lean();
 
     // Prepara dati per il grafico
     const chartData = analyticsData.map(analytics => ({
@@ -137,7 +159,7 @@ router.get('/engagement', async (req, res) => {
       worstDay: chartData.reduce((worst, current) => 
         current.overallScore < worst.overallScore ? current : worst,
         { overallScore: 100, date: 'N/A' }),
-      trend: engagementTrend.trend || 'stable'
+      trend: 'stable'
     };
 
     const response = {
@@ -149,7 +171,6 @@ router.get('/engagement', async (req, res) => {
       },
       chartData,
       stats,
-      trend: engagementTrend,
       totalRecords: analyticsData.length
     };
 
@@ -183,10 +204,20 @@ router.get('/heatmap', async (req, res) => {
   log.enter(functionName, { period, date });
 
   try {
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
     const targetDate = date ? new Date(date) : new Date();
     const periodKey = generatePeriodKey(targetDate, period);
 
-    const analytics = await getAnalytics(periodKey, period);
+    const analytics = await getAnalytics(periodKey, period, connection);
 
     if (!analytics || !analytics.behavioralHeatmap) {
       log.warn(functionName, 'Dati heatmap non trovati', { periodKey, period });
@@ -268,12 +299,26 @@ router.get('/temporal', async (req, res) => {
   log.enter(functionName, { period, weeks });
 
   try {
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
     const endDate = new Date();
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - (parseInt(weeks) * 7));
 
     // Recupera dati per il periodo
-    const analyticsData = await Analytics.findByDateRange(startDate, endDate, 'daily');
+    const Analytics = connection.model('Analytics');
+    const analyticsData = await Analytics.find({
+      date: { $gte: startDate, $lte: endDate },
+      period: 'daily'
+    }).sort({ date: 1 }).lean();
 
     // Aggrega pattern temporali
     const hourlyAggregated = Array.from({ length: 24 }, () => ({
@@ -395,6 +440,16 @@ router.post('/generate', async (req, res) => {
   log.enter(functionName, { startDate, endDate, period, force });
 
   try {
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -415,7 +470,7 @@ router.post('/generate', async (req, res) => {
 
     // Verifica se analytics esistono già
     const periodKey = generatePeriodKey(start, period);
-    const existing = await getAnalytics(periodKey, period);
+    const existing = await getAnalytics(periodKey, period, connection);
 
     if (existing && !force) {
       log.info(functionName, 'Analytics esistenti trovate', {
@@ -437,7 +492,7 @@ router.post('/generate', async (req, res) => {
       force
     });
 
-    const analytics = await generateAdvancedAnalytics(start, end, period);
+    const analytics = await generateAdvancedAnalytics(start, end, period, connection);
 
     log.info(functionName, 'Analytics generate con successo', {
       periodKey,
@@ -476,7 +531,17 @@ router.get('/insights/:periodKey', async (req, res) => {
   log.enter(functionName, { periodKey, period });
 
   try {
-    const analytics = await getAnalytics(periodKey, period);
+    // Ottieni la connessione dell'utente
+    const connection = await getUserConnection(req);
+    
+    if (!connection) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Database non disponibile o non configurato correttamente' 
+      });
+    }
+
+    const analytics = await getAnalytics(periodKey, period, connection);
 
     if (!analytics) {
       return res.status(404).json({
@@ -488,7 +553,7 @@ router.get('/insights/:periodKey', async (req, res) => {
     const insights = analytics.generateInsights ? analytics.generateInsights() : [];
 
     // Aggiungi insights comparativi se disponibili
-    const comparativeInsights = await generateComparativeInsights(periodKey, period);
+    const comparativeInsights = await generateComparativeInsights(periodKey, period, connection);
 
     const response = {
       periodKey,
@@ -655,9 +720,10 @@ function generateTemporalInsights(hourlyData, weeklyData) {
  * Genera insights comparativi
  * @param {string} periodKey - Chiave periodo
  * @param {string} period - Tipo periodo
+ * @param {Object} connection - Connessione database
  * @returns {Promise<Array>} - Insights comparativi
  */
-async function generateComparativeInsights(periodKey, period) {
+async function generateComparativeInsights(periodKey, period, connection) {
   try {
     // Trova periodo precedente per comparazione
     const currentDate = new Date(periodKey);
@@ -672,7 +738,7 @@ async function generateComparativeInsights(periodKey, period) {
     }
     
     const previousPeriodKey = generatePeriodKey(previousDate, period);
-    const previousAnalytics = await getAnalytics(previousPeriodKey, period);
+    const previousAnalytics = await getAnalytics(previousPeriodKey, period, connection);
     
     if (!previousAnalytics) {
       return [];
@@ -681,7 +747,7 @@ async function generateComparativeInsights(periodKey, period) {
     const insights = [];
     
     // Compara engagement
-    const currentAnalytics = await getAnalytics(periodKey, period);
+    const currentAnalytics = await getAnalytics(periodKey, period, connection);
     if (currentAnalytics) {
       const engagementDiff = currentAnalytics.engagement.overallScore - previousAnalytics.engagement.overallScore;
       

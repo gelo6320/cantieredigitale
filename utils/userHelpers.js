@@ -128,6 +128,9 @@ async function getUserConnection(req) {
       connection.model('TotalStatistics', TotalStatisticsSchema);
     }
     
+    const { registerAnalyticsModels } = require('../services/analyticsService');
+    registerAnalyticsModels(connection);
+    
     console.log("[getUserConnection] Connection and models ready");
     return connection;
   } catch (error) {
