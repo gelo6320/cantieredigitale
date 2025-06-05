@@ -108,13 +108,17 @@ router.post('/user/config', async (req, res) => {
     // Aggiorna le configurazioni in sessione
     req.session.userConfig = await getUserConfig(username);
     
+    // CORREZIONE: Includi TUTTI i campi nella risposta, inclusi quelli personali
     res.status(200).json({ 
       success: true, 
       message: 'Configurazioni aggiornate con successo',
       config: {
+        // CAMPI PERSONALI - AGGIUNTI NELLA RISPOSTA
         name: user.name || '(non configurato)',
-        company: user.company || '(non configurato)',
+        company: user.company || '(non configurato)', 
         companyLogo: user.companyLogo ? '(configurato)' : '(non configurato)',
+        
+        // CAMPI TECNICI
         mongodb_uri: user.config.mongodb_uri ? '(configurato)' : '(non configurato)',
         access_token: user.config.access_token ? '(configurato)' : '(non configurato)',
         meta_pixel_id: user.config.meta_pixel_id || '(non configurato)',
