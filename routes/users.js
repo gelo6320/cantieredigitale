@@ -1,9 +1,10 @@
+// routes/users.js - Aggiornato per includere nome e logo
 const express = require('express');
 const { getUserConfig, Admin } = require('../utils');
 
 const router = express.Router();
 
-// API per ottenere le configurazioni utente
+// API per ottenere le configurazioni utente (inclusi nome e logo)
 router.get('/user/config', async (req, res) => {
   try {
     // Verifica autenticazione
@@ -26,10 +27,14 @@ router.get('/user/config', async (req, res) => {
       });
     }
     
-    // Prepara el objeto de respuesta con los valores de configuración incluyendo WhatsApp
+    // Prepara el objeto de respuesta con todos los valores incluyendo datos personali
     res.json({
       success: true,
       config: {
+        username: user.username,
+        name: user.name || user.username || 'Utente',
+        company: user.company || '',
+        companyLogo: user.companyLogo || '',
         mongodb_uri: user.config?.mongodb_uri || "",
         access_token: user.config?.access_token || "",
         meta_pixel_id: user.config?.meta_pixel_id || "",
@@ -50,10 +55,13 @@ router.get('/user/config', async (req, res) => {
   }
 });
 
-// Configurazione utente API
+// Configurazione utente API (aggiornata per includere nome e logo)
 router.post('/user/config', async (req, res) => {
   try {
     const { 
+      name,
+      company,
+      companyLogo,
       mongodb_uri, 
       access_token, 
       meta_pixel_id, 
@@ -78,7 +86,12 @@ router.post('/user/config', async (req, res) => {
       user.config = {};
     }
     
-    // Aggiorna solo i campi forniti
+    // Aggiorna i campi personali dell'utente
+    if (name !== undefined) user.name = name;
+    if (company !== undefined) user.company = company;
+    if (companyLogo !== undefined) user.companyLogo = companyLogo;
+    
+    // Aggiorna solo i campi di configurazione forniti
     if (mongodb_uri !== undefined) user.config.mongodb_uri = mongodb_uri;
     if (access_token !== undefined) user.config.access_token = access_token;
     if (meta_pixel_id !== undefined) user.config.meta_pixel_id = meta_pixel_id;
@@ -99,6 +112,9 @@ router.post('/user/config', async (req, res) => {
       success: true, 
       message: 'Configurazioni aggiornate con successo',
       config: {
+        name: user.name || '(non configurato)',
+        company: user.company || '(non configurato)',
+        companyLogo: user.companyLogo ? '(configurato)' : '(non configurato)',
         mongodb_uri: user.config.mongodb_uri ? '(configurato)' : '(non configurato)',
         access_token: user.config.access_token ? '(configurato)' : '(non configurato)',
         meta_pixel_id: user.config.meta_pixel_id || '(non configurato)',
@@ -111,6 +127,7 @@ router.post('/user/config', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Errore nell\'aggiornamento delle configurazioni:', error);
     res.status(500).json({ success: false, message: 'Errore nell\'aggiornamento delle configurazioni' });
   }
 });
@@ -126,7 +143,7 @@ router.get('/admin/users', async (req, res) => {
       });
     }
 
-    const users = await Admin.find({}, 'username role createdAt').sort({ username: 1 });
+    const users = await Admin.find({}, 'username name company role createdAt').sort({ username: 1 });
     
     res.json({
       success: true,
