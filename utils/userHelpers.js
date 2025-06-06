@@ -156,8 +156,8 @@ async function getUserConnection(req) {
     }
     
     // Register analytics models
-    const { registerAnalyticsModels } = require('../services/analyticsService');
-    registerAnalyticsModels(connection);
+    const { registerModels } = require('../services/analyticsService');
+    registerModels(connection);
     
     console.log("[getUserConnection] All models registered successfully:");
     console.log("Available models:", Object.keys(connection.models));
