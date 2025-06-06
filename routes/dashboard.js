@@ -133,31 +133,52 @@ router.post('/mark-viewed/:id', async (req, res) => {
 
 // API to mark all contacts as viewed
 router.post('/mark-all-viewed', async (req, res) => {
+  console.log("[/api/dashboard/mark-all-viewed] Request received");
+  
   try {
     // Ensure user is authenticated
     if (!req.session || !req.session.isAuthenticated) {
+      console.log("[/api/dashboard/mark-all-viewed] Authentication failed");
       return res.status(401).json({ 
         success: false, 
         message: 'Non autorizzato' 
       });
     }
     
+    console.log("[/api/dashboard/mark-all-viewed] User authenticated:", req.session.user?.username);
+    
     // Get user connection
     const connection = await getUserConnection(req);
     
     if (!connection) {
+      console.log("[/api/dashboard/mark-all-viewed] Database connection failed");
       return res.status(400).json({ 
         success: false, 
         message: 'Configurazione database non trovata' 
       });
     }
     
+    console.log("[/api/dashboard/mark-all-viewed] Database connection established");
+    
     // Get the Lead model
     const Lead = connection.model('Lead');
     
+    // Prima verifica quanti lead non visti ci sono
+    const unviewedCount = await Lead.countDocuments({ viewed: false });
+    console.log(`[/api/dashboard/mark-all-viewed] Found ${unviewedCount} unviewed leads`);
+    
+    if (unviewedCount === 0) {
+      console.log("[/api/dashboard/mark-all-viewed] No unviewed leads to update");
+      return res.json({ 
+        success: true, 
+        message: 'Nessun contatto da aggiornare',
+        count: 0
+      });
+    }
+    
     // Update all leads with viewed=false to set viewed=true
     const result = await Lead.updateMany(
-      { viewed: false }, // Only update unviewed leads
+      { viewed: false }, // Solo lead non visti
       { 
         $set: { 
           viewed: true,
@@ -167,18 +188,45 @@ router.post('/mark-all-viewed', async (req, res) => {
       }
     );
     
-    res.json({ 
+    console.log(`[/api/dashboard/mark-all-viewed] Update result:`, {
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      acknowledged: result.acknowledged
+    });
+    
+    // Verifica che l'aggiornamento sia andato a buon fine
+    const remainingUnviewed = await Lead.countDocuments({ viewed: false });
+    console.log(`[/api/dashboard/mark-all-viewed] Remaining unviewed after update: ${remainingUnviewed}`);
+    
+    if (remainingUnviewed > 0) {
+      console.warn(`[/api/dashboard/mark-all-viewed] Warning: ${remainingUnviewed} leads still unviewed`);
+    }
+    
+    const response = { 
       success: true, 
       message: 'Tutti i contatti segnati come visti',
-      count: result.modifiedCount || 0
-    });
+      count: result.modifiedCount || 0,
+      debug: {
+        initialUnviewed: unviewedCount,
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+        remainingUnviewed: remainingUnviewed
+      }
+    };
+    
+    console.log("[/api/dashboard/mark-all-viewed] Sending response:", response);
+    res.json(response);
+    
   } catch (error) {
-    console.error('Error marking all contacts as viewed:', error);
+    console.error('[/api/dashboard/mark-all-viewed] ERROR:', error.message);
+    console.error('[/api/dashboard/mark-all-viewed] Stack:', error.stack);
     res.status(500).json({ 
       success: false, 
-      message: 'Errore nel segnare tutti i contatti come visti' 
+      message: 'Errore nel segnare tutti i contatti come visti',
+      error: error.message
     });
   }
 });
+
 
 module.exports = router;
