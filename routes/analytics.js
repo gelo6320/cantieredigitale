@@ -1,611 +1,164 @@
 /**
- * Routes API Analytics Avanzate
- * =============================
- * 
- * Endpoint per utilizzare le nuove funzionalità di analytics avanzate.
- * Da aggiungere al sistema di routing esistente.
- * 
+ * Routes Analytics Semplificato - Solo Pattern Temporali
  * @author Costruzione Digitale
- * @version 1.0
+ * @version 2.0
  */
 
 const express = require('express');
 const router = express.Router();
 const { 
-  generateAdvancedAnalytics, 
-  getAnalytics, 
-  updateTodayAnalytics,
-  Analytics 
+  generateTemporalAnalytics, 
+  getTemporalAnalytics,
+  generatePeriodKey
 } = require('../services/analyticsService');
 const { log } = require('../utils/logger');
 const { getUserConnection } = require('../utils');
 
 /**
- * GET /api/analytics/dashboard
- * Ottiene dashboard completa analytics per oggi
- */
-router.get('/dashboard', async (req, res) => {
-    const functionName = 'GET /api/analytics/dashboard';
-    log.enter(functionName, {
-      userAgent: req.headers['user-agent']?.substring(0, 50) + '...'
-    });
-  
-    try {
-      const connection = await getUserConnection(req);
-      
-      if (!connection) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'Database non disponibile o non configurato correttamente' 
-        });
-      }
-  
-      // MODIFICA: Genera analytics per il mese corrente invece di oggi
-      const today = new Date();
-      const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1); // Primo giorno del mese
-      const periodKey = generatePeriodKey(currentMonth, 'monthly'); // CAMBIATO: era 'daily'
-  
-      let analytics = await getAnalytics(periodKey, 'monthly', connection); // CAMBIATO: era 'daily'
-      
-      if (!analytics) {
-        log.info(functionName, 'Analytics non trovate, generazione nuove', { periodKey });
-        // MODIFICA: Genera analytics per tutto il mese corrente
-        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        analytics = await generateAdvancedAnalytics(currentMonth, nextMonth, 'monthly', connection);
-      }
-  
-      // Aggiungi metriche di comparazione (mese scorso invece di settimana scorsa)
-      const lastMonth = new Date(currentMonth);
-      lastMonth.setMonth(lastMonth.getMonth() - 1); // CAMBIATO: era -7 giorni
-      const lastMonthKey = generatePeriodKey(lastMonth, 'monthly'); // CAMBIATO: era 'daily'
-      const lastMonthAnalytics = await getAnalytics(lastMonthKey, 'monthly', connection); // CAMBIATO: era 'daily'
-  
-      const insights = analytics.generateInsights ? analytics.generateInsights() : [];
-
-    // Calcola metriche di comparazione
-    let comparison = null;
-    if (lastMonthAnalytics) {
-      const currentScore = analytics.engagement?.overallScore || 0;
-      const previousScore = lastMonthAnalytics.engagement?.overallScore || 0;
-      const scoreDiff = currentScore - previousScore;
-      
-      comparison = {
-        previous: {
-          periodKey: lastMonthKey,
-          score: previousScore
-        },
-        current: {
-          periodKey,
-          score: currentScore
-        },
-        change: {
-          value: scoreDiff,
-          percentage: previousScore > 0 ? ((scoreDiff / previousScore) * 100).toFixed(1) : 0,
-          trend: scoreDiff > 0 ? 'up' : scoreDiff < 0 ? 'down' : 'stable'
-        }
-      };
-    }
-    
-    // Ora l'oggetto dashboard può usare insights e comparison
-    const dashboard = {
-      currentPeriod: {
-        periodKey,
-        period: 'monthly',
-        analytics
-      },
-      insights,
-      comparison,
-      summary: {
-        overallScore: analytics.engagement?.overallScore || 0,
-        confidence: analytics.confidence || 0,
-        sampleSize: analytics.sampleSize || 0,
-        topInteraction: analytics.behavioralHeatmap?.interactionHotspots?.[0]?.elementType || 'none',
-        peakHour: getPeakHour(analytics.temporalPatterns?.hourlyDistribution || []),
-        topSource: analytics.engagement?.bySource?.[0]?.source || 'unknown'
-      },
-      lastUpdated: analytics.calculatedAt
-    };
-
-    log.info(functionName, 'Dashboard analytics generata', {
-      periodKey,
-      overallScore: dashboard.summary.overallScore,
-      insightsCount: insights.length
-    });
-
-    log.exit(functionName, { success: true });
-    res.json(dashboard);
-
-  } catch (error) {
-    log.error(functionName, 'Errore generazione dashboard', error);
-    log.exit(functionName, { success: false, error: true });
-    
-    res.status(500).json({
-      error: 'Errore interno server',
-      message: 'Impossibile generare dashboard analytics'
-    });
-  }
-});
-
-/**
- * GET /api/analytics/engagement
- * Ottiene metriche di engagement dettagliate
- */
-router.get('/engagement', async (req, res) => {
-  const functionName = 'GET /api/analytics/engagement';
-  const { period = 'monthly', days = 30 } = req.query;
-  
-  log.enter(functionName, { period, days });
-
-  try {
-    // Ottieni la connessione dell'utente
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
-      });
-    }
-
-    const endDate = new Date();
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - parseInt(days));
-
-    // Recupera analytics per il periodo usando la connessione
-    const Analytics = connection.model('Analytics');
-    const analyticsData = await Analytics.find({
-      date: { $gte: startDate, $lte: endDate },
-      period: period
-    }).sort({ date: 1 }).lean();
-
-    // Prepara dati per il grafico
-    const chartData = analyticsData.map(analytics => ({
-      date: analytics.periodKey,
-      overallScore: analytics.engagement?.overallScore || 0,
-      timeEngagement: analytics.engagement?.components?.timeEngagement || 0,
-      interactionEngagement: analytics.engagement?.components?.interactionEngagement || 0,
-      depthEngagement: analytics.engagement?.components?.depthEngagement || 0,
-      conversionEngagement: analytics.engagement?.components?.conversionEngagement || 0
-    })).reverse(); // Ordine cronologico
-
-    // Calcola statistiche aggregate
-    const stats = {
-      avgOverallScore: chartData.length > 0 ? 
-        Math.round(chartData.reduce((sum, d) => sum + d.overallScore, 0) / chartData.length) : 0,
-      bestDay: chartData.reduce((best, current) => 
-        current.overallScore > best.overallScore ? current : best, 
-        { overallScore: 0, date: 'N/A' }),
-      worstDay: chartData.reduce((worst, current) => 
-        current.overallScore < worst.overallScore ? current : worst,
-        { overallScore: 100, date: 'N/A' }),
-      trend: 'stable'
-    };
-
-    const response = {
-      period,
-      days: parseInt(days),
-      dateRange: {
-        from: startDate.toISOString().split('T')[0],
-        to: endDate.toISOString().split('T')[0]
-      },
-      chartData,
-      stats,
-      totalRecords: analyticsData.length
-    };
-
-    log.info(functionName, 'Dati engagement recuperati', {
-      records: analyticsData.length,
-      avgScore: stats.avgOverallScore
-    });
-
-    log.exit(functionName, { success: true });
-    res.json(response);
-
-  } catch (error) {
-    log.error(functionName, 'Errore recupero engagement', error);
-    log.exit(functionName, { success: false, error: true });
-    
-    res.status(500).json({
-      error: 'Errore recupero dati engagement',
-      message: error.message
-    });
-  }
-});
-
-/**
- * GET /api/analytics/heatmap
- * Ottiene dati heatmap comportamentale
- */
-router.get('/heatmap', async (req, res) => {
-  const functionName = 'GET /api/analytics/heatmap';
-  const { period = 'monthly', date } = req.query;
-  
-  log.enter(functionName, { period, date });
-
-  try {
-    // Ottieni la connessione dell'utente
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
-      });
-    }
-
-    const targetDate = date ? new Date(date) : new Date();
-    const periodKey = generatePeriodKey(targetDate, period);
-
-    const analytics = await getAnalytics(periodKey, period, connection);
-
-    if (!analytics || !analytics.behavioralHeatmap) {
-      log.warn(functionName, 'Dati heatmap non trovati', { periodKey, period });
-      return res.status(404).json({
-        error: 'Dati non trovati',
-        message: 'Nessun dato heatmap disponibile per il periodo specificato'
-      });
-    }
-
-    const heatmap = analytics.behavioralHeatmap;
-
-    // Processa hotspots per visualizzazione
-    const processedHotspots = heatmap.interactionHotspots.map(hotspot => ({
-      ...hotspot,
-      intensity: hotspot.heatScore / 100, // Normalizza per visualizzazione
-      category: categorizeElement(hotspot.elementType),
-      efficiency: hotspot.uniqueUsers > 0 ? 
-        (hotspot.interactions / hotspot.uniqueUsers).toFixed(2) : 0
-    }));
-
-    // Analizza scroll patterns
-    const scrollAnalysis = {
-      ...heatmap.scrollBehavior,
-      recommendations: generateScrollRecommendations(heatmap.scrollBehavior)
-    };
-
-    // Top navigation patterns con insights
-    const navigationInsights = heatmap.navigationPatterns.slice(0, 10).map(pattern => ({
-      ...pattern,
-      insight: generateNavigationInsight(pattern),
-      efficiency: pattern.frequency > 0 ? 
-        (pattern.conversionRate / pattern.frequency * 100).toFixed(2) : 0
-    }));
-
-    const response = {
-      periodKey,
-      period,
-      date: targetDate.toISOString().split('T')[0],
-      hotspots: processedHotspots,
-      scrollBehavior: scrollAnalysis,
-      navigationPatterns: navigationInsights,
-      summary: {
-        totalHotspots: processedHotspots.length,
-        topElementType: processedHotspots[0]?.elementType || 'none',
-        avgScrollDepth: scrollAnalysis.avgDepth,
-        topPattern: navigationInsights[0]?.pattern || 'none'
-      },
-      lastUpdated: analytics.calculatedAt
-    };
-
-    log.info(functionName, 'Dati heatmap recuperati', {
-      periodKey,
-      hotspots: processedHotspots.length,
-      patterns: navigationInsights.length
-    });
-
-    log.exit(functionName, { success: true });
-    res.json(response);
-
-  } catch (error) {
-    log.error(functionName, 'Errore recupero heatmap', error);
-    log.exit(functionName, { success: false, error: true });
-    
-    res.status(500).json({
-      error: 'Errore recupero dati heatmap',
-      message: error.message
-    });
-  }
-});
-
-/**
  * GET /api/analytics/temporal
- * Ottiene analisi pattern temporali
+ * Ottiene pattern temporali per un periodo
  */
 router.get('/temporal', async (req, res) => {
   const functionName = 'GET /api/analytics/temporal';
-  const { period = 'monthly', weeks = 4 } = req.query;
+  const { period = 'monthly', weeks = 4, days = 30 } = req.query;
   
-  log.enter(functionName, { period, weeks });
+  log.enter(functionName, { period, weeks, days });
 
   try {
-    // Ottieni la connessione dell'utente
     const connection = await getUserConnection(req);
     
     if (!connection) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
+        message: 'Database non disponibile' 
       });
     }
 
+    // Calcola range date basato sul periodo
     const endDate = new Date();
     const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - (parseInt(weeks) * 7));
-
-    // Recupera dati per il periodo
-    const Analytics = connection.model('Analytics');
-    const analyticsData = await Analytics.find({
-      date: { $gte: startDate, $lte: endDate },
-      period: 'daily'
-    }).sort({ date: 1 }).lean();
-
-    // Aggrega pattern temporali
-    const hourlyAggregated = Array.from({ length: 24 }, () => ({
-      visits: 0, pageViews: 0, engagement: 0, conversions: 0, count: 0
-    }));
-
-    const weeklyAggregated = Array.from({ length: 7 }, (_, i) => ({
-      dayOfWeek: i,
-      dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i],
-      visits: 0, engagement: 0, count: 0
-    }));
-
-    analyticsData.forEach(analytics => {
-      if (analytics.temporalPatterns?.hourlyDistribution) {
-        analytics.temporalPatterns.hourlyDistribution.forEach((hour, index) => {
-          if (hourlyAggregated[index]) {
-            hourlyAggregated[index].visits += hour.visits;
-            hourlyAggregated[index].pageViews += hour.pageViews;
-            hourlyAggregated[index].engagement += hour.engagement;
-            hourlyAggregated[index].conversions += hour.conversions;
-            hourlyAggregated[index].count++;
-          }
-        });
-      }
-
-      if (analytics.temporalPatterns?.weeklyDistribution) {
-        analytics.temporalPatterns.weeklyDistribution.forEach(day => {
-          if (weeklyAggregated[day.dayOfWeek]) {
-            weeklyAggregated[day.dayOfWeek].visits += day.visits;
-            weeklyAggregated[day.dayOfWeek].engagement += day.avgEngagement;
-            weeklyAggregated[day.dayOfWeek].count++;
-          }
-        });
-      }
-    });
-
-    // Calcola medie
-    hourlyAggregated.forEach(hour => {
-      if (hour.count > 0) {
-        hour.avgVisits = Math.round(hour.visits / hour.count);
-        hour.avgPageViews = Math.round(hour.pageViews / hour.count);
-        hour.avgEngagement = Math.round(hour.engagement / hour.count);
-        hour.avgConversions = Math.round(hour.conversions / hour.count);
-      }
-    });
-
-    weeklyAggregated.forEach(day => {
-      if (day.count > 0) {
-        day.avgVisits = Math.round(day.visits / day.count);
-        day.avgEngagement = Math.round(day.engagement / day.count);
-      }
-    });
-
-    // Identifica pattern e insight
-    const peakHour = hourlyAggregated.reduce((max, current, index) => 
-      current.avgVisits > hourlyAggregated[max].avgVisits ? index : max, 0);
     
-    const peakDay = weeklyAggregated.reduce((max, current) => 
-      current.avgVisits > max.avgVisits ? current : max);
+    if (period === 'monthly') {
+      startDate.setDate(startDate.getDate() - parseInt(days));
+    } else {
+      startDate.setDate(startDate.getDate() - (parseInt(weeks) * 7));
+    }
 
-    const insights = generateTemporalInsights(hourlyAggregated, weeklyAggregated);
+    // Genera period key per il periodo corrente
+    const currentPeriodKey = generatePeriodKey(endDate, period);
+    
+    // Cerca analytics esistenti
+    let analytics = await getTemporalAnalytics(currentPeriodKey, period, connection);
+    
+    // Se non esistono, genera nuove analytics
+    if (!analytics) {
+      log.info(functionName, 'Analytics non trovate, generazione nuove', { 
+        periodKey: currentPeriodKey 
+      });
+      
+      analytics = await generateTemporalAnalytics(startDate, endDate, period, connection);
+    }
+
+    // Identifica pattern e insights
+    const insights = generateInsights(analytics);
 
     const response = {
       period,
-      weeks: parseInt(weeks),
+      periodKey: currentPeriodKey,
       dateRange: {
         from: startDate.toISOString().split('T')[0],
         to: endDate.toISOString().split('T')[0]
       },
-      hourlyPattern: hourlyAggregated.map((hour, index) => ({
-        hour: index,
-        time: `${index.toString().padStart(2, '0')}:00`,
-        ...hour
-      })),
-      weeklyPattern: weeklyAggregated,
-      insights: {
-        peakHour: {
-          hour: peakHour,
-          time: `${peakHour.toString().padStart(2, '0')}:00`,
-          visits: hourlyAggregated[peakHour].avgVisits
-        },
-        peakDay: {
-          day: peakDay.dayName,
-          visits: peakDay.avgVisits
-        },
-        patterns: insights
+      hourlyDistribution: analytics.hourlyDistribution || [],
+      weeklyDistribution: analytics.weeklyDistribution || [],
+      insights,
+      summary: {
+        totalSessions: analytics.totalSessions || 0,
+        avgEngagement: analytics.avgEngagement || 0,
+        peakHour: findPeakHour(analytics.hourlyDistribution || []),
+        peakDay: findPeakDay(analytics.weeklyDistribution || [])
       },
-      recordsAnalyzed: analyticsData.length
+      lastUpdated: analytics.calculatedAt || new Date()
     };
 
-    log.info(functionName, 'Pattern temporali analizzati', {
-      records: analyticsData.length,
-      peakHour: peakHour,
-      peakDay: peakDay.dayName
+    log.info(functionName, 'Pattern temporali recuperati', {
+      periodKey: currentPeriodKey,
+      totalSessions: response.summary.totalSessions
     });
 
     log.exit(functionName, { success: true });
     res.json(response);
 
   } catch (error) {
-    log.error(functionName, 'Errore analisi pattern temporali', error);
+    log.error(functionName, 'Errore recupero pattern temporali', error);
     log.exit(functionName, { success: false, error: true });
     
     res.status(500).json({
-      error: 'Errore analisi pattern temporali',
+      error: 'Errore recupero pattern temporali',
       message: error.message
     });
   }
 });
 
 /**
- * POST /api/analytics/generate
- * Genera nuove analytics per un periodo specifico
+ * POST /api/analytics/temporal/generate
+ * Forza la rigenerazione dei pattern temporali
  */
-router.post('/generate', async (req, res) => {
-  const functionName = 'POST /api/analytics/generate';
-  const { startDate, endDate, period = 'monthly', force = false } = req.body;
+router.post('/temporal/generate', async (req, res) => {
+  const functionName = 'POST /api/analytics/temporal/generate';
+  const { period = 'monthly', force = true } = req.body;
   
-  log.enter(functionName, { startDate, endDate, period, force });
+  log.enter(functionName, { period, force });
 
   try {
-    // Ottieni la connessione dell'utente
     const connection = await getUserConnection(req);
     
     if (!connection) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
+        message: 'Database non disponibile' 
       });
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Validazione date
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return res.status(400).json({
-        error: 'Date non valide',
-        message: 'Fornire startDate e endDate in formato ISO valido'
-      });
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    
+    // Imposta range in base al periodo
+    if (period === 'monthly') {
+      startDate.setMonth(startDate.getMonth() - 1);
+    } else if (period === 'weekly') {
+      startDate.setDate(startDate.getDate() - 7);
+    } else {
+      startDate.setDate(startDate.getDate() - 1);
     }
 
-    if (start >= end) {
-      return res.status(400).json({
-        error: 'Range date non valido',
-        message: 'startDate deve essere precedente a endDate'
-      });
-    }
-
-    // Verifica se analytics esistono già
-    const periodKey = generatePeriodKey(start, period);
-    const existing = await getAnalytics(periodKey, period, connection);
-
-    if (existing && !force) {
-      log.info(functionName, 'Analytics esistenti trovate', {
-        periodKey,
-        confidence: existing.confidence
-      });
-
-      return res.json({
-        message: 'Analytics già esistenti per questo periodo',
-        periodKey,
-        analytics: existing,
-        generated: false
-      });
-    }
-
-    // Genera nuove analytics
-    log.info(functionName, 'Inizio generazione analytics', {
-      periodKey,
-      force
+    log.info(functionName, 'Generazione pattern temporali', {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      period
     });
 
-    const analytics = await generateAdvancedAnalytics(start, end, period, connection);
+    const analytics = await generateTemporalAnalytics(startDate, endDate, period, connection);
 
-    log.info(functionName, 'Analytics generate con successo', {
-      periodKey,
-      confidence: analytics.confidence,
-      sampleSize: analytics.sampleSize
+    log.info(functionName, 'Pattern temporali generati', {
+      periodKey: analytics.periodKey,
+      totalSessions: analytics.totalSessions
     });
 
     log.exit(functionName, { success: true });
     res.json({
-      message: 'Analytics generate con successo',
-      periodKey,
+      message: 'Pattern temporali generati con successo',
+      periodKey: analytics.periodKey,
       analytics,
       generated: true
     });
 
   } catch (error) {
-    log.error(functionName, 'Errore generazione analytics', error);
+    log.error(functionName, 'Errore generazione pattern temporali', error);
     log.exit(functionName, { success: false, error: true });
     
     res.status(500).json({
-      error: 'Errore generazione analytics',
-      message: error.message
-    });
-  }
-});
-
-/**
- * GET /api/analytics/insights/:periodKey
- * Ottiene insights per un periodo specifico
- */
-router.get('/insights/:periodKey', async (req, res) => {
-  const functionName = 'GET /api/analytics/insights/:periodKey';
-  const { periodKey } = req.params;
-  const { period = 'monthly' } = req.query;
-  
-  log.enter(functionName, { periodKey, period });
-
-  try {
-    // Ottieni la connessione dell'utente
-    const connection = await getUserConnection(req);
-    
-    if (!connection) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Database non disponibile o non configurato correttamente' 
-      });
-    }
-
-    const analytics = await getAnalytics(periodKey, period, connection);
-
-    if (!analytics) {
-      return res.status(404).json({
-        error: 'Analytics non trovate',
-        message: `Nessuna analytics disponibile per ${periodKey}`
-      });
-    }
-
-    const insights = analytics.generateInsights ? analytics.generateInsights() : [];
-
-    // Aggiungi insights comparativi se disponibili
-    const comparativeInsights = await generateComparativeInsights(periodKey, period, connection);
-
-    const response = {
-      periodKey,
-      period,
-      insights,
-      comparativeInsights,
-      summary: {
-        totalInsights: insights.length,
-        highPriority: insights.filter(i => i.priority === 'high').length,
-        categories: [...new Set(insights.map(i => i.category))]
-      },
-      analytics: {
-        overallScore: analytics.engagement?.overallScore || 0,
-        confidence: analytics.confidence || 0,
-        sampleSize: analytics.sampleSize || 0
-      }
-    };
-
-    log.info(functionName, 'Insights recuperati', {
-      periodKey,
-      insightsCount: insights.length,
-      highPriorityCount: response.summary.highPriority
-    });
-
-    log.exit(functionName, { success: true });
-    res.json(response);
-
-  } catch (error) {
-    log.error(functionName, 'Errore recupero insights', error);
-    log.exit(functionName, { success: false, error: true });
-    
-    res.status(500).json({
-      error: 'Errore recupero insights',
+      error: 'Errore generazione pattern temporali',
       message: error.message
     });
   }
@@ -616,248 +169,105 @@ router.get('/insights/:periodKey', async (req, res) => {
 // ================================================================
 
 /**
- * Trova l'ora di picco dai dati orari
- * @param {Array} hourlyData - Dati distribuzione oraria
- * @returns {number} - Ora di picco
+ * Trova l'ora di picco
  */
-function getPeakHour(hourlyData) {
-  if (!hourlyData || hourlyData.length === 0) return 0;
+function findPeakHour(hourlyData) {
+  if (!hourlyData || hourlyData.length === 0) return { hour: 0, visits: 0 };
   
-  return hourlyData.reduce((max, current, index) => 
-    current.visits > hourlyData[max].visits ? index : max, 0);
-}
-
-/**
- * Categorizza tipo elemento per heatmap
- * @param {string} elementType - Tipo elemento
- * @returns {string} - Categoria
- */
-function categorizeElement(elementType) {
-  const categories = {
-    'button': 'action',
-    'form': 'input',
-    'link': 'navigation',
-    'image': 'media',
-    'video': 'media',
-    'text': 'content',
-    'page': 'navigation'
+  const peak = hourlyData.reduce((max, current) => 
+    current.visits > max.visits ? current : max, hourlyData[0]);
+  
+  return {
+    hour: peak.hour,
+    visits: peak.visits,
+    time: `${peak.hour.toString().padStart(2, '0')}:00`
   };
-  
-  return categories[elementType] || 'other';
 }
 
 /**
- * Genera raccomandazioni per scroll behavior
- * @param {Object} scrollBehavior - Dati comportamento scroll
- * @returns {Array} - Array raccomandazioni
+ * Trova il giorno di picco
  */
-function generateScrollRecommendations(scrollBehavior) {
-  const recommendations = [];
+function findPeakDay(weeklyData) {
+  if (!weeklyData || weeklyData.length === 0) return { day: 'N/A', visits: 0 };
   
-  if (scrollBehavior.completionRate < 30) {
-    recommendations.push({
-      type: 'content',
-      message: 'Considera di spostare contenuto importante più in alto',
-      priority: 'high'
-    });
-  }
+  const peak = weeklyData.reduce((max, current) => 
+    current.visits > max.visits ? current : max, weeklyData[0]);
   
-  if (scrollBehavior.fastScrollers > 60) {
-    recommendations.push({
-      type: 'engagement',
-      message: 'Molti utenti scorrono velocemente - aggiungi elementi di stop',
-      priority: 'medium'
-    });
-  }
-  
-  if (scrollBehavior.avgDepth < 40) {
-    recommendations.push({
-      type: 'layout',
-      message: 'Considera un layout più compatto per migliorare la lettura',
-      priority: 'medium'
-    });
-  }
-  
-  return recommendations;
+  return {
+    day: peak.dayName,
+    visits: peak.visits,
+    dayOfWeek: peak.dayOfWeek
+  };
 }
 
 /**
- * Genera insight per pattern navigazione
- * @param {Object} pattern - Pattern navigazione
- * @returns {string} - Insight
+ * Genera insights dai pattern temporali
  */
-function generateNavigationInsight(pattern) {
-  if (pattern.conversionRate > 10) {
-    return 'Percorso ad alta conversione - considera di promuoverlo';
-  } else if (pattern.conversionRate < 2) {
-    return 'Percorso a bassa conversione - potrebbe necessitare ottimizzazioni';
-  } else if (pattern.frequency > 50) {
-    return 'Percorso molto frequente - monitora la user experience';
-  }
-  
-  return 'Percorso standard';
-}
-
-/**
- * Genera insights pattern temporali
- * @param {Array} hourlyData - Dati orari
- * @param {Array} weeklyData - Dati settimanali
- * @returns {Array} - Array insights
- */
-function generateTemporalInsights(hourlyData, weeklyData) {
+function generateInsights(analytics) {
   const insights = [];
   
-  // Analizza distribuzione oraria
-  const businessHours = hourlyData.slice(9, 17); // 9-17
-  const totalBusinessVisits = businessHours.reduce((sum, h) => sum + h.avgVisits, 0);
-  const totalVisits = hourlyData.reduce((sum, h) => sum + h.avgVisits, 0);
+  if (!analytics.hourlyDistribution || !analytics.weeklyDistribution) {
+    return insights;
+  }
   
-  if (totalBusinessVisits / totalVisits > 0.7) {
+  // Insight ora di picco
+  const peakHour = findPeakHour(analytics.hourlyDistribution);
+  if (peakHour.visits > 0) {
     insights.push({
-      type: 'business',
-      message: 'Traffico concentrato in orari lavorativi',
-      recommendation: 'Ottimizza per audience B2B'
+      type: 'peak_hour',
+      message: `Picco di traffico alle ${peakHour.time} con ${peakHour.visits} visite`,
+      recommendation: 'Pianifica contenuti e campagne per quest\'orario'
     });
   }
   
-  // Analizza weekend vs weekdays
-  const weekendVisits = weeklyData[0].avgVisits + weeklyData[6].avgVisits;
-  const weekdayVisits = weeklyData.slice(1, 6).reduce((sum, d) => sum + d.avgVisits, 0);
-  
-  if (weekendVisits > weekdayVisits / 5) {
+  // Insight giorno di picco
+  const peakDay = findPeakDay(analytics.weeklyDistribution);
+  if (peakDay.visits > 0) {
     insights.push({
-      type: 'weekend',
-      message: 'Traffico significativo nel weekend',
-      recommendation: 'Considera contenuti specifici per il tempo libero'
+      type: 'peak_day',
+      message: `${peakDay.day} è il giorno più attivo con ${peakDay.visits} visite`,
+      recommendation: 'Concentra le attività di marketing in questo giorno'
     });
   }
   
+  // Insight distribuzione oraria
+  const businessHours = analytics.hourlyDistribution.slice(9, 17);
+  const businessTraffic = businessHours.reduce((sum, h) => sum + h.visits, 0);
+  const totalTraffic = analytics.hourlyDistribution.reduce((sum, h) => sum + h.visits, 0);
+  
+  if (totalTraffic > 0) {
+    const businessPercentage = (businessTraffic / totalTraffic) * 100;
+    if (businessPercentage > 70) {
+      insights.push({
+        type: 'business_hours',
+        message: `${businessPercentage.toFixed(1)}% del traffico è in orari lavorativi (9-17)`,
+        recommendation: 'Target audience prevalentemente B2B'
+      });
+    } else if (businessPercentage < 30) {
+      insights.push({
+        type: 'after_hours',
+        message: `${(100 - businessPercentage).toFixed(1)}% del traffico è fuori orari lavorativi`,
+        recommendation: 'Target audience prevalentemente B2C o tempo libero'
+      });
+    }
+  }
+  
+  // Insight weekend vs weekdays
+  const weekendTraffic = analytics.weeklyDistribution[0].visits + analytics.weeklyDistribution[6].visits;
+  const weekdayTraffic = analytics.weeklyDistribution.slice(1, 6).reduce((sum, d) => sum + d.visits, 0);
+  
+  if (weekdayTraffic > 0) {
+    const weekendRatio = weekendTraffic / (weekdayTraffic / 5);
+    if (weekendRatio > 1.2) {
+      insights.push({
+        type: 'weekend_traffic',
+        message: 'Traffico weekend significativamente più alto della media',
+        recommendation: 'Crea contenuti specifici per il tempo libero'
+      });
+    }
+  }
+
   return insights;
 }
-
-/**
- * Genera insights comparativi
- * @param {string} periodKey - Chiave periodo
- * @param {string} period - Tipo periodo
- * @param {Object} connection - Connessione database
- * @returns {Promise<Array>} - Insights comparativi
- */
-async function generateComparativeInsights(periodKey, period, connection) {
-  try {
-    // Trova periodo precedente per comparazione
-    const currentDate = new Date(periodKey);
-    const previousDate = new Date(currentDate);
-    
-    if (period === 'daily') {
-      previousDate.setDate(previousDate.getDate() - 1);
-    } else if (period === 'weekly') {
-      previousDate.setDate(previousDate.getDate() - 7);
-    } else if (period === 'monthly') {
-      previousDate.setMonth(previousDate.getMonth() - 1);
-    }
-    
-    const previousPeriodKey = generatePeriodKey(previousDate, period);
-    const previousAnalytics = await getAnalytics(previousPeriodKey, period, connection);
-    
-    if (!previousAnalytics) {
-      return [];
-    }
-    
-    const insights = [];
-    
-    // Compara engagement
-    const currentAnalytics = await getAnalytics(periodKey, period, connection);
-    if (currentAnalytics) {
-      const engagementDiff = currentAnalytics.engagement.overallScore - previousAnalytics.engagement.overallScore;
-      
-      if (Math.abs(engagementDiff) > 10) {
-        insights.push({
-          type: engagementDiff > 0 ? 'improvement' : 'decline',
-          category: 'engagement',
-          message: `Engagement ${engagementDiff > 0 ? 'aumentato' : 'diminuito'} di ${Math.abs(engagementDiff)} punti`,
-          change: engagementDiff
-        });
-      }
-    }
-    
-    return insights;
-    
-  } catch (error) {
-    log.error('generateComparativeInsights', 'Errore generazione insights comparativi', error);
-    return [];
-  }
-}
-
-/**
- * Genera chiave periodo
- * @param {Date} date - Data
- * @param {string} period - Periodo
- * @returns {string} - Chiave periodo
- */
-function generatePeriodKey(date, period) {
-    // Gestione input sicura
-    let workingDate;
-    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-      workingDate = new Date();
-      console.warn('generatePeriodKey: Invalid date provided, using current date');
-    } else {
-      workingDate = new Date(date); // Clone per evitare modifiche
-    }
-    
-    // Debug dettagliato
-    console.log('🔍 generatePeriodKey DEBUG:', {
-      inputDate: date ? date.toString() : 'null/undefined',
-      workingDate: workingDate.toString(),
-      workingDateISO: workingDate.toISOString(),
-      period: period
-    });
-    
-    // Calcolo con verifica
-    const year = workingDate.getFullYear();
-    const monthZeroBased = workingDate.getMonth(); // 0-11
-    const monthOneBased = monthZeroBased + 1;      // 1-12
-    const monthString = monthOneBased.toString().padStart(2, '0');
-    const day = workingDate.getDate();
-    
-    // Debug calcolo mese
-    console.log('🔍 Month calculation:', {
-      monthZeroBased: monthZeroBased,
-      monthOneBased: monthOneBased,
-      monthString: monthString,
-      expectedForJune: '06',
-      isJune: monthString === '06'
-    });
-    
-    let result;
-    switch (period) {
-      case 'daily':
-        const dayString = day.toString().padStart(2, '0');
-        result = `${year}-${monthString}-${dayString}`;
-        break;
-      case 'weekly':
-        const startOfYear = new Date(year, 0, 1);
-        const dayOfYear = Math.floor((workingDate - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
-        const weekNumber = Math.ceil(dayOfYear / 7);
-        result = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
-        break;
-      case 'monthly':
-        result = `${year}-${monthString}`;
-        break;
-      case 'yearly':
-        result = `${year}`;
-        break;
-      default:
-        result = `${year}-${monthString}-${day.toString().padStart(2, '0')}`;
-    }
-    
-    console.log('🔍 generatePeriodKey RESULT:', {
-      period: period,
-      result: result,
-      expectedForJune2025: '2025-06',
-      isCorrectForJune: result === '2025-06' && period === 'monthly'
-    });
-    
-    return result;
-  }
 
 module.exports = router;
