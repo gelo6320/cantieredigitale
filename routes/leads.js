@@ -115,7 +115,14 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/update-metadata', async (req, res) => {
   try {
     const { id } = req.params;
-    const { value, service, leadType } = req.body;
+    const { value, service, notes, leadType } = req.body;
+    
+    console.log(`[updateLeadMetadata] Updating lead ${id}:`, { 
+      leadType, 
+      value, 
+      service, 
+      notes: notes ? `${notes.substring(0, 50)}...` : 'no notes'
+    });
     
     if (!id) {
       return res.status(400).json({ 
@@ -141,6 +148,7 @@ router.post('/:id/update-metadata', async (req, res) => {
     const lead = await Lead.findOne({ leadId: id });
     
     if (!lead) {
+      console.log(`[updateLeadMetadata] Lead not found with leadId: ${id}`);
       return res.status(404).json({ success: false, message: 'Lead not found' });
     }
     
@@ -157,7 +165,7 @@ router.post('/:id/update-metadata', async (req, res) => {
       lead.extendedData.value = value;
     }
     
-    if (service !== undefined) {
+    if (service !== undefined && service !== null) {
       updates.service = service;
       
       // Also update in extendedData.formData for backward compatibility
@@ -170,19 +178,40 @@ router.post('/:id/update-metadata', async (req, res) => {
       lead.extendedData.formData.service = service;
     }
     
+    // NUOVO: Gestione delle note
+    if (notes !== undefined) {
+      if (!lead.extendedData) {
+        lead.extendedData = {};
+      }
+      lead.extendedData.notes = notes;
+    }
+    
     updates.updatedAt = new Date();
+    
+    console.log(`[updateLeadMetadata] Update data for lead ${id}:`, {
+      ...updates,
+      extendedDataNotes: lead.extendedData?.notes ? 'notes updated' : 'no notes'
+    });
     
     // Apply all the updates
     Object.assign(lead, updates);
     await lead.save();
     
+    console.log(`[updateLeadMetadata] Lead ${id} updated successfully`);
+    
     res.json({
       success: true,
       message: 'Metadata updated successfully',
-      data: lead
+      data: {
+        leadId: lead.leadId,
+        value: lead.value,
+        service: lead.service,
+        notes: lead.extendedData?.notes,
+        updatedAt: lead.updatedAt
+      }
     });
   } catch (error) {
-    console.error('Error updating lead metadata:', error);
+    console.error('[updateLeadMetadata] ERROR:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Error updating metadata', 

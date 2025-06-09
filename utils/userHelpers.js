@@ -74,6 +74,7 @@ async function getUserConnection(req) {
         // Add these two fields at the top level:
         value: { type: Number, default: 0 },
         service: { type: String },
+        // AGGIORNATO: ExtendedData con supporto completo per le note
         extendedData: {
           consentGiven: { type: Boolean, default: false },
           ipAddress: String,
@@ -83,10 +84,16 @@ async function getUserConnection(req) {
           referrer: String,
           landingPage: String,
           deviceInfo: Object,
-          formData: Object,
-          notes: String,
+          formData: {
+            message: String,
+            service: String,
+            type: mongoose.Schema.Types.Mixed
+          },
+          notes: String, // NUOVO: Campo note a livello di extendedData
           value: Number,
-          currency: String
+          currency: String,
+          // Mantieni flessibilità per altri campi
+          type: mongoose.Schema.Types.Mixed
         },
         tags: [String],
         properties: { type: Map, of: mongoose.Schema.Types.Mixed },
