@@ -123,27 +123,30 @@ router.get('/landing-pages-stats', async (req, res) => {
           const url = visitData.url;
           const visits = visitData.count || 0;
           
-          // Ottieni i visitatori unici dalla nuova struttura array
-          const uniqueVisitorsData = stat.uniqueVisitorsByUrl && Array.isArray(stat.uniqueVisitorsByUrl) 
-            ? stat.uniqueVisitorsByUrl.find(item => item.url === url)
-            : null;
-          const uniqueVisitors = uniqueVisitorsData ? uniqueVisitorsData.count : 0;
+          // CORREZIONE: Usa i dati aggregati totali dal documento principale
+          // invece di cercare per singola URL
+          const uniqueVisitors = stat.uniqueVisitors || 0;
           
-          // Ottieni le conversioni dalla nuova struttura array
-          const conversionsData = stat.conversions && stat.conversions.byUrl && Array.isArray(stat.conversions.byUrl)
-            ? stat.conversions.byUrl.find(item => item.url === url)
-            : null;
-          const conversions = conversionsData ? conversionsData.count : 0;
+          // Per le conversioni, controlla sia la struttura array che quella diretta
+          let conversions = 0;
+          if (stat.conversions && stat.conversions.byUrl && Array.isArray(stat.conversions.byUrl)) {
+            const conversionsData = stat.conversions.byUrl.find(item => item.url === url);
+            conversions = conversionsData ? conversionsData.count : 0;
+          } else if (stat.conversions && stat.conversions.total) {
+            // Se non c'è breakdown per URL, usa il totale diviso per le URL
+            conversions = Math.round(stat.conversions.total / stat.visitsByUrl.length);
+          }
           
-          // Calcola il tasso di conversione
+          // Calcola il tasso di conversione usando i dati corretti
           const conversionRate = uniqueVisitors > 0 ? (conversions / uniqueVisitors) * 100 : 0;
           
           landingPages.push({
             url,
             title: url, // Potremmo migliorare questo in futuro recuperando i titoli effettivi
             totalVisits: Number(visits),
-            uniqueUsers: Number(uniqueVisitors),
-            conversionRate: Number(conversionRate.toFixed(2)), // Arrotonda a 2 decimali
+            uniqueUsers: Number(uniqueVisitors),      // Mantieni per compatibilità
+            uniqueVisitors: Number(uniqueVisitors),   // Aggiungi anche questo
+            conversionRate: Number(conversionRate.toFixed(2)),
             lastAccess: stat.lastUpdated || stat.date || new Date()
           });
         }
