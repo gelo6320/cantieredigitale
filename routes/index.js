@@ -17,6 +17,7 @@ const bankDataRouter = require('./bankData');
 const searchRouter = require('./search');
 const frontendRouter = require('./frontend');
 const analyticsRouter = require('./analytics');
+const aiRouter = require('./ai');
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ router.use('/api/whatsapp', whatsappRouter);
 router.use('/api/banca-dati', bankDataRouter);
 router.use('/api', searchRouter);
 router.use('/api/analytics', analyticsRouter);
+router.use('/api/ai', aiRouter);
 
 // API per la gestione dell'invio del form (mantenuto qui per compatibilità)
 router.post('/api/submit-form', async (req, res) => {
