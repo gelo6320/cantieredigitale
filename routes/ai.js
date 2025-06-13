@@ -1,4 +1,4 @@
-// routes/ai.js - Configurazione aggiornata Claude 4 con parsing robusto
+// routes/ai.js - Configurazione CORRETTA Claude 4 con parsing robusto
 const express = require('express');
 const axios = require('axios');
 
@@ -18,13 +18,27 @@ router.post('/analyze-performance', async (req, res) => {
       });
     }
 
+    // Verifica configurazione API key
+    if (!process.env.CLAUDE_API_KEY) {
+      console.error('[AI Analysis] CLAUDE_API_KEY non configurata');
+      const basicAnalysis = generateEnhancedBasicAnalysis(monthlyData, weeklyComparisons, additionalContext);
+      return res.json({
+        ...basicAnalysis,
+        _meta: {
+          source: 'fallback_analysis',
+          reason: 'api_key_missing',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
     // Prepara il prompt ottimizzato per Claude 4
     const analysisPrompt = generateClaudePrompt(monthlyData, weeklyComparisons, timeRange, additionalContext);
     
     try {
-      // ✅ Configurazione corretta per Claude 4
+      // ✅ Configurazione CORRETTA per Claude 4
       const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
-        model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514', // ✅ Claude 4 Sonnet configurabile
+        model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514', // ✅ Claude 4 Sonnet
         max_tokens: 8000, // ✅ Aumentato per risposte complete
         temperature: 0.1, // ✅ Molto basso per output JSON consistente
         // ✅ System prompt specifico per JSON
@@ -44,11 +58,36 @@ REGOLE CRITICHE:
       }, {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.CLAUDE_API_KEY,
-          'anthropic-version': '2023-12-22' // ✅ Versione più recente
+          'x-api-key': process.env.CLAUDE_API_KEY, // ✅ Header corretto
+          'anthropic-version': '2023-06-01' // ✅ VERSIONE CORRETTA! Era il problema principale
         },
-        timeout: 60000 // ✅ 60 secondi per Claude 4
+        timeout: 90000, // ✅ 90 secondi per Claude 4 (più tempo di elaborazione)
+        // ✅ Gestione errori di rete migliorata
+        validateStatus: function (status) {
+          return status < 500; // Accetta tutti gli status < 500 per gestirli manualmente
+        }
       });
+
+      // ✅ Gestione status codes migliorata
+      if (claudeResponse.status === 404) {
+        console.error('[AI Analysis] Errore 404 - Endpoint non trovato. Controllare URL e versione API');
+        throw new Error('API endpoint non trovato - verificare configurazione');
+      }
+      
+      if (claudeResponse.status === 401) {
+        console.error('[AI Analysis] Errore 401 - API key non valida o mancante');
+        throw new Error('Autenticazione fallita - verificare API key');
+      }
+      
+      if (claudeResponse.status === 403) {
+        console.error('[AI Analysis] Errore 403 - Permessi insufficienti');
+        throw new Error('Permessi insufficienti per accedere all\'API');
+      }
+      
+      if (claudeResponse.status >= 400) {
+        console.error('[AI Analysis] Errore API:', claudeResponse.status, claudeResponse.data);
+        throw new Error(`Errore API: ${claudeResponse.status} - ${claudeResponse.data?.error?.message || 'Errore sconosciuto'}`);
+      }
 
       // ✅ Parsing robusto e migliorato
       const aiResponse = claudeResponse.data.content[0].text;
@@ -63,7 +102,10 @@ REGOLE CRITICHE:
       // Logging dettagliato per debug
       if (claudeError.response) {
         console.error('[AI Analysis] Response status:', claudeError.response.status);
+        console.error('[AI Analysis] Response headers:', claudeError.response.headers);
         console.error('[AI Analysis] Response data:', claudeError.response.data);
+      } else if (claudeError.code) {
+        console.error('[AI Analysis] Error code:', claudeError.code);
       }
       
       // Fallback intelligente
@@ -72,7 +114,8 @@ REGOLE CRITICHE:
         ...basicAnalysis,
         _meta: {
           source: 'fallback_analysis',
-          reason: 'claude_unavailable',
+          reason: 'claude_error',
+          error: claudeError.message,
           timestamp: new Date().toISOString()
         }
       });
@@ -84,6 +127,66 @@ REGOLE CRITICHE:
       success: false,
       message: 'Errore durante l\'analisi AI',
       details: error.message
+    });
+  }
+});
+
+// ✅ Funzione per testare la connettività API
+router.get('/test-connection', async (req, res) => {
+  try {
+    console.log('[AI Analysis] Test connessione Claude API...');
+    
+    if (!process.env.CLAUDE_API_KEY) {
+      return res.status(400).json({
+        success: false,
+        message: 'CLAUDE_API_KEY non configurata',
+        details: 'Impostare la variabile ambiente CLAUDE_API_KEY'
+      });
+    }
+
+    // Test semplice con Claude
+    const testResponse = await axios.post('https://api.anthropic.com/v1/messages', {
+      model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514',
+      max_tokens: 50,
+      messages: [{
+        role: 'user',
+        content: 'Rispondi solo "OK" per confermare la connessione'
+      }]
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      timeout: 30000
+    });
+
+    res.json({
+      success: true,
+      message: 'Connessione Claude API funzionante',
+      model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514',
+      response: testResponse.data.content[0].text,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[AI Analysis] Test connessione fallito:', error.message);
+    
+    let errorDetails = {
+      message: error.message,
+      code: error.code
+    };
+    
+    if (error.response) {
+      errorDetails.status = error.response.status;
+      errorDetails.data = error.response.data;
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Test connessione Claude API fallito',
+      error: errorDetails,
+      timestamp: new Date().toISOString()
     });
   }
 });
